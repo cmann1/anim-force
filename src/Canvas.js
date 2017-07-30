@@ -7,6 +7,8 @@ var app;
     var Canvas = (function () {
         function Canvas(elementId) {
             var _this = this;
+            this.mousePrevX = 0;
+            this.mousePrevY = 0;
             this.mouseX = 0;
             this.mouseY = 0;
             this.canvasRightMouseDown = false;
@@ -30,6 +32,8 @@ var app;
                 }
             };
             this.onWindowMouseMove = function (event) {
+                _this.mousePrevX = _this.mouseX;
+                _this.mousePrevY = _this.mouseY;
                 var offset = _this.$canvas.offset();
                 _this.mouseX = event.pageX - offset.left;
                 _this.mouseY = event.pageY - offset.top;

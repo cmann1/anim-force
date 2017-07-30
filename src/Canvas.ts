@@ -7,6 +7,8 @@ namespace app
 	 */
 	export class Canvas
 	{
+		public mousePrevX:number = 0;
+		public mousePrevY:number = 0;
 		public mouseX:number = 0;
 		public mouseY:number = 0;
 
@@ -93,6 +95,9 @@ namespace app
 
 		protected onWindowMouseMove = (event) =>
 		{
+			this.mousePrevX = this.mouseX;
+			this.mousePrevY = this.mouseY;
+
 			var offset = this.$canvas.offset();
 			this.mouseX = event.pageX - offset.left;
 			this.mouseY = event.pageY - offset.top;

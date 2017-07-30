@@ -25,6 +25,13 @@ var app;
                 _this.scaleIndex = 3;
                 _this.cameraX = 0;
                 _this.cameraY = 0;
+                _this.cameraVelX = 0;
+                _this.cameraVelY = 0;
+                _this.cameraFriction = 0.9;
+                _this.prevCameraX = 0;
+                _this.prevCameraY = 0;
+                _this.flickTolerance = 4;
+                _this.flickFactor = 10;
                 _this.gridSize = 48 * 4;
                 _this.gridSubdivisions = 4;
                 _this.gridLineWidth = 1;
@@ -52,6 +59,16 @@ var app;
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
+                if (this.cameraVelX != 0 || this.cameraVelY != 0) {
+                    this.cameraX += this.cameraVelX;
+                    this.cameraY += this.cameraVelY;
+                    this.cameraVelX *= this.cameraFriction;
+                    this.cameraVelY *= this.cameraFriction;
+                    if (Math.abs(this.cameraVelX) < 0.01)
+                        this.cameraVelX = 0;
+                    if (Math.abs(this.cameraVelY) < 0.01)
+                        this.cameraVelY = 0;
+                }
                 var viewWidth = this.width / this.scale;
                 var viewHeight = this.height / this.scale;
                 this.viewLeft = this.cameraX - viewWidth * 0.5;
@@ -62,6 +79,8 @@ var app;
                     this.anchorToScreen(this.mouseX, this.mouseY, this.stageAnchorX, this.stageAnchorY);
                 }
                 this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
+                this.mousePrevX = this.mouseX;
+                this.mousePrevY = this.mouseY;
             };
             Viewport.prototype.draw = function () {
                 var ctx = this.ctx;
@@ -192,6 +211,13 @@ var app;
                 if (!isNaN(this.mouseGrabX)) {
                     this.mouseGrabX = NaN;
                     this.mouseGrabY = NaN;
+                    var dx = this.mousePrevX - this.mouseX;
+                    var dy = this.mousePrevY - this.mouseY;
+                    var dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist >= this.flickTolerance) {
+                        this.cameraVelX = dx / this.scale * this.flickFactor;
+                        this.cameraVelY = dy / this.scale * this.flickFactor;
+                    }
                 }
             };
             Viewport.prototype.onMouseWheel = function (event) {
@@ -208,6 +234,8 @@ var app;
             };
             Viewport.prototype.onMouseMove = function (event) {
                 if (!isNaN(this.mouseGrabX)) {
+                    this.prevCameraX = this.cameraX;
+                    this.prevCameraY = this.cameraY;
                     this.anchorToScreen(this.mouseX, this.mouseY, this.mouseGrabX, this.mouseGrabY);
                     this.showMessage(Math.floor(this.cameraX) + ", " + Math.floor(this.cameraY));
                 }

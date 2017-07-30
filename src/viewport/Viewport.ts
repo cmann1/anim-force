@@ -14,6 +14,15 @@ namespace app.viewport
 		protected cameraX:number = 0;
 		protected cameraY:number = 0;
 
+		protected cameraVelX:number = 0;
+		protected cameraVelY:number = 0;
+		protected cameraFriction:number = 0.9;
+
+		protected prevCameraX:number = 0;
+		protected prevCameraY:number = 0;
+		protected flickTolerance:number = 4;
+		protected flickFactor:number = 10;
+
 		protected viewLeft:number;
 		protected viewRight:number;
 		protected viewTop:number;
@@ -55,6 +64,18 @@ namespace app.viewport
 
 		public step(deltaTime:number, timestamp:number)
 		{
+			if(this.cameraVelX != 0 || this.cameraVelY != 0)
+			{
+				this.cameraX += this.cameraVelX;
+				this.cameraY += this.cameraVelY;
+
+				this.cameraVelX *= this.cameraFriction;
+				this.cameraVelY *= this.cameraFriction;
+
+				if(Math.abs(this.cameraVelX) < 0.01) this.cameraVelX = 0;
+				if(Math.abs(this.cameraVelY) < 0.01) this.cameraVelY = 0;
+			}
+
 			var viewWidth = this.width / this.scale;
 			var viewHeight = this.height / this.scale;
 			this.viewLeft = this.cameraX - viewWidth * 0.5;
@@ -68,6 +89,9 @@ namespace app.viewport
 			}
 
 			this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
+
+			this.mousePrevX = this.mouseX;
+			this.mousePrevY = this.mouseY;
 		}
 
 		public draw()
@@ -261,8 +285,19 @@ namespace app.viewport
 		{
 			if(!isNaN(this.mouseGrabX))
 			{
+
 				this.mouseGrabX = NaN;
 				this.mouseGrabY = NaN;
+
+				const dx = this.mousePrevX - this.mouseX;
+				const dy = this.mousePrevY - this.mouseY;
+				const dist = Math.sqrt(dx * dx + dy * dy);
+
+				if(dist >= this.flickTolerance)
+				{
+					this.cameraVelX = dx / this.scale * this.flickFactor;
+					this.cameraVelY = dy / this.scale * this.flickFactor;
+				}
 			}
 		}
 
@@ -286,6 +321,8 @@ namespace app.viewport
 
 			if(!isNaN(this.mouseGrabX))
 			{
+				this.prevCameraX = this.cameraX;
+				this.prevCameraY = this.cameraY;
 				this.anchorToScreen(this.mouseX, this.mouseY, this.mouseGrabX, this.mouseGrabY);
 				this.showMessage(`${Math.floor(this.cameraX)}, ${Math.floor(this.cameraY)}`);
 
