@@ -56,6 +56,9 @@ var app;
                 .on('contextmenu', this.onWindowContextMenu)
                 .focus();
         }
+        Canvas.prototype.focus = function () {
+            this.$canvas.focus();
+        };
         Canvas.prototype.updateCanvasSize = function () {
             this.width = this.canvas.width = this.canvas.clientWidth;
             this.height = this.canvas.height = this.canvas.clientHeight;

@@ -4,14 +4,15 @@
 ///<reference path='FpsDisplay.ts'/>
 ///<reference path='viewport/Viewport.ts'/>
 ///<reference path='ui/Splitter.ts'/>
+///<reference path='assets/SpriteManager.ts'/>
 /*
-// TODO: Load sprite set sprite sheet and render
 // TODO: Armature, bone, and forward kinematics
  */
 var app;
 (function (app) {
     var Ticker = app.ticker.Ticker;
     var Splitter = app.ui.Splitter;
+    var SpriteManager = app.assets.SpriteManager;
     var App = (function () {
         function App() {
             var _this = this;
@@ -43,6 +44,7 @@ var app;
                 _this.ticker.start();
             };
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            this._spriteManager = new SpriteManager('assets/sprites/');
             window.addEventListener('DOMContentLoaded', this.onWindowLoad);
             window.addEventListener('resize', this.onWindowResize);
         }
@@ -57,8 +59,16 @@ var app;
             new Splitter($('#col-left'), $('#properties-panel'), 1 /* HORIZONTAL */, 200, 1 /* SECOND */, 'properties');
             new Splitter(this.viewport.getContainer(), $('#timeline-container'), 0 /* VERTICAL */, 200, 1 /* SECOND */, 'timeline');
             this.viewport.updateCanvasSize();
+            this.viewport.focus();
             this.fpsDisplay = new app.Fps.Display(this.ticker.getFps);
         };
+        Object.defineProperty(App.prototype, "spriteManager", {
+            get: function () {
+                return this._spriteManager;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return App;
     }());
     // Used for debugging

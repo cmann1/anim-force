@@ -1,10 +1,15 @@
+///<reference path='../AnimForce.ts'/>
 ///<reference path='../Canvas.ts'/>
+///<reference path='../assets/SpriteManager.ts'/>
+///<reference path='../assets/SpriteAsset.ts'/>
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
 
 namespace app.viewport
 {
+
+	import Sprite = app.armature.Sprite;
 
 	export class Viewport extends app.Canvas
 	{
@@ -62,6 +67,10 @@ namespace app.viewport
 			this.$message = $('<div class="viewport-message"></div>');
 			this.$container.append(this.$message);
 			this.$message.hide();
+
+			this.$canvas
+				.on('keydown', this.onKeyDown)
+				.on('keyup', this.onKeyUp);
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -103,11 +112,18 @@ namespace app.viewport
 			ctx.clearRect(0, 0, this.width, this.height);
 
 			ctx.save();
-			// ctx.translate(Math.floor(-this.cameraX + this.centreX), Math.floor(-this.cameraY + this.centreY));
 
 			this.drawGrid();
 
-			// ctx.scale(this.scale, this.scale);
+			ctx.translate(this.centreX, this.centreY);
+			ctx.scale(this.scale, this.scale);
+			ctx.translate(-this.cameraX, -this.cameraY);
+
+			if(this.sprite)
+			{
+				this.sprite.draw(this.ctx);
+			}
+
 			ctx.restore();
 		}
 
@@ -147,7 +163,7 @@ namespace app.viewport
 				ctx.setLineDash(this.gridSubDash);
 				ctx.strokeStyle = this.gridSubColour;
 
-				ctx.lineDashOffset = cameraY * scale;
+				ctx.lineDashOffset = cameraY * scale - this.centreY;
 				ctx.beginPath();
 
 				x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
@@ -165,7 +181,7 @@ namespace app.viewport
 				ctx.stroke();
 
 
-				ctx.lineDashOffset = cameraX * scale;
+				ctx.lineDashOffset = cameraX * scale - this.centreX;
 				ctx.beginPath();
 
 				y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
@@ -278,6 +294,20 @@ namespace app.viewport
 		/*
 		 * Events
 		 */
+		sprite:Sprite;
+		protected onKeyDown = (event) =>
+		{
+			if(event.keyCode == 65) // A
+			{
+				var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
+				this.sprite = new Sprite(spriteAsset, 0, 0);
+			}
+		};
+
+		protected onKeyUp = (event) =>
+		{
+
+		};
 
 		protected onMouseDown(event)
 		{

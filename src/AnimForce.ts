@@ -5,9 +5,9 @@
 ///<reference path='FpsDisplay.ts'/>
 ///<reference path='viewport/Viewport.ts'/>
 ///<reference path='ui/Splitter.ts'/>
+///<reference path='assets/SpriteManager.ts'/>
 
 /*
-// TODO: Load sprite set sprite sheet and render
 // TODO: Armature, bone, and forward kinematics
  */
 
@@ -17,6 +17,7 @@ namespace app
 	import Splitter = app.ui.Splitter;
 	import SplitterOrientation = app.ui.SplitterOrientation;
 	import SplitterAnchor = app.ui.SplitterAnchor;
+	import SpriteManager = app.assets.SpriteManager;
 
 	class App{
 		protected ticker:Ticker;
@@ -24,9 +25,13 @@ namespace app
 
 		protected viewport:app.viewport.Viewport;
 
+		protected _spriteManager:SpriteManager;
+
 		constructor()
 		{
 			createjs.Ticker.timingMode = createjs.Ticker.RAF;
+
+			this._spriteManager = new SpriteManager('assets/sprites/');
 
 			window.addEventListener('DOMContentLoaded', this.onWindowLoad);
 			window.addEventListener('resize', this.onWindowResize);
@@ -50,8 +55,14 @@ namespace app
 			new Splitter(this.viewport.getContainer(), $('#timeline-container'), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
 
 			this.viewport.updateCanvasSize();
+			this.viewport.focus();
 
 			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
+		}
+
+		get spriteManager():app.assets.SpriteManager
+		{
+			return this._spriteManager;
 		}
 
 		/*

@@ -1,4 +1,7 @@
+///<reference path='../AnimForce.ts'/>
 ///<reference path='../Canvas.ts'/>
+///<reference path='../assets/SpriteManager.ts'/>
+///<reference path='../assets/SpriteAsset.ts'/>
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
@@ -16,6 +19,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport) {
+        var Sprite = app.armature.Sprite;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId) {
@@ -47,6 +51,14 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                _this.onKeyDown = function (event) {
+                    if (event.keyCode == 65) {
+                        var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
+                        _this.sprite = new Sprite(spriteAsset, 0, 0);
+                    }
+                };
+                _this.onKeyUp = function (event) {
+                };
                 _this.onResize = function () {
                     _this.updateCanvasSize();
                 };
@@ -61,6 +73,9 @@ var app;
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
+                _this.$canvas
+                    .on('keydown', _this.onKeyDown)
+                    .on('keyup', _this.onKeyUp);
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
@@ -91,9 +106,13 @@ var app;
                 var ctx = this.ctx;
                 ctx.clearRect(0, 0, this.width, this.height);
                 ctx.save();
-                // ctx.translate(Math.floor(-this.cameraX + this.centreX), Math.floor(-this.cameraY + this.centreY));
                 this.drawGrid();
-                // ctx.scale(this.scale, this.scale);
+                ctx.translate(this.centreX, this.centreY);
+                ctx.scale(this.scale, this.scale);
+                ctx.translate(-this.cameraX, -this.cameraY);
+                if (this.sprite) {
+                    this.sprite.draw(this.ctx);
+                }
                 ctx.restore();
             };
             Viewport.prototype.drawGrid = function () {
@@ -120,7 +139,7 @@ var app;
                 if (scale > this.gridSubMinScale) {
                     ctx.setLineDash(this.gridSubDash);
                     ctx.strokeStyle = this.gridSubColour;
-                    ctx.lineDashOffset = cameraY * scale;
+                    ctx.lineDashOffset = cameraY * scale - this.centreY;
                     ctx.beginPath();
                     x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
                     while (x < viewRight) {
@@ -132,7 +151,7 @@ var app;
                         x += gridSubSize;
                     }
                     ctx.stroke();
-                    ctx.lineDashOffset = cameraX * scale;
+                    ctx.lineDashOffset = cameraX * scale - this.centreX;
                     ctx.beginPath();
                     y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
                     while (y < viewBottom) {
@@ -206,9 +225,6 @@ var app;
             Viewport.prototype.getContainer = function () {
                 return this.$container;
             };
-            /*
-             * Events
-             */
             Viewport.prototype.onMouseDown = function (event) {
                 if (event.button == 2) {
                     this.mouseGrabX = this.stageMouse.x;

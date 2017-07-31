@@ -7,11 +7,14 @@
 	<link rel="stylesheet" href="css/main.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
-	<script src="lib/easeljs-0.8.2.combined.js"></script>
+	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
 	<script src="src/Ticker.js"></script>
 	<script src="src/FpsDisplay.js"></script>
 	<script src="src/ui/Splitter.js"></script>
+	<script src="src/assets/SpriteManager.js"></script>
+	<script src="src/assets/SpriteAsset.js"></script>
+	<script src="src/assets/SpriteFrame.js"></script>
 	<script src="src/armature/Sprite.js"></script>
 	<script src="src/armature/Bone.js"></script>
 	<script src="src/armature/Armature.js"></script>
@@ -24,10 +27,10 @@
 
 <div id="col-left">
 	<div id="viewport-container">
-		<canvas id="viewport"></canvas>
+		<canvas id="viewport" tabindex="1"></canvas>
 	</div>
 	<div id="timeline-container">
-		<canvas id="timeline"></canvas>
+		<canvas id="timeline" tabindex="2"></canvas>
 	</div>
 </div>
 <div id="properties-panel">

@@ -46,6 +46,11 @@ namespace app
 				.focus();
 		}
 
+		public focus()
+		{
+			this.$canvas.focus();
+		}
+
 		public updateCanvasSize()
 		{
 			this.width = this.canvas.width = this.canvas.clientWidth;
