@@ -12,9 +12,10 @@
 
 /*
 // TODO: Timeline:
-// TODO: -
-// TODO: -
-// TODO: -
+// TODO: - A row for each node
+// TODO: - Tree structure collapsible  nodes
+// TODO: - Selecting
+// TODO: - Add/Delete
 // TODO: -
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale

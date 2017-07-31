@@ -1,6 +1,7 @@
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
+///<reference path="../../lib/Key.enum.ts"/>
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -22,6 +23,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport) {
+        var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
         var Model = app.model.Model;
         var Bone = app.model.Bone;
@@ -58,7 +60,13 @@ var app;
                 _this.stageAnchorY = NaN;
                 _this.t = 0;
                 _this.onKeyDown = function (event) {
-                    if (event.keyCode == 65) {
+                    // console.log(event.keyCode);
+                    var keyCode = event.keyCode;
+                    if (keyCode == Key.Home) {
+                        _this.cameraX = 0;
+                        _this.cameraY = 0;
+                    }
+                    else if (keyCode == Key.A) {
                         var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
                         var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
                         var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
@@ -68,15 +76,13 @@ var app;
                         _this.sprite3.rotation = Math.PI * 0.25;
                         _this.bone.addChild(_this.sprite3);
                         _this.bone2 = new Bone();
+                        _this.bone2.offsetX = -50;
                         _this.bone.addChild(_this.bone2);
-                        _this.bone2.rotation = Math.PI * 0.25;
                         _this.bone2.addChild(_this.sprite2 = new Sprite(spriteAsset2, 0, 0));
                         _this.sprite.offsetY = _this.bone.length / 2;
                         _this.sprite2.offsetY = _this.bone2.length / 2;
                         _this.sprite3.offsetX = 50;
                         _this.sprite3.offsetY = 50;
-                        // 	var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
-                        // 	this.sprite = new Sprite(null, spriteAsset, 0, 0);
                     }
                 };
                 _this.onKeyUp = function (event) {
@@ -133,7 +139,7 @@ var app;
                 ctx.scale(this.scale, this.scale);
                 ctx.translate(-this.cameraX, -this.cameraY);
                 if (this.model) {
-                    // this.bone.rotation += 0.02;
+                    this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
                     this.bone2.rotation += 0.02;
                     this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
                     this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);

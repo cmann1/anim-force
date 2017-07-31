@@ -1,6 +1,7 @@
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
+///<reference path="../../lib/Key.enum.ts"/>
 
 ///<reference path='../AnimForce.ts'/>
 ///<reference path='../Canvas.ts'/>
@@ -13,6 +14,7 @@
 namespace app.viewport
 {
 
+	import Key = KeyCodes.Key;
 	import Sprite = app.model.Sprite;
 	import Model = app.model.Model;
 	import Bone = app.model.Bone;
@@ -127,7 +129,7 @@ namespace app.viewport
 
 			if(this.model)
 			{
-				// this.bone.rotation += 0.02;
+				this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
 				this.bone2.rotation += 0.02;
 				this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
 				this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
@@ -314,7 +316,16 @@ namespace app.viewport
 		t = 0;
 		protected onKeyDown = (event) =>
 		{
-			if(event.keyCode == 65) // A
+			// console.log(event.keyCode);
+			const keyCode = event.keyCode;
+
+			if(keyCode == Key.Home)
+			{
+				this.cameraX = 0;
+				this.cameraY = 0;
+			}
+
+			else if(keyCode == Key.A)
 			{
 				var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
 				var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
@@ -328,17 +339,14 @@ namespace app.viewport
 				this.bone.addChild(this.sprite3);
 
 				this.bone2 = new Bone();
+				this.bone2.offsetX = -50;
 				this.bone.addChild(this.bone2);
-				this.bone2.rotation = Math.PI * 0.25;
 				this.bone2.addChild(this.sprite2 = new Sprite(spriteAsset2, 0, 0));
 
 				this.sprite.offsetY = this.bone.length / 2;
 				this.sprite2.offsetY = this.bone2.length / 2;
 				this.sprite3.offsetX = 50;
 				this.sprite3.offsetY = 50;
-
-			// 	var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
-			// 	this.sprite = new Sprite(null, spriteAsset, 0, 0);
 			}
 		};
 
