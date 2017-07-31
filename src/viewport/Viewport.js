@@ -47,12 +47,17 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                _this.onResize = function () {
+                    _this.updateCanvasSize();
+                };
                 _this.onZoomComplete = function () {
                     _this.anchorToScreen(_this.mouseX, _this.mouseY, _this.stageAnchorX, _this.stageAnchorY);
                     _this.stageAnchorX = NaN;
                     _this.stageAnchorY = NaN;
                 };
                 _this.$container = _this.$canvas.parent();
+                _this.$container.on('resize', _this.onResize);
+                _this.$container.parent().on('resize', _this.onResize);
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
@@ -197,6 +202,9 @@ var app;
             Viewport.prototype.showMessage = function (message, duration) {
                 if (duration === void 0) { duration = 1000; }
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
+            };
+            Viewport.prototype.getContainer = function () {
+                return this.$container;
             };
             /*
              * Events

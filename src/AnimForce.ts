@@ -4,10 +4,19 @@
 ///<reference path='Ticker.ts'/>
 ///<reference path='FpsDisplay.ts'/>
 ///<reference path='viewport/Viewport.ts'/>
+///<reference path='ui/Splitter.ts'/>
+
+/*
+// TODO: Load sprite set sprite sheet and render
+// TODO: Armature, bone, and forward kinematics
+ */
 
 namespace app
 {
 	import Ticker = app.ticker.Ticker;
+	import Splitter = app.ui.Splitter;
+	import SplitterOrientation = app.ui.SplitterOrientation;
+	import SplitterAnchor = app.ui.SplitterAnchor;
 
 	class App{
 		protected ticker:Ticker;
@@ -33,6 +42,18 @@ namespace app
 			this.viewport.draw();
 		}
 
+		protected initUI()
+		{
+			this.viewport = new app.viewport.Viewport('viewport');
+
+			new Splitter($('#col-left'), $('#properties-panel'), SplitterOrientation.HORIZONTAL, 200, SplitterAnchor.SECOND, 'properties');
+			new Splitter(this.viewport.getContainer(), $('#timeline-container'), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
+
+			this.viewport.updateCanvasSize();
+
+			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
+		}
+
 		/*
 		* Events
 		*/
@@ -45,8 +66,6 @@ namespace app
 
 		protected onWindowLoad = () =>
 		{
-			this.viewport = new app.viewport.Viewport('viewport');
-
 			$(window)
 				.on('focus', this.onWindowFocus)
 				.on('blur', this.onWindowBlur)
@@ -55,7 +74,7 @@ namespace app
 			this.ticker = new Ticker(this.onTick);
 			this.ticker.start();
 
-			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
+			this.initUI();
 		};
 
 		protected onWindowResize = () =>

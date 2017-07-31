@@ -4,13 +4,14 @@
 	<meta charset="UTF-8">
 	<title>AnimForce</title>
 	
-	<link rel="stylesheet" href="css/index.css">
+	<link rel="stylesheet" href="css/main.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
 	<script src="lib/easeljs-0.8.2.combined.js"></script>
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
 	<script src="src/Ticker.js"></script>
 	<script src="src/FpsDisplay.js"></script>
+	<script src="src/ui/Splitter.js"></script>
 	<script src="src/armature/Sprite.js"></script>
 	<script src="src/armature/Bone.js"></script>
 	<script src="src/armature/Armature.js"></script>
@@ -21,13 +22,18 @@
 </head>
 <body>
 
-<div id="viewport-container">
-	<canvas id="viewport"></canvas>
+<div id="col-left">
+	<div id="viewport-container">
+		<canvas id="viewport"></canvas>
+	</div>
+	<div id="timeline-container">
+		<canvas id="timeline"></canvas>
+	</div>
 </div>
-<div id="properties-panel"></div>
-<div id="timeline-container">
-	<canvas id="timeline"></canvas>
+<div id="properties-panel">
+	
 </div>
+
 
 </body>
 </html>

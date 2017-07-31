@@ -56,6 +56,8 @@ namespace app.viewport
 			super(elementId);
 
 			this.$container = this.$canvas.parent();
+			this.$container.on('resize', this.onResize);
+			this.$container.parent().on('resize', this.onResize);
 
 			this.$message = $('<div class="viewport-message"></div>');
 			this.$container.append(this.$message);
@@ -268,6 +270,11 @@ namespace app.viewport
 			this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
 		}
 
+		public getContainer()
+		{
+			return this.$container;
+		}
+
 		/*
 		 * Events
 		 */
@@ -330,6 +337,11 @@ namespace app.viewport
 
 			this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
 		}
+
+		protected onResize = () =>
+		{
+			this.updateCanvasSize();
+		};
 
 		protected onZoomComplete = () =>
 		{

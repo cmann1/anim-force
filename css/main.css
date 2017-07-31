@@ -1,0 +1,43 @@
+.splitter-partition {
+  position: absolute; }
+
+.splitter-bar {
+  position: absolute;
+  background-color: #A7FFE5; }
+
+html, body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  font: 14px monospace; }
+
+div#viewport-container {
+  position: absolute; }
+
+canvas#viewport {
+  width: 100%;
+  height: 100%; }
+
+div#properties-panel {
+  background: indianred; }
+
+div#timeline-container {
+  background: cornflowerblue; }
+
+canvas#timeline {
+  width: 100%;
+  height: 100%; }
+
+.viewport-message {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  padding: 5px 10px;
+  background: #ffffff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
+  border-radius: 4px; }
+
+/*# sourceMappingURL=main.css.map */

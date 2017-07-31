@@ -3,9 +3,15 @@
 ///<reference path='Ticker.ts'/>
 ///<reference path='FpsDisplay.ts'/>
 ///<reference path='viewport/Viewport.ts'/>
+///<reference path='ui/Splitter.ts'/>
+/*
+// TODO: Load sprite set sprite sheet and render
+// TODO: Armature, bone, and forward kinematics
+ */
 var app;
 (function (app) {
     var Ticker = app.ticker.Ticker;
+    var Splitter = app.ui.Splitter;
     var App = (function () {
         function App() {
             var _this = this;
@@ -17,14 +23,13 @@ var app;
                 _this.draw();
             };
             this.onWindowLoad = function () {
-                _this.viewport = new app.viewport.Viewport('viewport');
                 $(window)
                     .on('focus', _this.onWindowFocus)
                     .on('blur', _this.onWindowBlur)
                     .focus();
                 _this.ticker = new Ticker(_this.onTick);
                 _this.ticker.start();
-                _this.fpsDisplay = new app.Fps.Display(_this.ticker.getFps);
+                _this.initUI();
             };
             this.onWindowResize = function () {
                 _this.viewport.updateCanvasSize();
@@ -46,6 +51,13 @@ var app;
         };
         App.prototype.draw = function () {
             this.viewport.draw();
+        };
+        App.prototype.initUI = function () {
+            this.viewport = new app.viewport.Viewport('viewport');
+            new Splitter($('#col-left'), $('#properties-panel'), 1 /* HORIZONTAL */, 200, 1 /* SECOND */, 'properties');
+            new Splitter(this.viewport.getContainer(), $('#timeline-container'), 0 /* VERTICAL */, 200, 1 /* SECOND */, 'timeline');
+            this.viewport.updateCanvasSize();
+            this.fpsDisplay = new app.Fps.Display(this.ticker.getFps);
         };
         return App;
     }());
