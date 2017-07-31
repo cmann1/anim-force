@@ -1,5 +1,5 @@
 ///<reference path='../../lib/jquery.d.ts'/>
-///<reference path='../armature/Sprite.ts'/>
+///<reference path='../model/Sprite.ts'/>
 ///<reference path='SpriteFrame.ts'/>
 
 namespace app.assets
@@ -13,13 +13,12 @@ namespace app.assets
 
 		public path:String;
 		public sheet:HTMLImageElement;
+		public spriteSetName:string;
+		public spriteName:string;
 
 		private error = false;
 		private loaded = 2;
-		private queuedSprites:app.armature.Sprite[] = [];
-
-		private spriteSetName:string;
-		private spriteName:string;
+		private queuedSprites:app.model.Sprite[] = [];
 
 		private palettes:SpriteFrame[][];
 		private paletteCount:number;
@@ -53,7 +52,7 @@ namespace app.assets
 			});
 		}
 
-		public setSpriteSource(sprite:app.armature.Sprite)
+		public setSpriteSource(sprite:app.model.Sprite)
 		{
 			var src;
 
@@ -76,7 +75,6 @@ namespace app.assets
 				const paletteIndex = sprite.palette < 0 || sprite.palette >= this.paletteCount ? 0 : sprite.palette;
 				const frameIndex = sprite.frame < 0 || sprite.frame >= this.frameCount ? 0 : sprite.frame;
 				const frame = this.palettes[paletteIndex][frameIndex];
-				console.log(paletteIndex, frameIndex);
 
 				sprite.src = this.sheet;
 				sprite.frameData = frame;

@@ -1,7 +1,3 @@
-///<reference path='../AnimForce.ts'/>
-///<reference path='../Canvas.ts'/>
-///<reference path='../assets/SpriteManager.ts'/>
-///<reference path='../assets/SpriteAsset.ts'/>
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
@@ -15,11 +11,20 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+///<reference path='../AnimForce.ts'/>
+///<reference path='../Canvas.ts'/>
+///<reference path='../assets/SpriteManager.ts'/>
+///<reference path='../assets/SpriteAsset.ts'/>
+///<reference path='../model/Model.ts'/>
+///<reference path='../model/Bone.ts'/>
+///<reference path='../model/Sprite.ts'/>
 var app;
 (function (app) {
     var viewport;
     (function (viewport) {
-        var Sprite = app.armature.Sprite;
+        var Sprite = app.model.Sprite;
+        var Model = app.model.Model;
+        var Bone = app.model.Bone;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId) {
@@ -51,10 +56,27 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                _this.t = 0;
                 _this.onKeyDown = function (event) {
                     if (event.keyCode == 65) {
-                        var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
-                        _this.sprite = new Sprite(spriteAsset, 0, 0);
+                        var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
+                        var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
+                        var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
+                        _this.model = new Model();
+                        _this.model.addRootBone(_this.bone = new Bone()).addChild(_this.sprite = new Sprite(spriteAsset, 0, 0));
+                        _this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
+                        _this.sprite3.rotation = Math.PI * 0.25;
+                        _this.bone.addChild(_this.sprite3);
+                        _this.bone2 = new Bone();
+                        _this.bone.addChild(_this.bone2);
+                        _this.bone2.rotation = Math.PI * 0.25;
+                        _this.bone2.addChild(_this.sprite2 = new Sprite(spriteAsset2, 0, 0));
+                        _this.sprite.offsetY = _this.bone.length / 2;
+                        _this.sprite2.offsetY = _this.bone2.length / 2;
+                        _this.sprite3.offsetX = 50;
+                        _this.sprite3.offsetY = 50;
+                        // 	var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
+                        // 	this.sprite = new Sprite(null, spriteAsset, 0, 0);
                     }
                 };
                 _this.onKeyUp = function (event) {
@@ -110,8 +132,13 @@ var app;
                 ctx.translate(this.centreX, this.centreY);
                 ctx.scale(this.scale, this.scale);
                 ctx.translate(-this.cameraX, -this.cameraY);
-                if (this.sprite) {
-                    this.sprite.draw(this.ctx);
+                if (this.model) {
+                    // this.bone.rotation += 0.02;
+                    this.bone2.rotation += 0.02;
+                    this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
+                    this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
+                    this.model.draw(this.ctx);
+                    this.t += 0.04;
                 }
                 ctx.restore();
             };

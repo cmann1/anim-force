@@ -5,17 +5,29 @@
 ///<reference path='viewport/Viewport.ts'/>
 ///<reference path='ui/Splitter.ts'/>
 ///<reference path='assets/SpriteManager.ts'/>
+///<reference path='model/Model.ts'/>
+///<reference path='model/Bone.ts'/>
+///<reference path='model/Sprite.ts'/>
 /*
-// TODO: Armature, bone, and forward kinematics
+// TODO: Timeline:
+// TODO: -
+// TODO: -
+// TODO: -
+// TODO: -
+// TODO: Draw controls:
+// TODO: - Independent of zoom and scale
+// TODO: - Mouse interaction
  */
 var app;
 (function (app) {
     var Ticker = app.ticker.Ticker;
     var Splitter = app.ui.Splitter;
     var SpriteManager = app.assets.SpriteManager;
+    var Model = app.model.Model;
     var App = (function () {
         function App() {
             var _this = this;
+            this.model = new Model();
             /*
             * Events
             */

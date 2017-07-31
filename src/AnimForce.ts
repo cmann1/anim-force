@@ -6,9 +6,19 @@
 ///<reference path='viewport/Viewport.ts'/>
 ///<reference path='ui/Splitter.ts'/>
 ///<reference path='assets/SpriteManager.ts'/>
+///<reference path='model/Model.ts'/>
+///<reference path='model/Bone.ts'/>
+///<reference path='model/Sprite.ts'/>
 
 /*
-// TODO: Armature, bone, and forward kinematics
+// TODO: Timeline:
+// TODO: -
+// TODO: -
+// TODO: -
+// TODO: -
+// TODO: Draw controls:
+// TODO: - Independent of zoom and scale
+// TODO: - Mouse interaction
  */
 
 namespace app
@@ -18,14 +28,18 @@ namespace app
 	import SplitterOrientation = app.ui.SplitterOrientation;
 	import SplitterAnchor = app.ui.SplitterAnchor;
 	import SpriteManager = app.assets.SpriteManager;
+	import Model = app.model.Model;
+	import Bone = app.model.Bone;
+	import Sprite = app.model.Sprite;
 
 	class App{
 		protected ticker:Ticker;
 		protected fpsDisplay:Fps.Display;
 
+		protected _spriteManager:SpriteManager;
 		protected viewport:app.viewport.Viewport;
 
-		protected _spriteManager:SpriteManager;
+		protected model:Model = new Model();
 
 		constructor()
 		{

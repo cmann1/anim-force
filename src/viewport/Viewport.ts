@@ -1,15 +1,21 @@
-///<reference path='../AnimForce.ts'/>
-///<reference path='../Canvas.ts'/>
-///<reference path='../assets/SpriteManager.ts'/>
-///<reference path='../assets/SpriteAsset.ts'/>
 ///<reference path='../../lib/createjs-lib.d.ts'/>
 ///<reference path='../../lib/tweenjs.d.ts'/>
 ///<reference path="../../lib/easeljs.d.ts"/>
 
+///<reference path='../AnimForce.ts'/>
+///<reference path='../Canvas.ts'/>
+///<reference path='../assets/SpriteManager.ts'/>
+///<reference path='../assets/SpriteAsset.ts'/>
+///<reference path='../model/Model.ts'/>
+///<reference path='../model/Bone.ts'/>
+///<reference path='../model/Sprite.ts'/>
+
 namespace app.viewport
 {
 
-	import Sprite = app.armature.Sprite;
+	import Sprite = app.model.Sprite;
+	import Model = app.model.Model;
+	import Bone = app.model.Bone;
 
 	export class Viewport extends app.Canvas
 	{
@@ -119,9 +125,14 @@ namespace app.viewport
 			ctx.scale(this.scale, this.scale);
 			ctx.translate(-this.cameraX, -this.cameraY);
 
-			if(this.sprite)
+			if(this.model)
 			{
-				this.sprite.draw(this.ctx);
+				// this.bone.rotation += 0.02;
+				this.bone2.rotation += 0.02;
+				this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
+				this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
+				this.model.draw(this.ctx);
+				this.t+=0.04;
 			}
 
 			ctx.restore();
@@ -294,13 +305,40 @@ namespace app.viewport
 		/*
 		 * Events
 		 */
+		model:Model;
+		bone:Bone;
+		bone2:Bone;
 		sprite:Sprite;
+		sprite2:Sprite;
+		sprite3:Sprite;
+		t = 0;
 		protected onKeyDown = (event) =>
 		{
 			if(event.keyCode == 65) // A
 			{
-				var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
-				this.sprite = new Sprite(spriteAsset, 0, 0);
+				var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
+				var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
+				var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
+
+				this.model = new Model();
+				this.model.addRootBone(this.bone = new Bone()).addChild(this.sprite = new Sprite(spriteAsset, 0, 0));
+
+				this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
+				this.sprite3.rotation = Math.PI * 0.25;
+				this.bone.addChild(this.sprite3);
+
+				this.bone2 = new Bone();
+				this.bone.addChild(this.bone2);
+				this.bone2.rotation = Math.PI * 0.25;
+				this.bone2.addChild(this.sprite2 = new Sprite(spriteAsset2, 0, 0));
+
+				this.sprite.offsetY = this.bone.length / 2;
+				this.sprite2.offsetY = this.bone2.length / 2;
+				this.sprite3.offsetX = 50;
+				this.sprite3.offsetY = 50;
+
+			// 	var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1');
+			// 	this.sprite = new Sprite(null, spriteAsset, 0, 0);
 			}
 		};
 

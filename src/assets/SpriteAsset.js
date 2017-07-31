@@ -1,5 +1,5 @@
 ///<reference path='../../lib/jquery.d.ts'/>
-///<reference path='../armature/Sprite.ts'/>
+///<reference path='../model/Sprite.ts'/>
 ///<reference path='SpriteFrame.ts'/>
 var app;
 (function (app) {
@@ -78,7 +78,6 @@ var app;
                     var paletteIndex = sprite.palette < 0 || sprite.palette >= this.paletteCount ? 0 : sprite.palette;
                     var frameIndex = sprite.frame < 0 || sprite.frame >= this.frameCount ? 0 : sprite.frame;
                     var frame = this.palettes[paletteIndex][frameIndex];
-                    console.log(paletteIndex, frameIndex);
                     sprite.src = this.sheet;
                     sprite.frameData = frame;
                     sprite.srcX = frame.x;
