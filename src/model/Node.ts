@@ -1,15 +1,24 @@
-///<reference path="Model.ts"/>
-///<reference path="Bone.ts"/>
-
 namespace app.model
 {
 
+	import EventDispatcher = events.EventDispatcher;
+	import StructureChangeEvent = events.StructureChangeEvent;
+
 	export class Node
 	{
-		public name:string;
+		static nextId:number = 0;
+
+		public id:number;
+		public type:string;
+		public canHaveChildren:boolean = false;
+		protected _name:string;
 
 		public model:Model;
-		public parent:Bone;
+		public parent:Node;
+
+		/// Events
+
+		public structureChange:EventDispatcher<Node> = new EventDispatcher<Node>();
 
 		/// Properties
 
@@ -29,13 +38,19 @@ namespace app.model
 		public worldRotation:number = 0;
 		public drawIndex:number = 0;
 
+		public selected:boolean = false;
+		public highlighted:boolean = false;
+
 		/// UI
 
 		public collapsed:boolean = false;
 
+		///
+
 		constructor(name:string)
 		{
-			this.name = name;
+			this.id = Node.nextId++;
+			this._name = name;
 		}
 
 		public setModel(model:Model)
@@ -43,17 +58,58 @@ namespace app.model
 			this.model = model;
 		}
 
+		public setSelected(selected:boolean)
+		{
+			this.model.setSelectedNode(selected ? this : null);
+		}
+
+		public setHighlighted(selected:boolean)
+		{
+			this.model.setHighlightedNode(selected ? this : null);
+		}
+
+		public addChild(child:Node):Node { return null; }
+		public removeChild(child:Node, triggerEvent=true):Node { return null; }
+
 		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList) { }
 
 		public draw(ctx:CanvasRenderingContext2D) { }
 
 		public drawControls(ctx:CanvasRenderingContext2D) { }
 
+		get name():string
+		{
+			return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
+		}
+
+		set name(value:string)
+		{
+			this._name = value;
+		}
+
 		static rotate(x, y, angle)
 		{
 			return {
 				x: Math.cos(angle) * x - Math.sin(angle) * y,
 				y: Math.sin(angle) * x + Math.cos(angle) * y
+			}
+		}
+
+		/*
+		 * Events
+		 */
+
+		protected onStructureChange(type:string, target:Node, index:number)
+		{
+			this.structureChange.dispatch(this, new StructureChangeEvent(type, target, index));
+
+			if(this.parent)
+			{
+				this.parent.onStructureChange(type, target, index);
+			}
+			else if(this.model)
+			{
+				this.model.onStructureChange(type, target, index);
 			}
 		}
 

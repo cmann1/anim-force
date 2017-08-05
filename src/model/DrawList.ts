@@ -1,6 +1,3 @@
-///<reference path="Node.ts"/>
-///<reference path="Attachment.ts"/>
-
 namespace app.model
 {
 

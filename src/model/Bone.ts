@@ -1,6 +1,3 @@
-///<reference path="Node.ts"/>
-///<reference path='DrawList.ts'/>
-
 namespace app.model
 {
 
@@ -15,9 +12,12 @@ namespace app.model
 		public worldEndPointX:number = 0;
 		public worldEndPointY:number = 0;
 
-		constructor(name:string='Unnamed Bone', parent:Bone=null)
+		constructor(name:string=null, parent:Bone=null)
 		{
 			super(name);
+
+			this.type = 'bone';
+			this.canHaveChildren = true;
 		}
 
 		public addChild(child:Node):Node
@@ -27,26 +27,39 @@ namespace app.model
 				return this
 			}
 
+			var eventType = 'addChild';
+
 			if(child.parent)
 			{
-				child.parent.removeChild(child);
+				child.parent.removeChild(child, false);
+				eventType = 'reParent';
 			}
 
 			child.model = this.model;
+			child.parent = this;
 			this.children.push(child);
 			this.childCount++;
+
+			this.onStructureChange(eventType, child, this.childCount - 1);
 
 			return child;
 		}
 
-		public removeChild(child:Node):Node
+		public removeChild(child:Node, triggerEvent=true):Node
 		{
 			if(child.parent == this)
 			{
+				const index = this.children.indexOf(child);
+
 				child.setModel(null);
 				child.parent = null;
-				this.children.splice(this.children.indexOf(child), 1);
+				this.children.splice(index, 1);
 				this.childCount--;
+
+				if(triggerEvent)
+				{
+					this.onStructureChange('removeChild', child, index);
+				}
 			}
 
 			return child;
@@ -91,7 +104,7 @@ namespace app.model
 		{
 			ctx.save();
 			ctx.lineWidth = 4;
-			ctx.strokeStyle = '#0F0';
+			ctx.strokeStyle = this.selected ? ColourConfig.selected : (this.highlighted ? ColourConfig.highlighted : '#888');
 			ctx.beginPath();
 			ctx.moveTo(this.worldX, this.worldY);
 			ctx.lineTo(this.worldEndPointX, this.worldEndPointY);

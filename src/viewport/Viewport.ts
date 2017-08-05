@@ -1,16 +1,3 @@
-///<reference path='../../lib/createjs-lib.d.ts'/>
-///<reference path='../../lib/tweenjs.d.ts'/>
-///<reference path="../../lib/easeljs.d.ts"/>
-///<reference path="../../lib/Key.enum.ts"/>
-
-///<reference path='../AnimForce.ts'/>
-///<reference path='../Canvas.ts'/>
-///<reference path='../assets/SpriteManager.ts'/>
-///<reference path='../assets/SpriteAsset.ts'/>
-///<reference path='../model/Model.ts'/>
-///<reference path='../model/Bone.ts'/>
-///<reference path='../model/Sprite.ts'/>
-
 namespace app.viewport
 {
 
@@ -18,6 +5,8 @@ namespace app.viewport
 	import Sprite = app.model.Sprite;
 	import Model = app.model.Model;
 	import Bone = app.model.Bone;
+	import SelectionEvent = events.SelectionEvent;
+	import StructureChangeEvent = events.StructureChangeEvent;
 
 	export class Viewport extends app.Canvas
 	{
@@ -64,11 +53,17 @@ namespace app.viewport
 
 		protected $message:JQuery;
 
-		constructor(elementId)
+		private model:Model;
+
+		constructor(elementId, model:Model)
 		{
 			super(elementId);
 
-			this.$container = this.$canvas.parent();
+			this.model = model;
+
+			model.structureChange.on(this.onModelStructureChange);
+			model.selectionChange.on(this.onModelSelectionChange);
+
 			this.$container.on('resize', this.onResize);
 			this.$container.parent().on('resize', this.onResize);
 
@@ -83,6 +78,8 @@ namespace app.viewport
 
 		public step(deltaTime:number, timestamp:number)
 		{
+			if(!this.requiresUpdate && document.activeElement != this.canvas) return;
+
 			if(this.cameraVelX != 0 || this.cameraVelY != 0)
 			{
 				this.cameraX += this.cameraVelX;
@@ -115,10 +112,11 @@ namespace app.viewport
 
 		public draw()
 		{
+			if(!this.requiresUpdate && document.activeElement != this.canvas) return;
+
 			const ctx = this.ctx;
 
 			ctx.clearRect(0, 0, this.width, this.height);
-
 			ctx.save();
 
 			this.drawGrid();
@@ -127,17 +125,26 @@ namespace app.viewport
 			ctx.scale(this.scale, this.scale);
 			ctx.translate(-this.cameraX, -this.cameraY);
 
-			if(this.model)
+			if(this.bone2)
 			{
 				this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
 				this.bone2.rotation += 0.02;
 				this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
 				this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
-				this.model.draw(this.ctx);
 				this.t+=0.04;
 			}
 
+			for(var b of this.model.rootBones)
+				{
+					b.rotation+=0.02;
+					for(var c of b.children)
+						c.rotation+=0.02;
+				}
+			this.model.draw(this.ctx);
+
 			ctx.restore();
+
+			this.requiresUpdate = false;
 		}
 
 		public drawGrid()
@@ -299,15 +306,24 @@ namespace app.viewport
 			this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
 		}
 
-		public getContainer()
+		/*
+		 * Model Events
+		 */
+
+		protected onModelSelectionChange = (model:Model, event:SelectionEvent) =>
 		{
-			return this.$container;
-		}
+			this.requiresUpdate = true;
+		};
+
+		protected onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
+		{
+			this.requiresUpdate = true;
+		};
 
 		/*
 		 * Events
 		 */
-		model:Model;
+
 		bone:Bone;
 		bone2:Bone;
 		sprite:Sprite;
@@ -325,14 +341,17 @@ namespace app.viewport
 				this.cameraY = 0;
 			}
 
+			// TODO: REMOVE
 			else if(keyCode == Key.A)
 			{
 				var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
 				var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
 				var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
 
-				this.model = new Model();
-				this.model.addRootBone(this.bone = new Bone()).addChild(this.sprite = new Sprite(spriteAsset, 0, 0));
+				this.model.clear();
+				this.model
+					.addChild(this.bone = new Bone())
+					.addChild(this.sprite = new Sprite(spriteAsset, 0, 0));
 
 				this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
 				this.sprite3.rotation = Math.PI * 0.25;
@@ -397,6 +416,7 @@ namespace app.viewport
 			this.stageAnchorY = this.stageMouse.y;
 
 			this.showMessage(`Zoom: ${scale}`);
+			this.requiresUpdate = true;
 		}
 
 		protected onMouseMove(event)
@@ -413,11 +433,6 @@ namespace app.viewport
 
 			this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
 		}
-
-		protected onResize = () =>
-		{
-			this.updateCanvasSize();
-		};
 
 		protected onZoomComplete = () =>
 		{

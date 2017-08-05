@@ -1,0 +1,1 @@
+declare function tippy(selector, settings?);

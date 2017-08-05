@@ -1,7 +1,3 @@
-///<reference path='Node.ts'/>
-///<reference path='Bone.ts'/>
-///<reference path='DrawList.ts'/>
-///<reference path='../assets/SpriteAsset.ts'/>
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -16,22 +12,24 @@ var app;
 (function (app) {
     var model;
     (function (model) {
+        var SpriteAsset = app.assets.SpriteAsset;
         var Sprite = (function (_super) {
             __extends(Sprite, _super);
             function Sprite(asset, palette, frame, name) {
                 if (palette === void 0) { palette = 0; }
                 if (frame === void 0) { frame = 0; }
                 if (name === void 0) { name = null; }
-                var _this = _super.call(this, name || asset.spriteName) || this;
+                var _this = _super.call(this, name || (asset ? asset.spriteName : null)) || this;
                 _this.src = null;
                 _this.srcX = 0;
                 _this.srcY = 0;
                 _this.srcWidth = 0;
                 _this.srcHeight = 0;
+                _this.type = 'sprite';
                 _this.asset = asset;
                 _this.palette = palette;
                 _this.frame = frame;
-                asset.setSpriteSource(_this);
+                (asset || SpriteAsset.NULL).setSpriteSource(_this);
                 return _this;
             }
             Sprite.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
@@ -59,7 +57,7 @@ var app;
                 ctx.rotate(this.worldRotation);
                 ctx.scale(this.scaleX, this.scaleY);
                 ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
-                ctx.strokeStyle = '#F00';
+                ctx.strokeStyle = this.selected ? app.ColourConfig.selected : (this.highlighted ? app.ColourConfig.highlighted : '#888');
                 ctx.beginPath();
                 ctx.rect(0, 0, this.srcWidth, this.srcHeight);
                 ctx.stroke();

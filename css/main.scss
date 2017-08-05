@@ -1,4 +1,19 @@
+@import 'tooltip';
 @import 'splitter';
+@import 'timeline-tree';
+
+::-webkit-scrollbar{
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track{
+	background: #dcdcdc;
+}
+
+::-webkit-scrollbar-thumb{
+	background: #909090;
+}
 
 html, body{
 	overflow: hidden;
@@ -9,7 +24,13 @@ html, body{
 	position: relative;
 
 	font: 14px monospace;
+	color: #444;
 }
+
+.no-select {
+	user-select: none;
+}
+
 div#viewport-container{
 	position: absolute;
 }
@@ -20,10 +41,9 @@ canvas#viewport{
 }
 div#properties-panel{
 	background: indianred;
-
 }
-div#timeline-container{
-	background: cornflowerblue;
+div#timeline-panel{
+	position: absolute;
 }
 canvas#timeline{
 	width: 100%;

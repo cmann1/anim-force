@@ -1,4 +1,3 @@
-///<reference path='../../lib/jquery.d.ts'/>
 var app;
 (function (app) {
     var ui;
@@ -10,6 +9,7 @@ var app;
                 if (id === void 0) { id = null; }
                 var _this = this;
                 this._barThickness = 6;
+                this.cursor = 'col-resize';
                 this.widthProp = 'width';
                 this.xProp = 'X';
                 this.leftProp = 'left';
@@ -19,10 +19,13 @@ var app;
                  * Events
                  */
                 this.onMouseDown = function (event) {
-                    _this.dragOffset = event["offset" + _this.xProp] - _this._barThickness * 0.5;
-                    $(window)
-                        .on('mousemove', _this.onMouseMove)
-                        .on('mouseup', _this.onMouseUp);
+                    if (event.button == 0) {
+                        _this.dragOffset = event["offset" + _this.xProp] - Math.floor(_this._barThickness * 0.5) + 1;
+                        app.$window
+                            .on('mousemove', _this.onMouseMove)
+                            .on('mouseup', _this.onMouseUp);
+                        app.$body.css('cursor', _this.cursor);
+                    }
                     event.preventDefault();
                 };
                 this.onMouseMove = function (event) {
@@ -35,12 +38,17 @@ var app;
                     _this.update();
                 };
                 this.onMouseUp = function (event) {
-                    $(window)
+                    app.$window
                         .off('mousemove', _this.onMouseMove)
                         .off('mouseup', _this.onMouseUp);
+                    app.$body.css('cursor', '');
                     if (_this.id !== null) {
                         localStorage.setItem(_this.id, _this.position.toString());
                     }
+                };
+                this.onContextMenu = function (event) {
+                    event.preventDefault();
+                    return false;
                 };
                 this.$container = $first.parent();
                 this.$container.addClass('splitter-container');
@@ -48,6 +56,7 @@ var app;
                 $second.addClass('splitter-partition');
                 this.$bar = $('<div>')
                     .addClass('splitter-bar')
+                    .on('contextmenu', this.onContextMenu)
                     .on('mousedown', this.onMouseDown);
                 this.$container.append(this.$bar);
                 if (id != null) {
@@ -100,23 +109,30 @@ var app;
                     this.$first.css(props);
                     this.$second.css(props);
                     this.$bar.css(props);
+                    this.$bar.removeClass('splitter-ver').removeClass('splitter-hor');
                     if (value == 1 /* HORIZONTAL */) {
+                        this.cursor = 'col-resize';
                         this.xProp = 'X';
                         this.widthProp = 'width';
                         this.leftProp = 'left';
                         this.rightProp = 'right';
                         this.$first.css({ top: 0, bottom: 0, left: 0 });
                         this.$second.css({ top: 0, bottom: 0, right: 0 });
-                        this.$bar.css({ top: 0, bottom: 0, width: this._barThickness, cursor: 'col-resize' });
+                        this.$bar
+                            .css({ top: 0, bottom: 0, width: this._barThickness, cursor: this.cursor })
+                            .addClass('splitter-ver');
                     }
                     else {
+                        this.cursor = 'row-resize';
                         this.xProp = 'Y';
                         this.widthProp = 'height';
                         this.leftProp = 'top';
                         this.rightProp = 'bottom';
                         this.$first.css({ left: 0, right: 0, top: 0 });
                         this.$second.css({ left: 0, right: 0, bottom: 0 });
-                        this.$bar.css({ left: 0, right: 0, height: this._barThickness, cursor: 'row-resize' });
+                        this.$bar
+                            .css({ left: 0, right: 0, height: this._barThickness, cursor: this.cursor })
+                            .addClass('splitter-hor');
                     }
                     this.update();
                 },

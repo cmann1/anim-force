@@ -1,6 +1,3 @@
-///<reference path='../../lib/jquery.d.ts'/>
-///<reference path='SpriteAsset.ts'/>
-
 namespace app.assets
 {
 
@@ -15,6 +12,8 @@ namespace app.assets
 		constructor(basePath)
 		{
 			this.basePath = basePath;
+
+			SpriteAsset.init();
 
 			$.ajax({
 				dataType: 'json',

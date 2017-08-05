@@ -1,5 +1,3 @@
-///<reference path='../../lib/jquery.d.ts'/>
-///<reference path='SpriteAsset.ts'/>
 var app;
 (function (app) {
     var assets;
@@ -30,6 +28,7 @@ var app;
                     _this.ready = true;
                 };
                 this.basePath = basePath;
+                assets.SpriteAsset.init();
                 $.ajax({
                     dataType: 'json',
                     url: this.basePath + 'sprites.json',

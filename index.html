@@ -4,20 +4,36 @@
 	<meta charset="UTF-8">
 	<title>AnimForce</title>
 	
+	<link rel="icon" href="favicon.ico" />
+	
 	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/lib/tippy.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
 	<script src="lib/Key.enum.js"></script>
+	<script src="lib/tippy.js"></script>
 	
+	<script src="src/Utils.js"></script>
 	<script src="src/Ticker.js"></script>
 	<script src="src/FpsDisplay.js"></script>
 	<script src="src/ui/Splitter.js"></script>
 	
+	<script src="src/math/Rectangle.js"></script>
+	<script src="src/math/Vector.js"></script>
+	<script src="src/events/EventDispatcher.js"></script>
+	<script src="src/events/Event.js"></script>
+	
+	<script src="src/ColourConfig.js"></script>
+	
 	<script src="src/assets/SpriteManager.js"></script>
 	<script src="src/assets/SpriteAsset.js"></script>
 	<script src="src/assets/SpriteFrame.js"></script>
+	
+	<script src="src/model/events/StructureChangeEvent.js"></script>
+	<script src="src/model/events/SelectionEvent.js"></script>
 	
 	<script src="src/model/DrawList.js"></script>
 	<script src="src/model/Node.js"></script>
@@ -29,6 +45,12 @@
 	
 	<script src="src/Canvas.js"></script>
 	<script src="src/viewport/Viewport.js"></script>
+	
+	<script src="src/timeline/tree/TimelineTree.js"></script>
+	<script src="src/timeline/tree/TreeNode.js"></script>
+	<script src="src/timeline/TimelineViewport.js"></script>
+	<script src="src/timeline/TimelinePanel.js"></script>
+	
 	<script src="src/AnimForce.js"></script>
 
 </head>
@@ -36,10 +58,28 @@
 
 <div id="col-left">
 	<div id="viewport-container">
-		<canvas id="viewport" tabindex="1"></canvas>
+		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
 	</div>
-	<div id="timeline-container">
-		<canvas id="timeline" tabindex="2"></canvas>
+	<div id="timeline-panel">
+		
+		<div id="timeline-container">
+			<canvas id="timeline" tabindex="2" class="no-select"></canvas>
+		</div>
+		<div id="timeline-tree">
+			<div id="timeline-tree-container"></div>
+			<div id="timeline-tree-toolbar">
+				<div>
+					<i class="fa fa-plus btn-add" title="Add"></i>
+					<div class="add-menu">
+						<i class="fa fa-chain add-sub btn-add-bone" title="Add Bone"></i>
+						<i class="fa fa-image add-sub btn-add-sprite" title="Add Sprite"></i>
+					</div>
+				</div>
+				<div class="filler"></div>
+				<i class="fa fa-close btn-delete" title="Delete"></i>
+			</div>
+		</div>
+		
 	</div>
 </div>
 <div id="properties-panel">

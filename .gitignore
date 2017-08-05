@@ -141,3 +141,4 @@ $RECYCLE.BIN/
 .idea/
 /assets/sprites/
 !/lib/
+!/css/lib/

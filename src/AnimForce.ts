@@ -1,25 +1,16 @@
-///<reference path='../lib/jquery.d.ts'/>
-///<reference path='../lib/createjs-lib.d.ts'/>
-
-///<reference path='Ticker.ts'/>
-///<reference path='FpsDisplay.ts'/>
-///<reference path='viewport/Viewport.ts'/>
-///<reference path='ui/Splitter.ts'/>
-///<reference path='assets/SpriteManager.ts'/>
-///<reference path='model/Model.ts'/>
-///<reference path='model/Bone.ts'/>
-///<reference path='model/Sprite.ts'/>
-
 /*
-// TODO: Timeline:
-// TODO: - A row for each node
-// TODO: - Tree structure collapsible  nodes
-// TODO: - Selecting
-// TODO: - Add/Delete
+// TODO: Select/deselect:
+// TODO: - Viewport
+// TODO: - Select sibling on delete
+// TODO: - Scroll into view on select
 // TODO: -
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
 // TODO: - Mouse interaction
+// TODO: Help?
+// TODO: - List of shortcut keys
+
+// TODO: Organise CSS
  */
 
 namespace app
@@ -39,6 +30,7 @@ namespace app
 
 		protected _spriteManager:SpriteManager;
 		protected viewport:app.viewport.Viewport;
+		protected timeline:app.timeline.TimelinePanel;
 
 		protected model:Model = new Model();
 
@@ -55,21 +47,25 @@ namespace app
 		protected step(deltaTime:number, timestamp:number)
 		{
 			this.viewport.step(deltaTime, timestamp);
+			this.timeline.step(deltaTime, timestamp);
 		}
 
 		protected draw()
 		{
 			this.viewport.draw();
+			this.timeline.draw();
 		}
 
 		protected initUI()
 		{
-			this.viewport = new app.viewport.Viewport('viewport');
+			this.viewport = new app.viewport.Viewport('viewport', this.model);
+			this.timeline = new app.timeline.TimelinePanel(this.model);
 
 			new Splitter($('#col-left'), $('#properties-panel'), SplitterOrientation.HORIZONTAL, 200, SplitterAnchor.SECOND, 'properties');
-			new Splitter(this.viewport.getContainer(), $('#timeline-container'), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
+			new Splitter(this.viewport.getContainer(), this.timeline.getContainer(), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
 
-			this.viewport.updateCanvasSize();
+			this.timeline.init();
+
 			this.viewport.focus();
 
 			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
@@ -92,7 +88,10 @@ namespace app
 
 		protected onWindowLoad = () =>
 		{
-			$(window)
+			app.$body = $(document.body);
+			app.$window = $(window);
+
+			app.$window
 				.on('focus', this.onWindowFocus)
 				.on('blur', this.onWindowBlur)
 				.focus();
@@ -106,6 +105,7 @@ namespace app
 		protected onWindowResize = () =>
 		{
 			this.viewport.updateCanvasSize();
+
 			this.step(0, 0);
 			this.draw();
 		};
@@ -125,4 +125,6 @@ namespace app
 	// Used for debugging
 	//noinspection JSUnusedLocalSymbols
 	export var main = new App();
+	export var $body:JQuery;
+	export var $window:JQuery;
 }

@@ -1,5 +1,3 @@
-///<reference path='../../lib/jquery.d.ts'/>
-
 namespace app.ui
 {
 	export const enum SplitterOrientation
@@ -26,6 +24,7 @@ namespace app.ui
 
 		private _barThickness = 6;
 
+		private cursor = 'col-resize';
 		private widthProp = 'width';
 		private xProp = 'X';
 		private leftProp = 'left';
@@ -45,6 +44,7 @@ namespace app.ui
 
 			this.$bar = $('<div>')
 				.addClass('splitter-bar')
+				.on('contextmenu', this.onContextMenu)
 				.on('mousedown', this.onMouseDown);
 			this.$container.append(this.$bar);
 
@@ -52,6 +52,7 @@ namespace app.ui
 			{
 				this.id = 'splitter-' + id + '-position';
 				var p = localStorage.getItem(this.id);
+
 				if(p !== null)
 				{
 					defaultPosition = parseFloat(p);
@@ -115,26 +116,33 @@ namespace app.ui
 			this.$first.css(props);
 			this.$second.css(props);
 			this.$bar.css(props);
+			this.$bar.removeClass('splitter-ver').removeClass('splitter-hor');
 
 			if(value == SplitterOrientation.HORIZONTAL)
 			{
+				this.cursor = 'col-resize';
 				this.xProp = 'X';
 				this.widthProp = 'width';
 				this.leftProp = 'left';
 				this.rightProp = 'right';
 				this.$first.css({top: 0, bottom: 0, left: 0});
 				this.$second.css({top: 0, bottom: 0, right: 0});
-				this.$bar.css({top: 0, bottom: 0, width: this._barThickness, cursor: 'col-resize'});
+				this.$bar
+					.css({top: 0, bottom: 0, width: this._barThickness, cursor: this.cursor})
+					.addClass('splitter-ver');
 			}
 			else
 			{
+				this.cursor = 'row-resize';
 				this.xProp = 'Y';
 				this.widthProp = 'height';
 				this.leftProp = 'top';
 				this.rightProp = 'bottom';
 				this.$first.css({left: 0, right: 0, top: 0});
 				this.$second.css({left: 0, right: 0, bottom: 0});
-				this.$bar.css({left: 0, right: 0, height: this._barThickness, cursor: 'row-resize'});
+				this.$bar
+					.css({left: 0, right: 0, height: this._barThickness, cursor: this.cursor})
+					.addClass('splitter-hor');
 			}
 
 			this.update();
@@ -157,10 +165,14 @@ namespace app.ui
 
 		protected onMouseDown = (event) =>
 		{
-			this.dragOffset = event[`offset${this.xProp}`] - this._barThickness * 0.5;
-			$(window)
-				.on('mousemove', this.onMouseMove)
-				.on('mouseup', this.onMouseUp);
+			if(event.button == 0)
+			{
+				this.dragOffset = event[`offset${this.xProp}`] - Math.floor(this._barThickness * 0.5) + 1;
+				app.$window
+					.on('mousemove', this.onMouseMove)
+					.on('mouseup', this.onMouseUp);
+				app.$body.css('cursor', this.cursor);
+			}
 
 			event.preventDefault();
 		};
@@ -181,14 +193,21 @@ namespace app.ui
 
 		protected onMouseUp = (event) =>
 		{
-			$(window)
+			app.$window
 				.off('mousemove', this.onMouseMove)
 				.off('mouseup', this.onMouseUp);
+			app.$body.css('cursor', '');
 
 			if(this.id !== null)
 			{
 				localStorage.setItem(this.id, this.position.toString());
 			}
+		};
+
+		protected onContextMenu = (event) =>
+		{
+			event.preventDefault();
+			return false;
 		};
 
 	}

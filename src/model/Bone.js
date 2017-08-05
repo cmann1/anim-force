@@ -1,5 +1,3 @@
-///<reference path="Node.ts"/>
-///<reference path='DrawList.ts'/>
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -17,7 +15,7 @@ var app;
         var Bone = (function (_super) {
             __extends(Bone, _super);
             function Bone(name, parent) {
-                if (name === void 0) { name = 'Unnamed Bone'; }
+                if (name === void 0) { name = null; }
                 if (parent === void 0) { parent = null; }
                 var _this = _super.call(this, name) || this;
                 _this.length = 100;
@@ -26,26 +24,37 @@ var app;
                 _this.childCount = 0;
                 _this.worldEndPointX = 0;
                 _this.worldEndPointY = 0;
+                _this.type = 'bone';
+                _this.canHaveChildren = true;
                 return _this;
             }
             Bone.prototype.addChild = function (child) {
                 if (child.parent == this) {
                     return this;
                 }
+                var eventType = 'addChild';
                 if (child.parent) {
-                    child.parent.removeChild(child);
+                    child.parent.removeChild(child, false);
+                    eventType = 'reParent';
                 }
                 child.model = this.model;
+                child.parent = this;
                 this.children.push(child);
                 this.childCount++;
+                this.onStructureChange(eventType, child, this.childCount - 1);
                 return child;
             };
-            Bone.prototype.removeChild = function (child) {
+            Bone.prototype.removeChild = function (child, triggerEvent) {
+                if (triggerEvent === void 0) { triggerEvent = true; }
                 if (child.parent == this) {
+                    var index = this.children.indexOf(child);
                     child.setModel(null);
                     child.parent = null;
-                    this.children.splice(this.children.indexOf(child), 1);
+                    this.children.splice(index, 1);
                     this.childCount--;
+                    if (triggerEvent) {
+                        this.onStructureChange('removeChild', child, index);
+                    }
                 }
                 return child;
             };
@@ -77,7 +86,7 @@ var app;
             Bone.prototype.drawControls = function (ctx) {
                 ctx.save();
                 ctx.lineWidth = 4;
-                ctx.strokeStyle = '#0F0';
+                ctx.strokeStyle = this.selected ? app.ColourConfig.selected : (this.highlighted ? app.ColourConfig.highlighted : '#888');
                 ctx.beginPath();
                 ctx.moveTo(this.worldX, this.worldY);
                 ctx.lineTo(this.worldEndPointX, this.worldEndPointY);

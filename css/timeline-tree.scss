@@ -1,0 +1,141 @@
+@import "vars";
+
+div#timeline-tree{
+	position: absolute;
+	left: 0;
+	width: 400px;
+	top: 0; bottom: 0;
+	overflow: auto;
+
+	display: flex;
+	flex-direction: column;
+}
+div#timeline-tree-container{
+	flex-grow: 1;
+	flex-shrink: 1;
+	overflow: auto;
+}
+div#timeline-tree-toolbar{
+	background-color: $ui-bg;
+	border-top: $border-size solid $border-colour;
+
+	padding: 5px;
+	white-space: nowrap;
+	overflow: hidden;
+	display: flex;
+	flex-shrink: 0;
+	align-items: stretch;
+}
+div#timeline-tree-toolbar, div#timeline-tree-toolbar *{
+	user-select: none;
+}
+div#timeline-tree-toolbar div{
+	white-space: nowrap;
+	overflow: hidden;
+	display: flex;
+	align-items: stretch;
+	flex-shrink: 0;
+}
+div#timeline-tree-toolbar i{
+	padding: 4px;
+	margin: 0 2px;
+	border-radius: 2px;
+}
+div#timeline-tree-toolbar i:hover{
+	background: $selected-bg;
+	color: $selected-color;
+}
+div#timeline-tree-toolbar i.disabled, div#timeline-tree-toolbar i.disabled:hover{
+	background: inherit !important;
+	color: $disabled-color !important;
+}
+div#timeline-tree-toolbar .filler{
+	flex-grow: 1;
+}
+
+.model-node .item{
+	height: 26px;
+	line-height: 26px;
+	padding: 0 10px;
+	border-bottom: 1px solid #dcdcdc;
+	box-sizing: border-box;
+	background: #fbfbfb;
+
+	display: flex;
+	align-items: center;
+}
+.model-node:hover > .item{
+	background: #ffe3e3;
+	border-color: #FFBFC8;
+
+}
+.model-node .item:hover, .model-node .item.selected{
+	background: $selected-bg;
+	border-color: $selected-border-colour;
+	color: $selected-color;
+}
+
+.model-node .item .icon{
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: inherit;
+	text-rendering: auto;
+	-webkit-font-smoothing: antialiased;
+
+	margin-right: 5px;
+}
+.model-node .item label{
+	flex-grow: 1;
+	flex-shrink: 1;
+
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.model-node.model > .item .icon:before{
+	content: "\f1ae"; // child
+}
+.model-node.sprite > .item .icon:before{
+	content: "\f03e"; // image
+}
+.model-node.bone > .item .icon:before{
+	content: "\f0c1"; // chain
+}
+
+.model-node .item .fold-icon{
+	width: 10px;
+	text-align: center;
+	cursor: pointer;
+
+	margin-right: 5px;
+}
+.model-node .item .fold-icon:before{
+	content: "\f0d7"; // caret-down
+}
+.model-node .item .fold-icon.collapsed:before{
+	content: "\f0da"; // caret-right
+}
+
+.model-node .children{
+	margin-left: 8px;
+	padding-left: 8px;
+	position: relative;
+
+	display: flex;
+	flex-direction: column;
+}
+.model-node .children:before
+{
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 0;
+	border-left: 1px #b7b7b7 dashed;
+}
+.model-node:hover > .children:before{
+	border-color: #703535;
+	//border-color: #355770;
+}

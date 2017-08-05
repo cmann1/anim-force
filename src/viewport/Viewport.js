@@ -1,7 +1,3 @@
-///<reference path='../../lib/createjs-lib.d.ts'/>
-///<reference path='../../lib/tweenjs.d.ts'/>
-///<reference path="../../lib/easeljs.d.ts"/>
-///<reference path="../../lib/Key.enum.ts"/>
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -12,24 +8,16 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-///<reference path='../AnimForce.ts'/>
-///<reference path='../Canvas.ts'/>
-///<reference path='../assets/SpriteManager.ts'/>
-///<reference path='../assets/SpriteAsset.ts'/>
-///<reference path='../model/Model.ts'/>
-///<reference path='../model/Bone.ts'/>
-///<reference path='../model/Sprite.ts'/>
 var app;
 (function (app) {
     var viewport;
     (function (viewport) {
         var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
-        var Model = app.model.Model;
         var Bone = app.model.Bone;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
-            function Viewport(elementId) {
+            function Viewport(elementId, model) {
                 var _this = _super.call(this, elementId) || this;
                 _this.scales = [0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16, 32];
                 _this.scale = 1;
@@ -58,6 +46,15 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                /*
+                 * Model Events
+                 */
+                _this.onModelSelectionChange = function (model, event) {
+                    _this.requiresUpdate = true;
+                };
+                _this.onModelStructureChange = function (model, event) {
+                    _this.requiresUpdate = true;
+                };
                 _this.t = 0;
                 _this.onKeyDown = function (event) {
                     // console.log(event.keyCode);
@@ -70,8 +67,10 @@ var app;
                         var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
                         var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
                         var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
-                        _this.model = new Model();
-                        _this.model.addRootBone(_this.bone = new Bone()).addChild(_this.sprite = new Sprite(spriteAsset, 0, 0));
+                        _this.model.clear();
+                        _this.model
+                            .addChild(_this.bone = new Bone())
+                            .addChild(_this.sprite = new Sprite(spriteAsset, 0, 0));
                         _this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
                         _this.sprite3.rotation = Math.PI * 0.25;
                         _this.bone.addChild(_this.sprite3);
@@ -87,15 +86,14 @@ var app;
                 };
                 _this.onKeyUp = function (event) {
                 };
-                _this.onResize = function () {
-                    _this.updateCanvasSize();
-                };
                 _this.onZoomComplete = function () {
                     _this.anchorToScreen(_this.mouseX, _this.mouseY, _this.stageAnchorX, _this.stageAnchorY);
                     _this.stageAnchorX = NaN;
                     _this.stageAnchorY = NaN;
                 };
-                _this.$container = _this.$canvas.parent();
+                _this.model = model;
+                model.structureChange.on(_this.onModelStructureChange);
+                model.selectionChange.on(_this.onModelSelectionChange);
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$message = $('<div class="viewport-message"></div>');
@@ -107,6 +105,8 @@ var app;
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
+                if (!this.requiresUpdate && document.activeElement != this.canvas)
+                    return;
                 if (this.cameraVelX != 0 || this.cameraVelY != 0) {
                     this.cameraX += this.cameraVelX;
                     this.cameraY += this.cameraVelY;
@@ -131,6 +131,8 @@ var app;
                 this.mousePrevY = this.mouseY;
             };
             Viewport.prototype.draw = function () {
+                if (!this.requiresUpdate && document.activeElement != this.canvas)
+                    return;
                 var ctx = this.ctx;
                 ctx.clearRect(0, 0, this.width, this.height);
                 ctx.save();
@@ -138,15 +140,24 @@ var app;
                 ctx.translate(this.centreX, this.centreY);
                 ctx.scale(this.scale, this.scale);
                 ctx.translate(-this.cameraX, -this.cameraY);
-                if (this.model) {
+                if (this.bone2) {
                     this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
                     this.bone2.rotation += 0.02;
                     this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
                     this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
-                    this.model.draw(this.ctx);
                     this.t += 0.04;
                 }
+                for (var _i = 0, _a = this.model.rootBones; _i < _a.length; _i++) {
+                    var b = _a[_i];
+                    b.rotation += 0.02;
+                    for (var _b = 0, _c = b.children; _b < _c.length; _b++) {
+                        var c = _c[_b];
+                        c.rotation += 0.02;
+                    }
+                }
+                this.model.draw(this.ctx);
                 ctx.restore();
+                this.requiresUpdate = false;
             };
             Viewport.prototype.drawGrid = function () {
                 var ctx = this.ctx;
@@ -255,9 +266,6 @@ var app;
                 if (duration === void 0) { duration = 1000; }
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
             };
-            Viewport.prototype.getContainer = function () {
-                return this.$container;
-            };
             Viewport.prototype.onMouseDown = function (event) {
                 if (event.button == 2) {
                     this.mouseGrabX = this.stageMouse.x;
@@ -288,6 +296,7 @@ var app;
                 this.stageAnchorX = this.stageMouse.x;
                 this.stageAnchorY = this.stageMouse.y;
                 this.showMessage("Zoom: " + scale);
+                this.requiresUpdate = true;
             };
             Viewport.prototype.onMouseMove = function (event) {
                 if (!isNaN(this.mouseGrabX)) {

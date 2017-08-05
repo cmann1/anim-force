@@ -1,3 +1,5 @@
+@import "vars";
+
 .splitter-container{
 
 }
@@ -6,5 +8,13 @@
 }
 .splitter-bar{
 	position: absolute;
-	background-color: #A7FFE5;
+	background-color: $ui-bg;
+	border: $border-size solid $border-colour;
+	box-sizing: border-box;
+}
+.splitter-bar.splitter-hor{
+	border-width: 1px 0;
+}
+.splitter-bar.splitter-ver{
+	border-width: 0 1px;
 }

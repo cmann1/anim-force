@@ -1,23 +1,16 @@
-///<reference path='../lib/jquery.d.ts'/>
-///<reference path='../lib/createjs-lib.d.ts'/>
-///<reference path='Ticker.ts'/>
-///<reference path='FpsDisplay.ts'/>
-///<reference path='viewport/Viewport.ts'/>
-///<reference path='ui/Splitter.ts'/>
-///<reference path='assets/SpriteManager.ts'/>
-///<reference path='model/Model.ts'/>
-///<reference path='model/Bone.ts'/>
-///<reference path='model/Sprite.ts'/>
 /*
-// TODO: Timeline:
-// TODO: - A row for each node
-// TODO: - Tree structure collapsible  nodes
-// TODO: - Selecting
-// TODO: - Add/Delete
+// TODO: Select/deselect:
+// TODO: - Viewport
+// TODO: - Select sibling on delete
+// TODO: - Scroll into view on select
 // TODO: -
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
 // TODO: - Mouse interaction
+// TODO: Help?
+// TODO: - List of shortcut keys
+
+// TODO: Organise CSS
  */
 var app;
 (function (app) {
@@ -37,7 +30,9 @@ var app;
                 _this.draw();
             };
             this.onWindowLoad = function () {
-                $(window)
+                app.$body = $(document.body);
+                app.$window = $(window);
+                app.$window
                     .on('focus', _this.onWindowFocus)
                     .on('blur', _this.onWindowBlur)
                     .focus();
@@ -63,15 +58,18 @@ var app;
         }
         App.prototype.step = function (deltaTime, timestamp) {
             this.viewport.step(deltaTime, timestamp);
+            this.timeline.step(deltaTime, timestamp);
         };
         App.prototype.draw = function () {
             this.viewport.draw();
+            this.timeline.draw();
         };
         App.prototype.initUI = function () {
-            this.viewport = new app.viewport.Viewport('viewport');
+            this.viewport = new app.viewport.Viewport('viewport', this.model);
+            this.timeline = new app.timeline.TimelinePanel(this.model);
             new Splitter($('#col-left'), $('#properties-panel'), 1 /* HORIZONTAL */, 200, 1 /* SECOND */, 'properties');
-            new Splitter(this.viewport.getContainer(), $('#timeline-container'), 0 /* VERTICAL */, 200, 1 /* SECOND */, 'timeline');
-            this.viewport.updateCanvasSize();
+            new Splitter(this.viewport.getContainer(), this.timeline.getContainer(), 0 /* VERTICAL */, 200, 1 /* SECOND */, 'timeline');
+            this.timeline.init();
             this.viewport.focus();
             this.fpsDisplay = new app.Fps.Display(this.ticker.getFps);
         };

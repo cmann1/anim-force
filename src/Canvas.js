@@ -1,4 +1,3 @@
-///<reference path='../lib/jquery.d.ts'/>
 var app;
 (function (app) {
     /*
@@ -11,18 +10,39 @@ var app;
             this.mousePrevY = 0;
             this.mouseX = 0;
             this.mouseY = 0;
+            this.requiresUpdate = false;
+            this.canvasMouseDown = false;
             this.canvasRightMouseDown = false;
             this.onCanvasMouseDown = function (event) {
                 if (event.button == 2) {
                     _this.canvasRightMouseDown = true;
                 }
+                _this.canvasMouseDown = true;
                 _this.onMouseDown(event);
+                event.preventDefault();
+                return false;
             };
             this.onCanvasMouseUp = function (event) {
+                _this.canvasMouseDown = false;
                 _this.onMouseUp(event);
             };
             this.onCanvasMouseWheel = function (event) {
                 _this.onMouseWheel(event);
+            };
+            this.onCanvasMouseMove = function (event, force) {
+                if (force === void 0) { force = false; }
+                if (!force && _this.canvasMouseDown)
+                    return;
+                if (document.activeElement != _this.canvas) {
+                    _this.$canvas.focus();
+                }
+                _this.requiresUpdate = true;
+                _this.mousePrevX = _this.mouseX;
+                _this.mousePrevY = _this.mouseY;
+                var offset = _this.$canvas.offset();
+                _this.mouseX = event.pageX - offset.left;
+                _this.mouseY = event.pageY - offset.top;
+                _this.onMouseMove(event);
             };
             this.onWindowContextMenu = function (event) {
                 if (_this.canvasRightMouseDown || event.target == _this.canvas) {
@@ -32,15 +52,14 @@ var app;
                 }
             };
             this.onWindowMouseMove = function (event) {
-                _this.mousePrevX = _this.mouseX;
-                _this.mousePrevY = _this.mouseY;
-                var offset = _this.$canvas.offset();
-                _this.mouseX = event.pageX - offset.left;
-                _this.mouseY = event.pageY - offset.top;
-                _this.onMouseMove(event);
+                if (_this.canvasMouseDown) {
+                    _this.onCanvasMouseMove(event, true);
+                }
+            };
+            this.onResize = function () {
+                _this.updateCanvasSize();
             };
             this.canvas = document.getElementById(elementId);
-            this.updateCanvasSize();
             if (!this.canvas) {
                 console.error("Cannot find canvas with id \"" + elementId + "\"");
                 return;
@@ -49,8 +68,10 @@ var app;
             this.$canvas = $(this.canvas);
             this.$canvas
                 .on('mousedown', this.onCanvasMouseDown)
-                .on('wheel', this.onCanvasMouseWheel);
-            $(window)
+                .on('wheel', this.onCanvasMouseWheel)
+                .on('mousemove', this.onCanvasMouseMove);
+            this.$container = this.$canvas.parent();
+            app.$window
                 .on('mousemove', this.onWindowMouseMove)
                 .on('mouseup', this.onCanvasMouseUp)
                 .on('contextmenu', this.onWindowContextMenu)
@@ -64,6 +85,10 @@ var app;
             this.height = this.canvas.height = this.canvas.clientHeight;
             this.centreX = this.width / 2;
             this.centreY = this.height / 2;
+            this.requiresUpdate = true;
+        };
+        Canvas.prototype.getContainer = function () {
+            return this.$container;
         };
         /*
          * Events

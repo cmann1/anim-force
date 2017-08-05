@@ -1,5 +1,3 @@
-///<reference path='../lib/jquery.d.ts'/>
-
 namespace app.Fps
 {
 	const CSS = `

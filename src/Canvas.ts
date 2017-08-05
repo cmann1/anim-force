@@ -1,5 +1,3 @@
-///<reference path='../lib/jquery.d.ts'/>
-
 namespace app
 {
 	/*
@@ -12,20 +10,24 @@ namespace app
 		public mouseX:number = 0;
 		public mouseY:number = 0;
 
+		public requiresUpdate = false;
+
 		protected width:number;
 		protected height:number;
 		protected centreX:number;
 		protected centreY:number;
 
+		protected $container:JQuery;
+
 		protected canvas:HTMLCanvasElement;
 		protected $canvas:JQuery;
 		protected ctx:CanvasRenderingContext2D;
+		protected canvasMouseDown = false;
 		protected canvasRightMouseDown = false;
 
 		constructor(elementId)
 		{
 			this.canvas = <HTMLCanvasElement> document.getElementById(elementId);
-			this.updateCanvasSize();
 
 			if(!this.canvas)
 			{
@@ -37,9 +39,11 @@ namespace app
 			this.$canvas = $(this.canvas);
 			this.$canvas
 				.on('mousedown', this.onCanvasMouseDown)
-				.on('wheel', this.onCanvasMouseWheel);
+				.on('wheel', this.onCanvasMouseWheel)
+				.on('mousemove', this.onCanvasMouseMove);
+			this.$container = this.$canvas.parent();
 
-			$(window)
+			app.$window
 				.on('mousemove', this.onWindowMouseMove)
 				.on('mouseup', this.onCanvasMouseUp)
 				.on('contextmenu', this.onWindowContextMenu)
@@ -57,6 +61,12 @@ namespace app
 			this.height = this.canvas.height = this.canvas.clientHeight;
 			this.centreX = this.width / 2;
 			this.centreY = this.height / 2;
+			this.requiresUpdate = true;
+		}
+
+		public getContainer()
+		{
+			return this.$container;
 		}
 
 		/*
@@ -75,17 +85,44 @@ namespace app
 				this.canvasRightMouseDown = true;
 			}
 
+			this.canvasMouseDown = true;
+
 			this.onMouseDown(event);
+
+			event.preventDefault();
+			return false;
 		};
 
 		protected onCanvasMouseUp = (event) =>
 		{
+			this.canvasMouseDown = false;
 			this.onMouseUp(event);
 		};
 
 		protected onCanvasMouseWheel = (event) =>
 		{
 			this.onMouseWheel(event);
+		};
+
+		protected onCanvasMouseMove = (event, force:boolean=false) =>
+		{
+			if(!force && this.canvasMouseDown) return;
+
+			if(document.activeElement != this.canvas)
+			{
+				this.$canvas.focus();
+			}
+
+			this.requiresUpdate = true;
+
+			this.mousePrevX = this.mouseX;
+			this.mousePrevY = this.mouseY;
+
+			var offset = this.$canvas.offset();
+			this.mouseX = event.pageX - offset.left;
+			this.mouseY = event.pageY - offset.top;
+
+			this.onMouseMove(event);
 		};
 
 		protected onWindowContextMenu = (event) =>
@@ -100,14 +137,15 @@ namespace app
 
 		protected onWindowMouseMove = (event) =>
 		{
-			this.mousePrevX = this.mouseX;
-			this.mousePrevY = this.mouseY;
+			if(this.canvasMouseDown)
+			{
+				this.onCanvasMouseMove(event, true);
+			}
+		};
 
-			var offset = this.$canvas.offset();
-			this.mouseX = event.pageX - offset.left;
-			this.mouseY = event.pageY - offset.top;
-
-			this.onMouseMove(event);
+		protected onResize = () =>
+		{
+			this.updateCanvasSize();
 		};
 	}
 }

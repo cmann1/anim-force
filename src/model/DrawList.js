@@ -1,5 +1,3 @@
-///<reference path="Node.ts"/>
-///<reference path="Attachment.ts"/>
 var app;
 (function (app) {
     var model;

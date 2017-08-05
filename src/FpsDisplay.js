@@ -1,4 +1,3 @@
-///<reference path='../lib/jquery.d.ts'/>
 var app;
 (function (app) {
     var Fps;
