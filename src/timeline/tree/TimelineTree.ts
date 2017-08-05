@@ -36,7 +36,7 @@ namespace app.timeline.tree
 
 			this.setupToolbar();
 
-			this.$container.append((this.rootNode = new TreeNode('model', this.model, true)).$element);
+			this.$container.append((this.rootNode = new TreeNode(this, 'model', this.model, true)).$element);
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
 
@@ -114,6 +114,21 @@ namespace app.timeline.tree
 			this.updateToolbar();
 		}
 
+		public focus()
+		{
+			this.$element.focus();
+		}
+
+		public initiateRenameForNode(node:Node)
+		{
+			if(node)
+			{
+				const treeNode:TreeNode = this.nodeMap[node.id];
+				treeNode.node.setSelected(true);
+				treeNode.startRename();
+			}
+		}
+
 		/*
 		 * Events
 		 */
@@ -148,7 +163,7 @@ namespace app.timeline.tree
 			}
 			else if(type == 'addChild')
 			{
-				parentTree.addChild(this.nodeMap[target.id] = new TreeNode(target.type, target, target.canHaveChildren));
+				parentTree.addChild(this.nodeMap[target.id] = new TreeNode(this, target.type, target, target.canHaveChildren));
 			}
 			else if(type == 'removeChild')
 			{
@@ -171,7 +186,10 @@ namespace app.timeline.tree
 
 		private onMouseEnter = (event) =>
 		{
-			this.$element.focus();
+			if(!$.contains(this.$element[0], document.activeElement))
+			{
+				this.$element.focus();
+			}
 		};
 
 		private onKeyDown = (event) =>
@@ -199,9 +217,16 @@ namespace app.timeline.tree
 
 			if(keyCode == Key.Delete)
 			{
-				if(this.selectedNode && this.selectedNode != this.rootNode)
+				if(document.activeElement ==  this.$element[0] && this.selectedNode && this.selectedNode != this.rootNode)
 				{
 					this.selectedNode.deleteNode();
+				}
+			}
+			else if(keyCode == Key.F2)
+			{
+				if(this.selectedNode)
+				{
+					this.selectedNode.startRename();
 				}
 			}
 		};

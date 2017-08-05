@@ -16,19 +16,6 @@ var app;
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId) {
                 var _this = _super.call(this, elementId) || this;
-                /*
-                 * Events
-                 */
-                // protected onModelStructureChange = (sender: Model, event:StructureChangeEvent) =>
-                // {
-                // 	this.requiresUpdate = true;
-                // };
-                _this.onKeyDown = function (event) {
-                    // console.log(event.keyCode);
-                    var keyCode = event.keyCode;
-                };
-                _this.onKeyUp = function (event) {
-                };
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$canvas
@@ -50,6 +37,15 @@ var app;
                 // this.viewport.draw(ctx, this.treeWidth, 0, this.width - this.treeWidth, this.height);
                 ctx.restore();
                 this.requiresUpdate = false;
+            };
+            /*
+             * Events
+             */
+            TimelineViewport.prototype.onKeyDown = function (event) {
+                // console.log(event.keyCode);
+                var keyCode = event.keyCode;
+            };
+            TimelineViewport.prototype.onKeyUp = function (event) {
             };
             TimelineViewport.prototype.onMouseDown = function (event) {
             };

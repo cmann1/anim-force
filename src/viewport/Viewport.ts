@@ -394,6 +394,8 @@ namespace app.viewport
 
 		protected onMouseDown(event)
 		{
+			this.$canvas.focus();
+
 			if(event.button == 2)
 			{
 				this.mouseGrabX = this.stageMouse.x;

@@ -34,7 +34,7 @@ var app;
                             parentTree.clear();
                         }
                         else if (type == 'addChild') {
-                            parentTree.addChild(_this.nodeMap[target.id] = new tree.TreeNode(target.type, target, target.canHaveChildren));
+                            parentTree.addChild(_this.nodeMap[target.id] = new tree.TreeNode(_this, target.type, target, target.canHaveChildren));
                         }
                         else if (type == 'removeChild') {
                             var node = _this.nodeMap[target.id];
@@ -50,7 +50,9 @@ var app;
                         }
                     };
                     this.onMouseEnter = function (event) {
-                        _this.$element.focus();
+                        if (!$.contains(_this.$element[0], document.activeElement)) {
+                            _this.$element.focus();
+                        }
                     };
                     this.onKeyDown = function (event) {
                         var keyCode = event.keyCode;
@@ -68,8 +70,13 @@ var app;
                     this.onKeyUp = function (event) {
                         var keyCode = event.keyCode;
                         if (keyCode == Key.Delete) {
-                            if (_this.selectedNode && _this.selectedNode != _this.rootNode) {
+                            if (document.activeElement == _this.$element[0] && _this.selectedNode && _this.selectedNode != _this.rootNode) {
                                 _this.selectedNode.deleteNode();
+                            }
+                        }
+                        else if (keyCode == Key.F2) {
+                            if (_this.selectedNode) {
+                                _this.selectedNode.startRename();
                             }
                         }
                     };
@@ -108,7 +115,7 @@ var app;
                     this.$element = $('#' + elementId);
                     this.$container = this.$element.find('#timeline-tree-container');
                     this.setupToolbar();
-                    this.$container.append((this.rootNode = new tree.TreeNode('model', this.model, true)).$element);
+                    this.$container.append((this.rootNode = new tree.TreeNode(this, 'model', this.model, true)).$element);
                     model.structureChange.on(this.onModelStructureChange);
                     model.selectionChange.on(this.onModelSelectionChange);
                     this.nodeMap[this.model.id] = this.rootNode;
@@ -165,6 +172,16 @@ var app;
                         this.selectedNode.selected = true;
                     this.selectedNode.$element.scrollintoview({ duration: 50 });
                     this.updateToolbar();
+                };
+                TimelineTree.prototype.focus = function () {
+                    this.$element.focus();
+                };
+                TimelineTree.prototype.initiateRenameForNode = function (node) {
+                    if (node) {
+                        var treeNode = this.nodeMap[node.id];
+                        treeNode.node.setSelected(true);
+                        treeNode.startRename();
+                    }
                 };
                 return TimelineTree;
             }());

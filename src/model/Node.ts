@@ -3,6 +3,7 @@ namespace app.model
 
 	import EventDispatcher = events.EventDispatcher;
 	import StructureChangeEvent = events.StructureChangeEvent;
+	import PropertyChangeEvent = events.PropertyChangeEvent;
 
 	export class Node
 	{
@@ -18,6 +19,7 @@ namespace app.model
 
 		/// Events
 
+		public propertyChange:EventDispatcher<Node> = new EventDispatcher<Node>();
 		public structureChange:EventDispatcher<Node> = new EventDispatcher<Node>();
 
 		/// Properties
@@ -109,7 +111,12 @@ namespace app.model
 
 		set name(value:string)
 		{
+			value = $.trim(value);
+
+			if(value == this._name) return;
+
 			this._name = value;
+			this.onPropertyChange('name');
 		}
 
 		static rotate(x, y, angle)
@@ -137,6 +144,12 @@ namespace app.model
 				this.model.onStructureChange(type, parent, target, index);
 			}
 		}
+
+		protected onPropertyChange(type:string)
+		{
+			this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
+		}
+
 
 	}
 

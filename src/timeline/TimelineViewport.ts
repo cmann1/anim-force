@@ -45,23 +45,18 @@ namespace app.timeline
 		 * Events
 		 */
 
-		// protected onModelStructureChange = (sender: Model, event:StructureChangeEvent) =>
-		// {
-		// 	this.requiresUpdate = true;
-		// };
-
-		protected onKeyDown = (event) =>
+		protected onKeyDown(event)
 		{
 			// console.log(event.keyCode);
 			const keyCode = event.keyCode;
 
 
-		};
+		}
 
-		protected onKeyUp = (event) =>
+		protected onKeyUp(event)
 		{
 
-		};
+		}
 
 		protected onMouseDown(event)
 		{

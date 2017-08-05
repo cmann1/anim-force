@@ -3,9 +3,15 @@ namespace app.timeline.tree
 
 	import Node = app.model.Node;
 	import Model = app.model.Model;
+	import Key = KeyCodes.Key;
+	import PropertyChangeEvent = events.PropertyChangeEvent;
 
 	export class TreeNode
 	{
+		private static $renameInput:JQuery;
+		private static renameNode:TreeNode;
+
+		public tree:TimelineTree;
 		public node:Node;
 
 		public parent:TreeNode = null;
@@ -15,11 +21,14 @@ namespace app.timeline.tree
 		public $item:JQuery;
 		public $children:JQuery = null;
 		public $foldIcon:JQuery = null;
+		public $label:JQuery = null;
 		public childrenVisible:boolean = true;
 
-		constructor(nodeType:string, node:Node|Model, allow_children:boolean)
+		constructor(tree:TimelineTree, nodeType:string, node:Node|Model, allow_children:boolean)
 		{
+			this.tree = tree;
 			this.node = node;
+			this.node.propertyChange.on(this.onNodePropertyChange);
 
 			this.$element = $(
 				'<div class="model-node">' +
@@ -29,6 +38,9 @@ namespace app.timeline.tree
 					'</div>' +
 				'</div>'
 			);
+
+			this.$label = this.$element.find('label')
+				.on('dblclick', this.onLabelDblClick);
 
 			this.$element.addClass(nodeType);
 			this.$item = this.$element.find('.item')
@@ -91,12 +103,69 @@ namespace app.timeline.tree
 
 		set selected(value:boolean)
 		{
+
 			this.$item.toggleClass('selected', value);
+		}
+
+		public startRename()
+		{
+			if(TreeNode.renameNode == this) return;
+
+			if(!TreeNode.$renameInput)
+			{
+				TreeNode.$renameInput = $('<input type="text" class="rename" />')
+					.on('blur', TreeNode.onRenameInputBlur)
+					.on('keydown', TreeNode.onRenameKeyDown);
+			}
+
+			if(TreeNode.renameNode)
+			{
+				TreeNode.renameNode.stopRename(false);
+			}
+
+			this.$label.after(TreeNode.$renameInput).detach();
+			TreeNode.$renameInput
+				.focus()
+				.val(this.node.name);
+			TreeNode.$renameInput.select();
+			TreeNode.renameNode = this;
+		}
+
+		public stopRename(accept=true)
+		{
+			if(TreeNode.renameNode != this) return;
+
+			if(accept)
+			{
+				this.node.name = TreeNode.$renameInput.val();
+			}
+
+			TreeNode.renameNode = null;
+			TreeNode.$renameInput.after(this.$label).detach();
+
+			this.tree.focus();
 		}
 
 		/*
 		 * Events
 		 */
+
+		protected onNodePropertyChange = (sender:Node, event:PropertyChangeEvent) =>
+		{
+			const property:string = event.type;
+
+			if(property == 'name')
+			{
+				this.$label.text(this.node.name);
+			}
+		};
+
+		protected onLabelDblClick = (event) =>
+		{
+			this.startRename();
+			event.preventDefault();
+			return false;
+		};
 
 		protected onMouseDown = (event) =>
 		{
@@ -127,6 +196,44 @@ namespace app.timeline.tree
 			}
 
 			this.$foldIcon.toggleClass('collapsed', !this.childrenVisible);
+		};
+
+		private static onRenameInputBlur(event)
+		{
+			if(TreeNode.renameNode)
+			{
+				TreeNode.renameNode.stopRename(false);
+			}
+		}
+
+		private static onRenameKeyDown(event)
+		{
+			const keyCode = event.keyCode;
+
+			if(keyCode == Key.Enter)
+			{
+				TreeNode.renameNode.stopRename(true);
+			}
+
+			else if(keyCode == Key.Escape)
+			{
+				TreeNode.renameNode.stopRename(false);
+			}
+
+			else if(keyCode == Key.Tab)
+			{
+				const treeNode:TreeNode = TreeNode.renameNode;
+				TreeNode.renameNode.stopRename(true);
+				const nextNode:Node = event.shiftKey ? treeNode.node.previous() : treeNode.node.next();
+
+				if(nextNode)
+				{
+					treeNode.tree.initiateRenameForNode(nextNode);
+				}
+
+				event.preventDefault();
+				return false;
+			}
 		}
 
 	}

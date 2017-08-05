@@ -123,11 +123,6 @@ namespace app
 		{
 			if(!force && this.canvasMouseDown) return;
 
-			if(document.activeElement != this.canvas)
-			{
-				this.$canvas.focus();
-			}
-
 			this.requiresUpdate = true;
 
 			this.mousePrevX = this.mouseX;

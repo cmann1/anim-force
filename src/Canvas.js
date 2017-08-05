@@ -39,9 +39,6 @@ var app;
                 if (force === void 0) { force = false; }
                 if (!force && _this.canvasMouseDown)
                     return;
-                if (document.activeElement != _this.canvas) {
-                    _this.$canvas.focus();
-                }
                 _this.requiresUpdate = true;
                 _this.mousePrevX = _this.mouseX;
                 _this.mousePrevY = _this.mouseY;

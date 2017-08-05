@@ -284,6 +284,7 @@ var app;
             Viewport.prototype.onKeyUp = function (event) {
             };
             Viewport.prototype.onMouseDown = function (event) {
+                this.$canvas.focus();
                 if (event.button == 2) {
                     this.mouseGrabX = this.stageMouse.x;
                     this.mouseGrabY = this.stageMouse.y;

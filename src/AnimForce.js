@@ -1,11 +1,10 @@
 /*
-// TODO: Select/deselect:
-// TODO: - Viewport
-// TODO: -
 // TODO: Timeline:
-// TODO: - Keyboard navigation
+// TODO: - Drag to reorder
+// TODO: - Undo/Redo - Before it's too late! But it's gonna be tough
+// TODO: -
 // TODO: Viewport:
-// TODO: - Plus/minus zoom
+// TODO: - Interaction - election, dragging, rotating, etc
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
 // TODO: - Mouse interaction

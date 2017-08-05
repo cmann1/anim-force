@@ -4,11 +4,13 @@ var app;
     (function (model_1) {
         var EventDispatcher = events.EventDispatcher;
         var StructureChangeEvent = events.StructureChangeEvent;
+        var PropertyChangeEvent = events.PropertyChangeEvent;
         var Node = (function () {
             ///
             function Node(name) {
                 this.canHaveChildren = false;
                 /// Events
+                this.propertyChange = new EventDispatcher();
                 this.structureChange = new EventDispatcher();
                 /// Properties
                 this.offsetX = 0;
@@ -74,7 +76,11 @@ var app;
                     return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
                 },
                 set: function (value) {
+                    value = $.trim(value);
+                    if (value == this._name)
+                        return;
                     this._name = value;
+                    this.onPropertyChange('name');
                 },
                 enumerable: true,
                 configurable: true
@@ -96,6 +102,9 @@ var app;
                 else if (this.model) {
                     this.model.onStructureChange(type, parent, target, index);
                 }
+            };
+            Node.prototype.onPropertyChange = function (type) {
+                this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
             };
             return Node;
         }());

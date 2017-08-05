@@ -116,11 +116,13 @@ div#timeline-tree-toolbar .filler {
   margin-right: 5px; }
 
 .model-node .item label {
-  flex-grow: 1;
-  flex-shrink: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; }
+
+.model-node .item label, .model-node .item input {
+  flex-grow: 1;
+  flex-shrink: 1; }
 
 .model-node.model > .item .icon:before {
   content: "\f1ae"; }
