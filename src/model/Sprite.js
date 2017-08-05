@@ -33,13 +33,8 @@ var app;
                 return _this;
             }
             Sprite.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
-                var offset = model.Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
-                worldX += offset.x;
-                worldY += offset.y;
-                this.worldX = worldX;
-                this.worldY = worldY;
-                worldRotation += this.rotation;
-                this.worldRotation = worldRotation;
+                this.scaleX = Math.sin(app.main.runningTime * 0.025); // TODO: REMOVE
+                _super.prototype.prepareForDrawing.call(this, worldX, worldY, stretchX, stretchY, worldRotation, drawList);
                 drawList.add(this);
             };
             Sprite.prototype.draw = function (ctx) {

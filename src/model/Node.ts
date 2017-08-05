@@ -70,8 +70,17 @@ namespace app.model
 
 		public addChild(child:Node):Node { return null; }
 		public removeChild(child:Node, triggerEvent=true):Node { return null; }
+		public getChildAt(index:number):Node { return null; }
 
-		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList) { }
+		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
+		{
+			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
+
+			this.worldX = worldX + offset.x;
+			this.worldY = worldY + offset.y;
+
+			this.worldRotation = worldRotation + this.rotation;
+		}
 
 		public draw(ctx:CanvasRenderingContext2D) { }
 
@@ -99,17 +108,17 @@ namespace app.model
 		 * Events
 		 */
 
-		protected onStructureChange(type:string, target:Node, index:number)
+		protected onStructureChange(type:string, parent:Node, target:Node, index:number)
 		{
-			this.structureChange.dispatch(this, new StructureChangeEvent(type, target, index));
+			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index));
 
 			if(this.parent)
 			{
-				this.parent.onStructureChange(type, target, index);
+				this.parent.onStructureChange(type, parent, target, index);
 			}
 			else if(this.model)
 			{
-				this.model.onStructureChange(type, target, index);
+				this.model.onStructureChange(type, parent, target, index);
 			}
 		}
 

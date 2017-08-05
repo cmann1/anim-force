@@ -1,8 +1,7 @@
 /*
 // TODO: Select/deselect:
-// TODO: - Viewport
-// TODO: - Select sibling on delete
 // TODO: - Scroll into view on select
+// TODO: - Viewport
 // TODO: -
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
@@ -22,10 +21,12 @@ var app;
         function App() {
             var _this = this;
             this.model = new Model();
+            this.runningTime = 0;
             /*
             * Events
             */
             this.onTick = function (deltaTime, timestamp) {
+                _this.runningTime++;
                 _this.step(deltaTime, timestamp);
                 _this.draw();
             };

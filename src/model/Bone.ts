@@ -40,7 +40,7 @@ namespace app.model
 			this.children.push(child);
 			this.childCount++;
 
-			this.onStructureChange(eventType, child, this.childCount - 1);
+			this.onStructureChange(eventType, this, child, this.childCount - 1);
 
 			return child;
 		}
@@ -58,11 +58,21 @@ namespace app.model
 
 				if(triggerEvent)
 				{
-					this.onStructureChange('removeChild', child, index);
+					this.onStructureChange('removeChild', this, child, index);
 				}
 			}
 
 			return child;
+		}
+
+		public getChildAt(index:number):Node
+		{
+			if(this.childCount == 0) return null;
+
+			if(index < 0) index = 0;
+			if(index >= this.childCount) index = this.childCount - 1;
+
+			return this.children[index];
 		}
 
 		public setModel(model:Model)
@@ -77,26 +87,17 @@ namespace app.model
 
 		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
 		{
-			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
-			worldX += offset.x;
-			worldY += offset.y;
+			this.rotation += 0.01; // TODO: REMOVE
 
-			this.worldX = worldX;
-			this.worldY = worldY;
+			super.prepareForDrawing(worldX, worldY, stretchX, stretchY, worldRotation, drawList);
 
-			worldRotation += this.rotation;
-			const endPoint = Node.rotate(0, -this.length * this.stretch, worldRotation);
-			worldX += endPoint.x;
-			worldY += endPoint.y;
-
-			this.worldEndPointX = worldX;
-			this.worldEndPointY = worldY;
-
-			this.worldRotation = worldRotation;
+			const endPoint = Node.rotate(0, -this.length * this.stretch, this.worldRotation);
+			this.worldEndPointX = this.worldX + endPoint.x;
+			this.worldEndPointY = this.worldY + endPoint.y;
 
 			for(var bone of this.children)
 			{
-				bone.prepareForDrawing(worldX, worldY, 1, this.stretch, worldRotation, drawList);
+				bone.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, 1, this.stretch, this.worldRotation, drawList);
 			}
 		}
 

@@ -41,7 +41,7 @@ var app;
                 child.parent = this;
                 this.children.push(child);
                 this.childCount++;
-                this.onStructureChange(eventType, child, this.childCount - 1);
+                this.onStructureChange(eventType, this, child, this.childCount - 1);
                 return child;
             };
             Bone.prototype.removeChild = function (child, triggerEvent) {
@@ -53,10 +53,19 @@ var app;
                     this.children.splice(index, 1);
                     this.childCount--;
                     if (triggerEvent) {
-                        this.onStructureChange('removeChild', child, index);
+                        this.onStructureChange('removeChild', this, child, index);
                     }
                 }
                 return child;
+            };
+            Bone.prototype.getChildAt = function (index) {
+                if (this.childCount == 0)
+                    return null;
+                if (index < 0)
+                    index = 0;
+                if (index >= this.childCount)
+                    index = this.childCount - 1;
+                return this.children[index];
             };
             Bone.prototype.setModel = function (model) {
                 _super.prototype.setModel.call(this, model);
@@ -66,21 +75,14 @@ var app;
                 }
             };
             Bone.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
-                var offset = model_1.Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
-                worldX += offset.x;
-                worldY += offset.y;
-                this.worldX = worldX;
-                this.worldY = worldY;
-                worldRotation += this.rotation;
-                var endPoint = model_1.Node.rotate(0, -this.length * this.stretch, worldRotation);
-                worldX += endPoint.x;
-                worldY += endPoint.y;
-                this.worldEndPointX = worldX;
-                this.worldEndPointY = worldY;
-                this.worldRotation = worldRotation;
+                this.rotation += 0.01; // TODO: REMOVE
+                _super.prototype.prepareForDrawing.call(this, worldX, worldY, stretchX, stretchY, worldRotation, drawList);
+                var endPoint = model_1.Node.rotate(0, -this.length * this.stretch, this.worldRotation);
+                this.worldEndPointX = this.worldX + endPoint.x;
+                this.worldEndPointY = this.worldY + endPoint.y;
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var bone = _a[_i];
-                    bone.prepareForDrawing(worldX, worldY, 1, this.stretch, worldRotation, drawList);
+                    bone.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, 1, this.stretch, this.worldRotation, drawList);
                 }
             };
             Bone.prototype.drawControls = function (ctx) {

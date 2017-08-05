@@ -125,21 +125,6 @@ namespace app.viewport
 			ctx.scale(this.scale, this.scale);
 			ctx.translate(-this.cameraX, -this.cameraY);
 
-			if(this.bone2)
-			{
-				this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
-				this.bone2.rotation += 0.02;
-				this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
-				this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
-				this.t+=0.04;
-			}
-
-			for(var b of this.model.rootBones)
-				{
-					b.rotation+=0.02;
-					for(var c of b.children)
-						c.rotation+=0.02;
-				}
 			this.model.draw(this.ctx);
 
 			ctx.restore();
@@ -324,12 +309,6 @@ namespace app.viewport
 		 * Events
 		 */
 
-		bone:Bone;
-		bone2:Bone;
-		sprite:Sprite;
-		sprite2:Sprite;
-		sprite3:Sprite;
-		t = 0;
 		protected onKeyDown = (event) =>
 		{
 			// console.log(event.keyCode);
@@ -348,24 +327,30 @@ namespace app.viewport
 				var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
 				var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
 
+				var bone:Bone;
+				var bone2:Bone;
+				var sprite:Sprite;
+				var sprite2:Sprite;
+				var sprite3:Sprite;
+
 				this.model.clear();
 				this.model
-					.addChild(this.bone = new Bone())
-					.addChild(this.sprite = new Sprite(spriteAsset, 0, 0));
+					.addChild(bone = new Bone())
+					.addChild(sprite = new Sprite(spriteAsset, 0, 0));
 
-				this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
-				this.sprite3.rotation = Math.PI * 0.25;
-				this.bone.addChild(this.sprite3);
+				sprite3 = new Sprite(spriteAsset3, 0, 0);
+				sprite3.rotation = Math.PI * 0.25;
+				bone.addChild(sprite3);
 
-				this.bone2 = new Bone();
-				this.bone2.offsetX = -50;
-				this.bone.addChild(this.bone2);
-				this.bone2.addChild(this.sprite2 = new Sprite(spriteAsset2, 0, 0));
+				bone2 = new Bone();
+				bone2.offsetX = -50;
+				bone.addChild(bone2);
+				bone2.addChild(sprite2 = new Sprite(spriteAsset2, 0, 0));
 
-				this.sprite.offsetY = this.bone.length / 2;
-				this.sprite2.offsetY = this.bone2.length / 2;
-				this.sprite3.offsetX = 50;
-				this.sprite3.offsetY = 50;
+				sprite.offsetY = bone.length / 2;
+				sprite2.offsetY = bone2.length / 2;
+				sprite3.offsetX = 50;
+				sprite3.offsetY = 50;
 			}
 		};
 

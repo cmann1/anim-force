@@ -55,7 +55,9 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
-                _this.t = 0;
+                /*
+                 * Events
+                 */
                 _this.onKeyDown = function (event) {
                     // console.log(event.keyCode);
                     var keyCode = event.keyCode;
@@ -67,21 +69,26 @@ var app;
                         var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
                         var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
                         var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
+                        var bone;
+                        var bone2;
+                        var sprite;
+                        var sprite2;
+                        var sprite3;
                         _this.model.clear();
                         _this.model
-                            .addChild(_this.bone = new Bone())
-                            .addChild(_this.sprite = new Sprite(spriteAsset, 0, 0));
-                        _this.sprite3 = new Sprite(spriteAsset3, 0, 0); // sci
-                        _this.sprite3.rotation = Math.PI * 0.25;
-                        _this.bone.addChild(_this.sprite3);
-                        _this.bone2 = new Bone();
-                        _this.bone2.offsetX = -50;
-                        _this.bone.addChild(_this.bone2);
-                        _this.bone2.addChild(_this.sprite2 = new Sprite(spriteAsset2, 0, 0));
-                        _this.sprite.offsetY = _this.bone.length / 2;
-                        _this.sprite2.offsetY = _this.bone2.length / 2;
-                        _this.sprite3.offsetX = 50;
-                        _this.sprite3.offsetY = 50;
+                            .addChild(bone = new Bone())
+                            .addChild(sprite = new Sprite(spriteAsset, 0, 0));
+                        sprite3 = new Sprite(spriteAsset3, 0, 0);
+                        sprite3.rotation = Math.PI * 0.25;
+                        bone.addChild(sprite3);
+                        bone2 = new Bone();
+                        bone2.offsetX = -50;
+                        bone.addChild(bone2);
+                        bone2.addChild(sprite2 = new Sprite(spriteAsset2, 0, 0));
+                        sprite.offsetY = bone.length / 2;
+                        sprite2.offsetY = bone2.length / 2;
+                        sprite3.offsetX = 50;
+                        sprite3.offsetY = 50;
                     }
                 };
                 _this.onKeyUp = function (event) {
@@ -140,21 +147,6 @@ var app;
                 ctx.translate(this.centreX, this.centreY);
                 ctx.scale(this.scale, this.scale);
                 ctx.translate(-this.cameraX, -this.cameraY);
-                if (this.bone2) {
-                    this.bone.rotation = Math.sin(this.t * 0.4 + 2) * 0.5;
-                    this.bone2.rotation += 0.02;
-                    this.bone.stretch = this.sprite.scaleY = (Math.sin(this.t) * 0.5 + 0.5);
-                    this.sprite3.scaleX = (Math.sin(this.t + 1) * 0.5 + 1);
-                    this.t += 0.04;
-                }
-                for (var _i = 0, _a = this.model.rootBones; _i < _a.length; _i++) {
-                    var b = _a[_i];
-                    b.rotation += 0.02;
-                    for (var _b = 0, _c = b.children; _b < _c.length; _b++) {
-                        var c = _c[_b];
-                        c.rotation += 0.02;
-                    }
-                }
                 this.model.draw(this.ctx);
                 ctx.restore();
                 this.requiresUpdate = false;

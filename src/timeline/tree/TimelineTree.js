@@ -44,7 +44,9 @@ var app;
                         else if (type == 'removeChild') {
                             var node = _this.nodeMap[target.id];
                             if (node == _this.selectedNode) {
-                                _this.model.setSelected(true);
+                                console.log(event.parent.getChildAt(event.index));
+                                (event.parent.getChildAt(event.index) || event.parent).setSelected(true);
+                                // this.model.setSelected(true);
                             }
                             node.parent.removeChild(node);
                             delete _this.nodeMap[target.id];
@@ -68,7 +70,6 @@ var app;
                             _this.selectedNode.node.addChild(new Sprite(null)).setSelected(true);
                         }
                         else if (type == 'Delete') {
-                            console.log('Delete');
                             _this.selectedNode.node.parent.removeChild(_this.selectedNode.node);
                         }
                     };

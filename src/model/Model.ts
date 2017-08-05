@@ -43,7 +43,7 @@ namespace app.model
 			this.rootBones.push(bone);
 			this.rootBoneCount++;
 
-			this.onStructureChange('addChild', bone, this.rootBoneCount - 1);
+			this.onStructureChange('addChild', this, bone, this.rootBoneCount - 1);
 
 			return bone;
 		}
@@ -59,7 +59,7 @@ namespace app.model
 				this.rootBones.splice(index, 1);
 				this.rootBoneCount--;
 
-				this.onStructureChange('removeChild', bone, index);
+				this.onStructureChange('removeChild', this, bone, index);
 			}
 
 			return bone;
@@ -77,7 +77,7 @@ namespace app.model
 			this.rootBones = [];
 			this.rootBoneCount--;
 
-			this.onStructureChange('clear', null, -1);
+			this.onStructureChange('clear', this, null, -1);
 		}
 
 		public prepareForDrawing()
@@ -187,9 +187,9 @@ namespace app.model
 		 * Events
 		 */
 
-		public onStructureChange(type:string, source:Node, index:number)
+		public onStructureChange(type:string, parent:Node, source:Node, index:number)
 		{
-			this.structureChange.dispatch(this, new StructureChangeEvent(type, source, index));
+			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index));
 		}
 	}
 

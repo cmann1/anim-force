@@ -32,15 +32,9 @@ namespace app.model
 
 		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
 		{
-			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
-			worldX += offset.x;
-			worldY += offset.y;
+			this.scaleX = Math.sin(app.main.runningTime * 0.025); // TODO: REMOVE
 
-			this.worldX = worldX;
-			this.worldY = worldY;
-
-			worldRotation += this.rotation;
-			this.worldRotation = worldRotation;
+			super.prepareForDrawing(worldX, worldY, stretchX, stretchY, worldRotation, drawList);
 
 			drawList.add(this);
 		}

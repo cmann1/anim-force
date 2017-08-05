@@ -144,7 +144,9 @@ namespace app.timeline.tree
 
 				if(node == this.selectedNode)
 				{
-					this.model.setSelected(true);
+					console.log(event.parent.getChildAt(event.index));
+					(event.parent.getChildAt(event.index) || event.parent).setSelected(true);
+					// this.model.setSelected(true);
 				}
 
 				node.parent.removeChild(node);
@@ -176,7 +178,6 @@ namespace app.timeline.tree
 			}
 			else if(type == 'Delete')
 			{
-				console.log('Delete');
 				this.selectedNode.node.parent.removeChild(this.selectedNode.node);
 			}
 		};

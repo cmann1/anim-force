@@ -44,7 +44,13 @@ var app;
                 if (triggerEvent === void 0) { triggerEvent = true; }
                 return null;
             };
-            Node.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) { };
+            Node.prototype.getChildAt = function (index) { return null; };
+            Node.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
+                var offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
+                this.worldX = worldX + offset.x;
+                this.worldY = worldY + offset.y;
+                this.worldRotation = worldRotation + this.rotation;
+            };
             Node.prototype.draw = function (ctx) { };
             Node.prototype.drawControls = function (ctx) { };
             Object.defineProperty(Node.prototype, "name", {
@@ -66,13 +72,13 @@ var app;
             /*
              * Events
              */
-            Node.prototype.onStructureChange = function (type, target, index) {
-                this.structureChange.dispatch(this, new StructureChangeEvent(type, target, index));
+            Node.prototype.onStructureChange = function (type, parent, target, index) {
+                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index));
                 if (this.parent) {
-                    this.parent.onStructureChange(type, target, index);
+                    this.parent.onStructureChange(type, parent, target, index);
                 }
                 else if (this.model) {
-                    this.model.onStructureChange(type, target, index);
+                    this.model.onStructureChange(type, parent, target, index);
                 }
             };
             return Node;

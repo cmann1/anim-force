@@ -1,8 +1,7 @@
 /*
 // TODO: Select/deselect:
-// TODO: - Viewport
-// TODO: - Select sibling on delete
 // TODO: - Scroll into view on select
+// TODO: - Viewport
 // TODO: -
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
@@ -33,6 +32,8 @@ namespace app
 		protected timeline:app.timeline.TimelinePanel;
 
 		protected model:Model = new Model();
+
+		public runningTime:number = 0;
 
 		constructor()
 		{
@@ -82,6 +83,7 @@ namespace app
 
 		protected onTick = (deltaTime:number, timestamp:number) =>
 		{
+			this.runningTime++;
 			this.step(deltaTime, timestamp);
 			this.draw();
 		};

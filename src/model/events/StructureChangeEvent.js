@@ -12,8 +12,9 @@ var events;
 (function (events) {
     var StructureChangeEvent = (function (_super) {
         __extends(StructureChangeEvent, _super);
-        function StructureChangeEvent(type, target, index) {
+        function StructureChangeEvent(type, parent, target, index) {
             var _this = _super.call(this, type, null) || this;
+            _this.parent = parent;
             _this.target = target;
             _this.index = index;
             return _this;

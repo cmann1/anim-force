@@ -40,7 +40,7 @@ var app;
                 bone.setModel(this);
                 this.rootBones.push(bone);
                 this.rootBoneCount++;
-                this.onStructureChange('addChild', bone, this.rootBoneCount - 1);
+                this.onStructureChange('addChild', this, bone, this.rootBoneCount - 1);
                 return bone;
             };
             Model.prototype.removeChild = function (bone) {
@@ -50,7 +50,7 @@ var app;
                     bone.setModel(null);
                     this.rootBones.splice(index, 1);
                     this.rootBoneCount--;
-                    this.onStructureChange('removeChild', bone, index);
+                    this.onStructureChange('removeChild', this, bone, index);
                 }
                 return bone;
             };
@@ -62,7 +62,7 @@ var app;
                 this.setSelected(null);
                 this.rootBones = [];
                 this.rootBoneCount--;
-                this.onStructureChange('clear', null, -1);
+                this.onStructureChange('clear', this, null, -1);
             };
             Model.prototype.prepareForDrawing = function () {
                 for (var _i = 0, _a = this.rootBones; _i < _a.length; _i++) {
@@ -138,8 +138,8 @@ var app;
             /*
              * Events
              */
-            Model.prototype.onStructureChange = function (type, source, index) {
-                this.structureChange.dispatch(this, new StructureChangeEvent(type, source, index));
+            Model.prototype.onStructureChange = function (type, parent, source, index) {
+                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index));
             };
             return Model;
         }(model.Node));
