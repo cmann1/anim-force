@@ -5,11 +5,8 @@ namespace app.model
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import SelectionEvent = events.SelectionEvent;
 
-	export class Model extends Node
+	export class Model extends ContainerNode
 	{
-
-		public rootBones:Bone[] = [];
-		public rootBoneCount = 0;
 
 		private selectedNode:Node = null;
 		private highlightedNode:Node = null;
@@ -23,68 +20,14 @@ namespace app.model
 		constructor()
 		{
 			super('Unnamed Model');
-			this.canHaveChildren = true;
-		}
-
-		public addChild(bone:Bone):Bone
-		{
-			if(bone.parent == this)
-			{
-				return bone;
-			}
-
-			if(bone.parent)
-			{
-				bone.parent.removeChild(bone);
-			}
-
-			bone.parent = this;
-			bone.setModel(this);
-			this.rootBones.push(bone);
-			this.rootBoneCount++;
-
-			this.onStructureChange('addChild', this, bone, this.rootBoneCount - 1);
-
-			return bone;
-		}
-
-		public removeChild(bone:Bone):Bone
-		{
-			if(bone.parent == this)
-			{
-				const index = this.rootBones.indexOf(bone);
-
-				bone.parent = null;
-				bone.setModel(null);
-				this.rootBones.splice(index, 1);
-				this.rootBoneCount--;
-
-				this.onStructureChange('removeChild', this, bone, index);
-			}
-
-			return bone;
-		}
-
-		public clear():void
-		{
-			for(let bone of this.rootBones)
-			{
-				bone.setModel(null);
-			}
-
-			this.setSelected(null);
-
-			this.rootBones = [];
-			this.rootBoneCount--;
-
-			this.onStructureChange('clear', this, null, -1);
+			this.model = this;
 		}
 
 		public prepareForDrawing()
 		{
-			for(var bone of this.rootBones)
+			for(var child of this.children)
 			{
-				bone.prepareForDrawing(0, 0, 1, 1, 0, this.drawList);
+				child.prepareForDrawing(0, 0, 1, 1, 0, this.drawList);
 			}
 		}
 
@@ -103,9 +46,9 @@ namespace app.model
 			ctx.restore();
 
 			ctx.save();
-			for(var bone of this.rootBones)
+			for(var child of this.children)
 			{
-				bone.drawControls(ctx);
+				child.drawControls(ctx);
 			}
 			ctx.restore();
 		}
@@ -158,6 +101,11 @@ namespace app.model
 			}
 
 			this.selectionChange.dispatch(this, new SelectionEvent('selection', <Node>node));
+		}
+
+		public getSelectedNode():Node
+		{
+			return this.selectedNode;
 		}
 
 		protected static nodeDrawOrder(a:Node, b:Node):number

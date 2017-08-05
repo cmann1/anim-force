@@ -45,6 +45,22 @@ var app;
                 return null;
             };
             Node.prototype.getChildAt = function (index) { return null; };
+            Node.prototype.previous = function (node) {
+                if (node === void 0) { node = null; }
+                if (node)
+                    return node;
+                if (!this.parent)
+                    return this;
+                return this.parent.previous(this);
+            };
+            Node.prototype.next = function (node) {
+                if (node === void 0) { node = null; }
+                if (node)
+                    return node;
+                if (!this.parent)
+                    return this;
+                return this.parent.next(this);
+            };
             Node.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
                 var offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
                 this.worldX = worldX + offset.x;

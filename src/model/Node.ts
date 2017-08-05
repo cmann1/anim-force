@@ -72,6 +72,22 @@ namespace app.model
 		public removeChild(child:Node, triggerEvent=true):Node { return null; }
 		public getChildAt(index:number):Node { return null; }
 
+		public previous(node:Node=null)
+		{
+			if(node) return node;
+			if(!this.parent) return this;
+
+			return this.parent.previous(this);
+		}
+
+		public next(node:Node=null)
+		{
+			if(node) return node;
+			if(!this.parent) return this;
+
+			return this.parent.next(this);
+		}
+
 		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
 		{
 			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);

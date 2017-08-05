@@ -70,10 +70,6 @@ namespace app.viewport
 			this.$message = $('<div class="viewport-message"></div>');
 			this.$container.append(this.$message);
 			this.$message.hide();
-
-			this.$canvas
-				.on('keydown', this.onKeyDown)
-				.on('keyup', this.onKeyUp);
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -291,6 +287,22 @@ namespace app.viewport
 			this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
 		}
 
+		protected zoom(direction:number=1)
+		{
+			this.scaleIndex += direction;
+			if(this.scaleIndex < 0) this.scaleIndex = 0;
+			else if(this.scaleIndex >= this.scales.length) this.scaleIndex = this.scales.length - 1;
+
+			const scale = this.scales[this.scaleIndex];
+			createjs.Tween.get(this, {override: true}).to({scale: scale}, 50).call(this.onZoomComplete);
+
+			this.stageAnchorX = this.stageMouse.x;
+			this.stageAnchorY = this.stageMouse.y;
+
+			this.showMessage(`Zoom: ${scale}`);
+			this.requiresUpdate = true;
+		}
+
 		/*
 		 * Model Events
 		 */
@@ -309,15 +321,36 @@ namespace app.viewport
 		 * Events
 		 */
 
-		protected onKeyDown = (event) =>
+		protected onKeyDown(event)
 		{
-			// console.log(event.keyCode);
 			const keyCode = event.keyCode;
+			// console.log(keyCode);
 
 			if(keyCode == Key.Home)
 			{
 				this.cameraX = 0;
 				this.cameraY = 0;
+				this.scale = 1;
+				this.scaleIndex = 3;
+			}
+
+			else if(keyCode == Key.Add || keyCode == Key.Equals)
+			{
+				this.zoom(1);
+			}
+
+			else if(keyCode == Key.Subtract || keyCode == Key.Dash)
+			{
+				this.zoom(-1);
+			}
+
+			else if(keyCode == Key.Delete)
+			{
+				const selectedNode = this.model.getSelectedNode();
+				if(selectedNode)
+				{
+					selectedNode.parent.removeChild(selectedNode);
+				}
 			}
 
 			// TODO: REMOVE
@@ -352,12 +385,12 @@ namespace app.viewport
 				sprite3.offsetX = 50;
 				sprite3.offsetY = 50;
 			}
-		};
+		}
 
-		protected onKeyUp = (event) =>
+		protected onKeyUp(event)
 		{
 
-		};
+		}
 
 		protected onMouseDown(event)
 		{
@@ -390,18 +423,7 @@ namespace app.viewport
 
 		protected onMouseWheel(event)
 		{
-			this.scaleIndex += event.originalEvent.wheelDelta > 0 ? 1 : -1;
-			if(this.scaleIndex < 0) this.scaleIndex = 0;
-			else if(this.scaleIndex >= this.scales.length) this.scaleIndex = this.scales.length - 1;
-
-			const scale = this.scales[this.scaleIndex];
-			createjs.Tween.get(this, {override: true}).to({scale: scale}, 50).call(this.onZoomComplete);
-
-			this.stageAnchorX = this.stageMouse.x;
-			this.stageAnchorY = this.stageMouse.y;
-
-			this.showMessage(`Zoom: ${scale}`);
-			this.requiresUpdate = true;
+			this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
 		}
 
 		protected onMouseMove(event)

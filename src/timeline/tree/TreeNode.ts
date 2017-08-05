@@ -72,6 +72,18 @@ namespace app.timeline.tree
 			this.children.splice(this.children.indexOf(node), 1);
 		}
 
+		public addNode(node:Node):Node
+		{
+			this.node.addChild(node);
+
+			return node;
+		}
+
+		public deleteNode()
+		{
+			this.node.parent.removeChild(this.node);
+		}
+
 		get selected():boolean
 		{
 			return this.$item.hasClass('selected');

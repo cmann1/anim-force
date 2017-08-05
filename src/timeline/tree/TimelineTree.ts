@@ -6,6 +6,8 @@ namespace app.timeline.tree
 	import Sprite = app.model.Sprite;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import SelectionEvent = events.SelectionEvent;
+	import Node = app.model.Node;
+	import Key = KeyCodes.Key;
 
 	export class TimelineTree
 	{
@@ -40,6 +42,10 @@ namespace app.timeline.tree
 
 			this.nodeMap[this.model.id] = this.rootNode;
 
+			this.$element
+				.on('mouseenter', this.onMouseEnter)
+				.keyup(this.onKeyDown)
+				.keyup(this.onKeyUp);
 			this.$container.on('click', this.onTreeClick);
 
 			this.selectedNode = this.rootNode;
@@ -95,6 +101,19 @@ namespace app.timeline.tree
 			this.$toolbarAddMenu.stop(true).animate({width:show  ? 'show' : 'hide'}, 250);
 		}
 
+		private updateSelection(target:Node)
+		{
+			const targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+			if(targetNode == this.selectedNode) return;
+
+			if(this.selectedNode) this.selectedNode.selected = false;
+			if((this.selectedNode = targetNode)) this.selectedNode.selected = true;
+
+			this.selectedNode.$element.scrollintoview({duration: 50});
+
+			this.updateToolbar();
+		}
+
 		/*
 		 * Events
 		 */
@@ -111,50 +130,79 @@ namespace app.timeline.tree
 		{
 			if(event.type == 'selection')
 			{
-				const target = event.target;
-				const targetNode = target ? this.nodeMap[target.id] : this.rootNode;
-
-				if(targetNode == this.selectedNode) return;
-
-				if(this.selectedNode) this.selectedNode.selected = false;
-
-				if((this.selectedNode = targetNode)) this.selectedNode.selected = true;
-
-				this.updateToolbar();
+				this.updateSelection(event.target);
 			}
 		};
 
 		private onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
 		{
 			const type = event.type;
+			const parent = event.parent;
 			const target = event.target;
+			const parentTree:TreeNode = parent ? this.nodeMap[parent.id] : null;
+			const targetTree:TreeNode = target ? this.nodeMap[target.id] : null;
 
 			if(type == 'clear')
 			{
-				this.rootNode.clear();
+				parentTree.clear();
 			}
 			else if(type == 'addChild')
 			{
-				let parent:TreeNode = this.nodeMap[target.parent.id];
-				parent.addChild(this.nodeMap[target.id] = new TreeNode(target.type, target, target.canHaveChildren));
+				parentTree.addChild(this.nodeMap[target.id] = new TreeNode(target.type, target, target.canHaveChildren));
 			}
 			else if(type == 'removeChild')
 			{
 				let node:TreeNode = this.nodeMap[target.id];
 
-				if(node == this.selectedNode)
+				if(targetTree == this.selectedNode)
 				{
-					console.log(event.parent.getChildAt(event.index));
+					// Select the sibling or parent node
 					(event.parent.getChildAt(event.index) || event.parent).setSelected(true);
-					// this.model.setSelected(true);
 				}
 
-				node.parent.removeChild(node);
+				parentTree.removeChild(node);
 				delete this.nodeMap[target.id];
 			}
 			else if(type == 'reparent')
 			{
 				// TODO: IMPLEMENT THIS
+			}
+		};
+
+		private onMouseEnter = (event) =>
+		{
+			this.$element.focus();
+		};
+
+		private onKeyDown = (event) =>
+		{
+			const keyCode = event.keyCode;
+
+			if(keyCode == Key.UpArrow)
+			{
+				if(!this.selectedNode) return;
+
+				this.selectedNode.node.previous().setSelected(true);
+			}
+
+			else if(keyCode == Key.DownArrow)
+			{
+				if(!this.selectedNode) return;
+
+				this.selectedNode.node.next().setSelected(true);
+			}
+		};
+
+		private onKeyUp = (event) =>
+		{
+			const keyCode = event.keyCode;
+
+			if(keyCode == Key.Delete)
+			{
+				if(this.selectedNode && this.selectedNode != this.rootNode)
+				{
+					this.selectedNode.deleteNode();
+				}
 			}
 		};
 
@@ -168,17 +216,23 @@ namespace app.timeline.tree
 
 			const type = $btn.prop('title') != '' ? $btn.prop('title') : $btn.data('original-title');
 
-			if(type == 'Add Bone')
+			if(type.substr(0, 3) == 'Add')
 			{
-				this.selectedNode.node.addChild(new Bone()).setSelected(true);
-			}
-			else if(type == 'Add Sprite')
-			{
-				this.selectedNode.node.addChild(new Sprite(null)).setSelected(true);
+				let newNode:Node;
+
+				if(type == 'Add Bone')
+					newNode = this.selectedNode.addNode(new Bone());
+				else if(type == 'Add Sprite')
+					newNode = this.selectedNode.addNode(new Sprite(null));
+
+				if(newNode && !event.shiftKey)
+				{
+					newNode.setSelected(true);
+				}
 			}
 			else if(type == 'Delete')
 			{
-				this.selectedNode.node.parent.removeChild(this.selectedNode.node);
+				this.selectedNode.deleteNode();
 			}
 		};
 

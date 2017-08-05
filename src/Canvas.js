@@ -13,6 +13,12 @@ var app;
             this.requiresUpdate = false;
             this.canvasMouseDown = false;
             this.canvasRightMouseDown = false;
+            this.onCanvasKeyDown = function (event) {
+                _this.onKeyDown(event);
+            };
+            this.onCanvasKeyUp = function (event) {
+                _this.onKeyUp(event);
+            };
             this.onCanvasMouseDown = function (event) {
                 if (event.button == 2) {
                     _this.canvasRightMouseDown = true;
@@ -69,7 +75,9 @@ var app;
             this.$canvas
                 .on('mousedown', this.onCanvasMouseDown)
                 .on('wheel', this.onCanvasMouseWheel)
-                .on('mousemove', this.onCanvasMouseMove);
+                .on('mousemove', this.onCanvasMouseMove)
+                .on('keydown', this.onCanvasKeyDown)
+                .on('keyup', this.onCanvasKeyUp);
             this.$container = this.$canvas.parent();
             app.$window
                 .on('mousemove', this.onWindowMouseMove)
@@ -97,6 +105,8 @@ var app;
         Canvas.prototype.onMouseUp = function (event) { };
         Canvas.prototype.onMouseMove = function (event) { };
         Canvas.prototype.onMouseWheel = function (event) { };
+        Canvas.prototype.onKeyDown = function (event) { };
+        Canvas.prototype.onKeyUp = function (event) { };
         return Canvas;
     }());
     app.Canvas = Canvas;

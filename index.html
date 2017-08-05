@@ -11,8 +11,11 @@
 	<link rel="stylesheet" href="css/lib/tippy.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
+	<script src="lib/jquery.scrollintoview.min.js"></script>
+	
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
+	
 	<script src="lib/Key.enum.js"></script>
 	<script src="lib/tippy.js"></script>
 	
@@ -37,6 +40,7 @@
 	
 	<script src="src/model/DrawList.js"></script>
 	<script src="src/model/Node.js"></script>
+	<script src="src/model/ContainerNode.js"></script>
 	<script src="src/model/Bone.js"></script>
 	<script src="src/model/Sprite.js"></script>
 	<script src="src/model/Model.js"></script>
@@ -62,10 +66,7 @@
 	</div>
 	<div id="timeline-panel">
 		
-		<div id="timeline-container">
-			<canvas id="timeline" tabindex="2" class="no-select"></canvas>
-		</div>
-		<div id="timeline-tree">
+		<div id="timeline-tree" tabindex="1">
 			<div id="timeline-tree-container"></div>
 			<div id="timeline-tree-toolbar">
 				<div>
@@ -78,6 +79,10 @@
 				<div class="filler"></div>
 				<i class="fa fa-close btn-delete" title="Delete"></i>
 			</div>
+		</div>
+		
+		<div id="timeline-container">
+			<canvas id="timeline" tabindex="2" class="no-select"></canvas>
 		</div>
 		
 	</div>

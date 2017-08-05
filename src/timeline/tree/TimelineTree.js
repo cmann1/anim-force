@@ -6,6 +6,7 @@ var app;
         (function (tree) {
             var Bone = app.model.Bone;
             var Sprite = app.model.Sprite;
+            var Key = KeyCodes.Key;
             var TimelineTree = (function () {
                 function TimelineTree(elementId, model) {
                     var _this = this;
@@ -20,39 +21,56 @@ var app;
                     };
                     this.onModelSelectionChange = function (model, event) {
                         if (event.type == 'selection') {
-                            var target = event.target;
-                            var targetNode = target ? _this.nodeMap[target.id] : _this.rootNode;
-                            if (targetNode == _this.selectedNode)
-                                return;
-                            if (_this.selectedNode)
-                                _this.selectedNode.selected = false;
-                            if ((_this.selectedNode = targetNode))
-                                _this.selectedNode.selected = true;
-                            _this.updateToolbar();
+                            _this.updateSelection(event.target);
                         }
                     };
                     this.onModelStructureChange = function (model, event) {
                         var type = event.type;
+                        var parent = event.parent;
                         var target = event.target;
+                        var parentTree = parent ? _this.nodeMap[parent.id] : null;
+                        var targetTree = target ? _this.nodeMap[target.id] : null;
                         if (type == 'clear') {
-                            _this.rootNode.clear();
+                            parentTree.clear();
                         }
                         else if (type == 'addChild') {
-                            var parent_1 = _this.nodeMap[target.parent.id];
-                            parent_1.addChild(_this.nodeMap[target.id] = new tree.TreeNode(target.type, target, target.canHaveChildren));
+                            parentTree.addChild(_this.nodeMap[target.id] = new tree.TreeNode(target.type, target, target.canHaveChildren));
                         }
                         else if (type == 'removeChild') {
                             var node = _this.nodeMap[target.id];
-                            if (node == _this.selectedNode) {
-                                console.log(event.parent.getChildAt(event.index));
+                            if (targetTree == _this.selectedNode) {
+                                // Select the sibling or parent node
                                 (event.parent.getChildAt(event.index) || event.parent).setSelected(true);
-                                // this.model.setSelected(true);
                             }
-                            node.parent.removeChild(node);
+                            parentTree.removeChild(node);
                             delete _this.nodeMap[target.id];
                         }
                         else if (type == 'reparent') {
                             // TODO: IMPLEMENT THIS
+                        }
+                    };
+                    this.onMouseEnter = function (event) {
+                        _this.$element.focus();
+                    };
+                    this.onKeyDown = function (event) {
+                        var keyCode = event.keyCode;
+                        if (keyCode == Key.UpArrow) {
+                            if (!_this.selectedNode)
+                                return;
+                            _this.selectedNode.node.previous().setSelected(true);
+                        }
+                        else if (keyCode == Key.DownArrow) {
+                            if (!_this.selectedNode)
+                                return;
+                            _this.selectedNode.node.next().setSelected(true);
+                        }
+                    };
+                    this.onKeyUp = function (event) {
+                        var keyCode = event.keyCode;
+                        if (keyCode == Key.Delete) {
+                            if (_this.selectedNode && _this.selectedNode != _this.rootNode) {
+                                _this.selectedNode.deleteNode();
+                            }
                         }
                     };
                     /*
@@ -63,14 +81,18 @@ var app;
                         if ($btn.hasClass('disabled'))
                             return;
                         var type = $btn.prop('title') != '' ? $btn.prop('title') : $btn.data('original-title');
-                        if (type == 'Add Bone') {
-                            _this.selectedNode.node.addChild(new Bone()).setSelected(true);
-                        }
-                        else if (type == 'Add Sprite') {
-                            _this.selectedNode.node.addChild(new Sprite(null)).setSelected(true);
+                        if (type.substr(0, 3) == 'Add') {
+                            var newNode = void 0;
+                            if (type == 'Add Bone')
+                                newNode = _this.selectedNode.addNode(new Bone());
+                            else if (type == 'Add Sprite')
+                                newNode = _this.selectedNode.addNode(new Sprite(null));
+                            if (newNode && !event.shiftKey) {
+                                newNode.setSelected(true);
+                            }
                         }
                         else if (type == 'Delete') {
-                            _this.selectedNode.node.parent.removeChild(_this.selectedNode.node);
+                            _this.selectedNode.deleteNode();
                         }
                     };
                     this.onToolbarMouseWheel = function (event) {
@@ -90,6 +112,10 @@ var app;
                     model.structureChange.on(this.onModelStructureChange);
                     model.selectionChange.on(this.onModelSelectionChange);
                     this.nodeMap[this.model.id] = this.rootNode;
+                    this.$element
+                        .on('mouseenter', this.onMouseEnter)
+                        .keyup(this.onKeyDown)
+                        .keyup(this.onKeyUp);
                     this.$container.on('click', this.onTreeClick);
                     this.selectedNode = this.rootNode;
                     this.selectedNode.selected = true;
@@ -128,6 +154,17 @@ var app;
                 TimelineTree.prototype.showAddMenu = function (show) {
                     show = show && this.selectedNode.node.canHaveChildren;
                     this.$toolbarAddMenu.stop(true).animate({ width: show ? 'show' : 'hide' }, 250);
+                };
+                TimelineTree.prototype.updateSelection = function (target) {
+                    var targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+                    if (targetNode == this.selectedNode)
+                        return;
+                    if (this.selectedNode)
+                        this.selectedNode.selected = false;
+                    if ((this.selectedNode = targetNode))
+                        this.selectedNode.selected = true;
+                    this.selectedNode.$element.scrollintoview({ duration: 50 });
+                    this.updateToolbar();
                 };
                 return TimelineTree;
             }());

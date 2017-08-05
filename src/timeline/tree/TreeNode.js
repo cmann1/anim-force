@@ -71,6 +71,13 @@ var app;
                     node.parent = null;
                     this.children.splice(this.children.indexOf(node), 1);
                 };
+                TreeNode.prototype.addNode = function (node) {
+                    this.node.addChild(node);
+                    return node;
+                };
+                TreeNode.prototype.deleteNode = function () {
+                    this.node.parent.removeChild(this.node);
+                };
                 Object.defineProperty(TreeNode.prototype, "selected", {
                     get: function () {
                         return this.$item.hasClass('selected');

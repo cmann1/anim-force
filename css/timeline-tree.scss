@@ -9,6 +9,8 @@ div#timeline-tree{
 
 	display: flex;
 	flex-direction: column;
+
+	outline: none;
 }
 div#timeline-tree-container{
 	flex-grow: 1;

@@ -1,8 +1,11 @@
 /*
 // TODO: Select/deselect:
-// TODO: - Scroll into view on select
 // TODO: - Viewport
 // TODO: -
+// TODO: Timeline:
+// TODO: - Keyboard navigation
+// TODO: Viewport:
+// TODO: - Plus/minus zoom
 // TODO: Draw controls:
 // TODO: - Independent of zoom and scale
 // TODO: - Mouse interaction

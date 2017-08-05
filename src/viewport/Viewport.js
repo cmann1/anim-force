@@ -55,44 +55,6 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
-                /*
-                 * Events
-                 */
-                _this.onKeyDown = function (event) {
-                    // console.log(event.keyCode);
-                    var keyCode = event.keyCode;
-                    if (keyCode == Key.Home) {
-                        _this.cameraX = 0;
-                        _this.cameraY = 0;
-                    }
-                    else if (keyCode == Key.A) {
-                        var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
-                        var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
-                        var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
-                        var bone;
-                        var bone2;
-                        var sprite;
-                        var sprite2;
-                        var sprite3;
-                        _this.model.clear();
-                        _this.model
-                            .addChild(bone = new Bone())
-                            .addChild(sprite = new Sprite(spriteAsset, 0, 0));
-                        sprite3 = new Sprite(spriteAsset3, 0, 0);
-                        sprite3.rotation = Math.PI * 0.25;
-                        bone.addChild(sprite3);
-                        bone2 = new Bone();
-                        bone2.offsetX = -50;
-                        bone.addChild(bone2);
-                        bone2.addChild(sprite2 = new Sprite(spriteAsset2, 0, 0));
-                        sprite.offsetY = bone.length / 2;
-                        sprite2.offsetY = bone2.length / 2;
-                        sprite3.offsetX = 50;
-                        sprite3.offsetY = 50;
-                    }
-                };
-                _this.onKeyUp = function (event) {
-                };
                 _this.onZoomComplete = function () {
                     _this.anchorToScreen(_this.mouseX, _this.mouseY, _this.stageAnchorX, _this.stageAnchorY);
                     _this.stageAnchorX = NaN;
@@ -106,9 +68,6 @@ var app;
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
-                _this.$canvas
-                    .on('keydown', _this.onKeyDown)
-                    .on('keyup', _this.onKeyUp);
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
@@ -258,6 +217,72 @@ var app;
                 if (duration === void 0) { duration = 1000; }
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
             };
+            Viewport.prototype.zoom = function (direction) {
+                if (direction === void 0) { direction = 1; }
+                this.scaleIndex += direction;
+                if (this.scaleIndex < 0)
+                    this.scaleIndex = 0;
+                else if (this.scaleIndex >= this.scales.length)
+                    this.scaleIndex = this.scales.length - 1;
+                var scale = this.scales[this.scaleIndex];
+                createjs.Tween.get(this, { override: true }).to({ scale: scale }, 50).call(this.onZoomComplete);
+                this.stageAnchorX = this.stageMouse.x;
+                this.stageAnchorY = this.stageMouse.y;
+                this.showMessage("Zoom: " + scale);
+                this.requiresUpdate = true;
+            };
+            /*
+             * Events
+             */
+            Viewport.prototype.onKeyDown = function (event) {
+                var keyCode = event.keyCode;
+                // console.log(keyCode);
+                if (keyCode == Key.Home) {
+                    this.cameraX = 0;
+                    this.cameraY = 0;
+                    this.scale = 1;
+                    this.scaleIndex = 3;
+                }
+                else if (keyCode == Key.Add || keyCode == Key.Equals) {
+                    this.zoom(1);
+                }
+                else if (keyCode == Key.Subtract || keyCode == Key.Dash) {
+                    this.zoom(-1);
+                }
+                else if (keyCode == Key.Delete) {
+                    var selectedNode = this.model.getSelectedNode();
+                    if (selectedNode) {
+                        selectedNode.parent.removeChild(selectedNode);
+                    }
+                }
+                else if (keyCode == Key.A) {
+                    var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
+                    var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
+                    var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
+                    var bone;
+                    var bone2;
+                    var sprite;
+                    var sprite2;
+                    var sprite3;
+                    this.model.clear();
+                    this.model
+                        .addChild(bone = new Bone())
+                        .addChild(sprite = new Sprite(spriteAsset, 0, 0));
+                    sprite3 = new Sprite(spriteAsset3, 0, 0);
+                    sprite3.rotation = Math.PI * 0.25;
+                    bone.addChild(sprite3);
+                    bone2 = new Bone();
+                    bone2.offsetX = -50;
+                    bone.addChild(bone2);
+                    bone2.addChild(sprite2 = new Sprite(spriteAsset2, 0, 0));
+                    sprite.offsetY = bone.length / 2;
+                    sprite2.offsetY = bone2.length / 2;
+                    sprite3.offsetX = 50;
+                    sprite3.offsetY = 50;
+                }
+            };
+            Viewport.prototype.onKeyUp = function (event) {
+            };
             Viewport.prototype.onMouseDown = function (event) {
                 if (event.button == 2) {
                     this.mouseGrabX = this.stageMouse.x;
@@ -278,17 +303,7 @@ var app;
                 }
             };
             Viewport.prototype.onMouseWheel = function (event) {
-                this.scaleIndex += event.originalEvent.wheelDelta > 0 ? 1 : -1;
-                if (this.scaleIndex < 0)
-                    this.scaleIndex = 0;
-                else if (this.scaleIndex >= this.scales.length)
-                    this.scaleIndex = this.scales.length - 1;
-                var scale = this.scales[this.scaleIndex];
-                createjs.Tween.get(this, { override: true }).to({ scale: scale }, 50).call(this.onZoomComplete);
-                this.stageAnchorX = this.stageMouse.x;
-                this.stageAnchorY = this.stageMouse.y;
-                this.showMessage("Zoom: " + scale);
-                this.requiresUpdate = true;
+                this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
             };
             Viewport.prototype.onMouseMove = function (event) {
                 if (!isNaN(this.mouseGrabX)) {

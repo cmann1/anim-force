@@ -44,7 +44,8 @@ div#timeline-tree {
   bottom: 0;
   overflow: auto;
   display: flex;
-  flex-direction: column; }
+  flex-direction: column;
+  outline: none; }
 
 div#timeline-tree-container {
   flex-grow: 1;

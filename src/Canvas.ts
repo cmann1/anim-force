@@ -40,7 +40,9 @@ namespace app
 			this.$canvas
 				.on('mousedown', this.onCanvasMouseDown)
 				.on('wheel', this.onCanvasMouseWheel)
-				.on('mousemove', this.onCanvasMouseMove);
+				.on('mousemove', this.onCanvasMouseMove)
+				.on('keydown', this.onCanvasKeyDown)
+				.on('keyup', this.onCanvasKeyUp);
 			this.$container = this.$canvas.parent();
 
 			app.$window
@@ -77,6 +79,19 @@ namespace app
 		protected onMouseUp(event) {}
 		protected onMouseMove(event) {}
 		protected onMouseWheel(event) {}
+
+		protected onKeyDown(event) {}
+		protected onKeyUp(event) {}
+
+		protected onCanvasKeyDown = (event) =>
+		{
+			this.onKeyDown(event);
+		};
+
+		protected onCanvasKeyUp = (event) =>
+		{
+			this.onKeyUp(event);
+		};
 
 		protected onCanvasMouseDown = (event) =>
 		{
