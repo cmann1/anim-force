@@ -32,7 +32,7 @@ namespace app.model
 
 		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
 		{
-			this.scaleX = Math.sin(app.main.runningTime * 0.025); // TODO: REMOVE
+			this.scaleX = Math.sin(app.main.runningTime * 0.025) * 0.5 + 1; // TODO: REMOVE
 
 			super.prepareForDrawing(worldX, worldY, stretchX, stretchY, worldRotation, drawList);
 

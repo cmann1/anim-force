@@ -15,7 +15,7 @@ namespace app.model
 		protected _name:string;
 
 		public model:Model;
-		public parent:Node;
+		public parent:ContainerNode;
 
 		/// Events
 
@@ -69,10 +69,6 @@ namespace app.model
 		{
 			this.model.setHighlightedNode(selected ? this : null);
 		}
-
-		public addChild(child:Node):Node { return null; }
-		public removeChild(child:Node, triggerEvent=true):Node { return null; }
-		public getChildAt(index:number):Node { return null; }
 
 		public previous(node:Node=null)
 		{
@@ -131,17 +127,17 @@ namespace app.model
 		 * Events
 		 */
 
-		protected onStructureChange(type:string, parent:Node, target:Node, index:number)
+		protected onStructureChange(type:string, parent:ContainerNode, target:Node, index:number, other:Node)
 		{
-			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index));
+			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index, other));
 
 			if(this.parent)
 			{
-				this.parent.onStructureChange(type, parent, target, index);
+				this.parent.onStructureChange(type, parent, target, index, other);
 			}
 			else if(this.model)
 			{
-				this.model.onStructureChange(type, parent, target, index);
+				this.model.onStructureChange(type, parent, target, index, other);
 			}
 		}
 

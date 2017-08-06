@@ -367,9 +367,8 @@ namespace app.viewport
 				var sprite3:Sprite;
 
 				this.model.clear();
-				this.model
-					.addChild(bone = new Bone())
-					.addChild(sprite = new Sprite(spriteAsset, 0, 0));
+				this.model.addChild(bone = new Bone());
+				bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
 
 				sprite3 = new Sprite(spriteAsset3, 0, 0);
 				sprite3.rotation = Math.PI * 0.25;
@@ -405,20 +404,23 @@ namespace app.viewport
 
 		protected onMouseUp(event)
 		{
-			if(!isNaN(this.mouseGrabX))
+			if(event.button == 2)
 			{
-
-				this.mouseGrabX = NaN;
-				this.mouseGrabY = NaN;
-
-				const dx = this.mousePrevX - this.mouseX;
-				const dy = this.mousePrevY - this.mouseY;
-				const dist = Math.sqrt(dx * dx + dy * dy);
-
-				if(dist >= this.flickTolerance)
+				if(!isNaN(this.mouseGrabX))
 				{
-					this.cameraVelX = dx / this.scale * this.flickFactor;
-					this.cameraVelY = dy / this.scale * this.flickFactor;
+
+					this.mouseGrabX = NaN;
+					this.mouseGrabY = NaN;
+
+					const dx = this.mousePrevX - this.mouseX;
+					const dy = this.mousePrevY - this.mouseY;
+					const dist = Math.sqrt(dx * dx + dy * dy);
+
+					if(dist >= this.flickTolerance)
+					{
+						this.cameraVelX = dx / this.scale * this.flickFactor;
+						this.cameraVelY = dy / this.scale * this.flickFactor;
+					}
 				}
 			}
 		}

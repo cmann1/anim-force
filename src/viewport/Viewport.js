@@ -265,9 +265,8 @@ var app;
                     var sprite2;
                     var sprite3;
                     this.model.clear();
-                    this.model
-                        .addChild(bone = new Bone())
-                        .addChild(sprite = new Sprite(spriteAsset, 0, 0));
+                    this.model.addChild(bone = new Bone());
+                    bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
                     sprite3 = new Sprite(spriteAsset3, 0, 0);
                     sprite3.rotation = Math.PI * 0.25;
                     bone.addChild(sprite3);
@@ -291,15 +290,17 @@ var app;
                 }
             };
             Viewport.prototype.onMouseUp = function (event) {
-                if (!isNaN(this.mouseGrabX)) {
-                    this.mouseGrabX = NaN;
-                    this.mouseGrabY = NaN;
-                    var dx = this.mousePrevX - this.mouseX;
-                    var dy = this.mousePrevY - this.mouseY;
-                    var dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist >= this.flickTolerance) {
-                        this.cameraVelX = dx / this.scale * this.flickFactor;
-                        this.cameraVelY = dy / this.scale * this.flickFactor;
+                if (event.button == 2) {
+                    if (!isNaN(this.mouseGrabX)) {
+                        this.mouseGrabX = NaN;
+                        this.mouseGrabY = NaN;
+                        var dx = this.mousePrevX - this.mouseX;
+                        var dy = this.mousePrevY - this.mouseY;
+                        var dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist >= this.flickTolerance) {
+                            this.cameraVelX = dx / this.scale * this.flickFactor;
+                            this.cameraVelY = dy / this.scale * this.flickFactor;
+                        }
                     }
                 }
             };

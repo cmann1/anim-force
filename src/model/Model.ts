@@ -21,6 +21,7 @@ namespace app.model
 		{
 			super('Unnamed Model');
 			this.model = this;
+			this.type = 'model';
 		}
 
 		public prepareForDrawing()
@@ -135,9 +136,9 @@ namespace app.model
 		 * Events
 		 */
 
-		public onStructureChange(type:string, parent:Node, source:Node, index:number)
+		public onStructureChange(type:string, parent:ContainerNode, source:Node, index:number, other:Node)
 		{
-			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index));
+			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
 		}
 	}
 

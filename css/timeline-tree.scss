@@ -11,7 +11,13 @@ div#timeline-tree{
 	flex-direction: column;
 
 	outline: none;
+
+	input.rename{
+		box-shadow: 0 0 7px rgba(0,0,0,0.5);
+		width: 0;
+	}
 }
+
 div#timeline-tree-container{
 	flex-grow: 1;
 	flex-shrink: 1;
@@ -27,118 +33,116 @@ div#timeline-tree-toolbar{
 	display: flex;
 	flex-shrink: 0;
 	align-items: stretch;
-}
-div#timeline-tree-toolbar, div#timeline-tree-toolbar *{
+
 	user-select: none;
-}
-div#timeline-tree-toolbar div{
-	white-space: nowrap;
-	overflow: hidden;
-	display: flex;
-	align-items: stretch;
-	flex-shrink: 0;
-}
-div#timeline-tree-toolbar i{
-	padding: 4px;
-	margin: 0 2px;
-	border-radius: 2px;
-}
-div#timeline-tree-toolbar i:hover{
-	background: $selected-bg;
-	color: $selected-color;
-}
-div#timeline-tree-toolbar i.disabled, div#timeline-tree-toolbar i.disabled:hover{
-	background: inherit !important;
-	color: $disabled-color !important;
-}
-div#timeline-tree-toolbar .filler{
-	flex-grow: 1;
-}
 
-.model-node .item{
-	height: 26px;
-	line-height: 26px;
-	padding: 0 10px;
-	border-bottom: 1px solid #dcdcdc;
-	box-sizing: border-box;
-	background: #fbfbfb;
-
-	display: flex;
-	align-items: center;
-}
-.model-node:hover > .item{
-	background: #ffe3e3;
-	border-color: #FFBFC8;
+	div{
+		white-space: nowrap;
+		overflow: hidden;
+		display: flex;
+		align-items: stretch;
+		flex-shrink: 0;
+	}
+	i{
+		padding: 4px;
+		margin: 0 2px;
+		border-radius: 2px;
+	}
+	i:hover{
+		background: $selected-bg;
+		color: $selected-color;
+	}
+	i.disabled, div#timeline-tree-toolbar i.disabled:hover{
+		background: inherit !important;
+		color: $disabled-color !important;
+	}
+	.filler{
+		flex-grow: 1;
+	}
 
 }
-.model-node .item:hover, .model-node .item.selected{
-	background: $selected-bg;
-	border-color: $selected-border-colour;
-	color: $selected-color;
-}
 
-.model-node .item .icon{
-	display: inline-block;
-	font: normal normal normal 14px/1 FontAwesome;
-	font-size: inherit;
-	text-rendering: auto;
-	-webkit-font-smoothing: antialiased;
+.model-node{
+	.item{
+		height: 29px;
+		line-height: 29px;
+		padding: 0 10px;
+		border-bottom: 1px solid #DCDCDC;
+		box-sizing: border-box;
+		background: #FBFBFB;
+		display: flex;
+		align-items: center;
+	}
+	&:hover > .item{
+		background: #FFE3E3;
+		border-color: #FFBFC8;
+	}
+	.item:hover, .item.selected{
+		background: $selected-bg;
+		border-color: $selected-border-colour;
+		color: $selected-color;
+	}
 
-	margin-right: 5px;
-}
-.model-node .item label{
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-.model-node .item label, .model-node .item input{
-	flex-grow: 1;
-	flex-shrink: 1;
-}
+	.item .icon{
+		display: inline-block;
+		font: normal normal normal 14px/1 FontAwesome;
+		font-size: inherit;
+		text-rendering: auto;
+		-webkit-font-smoothing: antialiased;
+		margin-right: 5px;
+	}
+	.item label{
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		user-select: none;
+	}
+	.item label, .item input{
+		flex-grow: 1;
+		flex-shrink: 1;
+	}
 
-.model-node.model > .item .icon:before{
-	content: "\f1ae"; // child
-}
-.model-node.sprite > .item .icon:before{
-	content: "\f03e"; // image
-}
-.model-node.bone > .item .icon:before{
-	content: "\f0c1"; // chain
-}
+	&.model > .item .icon:before{
+		content: "\f1ae"; // child
+	}
+	&.sprite > .item .icon:before{
+		content: "\f03e"; // image
+	}
+	&.bone > .item .icon:before{
+		content: "\f0c1"; // chain
+	}
 
-.model-node .item .fold-icon{
-	width: 10px;
-	text-align: center;
-	cursor: pointer;
+	.item .fold-icon{
+		width: 10px;
+		text-align: center;
+		cursor: pointer;
+		margin-right: 5px;
+	}
+	.item .fold-icon:before{
+		content: "\f0d7"; // caret-down
+	}
+	.item .fold-icon.collapsed:before{
+		content: "\f0da"; // caret-right
+	}
 
-	margin-right: 5px;
-}
-.model-node .item .fold-icon:before{
-	content: "\f0d7"; // caret-down
-}
-.model-node .item .fold-icon.collapsed:before{
-	content: "\f0da"; // caret-right
-}
-
-.model-node .children{
-	margin-left: 8px;
-	padding-left: 8px;
-	position: relative;
-
-	display: flex;
-	flex-direction: column;
-}
-.model-node .children:before
-{
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 0;
-	bottom: 0;
-	width: 0;
-	border-left: 1px #b7b7b7 dashed;
-}
-.model-node:hover > .children:before{
-	border-color: #703535;
-	//border-color: #355770;
+	.children{
+		margin-left: 8px;
+		padding-left: 8px;
+		position: relative;
+		display: flex;
+		flex-direction: column;
+	}
+	.children:before{
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 0;
+		border-left: 1px #B7B7B7 dashed;
+	}
+	&:hover > .children:before{
+		border-color: #703535;
+		//border-color: #355770;
+	}
 }

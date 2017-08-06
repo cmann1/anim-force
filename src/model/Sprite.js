@@ -33,7 +33,7 @@ var app;
                 return _this;
             }
             Sprite.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
-                this.scaleX = Math.sin(app.main.runningTime * 0.025); // TODO: REMOVE
+                this.scaleX = Math.sin(app.main.runningTime * 0.025) * 0.5 + 1; // TODO: REMOVE
                 _super.prototype.prepareForDrawing.call(this, worldX, worldY, stretchX, stretchY, worldRotation, drawList);
                 drawList.add(this);
             };

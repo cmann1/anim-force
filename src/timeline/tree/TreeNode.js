@@ -6,13 +6,10 @@ var app;
         (function (tree_1) {
             var Key = KeyCodes.Key;
             var TreeNode = (function () {
-                function TreeNode(tree, nodeType, node, allow_children) {
+                function TreeNode(tree, nodeType, node) {
                     var _this = this;
                     this.parent = null;
-                    this.$children = null;
-                    this.$foldIcon = null;
                     this.$label = null;
-                    this.childrenVisible = true;
                     /*
                      * Events
                      */
@@ -29,22 +26,15 @@ var app;
                     };
                     this.onMouseDown = function (event) {
                         _this.node.setSelected(true);
+                        _this.tree.waitForDrag(_this, event);
+                        event.preventDefault();
+                        return false;
                     };
                     this.onMouseEnter = function (event) {
                         _this.node.setHighlighted(true);
                     };
                     this.onMouseExit = function (event) {
                         _this.node.setHighlighted(false);
-                    };
-                    this.onToggleChildren = function (event) {
-                        _this.childrenVisible = !_this.childrenVisible;
-                        if (_this.childrenVisible) {
-                            _this.$children.slideDown(50);
-                        }
-                        else {
-                            _this.$children.slideUp(50);
-                        }
-                        _this.$foldIcon.toggleClass('collapsed', !_this.childrenVisible);
                     };
                     this.tree = tree;
                     this.node = node;
@@ -54,7 +44,8 @@ var app;
                         '<i class="icon"></i>' +
                         '<label> ' + node.name + '</label>' +
                         '</div>' +
-                        '</div>');
+                        '</div>')
+                        .data('tree-node', this);
                     this.$label = this.$element.find('label')
                         .on('dblclick', this.onLabelDblClick);
                     this.$element.addClass(nodeType);
@@ -62,36 +53,7 @@ var app;
                         .on('mousedown', this.onMouseDown)
                         .on('mouseenter', this.onMouseEnter)
                         .on('mouseleave', this.onMouseExit);
-                    if (allow_children) {
-                        this.children = [];
-                        this.$element.append(this.$children = $('<div class="children"></div>'));
-                        this.$item.prepend(this.$foldIcon = $('<i class="fa fold-icon"></i>').on('click', this.onToggleChildren));
-                    }
                 }
-                TreeNode.prototype.clear = function () {
-                    this.$children.empty();
-                    this.children = [];
-                };
-                TreeNode.prototype.addChild = function (node) {
-                    if (node.parent == this)
-                        return;
-                    if (node.parent)
-                        node.parent.removeChild(node);
-                    node.parent = this;
-                    this.children.push(node);
-                    this.$children.append(node.$element);
-                };
-                TreeNode.prototype.removeChild = function (node) {
-                    if (node.parent != this)
-                        return;
-                    node.$element.remove();
-                    node.parent = null;
-                    this.children.splice(this.children.indexOf(node), 1);
-                };
-                TreeNode.prototype.addNode = function (node) {
-                    this.node.addChild(node);
-                    return node;
-                };
                 TreeNode.prototype.deleteNode = function () {
                     this.node.parent.removeChild(this.node);
                 };
@@ -133,6 +95,18 @@ var app;
                     TreeNode.renameNode = null;
                     TreeNode.$renameInput.after(this.$label).detach();
                     this.tree.focus();
+                };
+                TreeNode.prototype.handleDragOver = function (treeNode, x, y, recurse) {
+                    if (recurse === void 0) { recurse = true; }
+                    if (treeNode == this)
+                        return false;
+                    if (y < this.$item.height() * 0.5) {
+                        this.$element.before(treeNode.$element);
+                    }
+                    else {
+                        this.$element.after(treeNode.$element);
+                    }
+                    return true;
                 };
                 TreeNode.onRenameInputBlur = function (event) {
                     if (TreeNode.renameNode) {

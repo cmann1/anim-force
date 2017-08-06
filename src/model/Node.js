@@ -41,12 +41,6 @@ var app;
             Node.prototype.setHighlighted = function (selected) {
                 this.model.setHighlightedNode(selected ? this : null);
             };
-            Node.prototype.addChild = function (child) { return null; };
-            Node.prototype.removeChild = function (child, triggerEvent) {
-                if (triggerEvent === void 0) { triggerEvent = true; }
-                return null;
-            };
-            Node.prototype.getChildAt = function (index) { return null; };
             Node.prototype.previous = function (node) {
                 if (node === void 0) { node = null; }
                 if (node)
@@ -94,13 +88,13 @@ var app;
             /*
              * Events
              */
-            Node.prototype.onStructureChange = function (type, parent, target, index) {
-                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index));
+            Node.prototype.onStructureChange = function (type, parent, target, index, other) {
+                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index, other));
                 if (this.parent) {
-                    this.parent.onStructureChange(type, parent, target, index);
+                    this.parent.onStructureChange(type, parent, target, index, other);
                 }
                 else if (this.model) {
-                    this.model.onStructureChange(type, parent, target, index);
+                    this.model.onStructureChange(type, parent, target, index, other);
                 }
             };
             Node.prototype.onPropertyChange = function (type) {

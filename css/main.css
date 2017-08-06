@@ -21,6 +21,15 @@
   opacity: 1;
   bottom: -35px; }
 
+input {
+  outline: none;
+  border: 2px solid #505050;
+  border-radius: 3px;
+  padding: 2px;
+  background: #efefef;
+  font-family: inherit;
+  font-size: inherit; }
+
 .splitter-partition {
   position: absolute; }
 
@@ -46,6 +55,9 @@ div#timeline-tree {
   display: flex;
   flex-direction: column;
   outline: none; }
+  div#timeline-tree input.rename {
+    box-shadow: 0 0 7px rgba(0, 0, 0, 0.5);
+    width: 0; }
 
 div#timeline-tree-container {
   flex-grow: 1;
@@ -60,53 +72,43 @@ div#timeline-tree-toolbar {
   overflow: hidden;
   display: flex;
   flex-shrink: 0;
-  align-items: stretch; }
-
-div#timeline-tree-toolbar, div#timeline-tree-toolbar * {
-  user-select: none; }
-
-div#timeline-tree-toolbar div {
-  white-space: nowrap;
-  overflow: hidden;
-  display: flex;
   align-items: stretch;
-  flex-shrink: 0; }
-
-div#timeline-tree-toolbar i {
-  padding: 4px;
-  margin: 0 2px;
-  border-radius: 2px; }
-
-div#timeline-tree-toolbar i:hover {
-  background: indianred;
-  color: #FFF; }
-
-div#timeline-tree-toolbar i.disabled, div#timeline-tree-toolbar i.disabled:hover {
-  background: inherit !important;
-  color: #b5b5b5 !important; }
-
-div#timeline-tree-toolbar .filler {
-  flex-grow: 1; }
+  user-select: none; }
+  div#timeline-tree-toolbar div {
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0; }
+  div#timeline-tree-toolbar i {
+    padding: 4px;
+    margin: 0 2px;
+    border-radius: 2px; }
+  div#timeline-tree-toolbar i:hover {
+    background: indianred;
+    color: #FFF; }
+  div#timeline-tree-toolbar i.disabled, div#timeline-tree-toolbar div#timeline-tree-toolbar i.disabled:hover {
+    background: inherit !important;
+    color: #b5b5b5 !important; }
+  div#timeline-tree-toolbar .filler {
+    flex-grow: 1; }
 
 .model-node .item {
-  height: 26px;
-  line-height: 26px;
+  height: 29px;
+  line-height: 29px;
   padding: 0 10px;
-  border-bottom: 1px solid #dcdcdc;
+  border-bottom: 1px solid #DCDCDC;
   box-sizing: border-box;
-  background: #fbfbfb;
+  background: #FBFBFB;
   display: flex;
   align-items: center; }
-
 .model-node:hover > .item {
-  background: #ffe3e3;
+  background: #FFE3E3;
   border-color: #FFBFC8; }
-
 .model-node .item:hover, .model-node .item.selected {
   background: indianred;
   border-color: #CD3D51;
   color: #FFF; }
-
 .model-node .item .icon {
   display: inline-block;
   font: normal normal normal 14px/1 FontAwesome;
@@ -114,44 +116,35 @@ div#timeline-tree-toolbar .filler {
   text-rendering: auto;
   -webkit-font-smoothing: antialiased;
   margin-right: 5px; }
-
 .model-node .item label {
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; }
-
+  text-overflow: ellipsis;
+  user-select: none; }
 .model-node .item label, .model-node .item input {
   flex-grow: 1;
   flex-shrink: 1; }
-
 .model-node.model > .item .icon:before {
   content: "\f1ae"; }
-
 .model-node.sprite > .item .icon:before {
   content: "\f03e"; }
-
 .model-node.bone > .item .icon:before {
   content: "\f0c1"; }
-
 .model-node .item .fold-icon {
   width: 10px;
   text-align: center;
   cursor: pointer;
   margin-right: 5px; }
-
 .model-node .item .fold-icon:before {
   content: "\f0d7"; }
-
 .model-node .item .fold-icon.collapsed:before {
   content: "\f0da"; }
-
 .model-node .children {
   margin-left: 8px;
   padding-left: 8px;
   position: relative;
   display: flex;
   flex-direction: column; }
-
 .model-node .children:before {
   content: '';
   position: absolute;
@@ -159,8 +152,7 @@ div#timeline-tree-toolbar .filler {
   top: 0;
   bottom: 0;
   width: 0;
-  border-left: 1px #b7b7b7 dashed; }
-
+  border-left: 1px #B7B7B7 dashed; }
 .model-node:hover > .children:before {
   border-color: #703535; }
 

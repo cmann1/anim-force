@@ -12,11 +12,12 @@ var events;
 (function (events) {
     var StructureChangeEvent = (function (_super) {
         __extends(StructureChangeEvent, _super);
-        function StructureChangeEvent(type, parent, target, index) {
+        function StructureChangeEvent(type, parent, target, index, other) {
             var _this = _super.call(this, type, null) || this;
             _this.parent = parent;
             _this.target = target;
             _this.index = index;
+            _this.other = other;
             return _this;
         }
         return StructureChangeEvent;

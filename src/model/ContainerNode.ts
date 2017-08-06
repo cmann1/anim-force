@@ -30,23 +30,49 @@ namespace app.model
 				return this
 			}
 
-			var eventType = 'addChild';
-
 			if(child.parent)
 			{
 				child.parent.removeChild(child, false);
-				eventType = 'reParent';
 			}
 
-			child.model = this.model;
+			child.setModel(this.model);
 			child.parent = this;
 			this.children.push(child);
 			this.childCount++;
 
 			if(triggerEvent)
 			{
-				this.onStructureChange(eventType, this, child, this.childCount - 1);
+				this.onStructureChange('addChild', this, child, this.childCount - 1, null);
 			}
+
+			return child;
+		}
+
+		public addChildBefore(child:Node, sibling:Node):Node
+		{
+			if(!sibling) return this.addChild(child);
+			if(sibling.parent != this) return child;
+
+			if(child.parent == this && this.children.indexOf(child) == this.children.indexOf(sibling) - 1) return;
+
+			if(child.parent)
+			{
+				if(child.parent == this)
+				{
+					this.children.splice(this.children.indexOf(child), 1);
+				}
+				else
+				{
+					child.parent.removeChild(child, false);
+					this.childCount++;
+				}
+			}
+
+			child.parent = this;
+			child.setModel(this.model);
+			this.children.splice(this.children.indexOf(sibling), 0, child);
+
+			this.onStructureChange('addChild', this, child, this.children.indexOf(child), sibling);
 
 			return child;
 		}
@@ -64,7 +90,7 @@ namespace app.model
 
 				if(triggerEvent)
 				{
-					this.onStructureChange('removeChild', this, child, index);
+					this.onStructureChange('removeChild', this, child, index, null);
 				}
 			}
 
@@ -137,7 +163,7 @@ namespace app.model
 			this.children = [];
 			this.childCount = 0;
 
-			this.onStructureChange('clear', this, null, -1);
+			this.onStructureChange('clear', this, null, -1, null);
 		}
 
 	}

@@ -25,6 +25,7 @@ var app;
                 /// Events
                 _this.selectionChange = new EventDispatcher();
                 _this.model = _this;
+                _this.type = 'model';
                 return _this;
             }
             Model.prototype.prepareForDrawing = function () {
@@ -104,8 +105,8 @@ var app;
             /*
              * Events
              */
-            Model.prototype.onStructureChange = function (type, parent, source, index) {
-                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index));
+            Model.prototype.onStructureChange = function (type, parent, source, index, other) {
+                this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
             };
             return Model;
         }(model.ContainerNode));

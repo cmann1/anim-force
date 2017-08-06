@@ -1,7 +1,6 @@
 /*
 // TODO: Timeline:
-// TODO: - Drag to reorder
-// TODO: - Undo/Redo - Before it's too late! But it's gonna be tough
+// TODO: - Drag to reorder/reparent
 // TODO: -
 // TODO: Viewport:
 // TODO: - Interaction - election, dragging, rotating, etc

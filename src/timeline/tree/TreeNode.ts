@@ -14,17 +14,13 @@ namespace app.timeline.tree
 		public tree:TimelineTree;
 		public node:Node;
 
-		public parent:TreeNode = null;
-		public children:TreeNode[];
+		public parent:ContainerTreeNode = null;
 
 		public $element:JQuery;
 		public $item:JQuery;
-		public $children:JQuery = null;
-		public $foldIcon:JQuery = null;
 		public $label:JQuery = null;
-		public childrenVisible:boolean = true;
 
-		constructor(tree:TimelineTree, nodeType:string, node:Node|Model, allow_children:boolean)
+		constructor(tree:TimelineTree, nodeType:string, node:Node)
 		{
 			this.tree = tree;
 			this.node = node;
@@ -37,7 +33,8 @@ namespace app.timeline.tree
 						'<label> ' + node.name  + '</label>' +
 					'</div>' +
 				'</div>'
-			);
+			)
+				.data('tree-node', this);
 
 			this.$label = this.$element.find('label')
 				.on('dblclick', this.onLabelDblClick);
@@ -47,48 +44,6 @@ namespace app.timeline.tree
 				.on('mousedown', this.onMouseDown)
 				.on('mouseenter', this.onMouseEnter)
 				.on('mouseleave', this.onMouseExit);
-
-			if(allow_children)
-			{
-				this.children = [];
-				this.$element.append(this.$children = $('<div class="children"></div>'));
-				this.$item.prepend(
-					this.$foldIcon = $('<i class="fa fold-icon"></i>').on('click', this.onToggleChildren)
-				);
-			}
-		}
-
-		public clear()
-		{
-			this.$children.empty();
-			this.children = [];
-		}
-
-		public addChild(node:TreeNode)
-		{
-			if(node.parent == this) return;
-
-			if(node.parent) node.parent.removeChild(node);
-
-			node.parent = this;
-			this.children.push(node);
-			this.$children.append(node.$element);
-		}
-
-		public removeChild(node:TreeNode)
-		{
-			if(node.parent != this) return;
-
-			node.$element.remove();
-			node.parent = null;
-			this.children.splice(this.children.indexOf(node), 1);
-		}
-
-		public addNode(node:Node):Node
-		{
-			this.node.addChild(node);
-
-			return node;
 		}
 
 		public deleteNode()
@@ -146,6 +101,22 @@ namespace app.timeline.tree
 			this.tree.focus();
 		}
 
+		public handleDragOver(treeNode:TreeNode, x:number, y:number, recurse:boolean=true):boolean
+		{
+			if(treeNode == this) return false;
+
+			if(y < this.$item.height() * 0.5)
+			{
+				this.$element.before(treeNode.$element);
+			}
+			else
+			{
+				this.$element.after(treeNode.$element);
+			}
+
+			return true;
+		}
+
 		/*
 		 * Events
 		 */
@@ -170,6 +141,11 @@ namespace app.timeline.tree
 		protected onMouseDown = (event) =>
 		{
 			this.node.setSelected(true);
+
+			this.tree.waitForDrag(this, event);
+
+			event.preventDefault();
+			return false;
 		};
 
 		protected onMouseEnter = (event) =>
@@ -180,22 +156,6 @@ namespace app.timeline.tree
 		protected onMouseExit = (event) =>
 		{
 			this.node.setHighlighted(false);
-		};
-
-		protected onToggleChildren = (event) =>
-		{
-			this.childrenVisible = !this.childrenVisible;
-
-			if(this.childrenVisible)
-			{
-				this.$children.slideDown(50);
-			}
-			else
-			{
-				this.$children.slideUp(50);
-			}
-
-			this.$foldIcon.toggleClass('collapsed', !this.childrenVisible);
 		};
 
 		private static onRenameInputBlur(event)
