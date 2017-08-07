@@ -7,6 +7,7 @@ namespace app.viewport
 	import Bone = app.model.Bone;
 	import SelectionEvent = events.SelectionEvent;
 	import StructureChangeEvent = events.StructureChangeEvent;
+	import Node = app.model.Node;
 
 	export class Viewport extends app.Canvas
 	{
@@ -25,6 +26,7 @@ namespace app.viewport
 		protected flickTolerance:number = 4;
 		protected flickFactor:number = 10;
 
+		protected viewportAABB:AABB = new AABB();
 		protected viewLeft:number;
 		protected viewRight:number;
 		protected viewTop:number;
@@ -94,6 +96,10 @@ namespace app.viewport
 			this.viewRight = this.viewLeft + viewWidth;
 			this.viewTop = this.cameraY - viewHeight * 0.5;
 			this.viewBottom = this.viewTop + viewHeight;
+			this.viewportAABB.x1 = this.viewLeft;
+			this.viewportAABB.y1 = this.viewTop;
+			this.viewportAABB.x2 = this.viewRight;
+			this.viewportAABB.y2 = this.viewBottom;
 
 			if(!isNaN(this.stageAnchorX))
 			{
@@ -118,10 +124,11 @@ namespace app.viewport
 			this.drawGrid();
 
 			ctx.translate(this.centreX, this.centreY);
-			ctx.scale(this.scale, this.scale);
-			ctx.translate(-this.cameraX, -this.cameraY);
+			ctx.translate(-this.cameraX * this.scale, -this.cameraY * this.scale);
 
-			this.model.draw(this.ctx);
+			this.model.drawModel(this.ctx, this.scale, this.viewportAABB);
+
+			// this.viewportAABB.draw(ctx, this.scale);
 
 			ctx.restore();
 
@@ -312,7 +319,7 @@ namespace app.viewport
 			this.requiresUpdate = true;
 		};
 
-		protected onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
+		protected onModelStructureChange = (model:Node, event:StructureChangeEvent) =>
 		{
 			this.requiresUpdate = true;
 		};

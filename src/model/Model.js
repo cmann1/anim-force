@@ -28,27 +28,33 @@ var app;
                 _this.type = 'model';
                 return _this;
             }
-            Model.prototype.prepareForDrawing = function () {
+            Model.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
-                    child.prepareForDrawing(0, 0, 1, 1, 0, this.drawList);
+                    child.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
                 }
             };
-            Model.prototype.draw = function (ctx) {
+            Model.prototype.draw = function (ctx, worldScale) {
+                console.error('Use drawModel instead');
+            };
+            Model.prototype.drawModel = function (ctx, worldScale, viewport) {
                 this.drawList.clear();
-                this.prepareForDrawing();
+                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                    var child = _a[_i];
+                    child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+                }
                 ctx.save();
                 var drawList = this.drawList.list;
                 drawList.sort(Model.nodeDrawOrder);
-                for (var _i = 0, drawList_1 = drawList; _i < drawList_1.length; _i++) {
-                    var node = drawList_1[_i];
-                    node.draw(ctx);
+                for (var _b = 0, drawList_1 = drawList; _b < drawList_1.length; _b++) {
+                    var node = drawList_1[_b];
+                    node.draw(ctx, worldScale);
                 }
                 ctx.restore();
                 ctx.save();
-                for (var _a = 0, _b = this.children; _a < _b.length; _a++) {
-                    var child = _b[_a];
-                    child.drawControls(ctx);
+                for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
+                    var child = _d[_c];
+                    child.drawControls(ctx, worldScale, viewport);
                 }
                 ctx.restore();
             };

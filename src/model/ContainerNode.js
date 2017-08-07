@@ -12,6 +12,7 @@ var app;
 (function (app) {
     var model;
     (function (model_1) {
+        var AABB = app.viewport.AABB;
         var ContainerNode = (function (_super) {
             __extends(ContainerNode, _super);
             function ContainerNode(name) {
@@ -19,6 +20,7 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.children = [];
                 _this.childCount = 0;
+                _this.childrenWorldAABB = new AABB();
                 _this.canHaveChildren = true;
                 return _this;
             }

@@ -4,6 +4,7 @@ namespace app.model
 	import EventDispatcher = events.EventDispatcher;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import SelectionEvent = events.SelectionEvent;
+	import AABB = app.viewport.AABB;
 
 	export class Model extends ContainerNode
 	{
@@ -24,32 +25,40 @@ namespace app.model
 			this.type = 'model';
 		}
 
-		public prepareForDrawing()
+		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
 		{
 			for(var child of this.children)
 			{
-				child.prepareForDrawing(0, 0, 1, 1, 0, this.drawList);
+				child.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
 			}
 		}
 
-		public draw(ctx:CanvasRenderingContext2D)
+		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
+		{
+			console.error('Use drawModel instead');
+		}
+
+		public drawModel(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
 			this.drawList.clear();
-			this.prepareForDrawing();
+			for(var child of this.children)
+			{
+				child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+			}
 
 			ctx.save();
 			var drawList:Node[] = this.drawList.list;
 			drawList.sort(Model.nodeDrawOrder);
 			for(var node of drawList)
 			{
-				node.draw(ctx);
+				node.draw(ctx, worldScale);
 			}
 			ctx.restore();
 
 			ctx.save();
 			for(var child of this.children)
 			{
-				child.drawControls(ctx);
+				child.drawControls(ctx, worldScale, viewport);
 			}
 			ctx.restore();
 		}

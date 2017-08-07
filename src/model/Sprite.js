@@ -32,31 +32,49 @@ var app;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
                 return _this;
             }
-            Sprite.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
-                this.scaleX = Math.sin(app.main.runningTime * 0.025) * 0.5 + 1; // TODO: REMOVE
-                _super.prototype.prepareForDrawing.call(this, worldX, worldY, stretchX, stretchY, worldRotation, drawList);
-                drawList.add(this);
+            Sprite.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
+                this.scaleX = Math.sin(app.main.runningTime * 0.01) * 0.5 + 1; // TODO: REMOVE
+                _super.prototype.prepareForDrawing.call(this, worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
+                var cosR = Math.abs(Math.cos(this.worldRotation));
+                var sinR = Math.abs(Math.sin(this.worldRotation));
+                var w = (this.srcHeight * this.scaleY * sinR + this.srcWidth * this.scaleX * cosR) * 0.5;
+                var h = (this.srcWidth * this.scaleX * sinR + this.srcHeight * this.scaleY * cosR) * 0.5;
+                this.worldAABB.x1 = this.worldX - w;
+                this.worldAABB.y1 = this.worldY - h;
+                this.worldAABB.x2 = this.worldX + w;
+                this.worldAABB.y2 = this.worldY + h;
+                if (this.worldAABB.intersects(viewport)) {
+                    drawList.add(this);
+                }
             };
-            Sprite.prototype.draw = function (ctx) {
+            Sprite.prototype.draw = function (ctx, worldScale) {
                 ctx.save();
-                ctx.translate(this.worldX, this.worldY);
+                ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
                 ctx.rotate(this.worldRotation);
-                ctx.scale(this.scaleX, this.scaleY);
+                ctx.scale(this.scaleX * worldScale, this.scaleY * worldScale);
                 ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
                 ctx.drawImage(this.src, this.srcX, this.srcY, this.srcWidth, this.srcHeight, 0, 0, this.srcWidth, this.srcHeight);
                 ctx.restore();
             };
-            Sprite.prototype.drawControls = function (ctx) {
+            Sprite.prototype.drawControls = function (ctx, worldScale, viewport) {
+                if (!this.worldAABB.intersects(viewport))
+                    return;
                 ctx.save();
-                ctx.translate(this.worldX, this.worldY);
+                var scaleX = this.scaleX * worldScale;
+                var scaleY = this.scaleY * worldScale;
+                ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
                 ctx.rotate(this.worldRotation);
-                ctx.scale(this.scaleX, this.scaleY);
-                ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
-                ctx.strokeStyle = this.selected ? app.ColourConfig.selected : (this.highlighted ? app.ColourConfig.highlighted : '#888');
+                ctx.translate(-this.srcWidth * 0.5 * scaleX, -this.srcHeight * 0.5 * scaleY);
+                ctx.setLineDash([2, 2]);
+                ctx.strokeStyle = this.selected ? app.Config.selected : (this.highlighted ? app.Config.highlighted : app.Config.control);
+                ctx.lineWidth = this.selected ? 2 : 1;
                 ctx.beginPath();
-                ctx.rect(0, 0, this.srcWidth, this.srcHeight);
+                ctx.rect(0, 0, this.srcWidth * scaleX, this.srcHeight * scaleY);
                 ctx.stroke();
                 ctx.restore();
+                if (app.Config.drawAABB) {
+                    this.worldAABB.draw(ctx, worldScale);
+                }
             };
             return Sprite;
         }(model.Node));

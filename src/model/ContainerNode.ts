@@ -1,10 +1,14 @@
 namespace app.model
 {
 
+	import AABB = app.viewport.AABB;
+
 	export class ContainerNode extends Node
 	{
 		public children:Node[] = [];
 		public childCount:number = 0;
+
+		public childrenWorldAABB:AABB = new AABB();
 
 		constructor(name:string=null)
 		{

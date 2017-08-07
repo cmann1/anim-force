@@ -5,6 +5,7 @@ var app;
         var EventDispatcher = events.EventDispatcher;
         var StructureChangeEvent = events.StructureChangeEvent;
         var PropertyChangeEvent = events.PropertyChangeEvent;
+        var AABB = app.viewport.AABB;
         var Node = (function () {
             ///
             function Node(name) {
@@ -21,6 +22,7 @@ var app;
                 this.layer = 17;
                 this.subLayer = 19;
                 /// Rendering related
+                this.worldAABB = new AABB();
                 this.worldX = 0;
                 this.worldY = 0;
                 this.worldRotation = 0;
@@ -57,14 +59,14 @@ var app;
                     return this;
                 return this.parent.next(this);
             };
-            Node.prototype.prepareForDrawing = function (worldX, worldY, stretchX, stretchY, worldRotation, drawList) {
+            Node.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
                 var offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
                 this.worldX = worldX + offset.x;
                 this.worldY = worldY + offset.y;
                 this.worldRotation = worldRotation + this.rotation;
             };
-            Node.prototype.draw = function (ctx) { };
-            Node.prototype.drawControls = function (ctx) { };
+            Node.prototype.draw = function (ctx, worldScale) { };
+            Node.prototype.drawControls = function (ctx, worldScale, viewport) { };
             Object.defineProperty(Node.prototype, "name", {
                 get: function () {
                     return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;

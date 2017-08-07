@@ -4,6 +4,7 @@ namespace app.model
 	import EventDispatcher = events.EventDispatcher;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import PropertyChangeEvent = events.PropertyChangeEvent;
+	import AABB = app.viewport.AABB;
 
 	export class Node
 	{
@@ -35,6 +36,7 @@ namespace app.model
 
 		/// Rendering related
 
+		public worldAABB:AABB = new AABB();
 		public worldX:number = 0;
 		public worldY:number = 0;
 		public worldRotation:number = 0;
@@ -86,7 +88,7 @@ namespace app.model
 			return this.parent.next(this);
 		}
 
-		public prepareForDrawing(worldX:number, worldY:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList)
+		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
 		{
 			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
 
@@ -96,9 +98,9 @@ namespace app.model
 			this.worldRotation = worldRotation + this.rotation;
 		}
 
-		public draw(ctx:CanvasRenderingContext2D) { }
+		public draw(ctx:CanvasRenderingContext2D, worldScale:number) { }
 
-		public drawControls(ctx:CanvasRenderingContext2D) { }
+		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB) { }
 
 		get name():string
 		{

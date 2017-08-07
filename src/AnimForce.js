@@ -1,12 +1,16 @@
 /*
-// TODO: Timeline:
-// TODO: - Drag to reorder/reparent
-// TODO: -
 // TODO: Viewport:
-// TODO: - Interaction - election, dragging, rotating, etc
-// TODO: Draw controls:
-// TODO: - Independent of zoom and scale
-// TODO: - Mouse interaction
+// TODO: - Hit testing:
+// TODO: - - Use aabb
+// TODO: - - Line test for bones
+// TODO: - - Rotated rect for sprites
+// TODO: - - Pixel for sprites?
+// TODO: - Draw controls - Independent of zoom and scale
+// TODO: - Interaction - selection, dragging, rotating, etc
+// TODO: Property panel:
+// TODO: - ????
+// TODO: Timeline:
+// TODO: -
 // TODO: Help?
 // TODO: - List of shortcut keys
 
