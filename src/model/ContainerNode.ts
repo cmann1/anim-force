@@ -2,11 +2,15 @@ namespace app.model
 {
 
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export class ContainerNode extends Node
 	{
 		public children:Node[] = [];
 		public childCount:number = 0;
+
+		public worldEndPointX:number = 0;
+		public worldEndPointY:number = 0;
 
 		public childrenWorldAABB:AABB = new AABB();
 
@@ -143,6 +147,24 @@ namespace app.model
 			return index >= this.childCount
 				? this.parent ? this.parent.next(this) : this
 				: this.children[index];
+		}
+
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			if(this.childrenWorldAABB.contains(x, y))
+			{
+				for(let i = this.childCount - 1; i >= 0; i--)
+				{
+					const child = this.children[i];
+
+					if(child.hitTest(x, y, worldScaleFactor, result))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		public setModel(model:Model)

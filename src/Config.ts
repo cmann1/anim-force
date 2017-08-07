@@ -8,7 +8,9 @@ namespace app
 
 		static control = '#333';
 		static selected = '#CD3D51';
-		static highlighted = '#34b5d5';
+		static highlighted = '#de7777';
+
+		static interactionTolerance = 2;
 
 		static bone = '#eee';
 		static boneThickness = 3;
@@ -17,6 +19,9 @@ namespace app
 		static AABB = '#F00';
 		static childrenAABB = '#0F0';
 		static boneAABB = '#00F';
+
+		static boneClick = Config.boneThickness + Config.interactionTolerance;
+		static boneEndPointClick = Config.boneEndPointRadius + Config.interactionTolerance;
 
 	}
 

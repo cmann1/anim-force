@@ -40,8 +40,8 @@ var app;
             Node.prototype.setSelected = function (selected) {
                 this.model.setSelectedNode(selected ? this : null);
             };
-            Node.prototype.setHighlighted = function (selected) {
-                this.model.setHighlightedNode(selected ? this : null);
+            Node.prototype.setHighlighted = function (highlighted) {
+                this.model.setHighlightedNode(highlighted ? this : null);
             };
             Node.prototype.previous = function (node) {
                 if (node === void 0) { node = null; }
@@ -58,6 +58,22 @@ var app;
                 if (!this.parent)
                     return this;
                 return this.parent.next(this);
+            };
+            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
+                if (interaction.part == 'base') {
+                    var worldCentreX = this.parent ? this.parent.worldEndPointX : 0;
+                    var worldCentreY = this.parent ? this.parent.worldEndPointY : 0;
+                    var worldRotation = this.parent ? this.parent.worldRotation : 0;
+                    this.offsetX = x - worldCentreX;
+                    this.offsetY = y - worldCentreY;
+                    var local = Node.rotate(this.offsetX, this.offsetY, -worldRotation);
+                    var localOffset = Node.rotate(interaction.x, interaction.y, interaction.offset);
+                    this.offsetX = local.x - localOffset.x;
+                    this.offsetY = local.y - localOffset.y;
+                    return true;
+                }
+                return false;
             };
             Node.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
                 var offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);

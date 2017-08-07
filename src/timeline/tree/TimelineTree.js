@@ -56,7 +56,10 @@ var app;
                         }
                     };
                     this.onModelSelectionChange = function (model, event) {
-                        if (event.type == 'selection') {
+                        if (event.type == 'highlight') {
+                            _this.updateHighlight(event.target);
+                        }
+                        else if (event.type == 'selection') {
                             _this.updateSelection(event.target);
                         }
                     };
@@ -207,6 +210,19 @@ var app;
                 TimelineTree.prototype.showAddMenu = function (show) {
                     show = show && this.selectedNode.node.canHaveChildren;
                     this.$toolbarAddMenu.stop(true).animate({ width: show ? 'show' : 'hide' }, 250);
+                };
+                TimelineTree.prototype.updateHighlight = function (target) {
+                    var targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+                    if (targetNode == this.rootNode) {
+                        target = null;
+                        targetNode = null;
+                    }
+                    if (targetNode == this.highlightedNode)
+                        return;
+                    if (this.highlightedNode)
+                        this.highlightedNode.highlighted = false;
+                    if ((this.highlightedNode = targetNode))
+                        this.highlightedNode.highlighted = true;
                 };
                 TimelineTree.prototype.updateSelection = function (target) {
                     var targetNode = target ? this.nodeMap[target.id] : this.rootNode;

@@ -2,14 +2,12 @@ namespace app.model
 {
 
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export class Bone extends ContainerNode
 	{
 		public length:number = 100;
 		public stretch:number = 1;
-
-		public worldEndPointX:number = 0;
-		public worldEndPointY:number = 0;
 
 		public boneWorldAABB:AABB = new AABB();
 
@@ -20,10 +18,70 @@ namespace app.model
 			this.type = 'bone';
 		}
 
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			if(this.boneWorldAABB.contains(x, y))
+			{
+				var dx:number, dy:number;
+
+				result.offset = this.parent ? -this.parent.worldRotation : 0;
+				result.node = this;
+
+				dx = x - this.worldEndPointX;
+				dy = y - this.worldEndPointY;
+				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneEndPointClick * worldScaleFactor)
+				{
+					dx = x - this.worldX;
+					dy = y - this.worldY;
+					result.offset = Math.atan2(dy, dx) - this.rotation;
+
+					result.part = 'endPoint';
+
+					return true;
+				}
+
+				dx = x - this.worldX;
+				dy = y - this.worldY;
+				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneEndPointClick * worldScaleFactor)
+				{
+					result.x = dx;
+					result.y = dy;
+					result.part = 'base';
+					return true;
+				}
+
+				var boneHit = this.getClosestPointOnBone(x, y);
+				dx = x - boneHit.x;
+				dy = y - boneHit.y;
+				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneClick * worldScaleFactor)
+				{
+					result.x = x - this.worldX;
+					result.y = y - this.worldY;
+					result.part = 'base';
+					return true;
+				}
+			}
+
+			return super.hitTest(x, y, worldScaleFactor, result);
+		}
+
+		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
+		{
+			if(interaction.part == 'endPoint')
+			{
+				var dx = x - this.worldX;
+				var dy = y - this.worldY;
+
+				this.rotation = Math.atan2(dy, dx) - interaction.offset;
+
+				return true;
+			}
+
+			return super.updateInteraction(x, y, worldScaleFactor, interaction);
+		}
+
 		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
 		{
-			this.rotation += 0.005; // TODO: REMOVE
-
 			super.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
 
 			const endPoint = Node.rotate(0, -this.length * this.stretch, this.worldRotation);
@@ -144,6 +202,30 @@ namespace app.model
 			}
 
 			ctx.restore();
+		}
+
+		public getClosestPointOnBone(x:number, y:number)
+		{
+			var dx = this.worldEndPointX - this.worldX;
+			var dy = this.worldEndPointY - this.worldY;
+
+			var u = ((x - this.worldX) * dx + (y - this.worldY) * dy) / (dx * dx + dy * dy);
+			var lineX, lineY;
+
+			if(u < 0){
+				lineX = this.worldX;
+				lineY = this.worldY;
+			}
+			else if(u > 1){
+				lineX = this.worldEndPointX;
+				lineY = this.worldEndPointY;
+			}
+			else{
+				lineX = this.worldX + u * dx;
+				lineY = this.worldY + u * dy;
+			}
+
+			return {x: lineX, y: lineY};
 		}
 
 	}

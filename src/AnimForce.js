@@ -1,16 +1,11 @@
 /*
 // TODO: Viewport:
-// TODO: - Hit testing:
-// TODO: - - Use aabb
-// TODO: - - Line test for bones
-// TODO: - - Rotated rect for sprites
-// TODO: - - Pixel for sprites?
-// TODO: - Draw controls - Independent of zoom and scale
 // TODO: - Interaction - selection, dragging, rotating, etc
+// TODO: - Sprite rotation handle
 // TODO: Property panel:
 // TODO: - ????
 // TODO: Timeline:
-// TODO: -
+// TODO: - ????
 // TODO: Help?
 // TODO: - List of shortcut keys
 

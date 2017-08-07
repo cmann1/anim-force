@@ -5,6 +5,7 @@ namespace app.model
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import PropertyChangeEvent = events.PropertyChangeEvent;
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export class Node
 	{
@@ -67,9 +68,9 @@ namespace app.model
 			this.model.setSelectedNode(selected ? this : null);
 		}
 
-		public setHighlighted(selected:boolean)
+		public setHighlighted(highlighted:boolean)
 		{
-			this.model.setHighlightedNode(selected ? this : null);
+			this.model.setHighlightedNode(highlighted ? this : null);
 		}
 
 		public previous(node:Node=null)
@@ -86,6 +87,28 @@ namespace app.model
 			if(!this.parent) return this;
 
 			return this.parent.next(this);
+		}
+
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false; }
+
+		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
+		{
+			if(interaction.part == 'base')
+			{
+				const worldCentreX = this.parent ? this.parent.worldEndPointX : 0;
+				const worldCentreY = this.parent ? this.parent.worldEndPointY : 0;
+				const worldRotation = this.parent ? this.parent.worldRotation : 0;
+				this.offsetX = x - worldCentreX;
+				this.offsetY = y - worldCentreY;
+				const local = Node.rotate(this.offsetX, this.offsetY, -worldRotation);
+				const localOffset = Node.rotate(interaction.x, interaction.y, interaction.offset);
+				this.offsetX = local.x - localOffset.x;
+				this.offsetY = local.y - localOffset.y;
+
+				return true;
+			}
+
+			return false;
 		}
 
 		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
@@ -147,7 +170,6 @@ namespace app.model
 		{
 			this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
 		}
-
 
 	}
 

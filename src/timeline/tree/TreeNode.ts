@@ -51,6 +51,17 @@ namespace app.timeline.tree
 			this.node.parent.removeChild(this.node);
 		}
 
+		get highlighted():boolean
+		{
+			return this.$item.hasClass('highlighted');
+		}
+
+		set highlighted(value:boolean)
+		{
+
+			this.$item.toggleClass('highlighted', value);
+		}
+
 		get selected():boolean
 		{
 			return this.$item.hasClass('selected');

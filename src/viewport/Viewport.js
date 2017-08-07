@@ -47,6 +47,8 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                _this.interaction = new viewport.Interaction();
+                _this.highlightInteraction = new viewport.Interaction();
                 /*
                  * Model Events
                  */
@@ -108,8 +110,7 @@ var app;
                 ctx.clearRect(0, 0, this.width, this.height);
                 ctx.save();
                 this.drawGrid();
-                ctx.translate(this.centreX, this.centreY);
-                ctx.translate(-this.cameraX * this.scale, -this.cameraY * this.scale);
+                ctx.translate(Math.floor(this.centreX - this.cameraX * this.scale), Math.floor(this.centreY - this.cameraY * this.scale));
                 this.model.drawModel(this.ctx, this.scale, this.viewportAABB);
                 // this.viewportAABB.draw(ctx, this.scale);
                 ctx.restore();
@@ -255,9 +256,11 @@ var app;
                     this.zoom(-1);
                 }
                 else if (keyCode == Key.Delete) {
-                    var selectedNode = this.model.getSelectedNode();
-                    if (selectedNode) {
-                        selectedNode.parent.removeChild(selectedNode);
+                    if (!this.interaction.success) {
+                        var selectedNode = this.model.getSelectedNode();
+                        if (selectedNode) {
+                            selectedNode.parent.removeChild(selectedNode);
+                        }
                     }
                 }
                 else if (keyCode == Key.A) {
@@ -289,13 +292,26 @@ var app;
             };
             Viewport.prototype.onMouseDown = function (event) {
                 this.$canvas.focus();
-                if (event.button == 2) {
+                if (event.button == 0) {
+                    this.interaction.success = false;
+                    if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction)) {
+                        this.interaction.node.setSelected(true);
+                        this.interaction.success = true;
+                    }
+                    else {
+                        this.model.setSelectedNode(null);
+                    }
+                }
+                else if (event.button == 2) {
                     this.mouseGrabX = this.stageMouse.x;
                     this.mouseGrabY = this.stageMouse.y;
                 }
             };
             Viewport.prototype.onMouseUp = function (event) {
-                if (event.button == 2) {
+                if (event.button == 0) {
+                    this.interaction.success = false;
+                }
+                else if (event.button == 2) {
                     if (!isNaN(this.mouseGrabX)) {
                         this.mouseGrabX = NaN;
                         this.mouseGrabY = NaN;
@@ -318,6 +334,17 @@ var app;
                     this.prevCameraY = this.cameraY;
                     this.anchorToScreen(this.mouseX, this.mouseY, this.mouseGrabX, this.mouseGrabY);
                     this.showMessage(Math.floor(this.cameraX) + ", " + Math.floor(this.cameraY));
+                }
+                if (this.interaction.success) {
+                    this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
+                }
+                else {
+                    if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.highlightInteraction)) {
+                        this.highlightInteraction.node.setHighlighted(true);
+                    }
+                    else {
+                        this.model.setHighlightedNode(null);
+                    }
                 }
                 this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
             };

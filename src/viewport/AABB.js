@@ -25,6 +25,22 @@ var app;
                 this.x2 = Math.max(a.x2, b.x2);
                 this.y2 = Math.max(a.y2, b.y2);
             };
+            AABB.prototype.from = function (a) {
+                this.x1 = a.x1;
+                this.y1 = a.y1;
+                this.x2 = a.x2;
+                this.y2 = a.y2;
+            };
+            AABB.prototype.union = function (a) {
+                if (a.x1 < this.x1)
+                    this.x1 = a.x1;
+                if (a.y1 < this.y1)
+                    this.y1 = a.y1;
+                if (a.x2 < this.x2)
+                    this.x2 = a.x2;
+                if (a.y2 < this.y2)
+                    this.y2 = a.y2;
+            };
             AABB.prototype.draw = function (ctx, worldScale, colour) {
                 if (colour === void 0) { colour = null; }
                 ctx.strokeStyle = colour || app.Config.AABB;

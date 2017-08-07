@@ -57,6 +57,16 @@ var app;
                 TreeNode.prototype.deleteNode = function () {
                     this.node.parent.removeChild(this.node);
                 };
+                Object.defineProperty(TreeNode.prototype, "highlighted", {
+                    get: function () {
+                        return this.$item.hasClass('highlighted');
+                    },
+                    set: function (value) {
+                        this.$item.toggleClass('highlighted', value);
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 Object.defineProperty(TreeNode.prototype, "selected", {
                     get: function () {
                         return this.$item.hasClass('selected');

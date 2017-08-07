@@ -28,21 +28,23 @@ var app;
                 _this.type = 'model';
                 return _this;
             }
-            Model.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
-                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
-                    var child = _a[_i];
-                    child.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
-                }
-            };
             Model.prototype.draw = function (ctx, worldScale) {
                 console.error('Use drawModel instead');
             };
             Model.prototype.drawModel = function (ctx, worldScale, viewport) {
                 this.drawList.clear();
+                var i = 0;
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
                     child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+                    if (i++ == 0) {
+                        this.childrenWorldAABB.from(child.worldAABB);
+                    }
+                    else {
+                        this.childrenWorldAABB.union(child.worldAABB);
+                    }
                 }
+                this.worldAABB.from(this.childrenWorldAABB);
                 ctx.save();
                 var drawList = this.drawList.list;
                 drawList.sort(Model.nodeDrawOrder);

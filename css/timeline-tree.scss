@@ -77,7 +77,12 @@ div#timeline-tree-toolbar{
 		background: #FFE3E3;
 		border-color: #FFBFC8;
 	}
-	.item:hover, .item.selected{
+	.item:hover, .item.highlighted{
+		background: $highlighted-bg;
+		border-color: $highlighted-border-colour;
+		color: $highlighted-color;
+	}
+	.item.selected{
 		background: $selected-bg;
 		border-color: $selected-border-colour;
 		color: $selected-color;

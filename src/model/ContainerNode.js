@@ -20,6 +20,8 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.children = [];
                 _this.childCount = 0;
+                _this.worldEndPointX = 0;
+                _this.worldEndPointY = 0;
                 _this.childrenWorldAABB = new AABB();
                 _this.canHaveChildren = true;
                 return _this;
@@ -118,6 +120,17 @@ var app;
                 return index >= this.childCount
                     ? this.parent ? this.parent.next(this) : this
                     : this.children[index];
+            };
+            ContainerNode.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (this.childrenWorldAABB.contains(x, y)) {
+                    for (var i = this.childCount - 1; i >= 0; i--) {
+                        var child = this.children[i];
+                        if (child.hitTest(x, y, worldScaleFactor, result)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             };
             ContainerNode.prototype.setModel = function (model) {
                 _super.prototype.setModel.call(this, model);

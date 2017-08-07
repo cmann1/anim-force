@@ -18,6 +18,7 @@ namespace app.timeline.tree
 		private rootNode:TreeNode;
 
 		private selectedNode:TreeNode;
+		private highlightedNode:TreeNode;
 
 		private nodeMap:{[id:string]:TreeNode} = {};
 
@@ -107,6 +108,20 @@ namespace app.timeline.tree
 		{
 			show = show && this.selectedNode.node.canHaveChildren;
 			this.$toolbarAddMenu.stop(true).animate({width:show  ? 'show' : 'hide'}, 250);
+		}
+
+		private updateHighlight(target:Node)
+		{
+			var targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+			if(targetNode == this.rootNode)
+			{
+				target = null;
+				targetNode = null;
+			}
+			if(targetNode == this.highlightedNode) return;
+
+			if(this.highlightedNode) this.highlightedNode.highlighted = false;
+			if((this.highlightedNode = targetNode)) this.highlightedNode.highlighted = true;
 		}
 
 		private updateSelection(target:Node)
@@ -286,7 +301,12 @@ namespace app.timeline.tree
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
 		{
-			if(event.type == 'selection')
+			if(event.type == 'highlight')
+			{
+				this.updateHighlight(event.target);
+			}
+
+			else if(event.type == 'selection')
 			{
 				this.updateSelection(event.target);
 			}

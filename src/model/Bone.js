@@ -20,14 +20,54 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.length = 100;
                 _this.stretch = 1;
-                _this.worldEndPointX = 0;
-                _this.worldEndPointY = 0;
                 _this.boneWorldAABB = new AABB();
                 _this.type = 'bone';
                 return _this;
             }
+            Bone.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (this.boneWorldAABB.contains(x, y)) {
+                    var dx, dy;
+                    result.offset = this.parent ? -this.parent.worldRotation : 0;
+                    result.node = this;
+                    dx = x - this.worldEndPointX;
+                    dy = y - this.worldEndPointY;
+                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneEndPointClick * worldScaleFactor) {
+                        dx = x - this.worldX;
+                        dy = y - this.worldY;
+                        result.offset = Math.atan2(dy, dx) - this.rotation;
+                        result.part = 'endPoint';
+                        return true;
+                    }
+                    dx = x - this.worldX;
+                    dy = y - this.worldY;
+                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneEndPointClick * worldScaleFactor) {
+                        result.x = dx;
+                        result.y = dy;
+                        result.part = 'base';
+                        return true;
+                    }
+                    var boneHit = this.getClosestPointOnBone(x, y);
+                    dx = x - boneHit.x;
+                    dy = y - boneHit.y;
+                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneClick * worldScaleFactor) {
+                        result.x = x - this.worldX;
+                        result.y = y - this.worldY;
+                        result.part = 'base';
+                        return true;
+                    }
+                }
+                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
+            };
+            Bone.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
+                if (interaction.part == 'endPoint') {
+                    var dx = x - this.worldX;
+                    var dy = y - this.worldY;
+                    this.rotation = Math.atan2(dy, dx) - interaction.offset;
+                    return true;
+                }
+                return _super.prototype.updateInteraction.call(this, x, y, worldScaleFactor, interaction);
+            };
             Bone.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
-                this.rotation += 0.005; // TODO: REMOVE
                 _super.prototype.prepareForDrawing.call(this, worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
                 var endPoint = model.Node.rotate(0, -this.length * this.stretch, this.worldRotation);
                 this.worldEndPointX = this.worldX + endPoint.x;
@@ -125,6 +165,25 @@ var app;
                     this.worldAABB.draw(ctx, worldScale);
                 }
                 ctx.restore();
+            };
+            Bone.prototype.getClosestPointOnBone = function (x, y) {
+                var dx = this.worldEndPointX - this.worldX;
+                var dy = this.worldEndPointY - this.worldY;
+                var u = ((x - this.worldX) * dx + (y - this.worldY) * dy) / (dx * dx + dy * dy);
+                var lineX, lineY;
+                if (u < 0) {
+                    lineX = this.worldX;
+                    lineY = this.worldY;
+                }
+                else if (u > 1) {
+                    lineX = this.worldEndPointX;
+                    lineY = this.worldEndPointY;
+                }
+                else {
+                    lineX = this.worldX + u * dx;
+                    lineY = this.worldY + u * dy;
+                }
+                return { x: lineX, y: lineY };
             };
             return Bone;
         }(model.ContainerNode));

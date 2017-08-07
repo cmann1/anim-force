@@ -32,8 +32,26 @@ var app;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
                 return _this;
             }
+            Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (!this.worldAABB.contains(x, y))
+                    return false;
+                var local = model.Node.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+                x = local.x + this.srcWidth * 0.5;
+                y = local.y + this.srcHeight * 0.5;
+                if (x >= 0 && x <= this.srcWidth && y >= 0 && y <= this.srcHeight) {
+                    result.x = local.x;
+                    result.y = local.y;
+                    result.offset = this.rotation;
+                    result.node = this;
+                    result.part = 'base';
+                    return true;
+                }
+                return false;
+            };
+            Sprite.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
+                return _super.prototype.updateInteraction.call(this, x, y, worldScaleFactor, interaction);
+            };
             Sprite.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
-                this.scaleX = Math.sin(app.main.runningTime * 0.01) * 0.5 + 1; // TODO: REMOVE
                 _super.prototype.prepareForDrawing.call(this, worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
                 var cosR = Math.abs(Math.cos(this.worldRotation));
                 var sinR = Math.abs(Math.sin(this.worldRotation));
@@ -67,7 +85,7 @@ var app;
                 ctx.translate(-this.srcWidth * 0.5 * scaleX, -this.srcHeight * 0.5 * scaleY);
                 ctx.setLineDash([2, 2]);
                 ctx.strokeStyle = this.selected ? app.Config.selected : (this.highlighted ? app.Config.highlighted : app.Config.control);
-                ctx.lineWidth = this.selected ? 2 : 1;
+                ctx.lineWidth = this.selected ? 3 : 1;
                 ctx.beginPath();
                 ctx.rect(0, 0, this.srcWidth * scaleX, this.srcHeight * scaleY);
                 ctx.stroke();

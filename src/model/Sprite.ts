@@ -4,6 +4,7 @@ namespace app.model
 	import SpriteFrame = app.assets.SpriteFrame;
 	import SpriteAsset = app.assets.SpriteAsset;
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export class Sprite extends Node
 	{
@@ -31,10 +32,34 @@ namespace app.model
 			(asset || SpriteAsset.NULL).setSpriteSource(this);
 		}
 
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			if(!this.worldAABB.contains(x, y)) return false;
+
+			const local = Node.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+			x = local.x + this.srcWidth * 0.5;
+			y = local.y + this.srcHeight * 0.5;
+
+			if(x >=0 && x <= this.srcWidth && y >=0 && y <= this.srcHeight)
+			{
+				result.x = local.x;
+				result.y = local.y;
+				result.offset = this.rotation;
+				result.node = this;
+				result.part = 'base';
+				return true;
+			}
+
+			return false;
+		}
+
+		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
+		{
+			return super.updateInteraction(x, y, worldScaleFactor, interaction);
+		}
+
 		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
 		{
-			this.scaleX = Math.sin(app.main.runningTime * 0.01) * 0.5 + 1; // TODO: REMOVE
-
 			super.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
 
 			const cosR = Math.abs(Math.cos(this.worldRotation));
@@ -84,7 +109,7 @@ namespace app.model
 
 			ctx.setLineDash([2, 2]);
 			ctx.strokeStyle = this.selected ? Config.selected : (this.highlighted ? Config.highlighted : Config.control);
-			ctx.lineWidth = this.selected ? 2 : 1;
+			ctx.lineWidth = this.selected ? 3 : 1;
 			ctx.beginPath();
 			ctx.rect(0, 0, this.srcWidth * scaleX, this.srcHeight * scaleY);
 			ctx.stroke();

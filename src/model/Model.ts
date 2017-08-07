@@ -5,6 +5,7 @@ namespace app.model
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import SelectionEvent = events.SelectionEvent;
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export class Model extends ContainerNode
 	{
@@ -25,14 +26,6 @@ namespace app.model
 			this.type = 'model';
 		}
 
-		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
-		{
-			for(var child of this.children)
-			{
-				child.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
-			}
-		}
-
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
 		{
 			console.error('Use drawModel instead');
@@ -41,10 +34,23 @@ namespace app.model
 		public drawModel(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
 			this.drawList.clear();
+
+			var i = 0;
 			for(var child of this.children)
 			{
 				child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+
+				if(i++ == 0)
+				{
+					this.childrenWorldAABB.from(child.worldAABB);
+				}
+				else
+				{
+					this.childrenWorldAABB.union(child.worldAABB);
+				}
 			}
+
+			this.worldAABB.from(this.childrenWorldAABB);
 
 			ctx.save();
 			var drawList:Node[] = this.drawList.list;

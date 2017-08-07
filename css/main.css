@@ -105,9 +105,13 @@ div#timeline-tree-toolbar {
 .model-node:hover > .item {
   background: #FFE3E3;
   border-color: #FFBFC8; }
-.model-node .item:hover, .model-node .item.selected {
+.model-node .item:hover, .model-node .item.highlighted {
+  background: #de7777;
+  border-color: #b16161;
+  color: #FFF; }
+.model-node .item.selected {
   background: indianred;
-  border-color: #CD3D51;
+  border-color: #ab4646;
   color: #FFF; }
 .model-node .item .icon {
   display: inline-block;
