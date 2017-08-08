@@ -11,6 +11,7 @@ namespace app
 		static selected = '#CD3D51';
 		static highlighted = '#de7777';
 		static outline = '#eee';
+		static link = '#999';
 
 		static AABB = '#F00';
 		static childrenAABB = '#0F0';

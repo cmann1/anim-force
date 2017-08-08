@@ -78,6 +78,10 @@ var app;
                 if (this.selectedNode) {
                     this.selectedNode.drawControls(ctx, worldScale, viewport);
                 }
+                if (app.Config.drawAABB) {
+                    // this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
+                    this.worldAABB.draw(ctx, worldScale, '#0FF');
+                }
                 ctx.restore();
             };
             Model.prototype.setHighlighted = function (highlighted) {

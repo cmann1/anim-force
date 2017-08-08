@@ -48,8 +48,8 @@ namespace app.viewport
 		{
 			if(a.x1 < this.x1) this.x1 = a.x1;
 			if(a.y1 < this.y1) this.y1 = a.y1;
-			if(a.x2 < this.x2) this.x2 = a.x2;
-			if(a.y2 < this.y2) this.y2 = a.y2;
+			if(a.x2 > this.x2) this.x2 = a.x2;
+			if(a.y2 > this.y2) this.y2 = a.y2;
 		}
 
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number, colour=null)
@@ -60,6 +60,10 @@ namespace app.viewport
 			ctx.beginPath();
 			ctx.rect(this.x1 * worldScale, this.y1 * worldScale, (this.x2 - this.x1) * worldScale, (this.y2 - this.y1) * worldScale);
 			ctx.stroke();
+		}
+
+		public toString = () : string => {
+			return `<${this.x1}, ${this.y1}> <${this.x2}, ${this.y2}>`;
 		}
 
 	}

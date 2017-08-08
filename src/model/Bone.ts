@@ -33,6 +33,7 @@ namespace app.model
 				{
 					dx = x - this.worldX;
 					dy = y - this.worldY;
+					result.initialX = this.rotation;
 					result.offset = Math.atan2(dy, dx) - this.rotation;
 
 					result.part = 'rotation';
@@ -152,6 +153,18 @@ namespace app.model
 			const y = this.worldY * worldScale;
 			const eX = this.worldEndPointX * worldScale;
 			const eY = this.worldEndPointY * worldScale;
+
+			// Parent connector
+			if(this.parent && this.parent != this.model)
+			{
+				ctx.setLineDash([2, 2]);
+				ctx.strokeStyle = Config.link;
+				ctx.beginPath();
+				ctx.moveTo(x, y);
+				ctx.lineTo(this.parent.worldEndPointX * worldScale, this.parent.worldEndPointY * worldScale);
+				ctx.stroke();
+				ctx.setLineDash([]);
+			}
 
 			/// Bone
 

@@ -34,6 +34,7 @@ var app;
                     if (this.hitTestHandle(dx, dy, worldScaleFactor)) {
                         dx = x - this.worldX;
                         dy = y - this.worldY;
+                        result.initialX = this.rotation;
                         result.offset = Math.atan2(dy, dx) - this.rotation;
                         result.part = 'rotation';
                         return true;
@@ -125,6 +126,16 @@ var app;
                 var y = this.worldY * worldScale;
                 var eX = this.worldEndPointX * worldScale;
                 var eY = this.worldEndPointY * worldScale;
+                // Parent connector
+                if (this.parent && this.parent != this.model) {
+                    ctx.setLineDash([2, 2]);
+                    ctx.strokeStyle = app.Config.link;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(this.parent.worldEndPointX * worldScale, this.parent.worldEndPointY * worldScale);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
                 /// Bone
                 // Outline
                 ctx.lineWidth = app.Config.boneThickness + 2;

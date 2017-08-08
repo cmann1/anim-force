@@ -76,6 +76,12 @@ namespace app.model
 				this.selectedNode.drawControls(ctx, worldScale, viewport);
 			}
 
+			if(Config.drawAABB)
+			{
+				// this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
+				this.worldAABB.draw(ctx, worldScale, '#0FF');
+			}
+
 			ctx.restore();
 		}
 

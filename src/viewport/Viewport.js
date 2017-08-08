@@ -274,6 +274,7 @@ var app;
                     var sprite3;
                     this.model.clear();
                     this.model.addChild(bone = new Bone());
+                    bone.rotation = Math.PI * 0.25;
                     bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
                     sprite3 = new Sprite(spriteAsset3, 0, 0);
                     sprite3.rotation = Math.PI * 0.25;

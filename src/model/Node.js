@@ -60,6 +60,9 @@ var app;
                 return this.parent.next(this);
             };
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.globalToLocal = function (x, y) {
+                return app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+            };
             Node.prototype.hitTestHandle = function (dx, dy, worldScaleFactor, square, radius) {
                 if (square === void 0) { square = false; }
                 if (radius === void 0) { radius = app.Config.handleClick; }
@@ -85,6 +88,10 @@ var app;
                     var dx = x - this.worldX;
                     var dy = y - this.worldY;
                     this.rotation = Math.atan2(dy, dx) - interaction.offset;
+                    if (interaction.constrain) {
+                        // console.log(this.rotation / );
+                        this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
+                    }
                     return true;
                 }
                 return false;

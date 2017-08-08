@@ -8,6 +8,10 @@ var app;
                 if (y1 === void 0) { y1 = 0; }
                 if (x2 === void 0) { x2 = 0; }
                 if (y2 === void 0) { y2 = 0; }
+                var _this = this;
+                this.toString = function () {
+                    return "<" + _this.x1 + ", " + _this.y1 + "> <" + _this.x2 + ", " + _this.y2 + ">";
+                };
                 this.x1 = x1;
                 this.y1 = y1;
                 this.x2 = x2;
@@ -36,9 +40,9 @@ var app;
                     this.x1 = a.x1;
                 if (a.y1 < this.y1)
                     this.y1 = a.y1;
-                if (a.x2 < this.x2)
+                if (a.x2 > this.x2)
                     this.x2 = a.x2;
-                if (a.y2 < this.y2)
+                if (a.y2 > this.y2)
                     this.y2 = a.y2;
             };
             AABB.prototype.draw = function (ctx, worldScale, colour) {

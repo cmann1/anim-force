@@ -38,10 +38,14 @@ var app;
             ContainerNode.prototype.addChild = function (child, triggerEvent) {
                 if (triggerEvent === void 0) { triggerEvent = true; }
                 if (child.parent == this) {
-                    return this;
+                    return child;
                 }
                 if (child.parent) {
                     child.parent.removeChild(child, false);
+                    child.rotation = child.worldRotation - this.worldRotation;
+                    var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+                    child.offsetX = local.x;
+                    child.offsetY = local.y;
                 }
                 child.setModel(this.model);
                 child.parent = this;
@@ -64,6 +68,10 @@ var app;
                         this.children.splice(this.children.indexOf(child), 1);
                     }
                     else {
+                        child.rotation = child.worldRotation - this.worldRotation;
+                        var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+                        child.offsetX = local.x;
+                        child.offsetY = local.y;
                         child.parent.removeChild(child, false);
                         this.childCount++;
                     }

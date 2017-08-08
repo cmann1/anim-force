@@ -51,6 +51,7 @@ namespace app.model
 				dy = y + h;
 				if(this.hitTestHandle(dx, dy, worldScaleFactor))
 				{
+					result.initialX = this.rotation;
 					result.offset = Math.atan2(y, x) - this.rotation + this.worldRotation;
 					result.node = this;
 					result.part = 'rotation';

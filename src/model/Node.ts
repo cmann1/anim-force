@@ -91,6 +91,11 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false; }
 
+		public globalToLocal(x:number, y:number):{x:number, y:number}
+		{
+			return MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+		}
+
 		protected hitTestHandle(dx:number, dy:number, worldScaleFactor:number, square:boolean=false, radius=Config.handleClick):boolean
 		{
 			if(square)
@@ -124,6 +129,12 @@ namespace app.model
 				var dy = y - this.worldY;
 
 				this.rotation = Math.atan2(dy, dx) - interaction.offset;
+
+				if(interaction.constrain)
+				{
+					// console.log(this.rotation / );
+					this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
+				}
 
 				return true;
 			}

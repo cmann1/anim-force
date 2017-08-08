@@ -11,6 +11,7 @@ var app;
     Config.selected = '#CD3D51';
     Config.highlighted = '#de7777';
     Config.outline = '#eee';
+    Config.link = '#999';
     Config.AABB = '#F00';
     Config.childrenAABB = '#0F0';
     Config.boneAABB = '#00F';

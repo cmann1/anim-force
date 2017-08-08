@@ -35,12 +35,17 @@ namespace app.model
 		{
 			if(child.parent == this)
 			{
-				return this
+				return child
 			}
 
 			if(child.parent)
 			{
 				child.parent.removeChild(child, false);
+
+				child.rotation = child.worldRotation - this.worldRotation;
+				var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+				child.offsetX = local.x;
+				child.offsetY = local.y;
 			}
 
 			child.setModel(this.model);
@@ -71,6 +76,11 @@ namespace app.model
 				}
 				else
 				{
+					child.rotation = child.worldRotation - this.worldRotation;
+					var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+					child.offsetX = local.x;
+					child.offsetY = local.y;
+
 					child.parent.removeChild(child, false);
 					this.childCount++;
 				}
