@@ -31,16 +31,16 @@ var app;
                     result.node = this;
                     dx = x - this.worldEndPointX;
                     dy = y - this.worldEndPointY;
-                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneEndPointClick * worldScaleFactor) {
+                    if (this.hitTestHandle(dx, dy, worldScaleFactor)) {
                         dx = x - this.worldX;
                         dy = y - this.worldY;
                         result.offset = Math.atan2(dy, dx) - this.rotation;
-                        result.part = 'endPoint';
+                        result.part = 'rotation';
                         return true;
                     }
                     dx = x - this.worldX;
                     dy = y - this.worldY;
-                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneEndPointClick * worldScaleFactor) {
+                    if (this.hitTestHandle(dx, dy, worldScaleFactor)) {
                         result.x = dx;
                         result.y = dy;
                         result.part = 'base';
@@ -49,7 +49,7 @@ var app;
                     var boneHit = this.getClosestPointOnBone(x, y);
                     dx = x - boneHit.x;
                     dy = y - boneHit.y;
-                    if (Math.sqrt(dx * dx + dy * dy) <= app.Config.boneClick * worldScaleFactor) {
+                    if (this.hitTestHandle(dx, dy, worldScaleFactor, false, app.Config.boneClick)) {
                         result.x = x - this.worldX;
                         result.y = y - this.worldY;
                         result.part = 'base';
@@ -60,22 +60,24 @@ var app;
             };
             Bone.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 if (interaction.part == 'endPoint') {
-                    var dx = x - this.worldX;
-                    var dy = y - this.worldY;
-                    this.rotation = Math.atan2(dy, dx) - interaction.offset;
-                    return true;
+                    // var dx = x - this.worldX;
+                    // var dy = y - this.worldY;
+                    //
+                    // this.rotation = Math.atan2(dy, dx) - interaction.offset;
+                    //
+                    // return true;
                 }
                 return _super.prototype.updateInteraction.call(this, x, y, worldScaleFactor, interaction);
             };
             Bone.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
                 _super.prototype.prepareForDrawing.call(this, worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
-                var endPoint = model.Node.rotate(0, -this.length * this.stretch, this.worldRotation);
+                var endPoint = app.MathUtils.rotate(0, -this.length * this.stretch, this.worldRotation);
                 this.worldEndPointX = this.worldX + endPoint.x;
                 this.worldEndPointY = this.worldY + endPoint.y;
-                this.boneWorldAABB.x1 = Math.min(this.worldX - app.Config.boneEndPointRadius * 2, this.worldEndPointX - app.Config.boneEndPointRadius * 2);
-                this.boneWorldAABB.y1 = Math.min(this.worldY - app.Config.boneEndPointRadius * 2, this.worldEndPointY - app.Config.boneEndPointRadius * 2);
-                this.boneWorldAABB.x2 = Math.max(this.worldX + app.Config.boneEndPointRadius * 2, this.worldEndPointX + app.Config.boneEndPointRadius * 2);
-                this.boneWorldAABB.y2 = Math.max(this.worldY + app.Config.boneEndPointRadius * 2, this.worldEndPointY + app.Config.boneEndPointRadius * 2);
+                this.boneWorldAABB.x1 = Math.min(this.worldX - app.Config.handleRadius, this.worldEndPointX - app.Config.handleRadius);
+                this.boneWorldAABB.y1 = Math.min(this.worldY - app.Config.handleRadius, this.worldEndPointY - app.Config.handleRadius);
+                this.boneWorldAABB.x2 = Math.max(this.worldX + app.Config.handleRadius, this.worldEndPointX + app.Config.handleRadius);
+                this.boneWorldAABB.y2 = Math.max(this.worldY + app.Config.handleRadius, this.worldEndPointY + app.Config.handleRadius);
                 var x1 = NaN;
                 var y1 = NaN;
                 var x2 = NaN;
@@ -126,7 +128,7 @@ var app;
                 /// Bone
                 // Outline
                 ctx.lineWidth = app.Config.boneThickness + 2;
-                ctx.strokeStyle = app.Config.bone;
+                ctx.strokeStyle = app.Config.outline;
                 ctx.beginPath();
                 ctx.moveTo(x, y);
                 ctx.lineTo(eX, eY);
@@ -138,27 +140,8 @@ var app;
                 ctx.moveTo(x, y);
                 ctx.lineTo(eX, eY);
                 ctx.stroke();
-                /// End points
-                // Outline
-                ctx.beginPath();
-                ctx.fillStyle = app.Config.bone;
-                ctx.arc(x, y, app.Config.boneEndPointRadius + 1, 0, Math.PI * 2);
-                ctx.fill();
-                // Centre
-                ctx.beginPath();
-                ctx.fillStyle = colour;
-                ctx.arc(x, y, app.Config.boneEndPointRadius, 0, Math.PI * 2);
-                ctx.fill();
-                // Outline
-                ctx.beginPath();
-                ctx.fillStyle = app.Config.bone;
-                ctx.arc(eX, eY, app.Config.boneEndPointRadius + 1, 0, Math.PI * 2);
-                ctx.fill();
-                // Centre
-                ctx.beginPath();
-                ctx.fillStyle = colour;
-                ctx.arc(eX, eY, app.Config.boneEndPointRadius, 0, Math.PI * 2);
-                ctx.fill();
+                this.drawHandle(ctx, x, y);
+                this.drawHandle(ctx, eX, eY);
                 if (app.Config.drawAABB) {
                     this.boneWorldAABB.draw(ctx, worldScale, app.Config.boneAABB);
                     this.childrenWorldAABB.draw(ctx, worldScale, app.Config.childrenAABB);

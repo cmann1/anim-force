@@ -1,7 +1,6 @@
 /*
 // TODO: Viewport:
-// TODO: - Interaction - selection, dragging, rotating, etc
-// TODO: - Sprite rotation handle
+// TODO: - ???
 // TODO: Property panel:
 // TODO: - ????
 // TODO: Timeline:

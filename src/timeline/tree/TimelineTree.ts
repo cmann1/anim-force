@@ -303,7 +303,7 @@ namespace app.timeline.tree
 		{
 			if(event.type == 'highlight')
 			{
-				this.updateHighlight(event.target);
+				// this.updateHighlight(event.target);
 			}
 
 			else if(event.type == 'selection')

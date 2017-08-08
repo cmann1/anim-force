@@ -91,6 +91,16 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false; }
 
+		protected hitTestHandle(dx:number, dy:number, worldScaleFactor:number, square:boolean=false, radius=Config.handleClick):boolean
+		{
+			if(square)
+			{
+				return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
+			}
+
+			return Math.sqrt(dx * dx + dy * dy) <= radius * worldScaleFactor;
+		}
+
 		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
 		{
 			if(interaction.part == 'base')
@@ -100,10 +110,20 @@ namespace app.model
 				const worldRotation = this.parent ? this.parent.worldRotation : 0;
 				this.offsetX = x - worldCentreX;
 				this.offsetY = y - worldCentreY;
-				const local = Node.rotate(this.offsetX, this.offsetY, -worldRotation);
-				const localOffset = Node.rotate(interaction.x, interaction.y, interaction.offset);
+				const local = MathUtils.rotate(this.offsetX, this.offsetY, -worldRotation);
+				const localOffset = MathUtils.rotate(interaction.x, interaction.y, interaction.offset);
 				this.offsetX = local.x - localOffset.x;
 				this.offsetY = local.y - localOffset.y;
+
+				return true;
+			}
+
+			if(interaction.part == 'rotation')
+			{
+				var dx = x - this.worldX;
+				var dy = y - this.worldY;
+
+				this.rotation = Math.atan2(dy, dx) - interaction.offset;
 
 				return true;
 			}
@@ -113,7 +133,7 @@ namespace app.model
 
 		public prepareForDrawing(worldX:number, worldY:number, worldScale:number, stretchX:number, stretchY:number, worldRotation:number, drawList:DrawList, viewport:AABB)
 		{
-			const offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
+			const offset = MathUtils.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
 
 			this.worldX = worldX + offset.x;
 			this.worldY = worldY + offset.y;
@@ -124,6 +144,47 @@ namespace app.model
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number) { }
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB) { }
+
+		protected drawHandle(ctx:CanvasRenderingContext2D, x, y, outline=null, colour=null, square=false)
+		{
+			if(outline == null)
+			{
+				outline = Config.outline;
+			}
+			if(colour == null)
+			{
+				colour = this.selected ? Config.selected : (this.highlighted ? Config.highlighted : Config.control)
+			}
+
+			// Outline
+			ctx.beginPath();
+			ctx.fillStyle = outline;
+			if(square)
+			{
+				ctx.rect(
+					x - Config.handleRadius - 1, y - Config.handleRadius - 1,
+					(Config.handleRadius + 1) * 2, (Config.handleRadius + 1) * 2);
+			}
+			else
+			{
+				ctx.arc(x, y, Config.handleRadius + 1, 0, Math.PI * 2);
+			}
+			ctx.fill();
+			// Centre
+			ctx.beginPath();
+			ctx.fillStyle = colour;
+			if(square)
+			{
+				ctx.rect(
+					x - Config.handleRadius, y - Config.handleRadius,
+					Config.handleRadius * 2, Config.handleRadius * 2);
+			}
+			else
+			{
+				ctx.arc(x, y, Config.handleRadius, 0, Math.PI * 2);
+			}
+			ctx.fill();
+		}
 
 		get name():string
 		{
@@ -138,14 +199,6 @@ namespace app.model
 
 			this._name = value;
 			this.onPropertyChange('name');
-		}
-
-		static rotate(x, y, angle)
-		{
-			return {
-				x: Math.cos(angle) * x - Math.sin(angle) * y,
-				y: Math.sin(angle) * x + Math.cos(angle) * y
-			}
 		}
 
 		/*

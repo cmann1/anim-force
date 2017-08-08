@@ -60,6 +60,14 @@ var app;
                 return this.parent.next(this);
             };
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.hitTestHandle = function (dx, dy, worldScaleFactor, square, radius) {
+                if (square === void 0) { square = false; }
+                if (radius === void 0) { radius = app.Config.handleClick; }
+                if (square) {
+                    return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
+                }
+                return Math.sqrt(dx * dx + dy * dy) <= radius * worldScaleFactor;
+            };
             Node.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 if (interaction.part == 'base') {
                     var worldCentreX = this.parent ? this.parent.worldEndPointX : 0;
@@ -67,22 +75,59 @@ var app;
                     var worldRotation = this.parent ? this.parent.worldRotation : 0;
                     this.offsetX = x - worldCentreX;
                     this.offsetY = y - worldCentreY;
-                    var local = Node.rotate(this.offsetX, this.offsetY, -worldRotation);
-                    var localOffset = Node.rotate(interaction.x, interaction.y, interaction.offset);
+                    var local = app.MathUtils.rotate(this.offsetX, this.offsetY, -worldRotation);
+                    var localOffset = app.MathUtils.rotate(interaction.x, interaction.y, interaction.offset);
                     this.offsetX = local.x - localOffset.x;
                     this.offsetY = local.y - localOffset.y;
+                    return true;
+                }
+                if (interaction.part == 'rotation') {
+                    var dx = x - this.worldX;
+                    var dy = y - this.worldY;
+                    this.rotation = Math.atan2(dy, dx) - interaction.offset;
                     return true;
                 }
                 return false;
             };
             Node.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
-                var offset = Node.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
+                var offset = app.MathUtils.rotate(this.offsetX * stretchX, this.offsetY * stretchY, worldRotation);
                 this.worldX = worldX + offset.x;
                 this.worldY = worldY + offset.y;
                 this.worldRotation = worldRotation + this.rotation;
             };
             Node.prototype.draw = function (ctx, worldScale) { };
             Node.prototype.drawControls = function (ctx, worldScale, viewport) { };
+            Node.prototype.drawHandle = function (ctx, x, y, outline, colour, square) {
+                if (outline === void 0) { outline = null; }
+                if (colour === void 0) { colour = null; }
+                if (square === void 0) { square = false; }
+                if (outline == null) {
+                    outline = app.Config.outline;
+                }
+                if (colour == null) {
+                    colour = this.selected ? app.Config.selected : (this.highlighted ? app.Config.highlighted : app.Config.control);
+                }
+                // Outline
+                ctx.beginPath();
+                ctx.fillStyle = outline;
+                if (square) {
+                    ctx.rect(x - app.Config.handleRadius - 1, y - app.Config.handleRadius - 1, (app.Config.handleRadius + 1) * 2, (app.Config.handleRadius + 1) * 2);
+                }
+                else {
+                    ctx.arc(x, y, app.Config.handleRadius + 1, 0, Math.PI * 2);
+                }
+                ctx.fill();
+                // Centre
+                ctx.beginPath();
+                ctx.fillStyle = colour;
+                if (square) {
+                    ctx.rect(x - app.Config.handleRadius, y - app.Config.handleRadius, app.Config.handleRadius * 2, app.Config.handleRadius * 2);
+                }
+                else {
+                    ctx.arc(x, y, app.Config.handleRadius, 0, Math.PI * 2);
+                }
+                ctx.fill();
+            };
             Object.defineProperty(Node.prototype, "name", {
                 get: function () {
                     return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
@@ -97,12 +142,6 @@ var app;
                 enumerable: true,
                 configurable: true
             });
-            Node.rotate = function (x, y, angle) {
-                return {
-                    x: Math.cos(angle) * x - Math.sin(angle) * y,
-                    y: Math.sin(angle) * x + Math.cos(angle) * y
-                };
-            };
             /*
              * Events
              */

@@ -54,7 +54,7 @@ namespace app.model
 
 			ctx.save();
 			var drawList:Node[] = this.drawList.list;
-			drawList.sort(Model.nodeDrawOrder);
+			drawList.sort(this.nodeDrawOrder);
 			for(var node of drawList)
 			{
 				node.draw(ctx, worldScale);
@@ -62,10 +62,20 @@ namespace app.model
 			ctx.restore();
 
 			ctx.save();
+
 			for(var child of this.children)
 			{
-				child.drawControls(ctx, worldScale, viewport);
+				if(child != this.selectedNode)
+				{
+					child.drawControls(ctx, worldScale, viewport);
+				}
 			}
+
+			if(this.selectedNode)
+			{
+				this.selectedNode.drawControls(ctx, worldScale, viewport);
+			}
+
 			ctx.restore();
 		}
 
@@ -124,28 +134,38 @@ namespace app.model
 			return this.selectedNode;
 		}
 
-		protected static nodeDrawOrder(a:Node, b:Node):number
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(a.layer < b.layer)
+			if(this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result))
+			{
+				return true;
+			}
+
+			return super.hitTest(x, y, worldScaleFactor, result);
+		}
+
+		protected nodeDrawOrder = (a:Node, b:Node):number =>
+		{
+			if(a.layer < b.layer || b == this.selectedNode)
 			{
 				return -1;
 			}
-			if(a.layer > b.layer)
+			if(a.layer > b.layer || a == this.selectedNode)
 			{
 				return 1;
 			}
 
-			if(a.subLayer < b.subLayer)
+			if(a.subLayer < b.subLayer || b == this.selectedNode)
 			{
 				return -1;
 			}
-			if(a.subLayer > b.subLayer)
+			if(a.subLayer > b.subLayer || a == this.selectedNode)
 			{
 				return 1;
 			}
 
 			return a.drawIndex - b.drawIndex;
-		}
+		};
 
 		/*
 		 * Events

@@ -57,7 +57,7 @@ var app;
                     };
                     this.onModelSelectionChange = function (model, event) {
                         if (event.type == 'highlight') {
-                            _this.updateHighlight(event.target);
+                            // this.updateHighlight(event.target);
                         }
                         else if (event.type == 'selection') {
                             _this.updateSelection(event.target);

@@ -478,6 +478,7 @@ namespace app.viewport
 
 			if(this.interaction.success)
 			{
+				this.interaction.constrain = event.shiftKey;
 				this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
 			}
 			else

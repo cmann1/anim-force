@@ -24,6 +24,21 @@ var app;
                 _this.drawList = new model.DrawList();
                 /// Events
                 _this.selectionChange = new EventDispatcher();
+                _this.nodeDrawOrder = function (a, b) {
+                    if (a.layer < b.layer || b == _this.selectedNode) {
+                        return -1;
+                    }
+                    if (a.layer > b.layer || a == _this.selectedNode) {
+                        return 1;
+                    }
+                    if (a.subLayer < b.subLayer || b == _this.selectedNode) {
+                        return -1;
+                    }
+                    if (a.subLayer > b.subLayer || a == _this.selectedNode) {
+                        return 1;
+                    }
+                    return a.drawIndex - b.drawIndex;
+                };
                 _this.model = _this;
                 _this.type = 'model';
                 return _this;
@@ -47,7 +62,7 @@ var app;
                 this.worldAABB.from(this.childrenWorldAABB);
                 ctx.save();
                 var drawList = this.drawList.list;
-                drawList.sort(Model.nodeDrawOrder);
+                drawList.sort(this.nodeDrawOrder);
                 for (var _b = 0, drawList_1 = drawList; _b < drawList_1.length; _b++) {
                     var node = drawList_1[_b];
                     node.draw(ctx, worldScale);
@@ -56,7 +71,12 @@ var app;
                 ctx.save();
                 for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
                     var child = _d[_c];
-                    child.drawControls(ctx, worldScale, viewport);
+                    if (child != this.selectedNode) {
+                        child.drawControls(ctx, worldScale, viewport);
+                    }
+                }
+                if (this.selectedNode) {
+                    this.selectedNode.drawControls(ctx, worldScale, viewport);
                 }
                 ctx.restore();
             };
@@ -95,20 +115,11 @@ var app;
             Model.prototype.getSelectedNode = function () {
                 return this.selectedNode;
             };
-            Model.nodeDrawOrder = function (a, b) {
-                if (a.layer < b.layer) {
-                    return -1;
+            Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {
+                    return true;
                 }
-                if (a.layer > b.layer) {
-                    return 1;
-                }
-                if (a.subLayer < b.subLayer) {
-                    return -1;
-                }
-                if (a.subLayer > b.subLayer) {
-                    return 1;
-                }
-                return a.drawIndex - b.drawIndex;
+                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
             };
             /*
              * Events

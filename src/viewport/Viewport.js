@@ -336,6 +336,7 @@ var app;
                     this.showMessage(Math.floor(this.cameraX) + ", " + Math.floor(this.cameraY));
                 }
                 if (this.interaction.success) {
+                    this.interaction.constrain = event.shiftKey;
                     this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
                 }
                 else {

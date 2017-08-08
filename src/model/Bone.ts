@@ -29,20 +29,20 @@ namespace app.model
 
 				dx = x - this.worldEndPointX;
 				dy = y - this.worldEndPointY;
-				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneEndPointClick * worldScaleFactor)
+				if(this.hitTestHandle(dx, dy, worldScaleFactor))
 				{
 					dx = x - this.worldX;
 					dy = y - this.worldY;
 					result.offset = Math.atan2(dy, dx) - this.rotation;
 
-					result.part = 'endPoint';
+					result.part = 'rotation';
 
 					return true;
 				}
 
 				dx = x - this.worldX;
 				dy = y - this.worldY;
-				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneEndPointClick * worldScaleFactor)
+				if(this.hitTestHandle(dx, dy, worldScaleFactor))
 				{
 					result.x = dx;
 					result.y = dy;
@@ -53,7 +53,7 @@ namespace app.model
 				var boneHit = this.getClosestPointOnBone(x, y);
 				dx = x - boneHit.x;
 				dy = y - boneHit.y;
-				if(Math.sqrt(dx * dx + dy * dy) <= Config.boneClick * worldScaleFactor)
+				if(this.hitTestHandle(dx, dy, worldScaleFactor, false, Config.boneClick))
 				{
 					result.x = x - this.worldX;
 					result.y = y - this.worldY;
@@ -69,12 +69,12 @@ namespace app.model
 		{
 			if(interaction.part == 'endPoint')
 			{
-				var dx = x - this.worldX;
-				var dy = y - this.worldY;
-
-				this.rotation = Math.atan2(dy, dx) - interaction.offset;
-
-				return true;
+				// var dx = x - this.worldX;
+				// var dy = y - this.worldY;
+				//
+				// this.rotation = Math.atan2(dy, dx) - interaction.offset;
+				//
+				// return true;
 			}
 
 			return super.updateInteraction(x, y, worldScaleFactor, interaction);
@@ -84,14 +84,14 @@ namespace app.model
 		{
 			super.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
 
-			const endPoint = Node.rotate(0, -this.length * this.stretch, this.worldRotation);
+			const endPoint = MathUtils.rotate(0, -this.length * this.stretch, this.worldRotation);
 			this.worldEndPointX = this.worldX + endPoint.x;
 			this.worldEndPointY = this.worldY + endPoint.y;
 
-			this.boneWorldAABB.x1 = Math.min(this.worldX - Config.boneEndPointRadius * 2, this.worldEndPointX - Config.boneEndPointRadius * 2);
-			this.boneWorldAABB.y1 = Math.min(this.worldY - Config.boneEndPointRadius * 2, this.worldEndPointY - Config.boneEndPointRadius * 2);
-			this.boneWorldAABB.x2 = Math.max(this.worldX + Config.boneEndPointRadius * 2, this.worldEndPointX + Config.boneEndPointRadius * 2);
-			this.boneWorldAABB.y2 = Math.max(this.worldY + Config.boneEndPointRadius * 2, this.worldEndPointY + Config.boneEndPointRadius * 2);
+			this.boneWorldAABB.x1 = Math.min(this.worldX - Config.handleRadius, this.worldEndPointX - Config.handleRadius);
+			this.boneWorldAABB.y1 = Math.min(this.worldY - Config.handleRadius, this.worldEndPointY - Config.handleRadius);
+			this.boneWorldAABB.x2 = Math.max(this.worldX + Config.handleRadius, this.worldEndPointX + Config.handleRadius);
+			this.boneWorldAABB.y2 = Math.max(this.worldY + Config.handleRadius, this.worldEndPointY + Config.handleRadius);
 
 			var x1 = NaN;
 			var y1 = NaN;
@@ -157,7 +157,7 @@ namespace app.model
 
 			// Outline
 			ctx.lineWidth = Config.boneThickness + 2;
-			ctx.strokeStyle = Config.bone;
+			ctx.strokeStyle = Config.outline;
 			ctx.beginPath();
 			ctx.moveTo(x, y);
 			ctx.lineTo(eX, eY);
@@ -170,29 +170,8 @@ namespace app.model
 			ctx.lineTo(eX, eY);
 			ctx.stroke();
 
-			/// End points
-
-			// Outline
-			ctx.beginPath();
-			ctx.fillStyle = Config.bone;
-			ctx.arc(x, y, Config.boneEndPointRadius + 1, 0, Math.PI * 2);
-			ctx.fill();
-			// Centre
-			ctx.beginPath();
-			ctx.fillStyle = colour;
-			ctx.arc(x, y, Config.boneEndPointRadius, 0, Math.PI * 2);
-			ctx.fill();
-
-			// Outline
-			ctx.beginPath();
-			ctx.fillStyle = Config.bone;
-			ctx.arc(eX, eY, Config.boneEndPointRadius + 1, 0, Math.PI * 2);
-			ctx.fill();
-			// Centre
-			ctx.beginPath();
-			ctx.fillStyle = colour;
-			ctx.arc(eX, eY, Config.boneEndPointRadius, 0, Math.PI * 2);
-			ctx.fill();
+			this.drawHandle(ctx, x, y);
+			this.drawHandle(ctx, eX, eY);
 
 			if(Config.drawAABB)
 			{

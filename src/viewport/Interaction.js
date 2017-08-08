@@ -7,6 +7,9 @@ var app;
                 this.offset = 0;
                 this.x = 0;
                 this.y = 0;
+                this.initialX = 0;
+                this.initialY = 0;
+                this.constrain = false;
                 this.success = false;
             }
             return Interaction;
