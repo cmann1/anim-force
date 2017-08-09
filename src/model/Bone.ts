@@ -10,15 +10,26 @@ namespace app.model
 
 		public boneWorldAABB:AABB = new AABB();
 
+		public baseHandle:Handle = new Handle('base');
+		public endPointHandle:Handle = new Handle('rotation');
+		public boneHandle:Handle = new Handle('base', Config.boneThickness, HandleShape.LINE);
+		public stretchHandle:Handle = new Handle('stretch', Config.subHandleRadius, HandleShape.SQUARE);
+
 		constructor(name:string=null)
 		{
 			super(name);
 
 			this.type = 'bone';
+
+			this.handles.push(this.boneHandle);
+			this.handles.push(this.baseHandle);
+			this.handles.push(this.endPointHandle);
+			this.handles.push(this.stretchHandle);
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
+			// TODO: Auto hit testing using handles
 			if(this.boneWorldAABB.contains(x, y))
 			{
 				var dx:number, dy:number;
@@ -105,67 +116,28 @@ namespace app.model
 			this.worldEndPointX = this.worldX + endPoint.x;
 			this.worldEndPointY = this.worldY + endPoint.y;
 
-			this.boneWorldAABB.x1 = Math.min(this.worldX - Config.handleRadius / worldScale, this.worldEndPointX - Config.handleRadius / worldScale);
-			this.boneWorldAABB.y1 = Math.min(this.worldY - Config.handleRadius / worldScale, this.worldEndPointY - Config.handleRadius / worldScale);
-			this.boneWorldAABB.x2 = Math.max(this.worldX + Config.handleRadius / worldScale, this.worldEndPointX + Config.handleRadius / worldScale);
-			this.boneWorldAABB.y2 = Math.max(this.worldY + Config.handleRadius / worldScale, this.worldEndPointY + Config.handleRadius / worldScale);
+			this.stretchHandle.active = this.selected;
+			this.baseHandle.x = this.boneHandle.x = this.worldX;
+			this.baseHandle.y = this.boneHandle.y = this.worldY;
+			this.endPointHandle.x = this.boneHandle.x2 = this.worldEndPointX;
+			this.endPointHandle.y = this.boneHandle.y2 = this.worldEndPointY;
+			this.stretchHandle.x = this.worldEndPointX + ((this.worldEndPointX - this.worldX) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist / worldScale);
+			this.stretchHandle.y = this.worldEndPointY + ((this.worldEndPointY - this.worldY) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist / worldScale);
+			this.stretchHandle.rotation = this.worldRotation;
 
-			if(this.selected)
-			{
-				var x = this.worldX;
-				var y = this.worldY;
-				var eX = this.worldEndPointX;
-				var eY = this.worldEndPointY;
-				var dx = (eX - x) / (this.length * this.stretchY);
-				var dy = (eY - y) / (this.length * this.stretchY);
-				eX += dx * Config.boneStretchHandleDist / worldScale;
-				eY += dy * Config.boneStretchHandleDist / worldScale;
-				this.boneWorldAABB.unionF(
-					eX - Config.subHandleRadius / worldScale, eY - Config.subHandleRadius / worldScale,
-					eX + Config.subHandleRadius / worldScale, eY + Config.subHandleRadius / worldScale);
-			}
+			this.prepareAABB(worldScale);
+			this.boneWorldAABB.from(this.worldAABB);
 
-			var x1 = NaN;
-			var y1 = NaN;
-			var x2 = NaN;
-			var y2 = NaN;
+			this.childrenWorldAABB.reset();
 
 			for(var child of this.children)
 			{
 				child.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, worldScale, 1, this.stretchY, this.worldRotation, drawList, viewport);
 
-				if(isNaN(x1))
-				{
-					x1 = child.worldAABB.x1;
-					y1 = child.worldAABB.y1;
-					x2 = child.worldAABB.x2;
-					y2 = child.worldAABB.y2;
-				}
-				else
-				{
-					x1 = Math.min(x1, child.worldAABB.x1);
-					y1 = Math.min(y1, child.worldAABB.y1);
-					x2 = Math.max(x2, child.worldAABB.x2);
-					y2 = Math.max(y2, child.worldAABB.y2);
-				}
+				this.childrenWorldAABB.union(child.worldAABB);
 			}
 
-			this.childrenWorldAABB.x1 = x1;
-			this.childrenWorldAABB.y1 = y1;
-			this.childrenWorldAABB.x2 = x2;
-			this.childrenWorldAABB.y2 = y2;
-
-			if(isNaN(x1))
-			{
-				this.worldAABB.x1 = this.boneWorldAABB.x1;
-				this.worldAABB.y1 = this.boneWorldAABB.y1;
-				this.worldAABB.x2 = this.boneWorldAABB.x2;
-				this.worldAABB.y2 = this.boneWorldAABB.y2;
-			}
-			else
-			{
-				this.worldAABB.fromCombined(this.boneWorldAABB, this.childrenWorldAABB);
-			}
+			this.worldAABB.union(this.childrenWorldAABB);
 		}
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
@@ -179,11 +151,8 @@ namespace app.model
 
 			ctx.save();
 
-			const colour = this.selected ? Config.selected : (this.highlighted ? Config.highlighted : Config.control);
 			const x = this.worldX * worldScale;
 			const y = this.worldY * worldScale;
-			const eX = this.worldEndPointX * worldScale;
-			const eY = this.worldEndPointY * worldScale;
 
 			// Parent connector
 			if(this.parent && this.parent != this.model)
@@ -197,33 +166,7 @@ namespace app.model
 				ctx.setLineDash([]);
 			}
 
-			/// Bone
-
-			// Outline
-			ctx.lineWidth = Config.boneThickness + 2;
-			ctx.strokeStyle = Config.outline;
-			ctx.beginPath();
-			ctx.moveTo(x, y);
-			ctx.lineTo(eX, eY);
-			ctx.stroke();
-			// Centre
-			ctx.lineWidth = Config.boneThickness;
-			ctx.strokeStyle = colour;
-			ctx.beginPath();
-			ctx.moveTo(x, y);
-			ctx.lineTo(eX, eY);
-			ctx.stroke();
-
-			this.drawHandle(ctx, x, y);
-			this.drawHandle(ctx, eX, eY);
-
-			if(this.selected)
-			{
-				var dx = (eX - x) / (this.length * this.stretchY);
-				var dy = (eY - y) / (this.length * this.stretchY);
-				this.drawHandle(ctx, eX + dx * Config.boneStretchHandleDist / worldScale, eY + dy * Config.boneStretchHandleDist / worldScale,
-					null, null, true, Config.subHandleRadius);
-			}
+			super.drawControls(ctx, worldScale, viewport);
 
 			if(Config.drawAABB)
 			{

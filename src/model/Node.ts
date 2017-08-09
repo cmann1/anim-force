@@ -19,6 +19,8 @@ namespace app.model
 		public model:Model;
 		public parent:ContainerNode;
 
+		public handles:Handle[] = [];
+
 		/// Events
 
 		public propertyChange:EventDispatcher<Node> = new EventDispatcher<Node>();
@@ -31,6 +33,9 @@ namespace app.model
 		public rotation:number = 0;
 		public scaleX:number = 1;
 		public scaleY:number = 1;
+
+		public stretchX:number = 1;
+		public stretchY:number = 1;
 
 		public layer:number = 17;
 		public subLayer:number = 19;
@@ -89,7 +94,10 @@ namespace app.model
 			return this.parent.next(this);
 		}
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false; }
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			return false;
+		}
 
 		public globalToLocal(x:number, y:number):{x:number, y:number}
 		{
@@ -158,51 +166,46 @@ namespace app.model
 			this.worldY = worldY + offset.y;
 
 			this.worldRotation = worldRotation + this.rotation;
+
+			var x1 = Number.MAX_VALUE;
+			var y1 = Number.MAX_VALUE;
+			var x2 = -Number.MAX_VALUE;
+			var y2 = -Number.MAX_VALUE;
+
+			for(var handle of this.handles)
+			{
+				if(!handle.active) continue;
+
+
+			}
+		}
+
+		protected prepareAABB(worldScale:number)
+		{
+			this.worldAABB.x1 = this.worldX;
+			this.worldAABB.y1 = this.worldY;
+			this.worldAABB.x2 = this.worldX;
+			this.worldAABB.y2 = this.worldY;
+
+			for(var handle of this.handles)
+			{
+				if(!handle.active) continue;
+
+				handle.expand(this.worldAABB, worldScale);
+			}
 		}
 
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number) { }
 
-		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB) { }
-
-		protected drawHandle(ctx:CanvasRenderingContext2D, x, y, outline=null, colour=null, square=false, radius=Config.handleRadius)
+		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
-			if(outline == null)
+			for(var handle of this.handles)
 			{
-				outline = Config.outline;
+				if(handle.active)
+				{
+					handle.draw(ctx, worldScale, this.selected, this.highlighted);
+				}
 			}
-			if(colour == null)
-			{
-				colour = this.selected ? Config.selected : (this.highlighted ? Config.highlighted : Config.control)
-			}
-
-			// Outline
-			ctx.beginPath();
-			ctx.fillStyle = outline;
-			if(square)
-			{
-				ctx.rect(
-					x - radius - 1, y - radius - 1,
-					(radius + 1) * 2, (radius + 1) * 2);
-			}
-			else
-			{
-				ctx.arc(x, y, radius + 1, 0, Math.PI * 2);
-			}
-			ctx.fill();
-			// Centre
-			ctx.beginPath();
-			ctx.fillStyle = colour;
-			if(square)
-			{
-				ctx.rect(
-					x - radius, y - radius,
-					radius * 2, radius * 2);
-			}
-			else
-			{
-				ctx.arc(x, y, radius, 0, Math.PI * 2);
-			}
-			ctx.fill();
 		}
 
 		get name():string

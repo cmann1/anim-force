@@ -17,6 +17,7 @@ namespace app.MathUtils
 	export function project(ax:number, ay:number, bx:number, by:number)
 	{
 		const dp = dot(ax, ay, bx, by);
+
 		return {
 			x: ( dp / (bx * bx + by * by) ) * bx,
 			y: ( dp / (bx * bx + by * by) ) * by

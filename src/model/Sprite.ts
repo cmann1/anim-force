@@ -19,6 +19,11 @@ namespace app.model
 		public srcWidth:number = 0;
 		public srcHeight:number = 0;
 
+		public rotationHandle:Handle = new Handle('rotation', Config.handleRadius, HandleShape.CIRCLE, Config.handle);
+		public scaleHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
+		public scaleXHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
+		public scaleYHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
+
 		constructor(asset:app.assets.SpriteAsset, palette:number=0, frame:number=0, name:string=null)
 		{
 			super(name || (asset ? asset.spriteName : null));
@@ -30,6 +35,11 @@ namespace app.model
 			this.frame = frame;
 
 			(asset || SpriteAsset.NULL).setSpriteSource(this);
+
+			this.handles.push(this.rotationHandle);
+			this.handles.push(this.scaleHandle);
+			this.handles.push(this.scaleXHandle);
+			this.handles.push(this.scaleYHandle);
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
@@ -153,23 +163,43 @@ namespace app.model
 		{
 			super.prepareForDrawing(worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
 
+			const x = this.worldX;
+			const y = this.worldY;
+			const w = this.srcWidth * 0.5 * this.scaleX;
+			const h = this.srcHeight * 0.5 * this.scaleY;
+
+			this.rotationHandle.active = this.selected;
+			this.scaleHandle.active = this.selected;
+			this.scaleXHandle.active = this.selected;
+			this.scaleYHandle.active = this.selected;
+			this.scaleHandle.rotation = this.scaleXHandle.rotation = this.scaleYHandle.rotation = this.worldRotation;
+
+			var local = MathUtils.rotate(0, -h, this.worldRotation);
+			this.rotationHandle.x = x + local.x;
+			this.rotationHandle.y = y + local.y;
+			var local = MathUtils.rotate(w, h, this.worldRotation);
+			this.scaleHandle.x = x + local.x;
+			this.scaleHandle.y = y + local.y;
+			var local = MathUtils.rotate(w, 0, this.worldRotation);
+			this.scaleXHandle.x = x + local.x;
+			this.scaleXHandle.y = y + local.y;
+			var local = MathUtils.rotate(0, h, this.worldRotation);
+			this.scaleYHandle.x = x + local.x;
+			this.scaleYHandle.y = y + local.y;
+
+			this.prepareAABB(worldScale);
+
 			const scaleX = Math.abs(this.scaleX);
 			const scaleY = Math.abs(this.scaleY);
 			const cosR = Math.abs(Math.cos(this.worldRotation));
 			const sinR = Math.abs(Math.sin(this.worldRotation));
-			var w = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
-			var h = (this.srcWidth * scaleX * sinR  + this.srcHeight * scaleY * cosR) * 0.5;
+			var w1 = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
+			var h1 = (this.srcWidth * scaleX * sinR  + this.srcHeight * scaleY * cosR) * 0.5;
 
-			if(this.selected)
-			{
-				w += Config.handleClick / worldScale;
-				h += Config.handleClick / worldScale;
-			}
-
-			this.worldAABB.x1 = this.worldX - w;
-			this.worldAABB.y1 = this.worldY - h;
-			this.worldAABB.x2 = this.worldX + w;
-			this.worldAABB.y2 = this.worldY + h;
+			this.worldAABB.unionF(
+				this.worldX - w1, this.worldY - h1,
+				this.worldX + w1, this.worldY + h1
+			);
 
 			if(this.worldAABB.intersects(viewport))
 			{
@@ -215,17 +245,9 @@ namespace app.model
 			ctx.rect(0, 0, this.srcWidth * scaleX, this.srcHeight * scaleY);
 			ctx.stroke();
 
-			if(this.selected)
-			{
-				// Rotation
-				this.drawHandle(ctx, w * scaleX, 0, null, Config.handle);
-				// Scale X/Y
-				this.drawHandle(ctx, this.srcWidth * scaleX, h * scaleY, null, Config.handle, true);
-				this.drawHandle(ctx, w * scaleX, this.srcHeight * scaleY, null, Config.handle, true);
-				this.drawHandle(ctx, this.srcWidth * scaleX, this.srcHeight * scaleY, null, Config.handle, true);
-			}
-
 			ctx.restore();
+
+			super.drawControls(ctx, worldScale, viewport);
 
 			if(Config.drawAABB)
 			{

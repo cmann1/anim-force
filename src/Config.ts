@@ -4,7 +4,7 @@ namespace app
 	export class Config
 	{
 
-		static drawAABB = false;
+		static drawAABB = true;
 
 		static control = '#333';
 		static handle = '#5c7ecd';

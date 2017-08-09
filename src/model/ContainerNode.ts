@@ -9,9 +9,6 @@ namespace app.model
 		public children:Node[] = [];
 		public childCount:number = 0;
 
-		public stretchX:number = 1;
-		public stretchY:number = 1;
-
 		public worldEndPointX:number = 0;
 		public worldEndPointY:number = 0;
 
@@ -47,8 +44,8 @@ namespace app.model
 
 				child.rotation = child.worldRotation - this.worldRotation;
 				var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-				child.offsetX = local.x;
-				child.offsetY = local.y;
+				child.offsetX = local.x / this.stretchX;
+				child.offsetY = local.y / this.stretchY;
 			}
 
 			child.setModel(this.model);
@@ -81,8 +78,8 @@ namespace app.model
 				{
 					child.rotation = child.worldRotation - this.worldRotation;
 					var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-					child.offsetX = local.x;
-					child.offsetY = local.y;
+					child.offsetX = local.x / this.stretchX;
+					child.offsetY = local.y / this.stretchY;
 
 					child.parent.removeChild(child, false);
 					this.childCount++;
@@ -177,7 +174,7 @@ namespace app.model
 				}
 			}
 
-			return false;
+			return super.hitTest(x, y, worldScaleFactor, result);
 		}
 
 		public setModel(model:Model)

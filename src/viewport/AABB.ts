@@ -60,6 +60,14 @@ namespace app.viewport
 			if(y2 > this.y2) this.y2 = y2;
 		}
 
+		public reset()
+		{
+			this.x1 = Number.MAX_VALUE;
+			this.y1 = Number.MAX_VALUE;
+			this.x2 = -Number.MAX_VALUE;
+			this.y2 = -Number.MAX_VALUE;
+		}
+
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number, colour=null)
 		{
 			ctx.strokeStyle = colour || Config.AABB;

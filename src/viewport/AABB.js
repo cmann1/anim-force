@@ -55,6 +55,12 @@ var app;
                 if (y2 > this.y2)
                     this.y2 = y2;
             };
+            AABB.prototype.reset = function () {
+                this.x1 = Number.MAX_VALUE;
+                this.y1 = Number.MAX_VALUE;
+                this.x2 = -Number.MAX_VALUE;
+                this.y2 = -Number.MAX_VALUE;
+            };
             AABB.prototype.draw = function (ctx, worldScale, colour) {
                 if (colour === void 0) { colour = null; }
                 ctx.strokeStyle = colour || app.Config.AABB;

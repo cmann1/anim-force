@@ -5,7 +5,7 @@ var app;
         }
         return Config;
     }());
-    Config.drawAABB = false;
+    Config.drawAABB = true;
     Config.control = '#333';
     Config.handle = '#5c7ecd';
     Config.selected = '#CD3D51';

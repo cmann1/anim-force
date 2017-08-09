@@ -20,8 +20,6 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.children = [];
                 _this.childCount = 0;
-                _this.stretchX = 1;
-                _this.stretchY = 1;
                 _this.worldEndPointX = 0;
                 _this.worldEndPointY = 0;
                 _this.childrenWorldAABB = new AABB();
@@ -46,8 +44,8 @@ var app;
                     child.parent.removeChild(child, false);
                     child.rotation = child.worldRotation - this.worldRotation;
                     var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-                    child.offsetX = local.x;
-                    child.offsetY = local.y;
+                    child.offsetX = local.x / this.stretchX;
+                    child.offsetY = local.y / this.stretchY;
                 }
                 child.setModel(this.model);
                 child.parent = this;
@@ -72,8 +70,8 @@ var app;
                     else {
                         child.rotation = child.worldRotation - this.worldRotation;
                         var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-                        child.offsetX = local.x;
-                        child.offsetY = local.y;
+                        child.offsetX = local.x / this.stretchX;
+                        child.offsetY = local.y / this.stretchY;
                         child.parent.removeChild(child, false);
                         this.childCount++;
                     }
@@ -140,7 +138,7 @@ var app;
                         }
                     }
                 }
-                return false;
+                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
             };
             ContainerNode.prototype.setModel = function (model) {
                 _super.prototype.setModel.call(this, model);

@@ -25,11 +25,19 @@ var app;
                 _this.srcY = 0;
                 _this.srcWidth = 0;
                 _this.srcHeight = 0;
+                _this.rotationHandle = new model.Handle('rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, app.Config.handle);
+                _this.scaleHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
+                _this.scaleXHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
+                _this.scaleYHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
                 _this.type = 'sprite';
                 _this.asset = asset;
                 _this.palette = palette;
                 _this.frame = frame;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
+                _this.handles.push(_this.rotationHandle);
+                _this.handles.push(_this.scaleHandle);
+                _this.handles.push(_this.scaleXHandle);
+                _this.handles.push(_this.scaleYHandle);
                 return _this;
             }
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
@@ -122,20 +130,35 @@ var app;
             };
             Sprite.prototype.prepareForDrawing = function (worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport) {
                 _super.prototype.prepareForDrawing.call(this, worldX, worldY, worldScale, stretchX, stretchY, worldRotation, drawList, viewport);
+                var x = this.worldX;
+                var y = this.worldY;
+                var w = this.srcWidth * 0.5 * this.scaleX;
+                var h = this.srcHeight * 0.5 * this.scaleY;
+                this.rotationHandle.active = this.selected;
+                this.scaleHandle.active = this.selected;
+                this.scaleXHandle.active = this.selected;
+                this.scaleYHandle.active = this.selected;
+                this.scaleHandle.rotation = this.scaleXHandle.rotation = this.scaleYHandle.rotation = this.worldRotation;
+                var local = app.MathUtils.rotate(0, -h, this.worldRotation);
+                this.rotationHandle.x = x + local.x;
+                this.rotationHandle.y = y + local.y;
+                var local = app.MathUtils.rotate(w, h, this.worldRotation);
+                this.scaleHandle.x = x + local.x;
+                this.scaleHandle.y = y + local.y;
+                var local = app.MathUtils.rotate(w, 0, this.worldRotation);
+                this.scaleXHandle.x = x + local.x;
+                this.scaleXHandle.y = y + local.y;
+                var local = app.MathUtils.rotate(0, h, this.worldRotation);
+                this.scaleYHandle.x = x + local.x;
+                this.scaleYHandle.y = y + local.y;
+                this.prepareAABB(worldScale);
                 var scaleX = Math.abs(this.scaleX);
                 var scaleY = Math.abs(this.scaleY);
                 var cosR = Math.abs(Math.cos(this.worldRotation));
                 var sinR = Math.abs(Math.sin(this.worldRotation));
-                var w = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
-                var h = (this.srcWidth * scaleX * sinR + this.srcHeight * scaleY * cosR) * 0.5;
-                if (this.selected) {
-                    w += app.Config.handleClick / worldScale;
-                    h += app.Config.handleClick / worldScale;
-                }
-                this.worldAABB.x1 = this.worldX - w;
-                this.worldAABB.y1 = this.worldY - h;
-                this.worldAABB.x2 = this.worldX + w;
-                this.worldAABB.y2 = this.worldY + h;
+                var w1 = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
+                var h1 = (this.srcWidth * scaleX * sinR + this.srcHeight * scaleY * cosR) * 0.5;
+                this.worldAABB.unionF(this.worldX - w1, this.worldY - h1, this.worldX + w1, this.worldY + h1);
                 if (this.worldAABB.intersects(viewport)) {
                     drawList.add(this);
                 }
@@ -166,15 +189,8 @@ var app;
                 ctx.beginPath();
                 ctx.rect(0, 0, this.srcWidth * scaleX, this.srcHeight * scaleY);
                 ctx.stroke();
-                if (this.selected) {
-                    // Rotation
-                    this.drawHandle(ctx, w * scaleX, 0, null, app.Config.handle);
-                    // Scale X/Y
-                    this.drawHandle(ctx, this.srcWidth * scaleX, h * scaleY, null, app.Config.handle, true);
-                    this.drawHandle(ctx, w * scaleX, this.srcHeight * scaleY, null, app.Config.handle, true);
-                    this.drawHandle(ctx, this.srcWidth * scaleX, this.srcHeight * scaleY, null, app.Config.handle, true);
-                }
                 ctx.restore();
+                _super.prototype.drawControls.call(this, ctx, worldScale, viewport);
                 if (app.Config.drawAABB) {
                     this.worldAABB.draw(ctx, worldScale);
                 }

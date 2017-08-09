@@ -10,6 +10,7 @@ var app;
             ///
             function Node(name) {
                 this.canHaveChildren = false;
+                this.handles = [];
                 /// Events
                 this.propertyChange = new EventDispatcher();
                 this.structureChange = new EventDispatcher();
@@ -19,6 +20,8 @@ var app;
                 this.rotation = 0;
                 this.scaleX = 1;
                 this.scaleY = 1;
+                this.stretchX = 1;
+                this.stretchY = 1;
                 this.layer = 17;
                 this.subLayer = 19;
                 /// Rendering related
@@ -59,7 +62,9 @@ var app;
                     return this;
                 return this.parent.next(this);
             };
-            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                return false;
+            };
             Node.prototype.globalToLocal = function (x, y) {
                 return app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
             };
@@ -106,40 +111,36 @@ var app;
                 this.worldX = worldX + offset.x;
                 this.worldY = worldY + offset.y;
                 this.worldRotation = worldRotation + this.rotation;
+                var x1 = Number.MAX_VALUE;
+                var y1 = Number.MAX_VALUE;
+                var x2 = -Number.MAX_VALUE;
+                var y2 = -Number.MAX_VALUE;
+                for (var _i = 0, _a = this.handles; _i < _a.length; _i++) {
+                    var handle = _a[_i];
+                    if (!handle.active)
+                        continue;
+                }
+            };
+            Node.prototype.prepareAABB = function (worldScale) {
+                this.worldAABB.x1 = this.worldX;
+                this.worldAABB.y1 = this.worldY;
+                this.worldAABB.x2 = this.worldX;
+                this.worldAABB.y2 = this.worldY;
+                for (var _i = 0, _a = this.handles; _i < _a.length; _i++) {
+                    var handle = _a[_i];
+                    if (!handle.active)
+                        continue;
+                    handle.expand(this.worldAABB, worldScale);
+                }
             };
             Node.prototype.draw = function (ctx, worldScale) { };
-            Node.prototype.drawControls = function (ctx, worldScale, viewport) { };
-            Node.prototype.drawHandle = function (ctx, x, y, outline, colour, square, radius) {
-                if (outline === void 0) { outline = null; }
-                if (colour === void 0) { colour = null; }
-                if (square === void 0) { square = false; }
-                if (radius === void 0) { radius = app.Config.handleRadius; }
-                if (outline == null) {
-                    outline = app.Config.outline;
+            Node.prototype.drawControls = function (ctx, worldScale, viewport) {
+                for (var _i = 0, _a = this.handles; _i < _a.length; _i++) {
+                    var handle = _a[_i];
+                    if (handle.active) {
+                        handle.draw(ctx, worldScale, this.selected, this.highlighted);
+                    }
                 }
-                if (colour == null) {
-                    colour = this.selected ? app.Config.selected : (this.highlighted ? app.Config.highlighted : app.Config.control);
-                }
-                // Outline
-                ctx.beginPath();
-                ctx.fillStyle = outline;
-                if (square) {
-                    ctx.rect(x - radius - 1, y - radius - 1, (radius + 1) * 2, (radius + 1) * 2);
-                }
-                else {
-                    ctx.arc(x, y, radius + 1, 0, Math.PI * 2);
-                }
-                ctx.fill();
-                // Centre
-                ctx.beginPath();
-                ctx.fillStyle = colour;
-                if (square) {
-                    ctx.rect(x - radius, y - radius, radius * 2, radius * 2);
-                }
-                else {
-                    ctx.arc(x, y, radius, 0, Math.PI * 2);
-                }
-                ctx.fill();
             };
             Object.defineProperty(Node.prototype, "name", {
                 get: function () {
