@@ -45,6 +45,16 @@ var app;
                 if (a.y2 > this.y2)
                     this.y2 = a.y2;
             };
+            AABB.prototype.unionF = function (x1, y1, x2, y2) {
+                if (x1 < this.x1)
+                    this.x1 = x1;
+                if (y1 < this.y1)
+                    this.y1 = y1;
+                if (x2 > this.x2)
+                    this.x2 = x2;
+                if (y2 > this.y2)
+                    this.y2 = y2;
+            };
             AABB.prototype.draw = function (ctx, worldScale, colour) {
                 if (colour === void 0) { colour = null; }
                 ctx.strokeStyle = colour || app.Config.AABB;

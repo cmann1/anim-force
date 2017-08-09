@@ -30,7 +30,7 @@ var app;
                 _this.prevCameraX = 0;
                 _this.prevCameraY = 0;
                 _this.flickTolerance = 4;
-                _this.flickFactor = 10;
+                _this.flickFactor = 2;
                 _this.viewportAABB = new viewport.AABB();
                 _this.gridSize = 48 * 4;
                 _this.gridSubdivisions = 4;
@@ -274,7 +274,7 @@ var app;
                     var sprite3;
                     this.model.clear();
                     this.model.addChild(bone = new Bone());
-                    bone.rotation = Math.PI * 0.25;
+                    // bone.rotation = Math.PI * 0.25;
                     bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
                     sprite3 = new Sprite(spriteAsset3, 0, 0);
                     sprite3.rotation = Math.PI * 0.25;
@@ -304,8 +304,10 @@ var app;
                     }
                 }
                 else if (event.button == 2) {
-                    this.mouseGrabX = this.stageMouse.x;
-                    this.mouseGrabY = this.stageMouse.y;
+                    if (!this.interaction.success) {
+                        this.mouseGrabX = this.stageMouse.x;
+                        this.mouseGrabY = this.stageMouse.y;
+                    }
                 }
             };
             Viewport.prototype.onMouseUp = function (event) {
@@ -327,7 +329,9 @@ var app;
                 }
             };
             Viewport.prototype.onMouseWheel = function (event) {
-                this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
+                if (!this.interaction.success) {
+                    this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
+                }
             };
             Viewport.prototype.onMouseMove = function (event) {
                 if (!isNaN(this.mouseGrabX)) {

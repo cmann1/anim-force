@@ -52,6 +52,14 @@ namespace app.viewport
 			if(a.y2 > this.y2) this.y2 = a.y2;
 		}
 
+		public unionF(x1:number, y1:number, x2:number, y2:number)
+		{
+			if(x1 < this.x1) this.x1 = x1;
+			if(y1 < this.y1) this.y1 = y1;
+			if(x2 > this.x2) this.x2 = x2;
+			if(y2 > this.y2) this.y2 = y2;
+		}
+
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number, colour=null)
 		{
 			ctx.strokeStyle = colour || Config.AABB;

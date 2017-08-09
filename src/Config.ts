@@ -21,9 +21,12 @@ namespace app
 
 		static boneThickness = 3;
 		static boneClick = Config.boneThickness + Config.interactionTolerance;
+		static boneStretchHandleDist = 20;
 
 		static handleRadius = 4;
 		static handleClick = Config.handleRadius + Config.interactionTolerance;
+		static subHandleRadius = 3;
+		static subHandleClick = Config.subHandleRadius + Config.interactionTolerance;
 
 	}
 

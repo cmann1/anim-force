@@ -66,10 +66,11 @@ var app;
             Node.prototype.hitTestHandle = function (dx, dy, worldScaleFactor, square, radius) {
                 if (square === void 0) { square = false; }
                 if (radius === void 0) { radius = app.Config.handleClick; }
+                radius *= worldScaleFactor;
                 if (square) {
                     return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
                 }
-                return Math.sqrt(dx * dx + dy * dy) <= radius * worldScaleFactor;
+                return Math.sqrt(dx * dx + dy * dy) <= radius;
             };
             Node.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 if (interaction.part == 'base') {
@@ -82,6 +83,10 @@ var app;
                     var localOffset = app.MathUtils.rotate(interaction.x, interaction.y, interaction.offset);
                     this.offsetX = local.x - localOffset.x;
                     this.offsetY = local.y - localOffset.y;
+                    if (this.parent) {
+                        this.offsetX /= this.parent.stretchX;
+                        this.offsetY /= this.parent.stretchY;
+                    }
                     return true;
                 }
                 if (interaction.part == 'rotation') {
@@ -104,10 +109,11 @@ var app;
             };
             Node.prototype.draw = function (ctx, worldScale) { };
             Node.prototype.drawControls = function (ctx, worldScale, viewport) { };
-            Node.prototype.drawHandle = function (ctx, x, y, outline, colour, square) {
+            Node.prototype.drawHandle = function (ctx, x, y, outline, colour, square, radius) {
                 if (outline === void 0) { outline = null; }
                 if (colour === void 0) { colour = null; }
                 if (square === void 0) { square = false; }
+                if (radius === void 0) { radius = app.Config.handleRadius; }
                 if (outline == null) {
                     outline = app.Config.outline;
                 }
@@ -118,20 +124,20 @@ var app;
                 ctx.beginPath();
                 ctx.fillStyle = outline;
                 if (square) {
-                    ctx.rect(x - app.Config.handleRadius - 1, y - app.Config.handleRadius - 1, (app.Config.handleRadius + 1) * 2, (app.Config.handleRadius + 1) * 2);
+                    ctx.rect(x - radius - 1, y - radius - 1, (radius + 1) * 2, (radius + 1) * 2);
                 }
                 else {
-                    ctx.arc(x, y, app.Config.handleRadius + 1, 0, Math.PI * 2);
+                    ctx.arc(x, y, radius + 1, 0, Math.PI * 2);
                 }
                 ctx.fill();
                 // Centre
                 ctx.beginPath();
                 ctx.fillStyle = colour;
                 if (square) {
-                    ctx.rect(x - app.Config.handleRadius, y - app.Config.handleRadius, app.Config.handleRadius * 2, app.Config.handleRadius * 2);
+                    ctx.rect(x - radius, y - radius, radius * 2, radius * 2);
                 }
                 else {
-                    ctx.arc(x, y, app.Config.handleRadius, 0, Math.PI * 2);
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
                 }
                 ctx.fill();
             };

@@ -24,7 +24,7 @@ namespace app.viewport
 		protected prevCameraX:number = 0;
 		protected prevCameraY:number = 0;
 		protected flickTolerance:number = 4;
-		protected flickFactor:number = 10;
+		protected flickFactor:number = 2;
 
 		protected viewportAABB:AABB = new AABB();
 		protected viewLeft:number;
@@ -382,7 +382,7 @@ namespace app.viewport
 
 				this.model.clear();
 				this.model.addChild(bone = new Bone());
-				bone.rotation = Math.PI * 0.25;
+				// bone.rotation = Math.PI * 0.25;
 				bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
 
 				sprite3 = new Sprite(spriteAsset3, 0, 0);
@@ -427,8 +427,11 @@ namespace app.viewport
 
 			else if(event.button == 2)
 			{
-				this.mouseGrabX = this.stageMouse.x;
-				this.mouseGrabY = this.stageMouse.y;
+				if(!this.interaction.success)
+				{
+					this.mouseGrabX = this.stageMouse.x;
+					this.mouseGrabY = this.stageMouse.y;
+				}
 			}
 		}
 
@@ -462,7 +465,10 @@ namespace app.viewport
 
 		protected onMouseWheel(event)
 		{
-			this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
+			if(!this.interaction.success)
+			{
+				this.zoom(event.originalEvent.wheelDelta > 0 ? 1 : -1);
+			}
 		}
 
 		protected onMouseMove(event)

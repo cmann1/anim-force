@@ -9,6 +9,9 @@ namespace app.model
 		public children:Node[] = [];
 		public childCount:number = 0;
 
+		public stretchX:number = 1;
+		public stretchY:number = 1;
+
 		public worldEndPointX:number = 0;
 		public worldEndPointY:number = 0;
 

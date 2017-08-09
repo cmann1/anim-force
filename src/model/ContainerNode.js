@@ -20,6 +20,8 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.children = [];
                 _this.childCount = 0;
+                _this.stretchX = 1;
+                _this.stretchY = 1;
                 _this.worldEndPointX = 0;
                 _this.worldEndPointY = 0;
                 _this.childrenWorldAABB = new AABB();

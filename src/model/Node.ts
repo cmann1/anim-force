@@ -98,12 +98,14 @@ namespace app.model
 
 		protected hitTestHandle(dx:number, dy:number, worldScaleFactor:number, square:boolean=false, radius=Config.handleClick):boolean
 		{
+			radius *= worldScaleFactor;
+
 			if(square)
 			{
 				return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
 			}
 
-			return Math.sqrt(dx * dx + dy * dy) <= radius * worldScaleFactor;
+			return Math.sqrt(dx * dx + dy * dy) <= radius;
 		}
 
 		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
@@ -119,6 +121,12 @@ namespace app.model
 				const localOffset = MathUtils.rotate(interaction.x, interaction.y, interaction.offset);
 				this.offsetX = local.x - localOffset.x;
 				this.offsetY = local.y - localOffset.y;
+
+				if(this.parent)
+				{
+					this.offsetX /= this.parent.stretchX;
+					this.offsetY /= this.parent.stretchY;
+				}
 
 				return true;
 			}
@@ -156,7 +164,7 @@ namespace app.model
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB) { }
 
-		protected drawHandle(ctx:CanvasRenderingContext2D, x, y, outline=null, colour=null, square=false)
+		protected drawHandle(ctx:CanvasRenderingContext2D, x, y, outline=null, colour=null, square=false, radius=Config.handleRadius)
 		{
 			if(outline == null)
 			{
@@ -173,12 +181,12 @@ namespace app.model
 			if(square)
 			{
 				ctx.rect(
-					x - Config.handleRadius - 1, y - Config.handleRadius - 1,
-					(Config.handleRadius + 1) * 2, (Config.handleRadius + 1) * 2);
+					x - radius - 1, y - radius - 1,
+					(radius + 1) * 2, (radius + 1) * 2);
 			}
 			else
 			{
-				ctx.arc(x, y, Config.handleRadius + 1, 0, Math.PI * 2);
+				ctx.arc(x, y, radius + 1, 0, Math.PI * 2);
 			}
 			ctx.fill();
 			// Centre
@@ -187,12 +195,12 @@ namespace app.model
 			if(square)
 			{
 				ctx.rect(
-					x - Config.handleRadius, y - Config.handleRadius,
-					Config.handleRadius * 2, Config.handleRadius * 2);
+					x - radius, y - radius,
+					radius * 2, radius * 2);
 			}
 			else
 			{
-				ctx.arc(x, y, Config.handleRadius, 0, Math.PI * 2);
+				ctx.arc(x, y, radius, 0, Math.PI * 2);
 			}
 			ctx.fill();
 		}
