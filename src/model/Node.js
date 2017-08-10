@@ -62,20 +62,21 @@ var app;
                     return this;
                 return this.parent.next(this);
             };
-            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
+                // Do it in reverse order so that handles in front are checked first
+                for (var i = this.handles.length - 1; i >= 0; i--) {
+                    var handle = this.handles[i];
+                    if (!handle.active)
+                        continue;
+                    if (handle.hitTest(x, y, worldScaleFactor, result)) {
+                        return true;
+                    }
+                }
                 return false;
             };
             Node.prototype.globalToLocal = function (x, y) {
                 return app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-            };
-            Node.prototype.hitTestHandle = function (dx, dy, worldScaleFactor, square, radius) {
-                if (square === void 0) { square = false; }
-                if (radius === void 0) { radius = app.Config.handleClick; }
-                radius *= worldScaleFactor;
-                if (square) {
-                    return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
-                }
-                return Math.sqrt(dx * dx + dy * dy) <= radius;
             };
             Node.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 if (interaction.part == 'base') {
@@ -99,7 +100,6 @@ var app;
                     var dy = y - this.worldY;
                     this.rotation = Math.atan2(dy, dx) - interaction.offset;
                     if (interaction.constrain) {
-                        // console.log(this.rotation / );
                         this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
                     }
                     return true;
@@ -111,15 +111,6 @@ var app;
                 this.worldX = worldX + offset.x;
                 this.worldY = worldY + offset.y;
                 this.worldRotation = worldRotation + this.rotation;
-                var x1 = Number.MAX_VALUE;
-                var y1 = Number.MAX_VALUE;
-                var x2 = -Number.MAX_VALUE;
-                var y2 = -Number.MAX_VALUE;
-                for (var _i = 0, _a = this.handles; _i < _a.length; _i++) {
-                    var handle = _a[_i];
-                    if (!handle.active)
-                        continue;
-                }
             };
             Node.prototype.prepareAABB = function (worldScale) {
                 this.worldAABB.x1 = this.worldX;

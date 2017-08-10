@@ -2,6 +2,7 @@ namespace app.model
 {
 
 	import AABB = app.viewport.AABB;
+	import Interaction = app.viewport.Interaction;
 
 	export enum HandleShape
 	{
@@ -10,9 +11,17 @@ namespace app.model
 		LINE
 	}
 
+	export enum HandleType
+	{
+		VECTOR,
+		AXIS,
+		ROTATION
+	}
+
 	export class Handle
 	{
 
+		public node:Node;
 		public interaction:string;
 		public radius:number;
 		public shape:HandleShape;
@@ -20,17 +29,22 @@ namespace app.model
 		private fill:string;
 
 		public active:boolean = true;
+		public rotation:number = 0;
 		public x:number;
 		public y:number;
-		public rotation:number;
 		public x2:number;
 		public y2:number;
+		private type:HandleType;
 
-		constructor(interaction:string, radius:number=Config.handleRadius, shape:HandleShape=HandleShape.CIRCLE, fill=Config.control, outline=Config.outline)
+		constructor(node:Node, interaction:string, radius:number=Config.handleRadius,
+		            shape:HandleShape=HandleShape.CIRCLE, type=HandleType.VECTOR,
+		            fill=Config.control, outline=Config.outline)
 		{
+			this.node = node;
 			this.interaction = interaction;
 			this.radius = radius;
 			this.shape = shape;
+			this.type = type;
 			this.fill = fill;
 			this.outline = outline;
 		}
@@ -125,6 +139,89 @@ namespace app.model
 					(x > x2 ? x : x2) + radius, (y > y2 ? y : y2) + radius
 				);
 			}
+		}
+
+		public hitTest(worldX:number, worldY:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			const x = this.x;
+			const y = this.y;
+			const x2 = this.x2;
+			const y2 = this.y2;
+			const radius = (this.radius + Config.interactionTolerance) * worldScaleFactor;
+			const shape = this.shape;
+
+			var hit = false;
+			var dx = worldX - x;
+			var dy = worldY - y;
+
+			if(this.rotation != 0)
+			{
+				var local = MathUtils.rotate(dx, dy, this.rotation);
+				dx = local.x;
+				dy = local.y;
+			}
+
+			if(shape == HandleShape.LINE)
+			{
+				var lineDx = x2 - x;
+				var lineDy = y2 - y;
+
+				var u = ((worldX - x) * lineDx + (worldY - y) * lineDy) / (lineDx * lineDx + lineDy * lineDy);
+				var lineX, lineY;
+
+				if(u < 0){
+					lineX = x;
+					lineY = y;
+				}
+				else if(u > 1){
+					lineX = x2;
+					lineY = y2;
+				}
+				else{
+					lineX = x + u * lineDx;
+					lineY = y + u * lineDy;
+				}
+
+				dx = worldX - lineX;
+				dy = worldY - lineY;
+			}
+
+			if(shape == HandleShape.CIRCLE || shape == HandleShape.LINE)
+			{
+				hit = Math.sqrt(dx * dx + dy * dy) <= radius;
+			}
+			else if(shape == HandleShape.SQUARE)
+			{
+				hit = dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
+			}
+
+			if(hit)
+			{
+				result.part = this.interaction;
+				result.node = this.node;
+
+				if(this.type == HandleType.VECTOR)
+				{
+					result.x = worldX - x;
+					result.y = worldY - y;
+					result.offset = 0;
+				}
+				else if(this.type == HandleType.AXIS)
+				{
+					result.x = worldX - x;
+					result.y = worldY - y;
+					result.offset = 1;
+				}
+				else if(this.type == HandleType.ROTATION)
+				{
+					result.initialX = this.node.rotation;
+					result.offset = (this.node.parent ? this.node.parent.worldRotation : 0)
+						+ (Math.atan2(worldY - this.node.worldY, worldX - this.node.worldX)
+						- this.node.worldRotation);
+				}
+			}
+
+			return hit;
 		}
 
 	}

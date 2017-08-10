@@ -119,6 +119,11 @@ var app;
             Model.prototype.getSelectedNode = function () {
                 return this.selectedNode;
             };
+            Model.prototype.clear = function () {
+                this.selectedNode = null;
+                this.highlightedNode = null;
+                _super.prototype.clear.call(this);
+            };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {
                     return true;

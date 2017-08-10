@@ -8,16 +8,26 @@ var app;
             HandleShape[HandleShape["SQUARE"] = 1] = "SQUARE";
             HandleShape[HandleShape["LINE"] = 2] = "LINE";
         })(HandleShape = model.HandleShape || (model.HandleShape = {}));
+        var HandleType;
+        (function (HandleType) {
+            HandleType[HandleType["VECTOR"] = 0] = "VECTOR";
+            HandleType[HandleType["AXIS"] = 1] = "AXIS";
+            HandleType[HandleType["ROTATION"] = 2] = "ROTATION";
+        })(HandleType = model.HandleType || (model.HandleType = {}));
         var Handle = (function () {
-            function Handle(interaction, radius, shape, fill, outline) {
+            function Handle(node, interaction, radius, shape, type, fill, outline) {
                 if (radius === void 0) { radius = app.Config.handleRadius; }
                 if (shape === void 0) { shape = HandleShape.CIRCLE; }
+                if (type === void 0) { type = HandleType.VECTOR; }
                 if (fill === void 0) { fill = app.Config.control; }
                 if (outline === void 0) { outline = app.Config.outline; }
                 this.active = true;
+                this.rotation = 0;
+                this.node = node;
                 this.interaction = interaction;
                 this.radius = radius;
                 this.shape = shape;
+                this.type = type;
                 this.fill = fill;
                 this.outline = outline;
             }
@@ -84,6 +94,69 @@ var app;
                 else if (shape == HandleShape.LINE) {
                     aabb.unionF((x < x2 ? x : x2) - radius, (y < y2 ? y : y2) - radius, (x > x2 ? x : x2) + radius, (y > y2 ? y : y2) + radius);
                 }
+            };
+            Handle.prototype.hitTest = function (worldX, worldY, worldScaleFactor, result) {
+                var x = this.x;
+                var y = this.y;
+                var x2 = this.x2;
+                var y2 = this.y2;
+                var radius = (this.radius + app.Config.interactionTolerance) * worldScaleFactor;
+                var shape = this.shape;
+                var hit = false;
+                var dx = worldX - x;
+                var dy = worldY - y;
+                if (this.rotation != 0) {
+                    var local = app.MathUtils.rotate(dx, dy, this.rotation);
+                    dx = local.x;
+                    dy = local.y;
+                }
+                if (shape == HandleShape.LINE) {
+                    var lineDx = x2 - x;
+                    var lineDy = y2 - y;
+                    var u = ((worldX - x) * lineDx + (worldY - y) * lineDy) / (lineDx * lineDx + lineDy * lineDy);
+                    var lineX, lineY;
+                    if (u < 0) {
+                        lineX = x;
+                        lineY = y;
+                    }
+                    else if (u > 1) {
+                        lineX = x2;
+                        lineY = y2;
+                    }
+                    else {
+                        lineX = x + u * lineDx;
+                        lineY = y + u * lineDy;
+                    }
+                    dx = worldX - lineX;
+                    dy = worldY - lineY;
+                }
+                if (shape == HandleShape.CIRCLE || shape == HandleShape.LINE) {
+                    hit = Math.sqrt(dx * dx + dy * dy) <= radius;
+                }
+                else if (shape == HandleShape.SQUARE) {
+                    hit = dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
+                }
+                if (hit) {
+                    result.part = this.interaction;
+                    result.node = this.node;
+                    if (this.type == HandleType.VECTOR) {
+                        result.x = worldX - x;
+                        result.y = worldY - y;
+                        result.offset = 0;
+                    }
+                    else if (this.type == HandleType.AXIS) {
+                        result.x = worldX - x;
+                        result.y = worldY - y;
+                        result.offset = 1;
+                    }
+                    else if (this.type == HandleType.ROTATION) {
+                        result.initialX = this.node.rotation;
+                        result.offset = (this.node.parent ? this.node.parent.worldRotation : 0)
+                            + (Math.atan2(worldY - this.node.worldY, worldX - this.node.worldX)
+                                - this.node.worldRotation);
+                    }
+                }
+                return hit;
             };
             return Handle;
         }());

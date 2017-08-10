@@ -94,26 +94,28 @@ namespace app.model
 			return this.parent.next(this);
 		}
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false }
+
+		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
+			// Do it in reverse order so that handles in front are checked first
+			for(var i = this.handles.length - 1; i >= 0; i--)
+			{
+				var handle = this.handles[i];
+				if(!handle.active) continue;
+
+				if(handle.hitTest(x, y, worldScaleFactor, result))
+				{
+					return true;
+				}
+			}
+
 			return false;
 		}
 
 		public globalToLocal(x:number, y:number):{x:number, y:number}
 		{
 			return MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-		}
-
-		protected hitTestHandle(dx:number, dy:number, worldScaleFactor:number, square:boolean=false, radius=Config.handleClick):boolean
-		{
-			radius *= worldScaleFactor;
-
-			if(square)
-			{
-				return dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
-			}
-
-			return Math.sqrt(dx * dx + dy * dy) <= radius;
 		}
 
 		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
@@ -148,7 +150,6 @@ namespace app.model
 
 				if(interaction.constrain)
 				{
-					// console.log(this.rotation / );
 					this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
 				}
 
@@ -166,18 +167,6 @@ namespace app.model
 			this.worldY = worldY + offset.y;
 
 			this.worldRotation = worldRotation + this.rotation;
-
-			var x1 = Number.MAX_VALUE;
-			var y1 = Number.MAX_VALUE;
-			var x2 = -Number.MAX_VALUE;
-			var y2 = -Number.MAX_VALUE;
-
-			for(var handle of this.handles)
-			{
-				if(!handle.active) continue;
-
-
-			}
 		}
 
 		protected prepareAABB(worldScale:number)

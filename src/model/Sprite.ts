@@ -19,10 +19,10 @@ namespace app.model
 		public srcWidth:number = 0;
 		public srcHeight:number = 0;
 
-		public rotationHandle:Handle = new Handle('rotation', Config.handleRadius, HandleShape.CIRCLE, Config.handle);
-		public scaleHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
-		public scaleXHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
-		public scaleYHandle:Handle = new Handle('scale', Config.handleRadius, HandleShape.SQUARE, Config.handle);
+		public rotationHandle:Handle;
+		public scaleHandle:Handle;
+		public scaleXHandle:Handle;
+		public scaleYHandle:Handle;
 
 		constructor(asset:app.assets.SpriteAsset, palette:number=0, frame:number=0, name:string=null)
 		{
@@ -36,6 +36,11 @@ namespace app.model
 
 			(asset || SpriteAsset.NULL).setSpriteSource(this);
 
+			this.rotationHandle = new Handle(this, 'rotation', Config.handleRadius, HandleShape.CIRCLE, HandleType.ROTATION, Config.handle);
+			this.scaleHandle = new Handle(this, 'scale', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
+			this.scaleXHandle = new Handle(this, 'scaleX', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
+			this.scaleYHandle = new Handle(this, 'scaleY', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
+
 			this.handles.push(this.rotationHandle);
 			this.handles.push(this.scaleHandle);
 			this.handles.push(this.scaleXHandle);
@@ -46,76 +51,17 @@ namespace app.model
 		{
 			if(!this.worldAABB.contains(x, y)) return false;
 
-			var dx:number, dy:number;
+			if(this.hitTestHandles(x, y, worldScaleFactor, result))
+			{
+				return true;
+			}
 
 			const local = MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-			var w = this.srcWidth * 0.5 * this.scaleX;
-			var h = this.srcHeight * 0.5 * this.scaleY;
+			const w = Math.abs(this.srcWidth * 0.5 * this.scaleX);
+			const h = Math.abs(this.srcHeight * 0.5 * this.scaleY);
 			x = local.x;
 			y = local.y;
 
-			if(this.selected)
-			{
-				// Rotation
-				dx = x;
-				dy = y + h;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor))
-				{
-					result.initialX = this.rotation;
-					result.offset = Math.atan2(y, x) - this.rotation + this.worldRotation;
-					result.node = this;
-					result.part = 'rotation';
-
-					return true;
-				}
-
-				// Scale X
-				dx = x - w;
-				dy = y;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor, true))
-				{
-					result.x = dx;
-					result.y = dy;
-					result.offset = this.scaleX;
-					result.node = this;
-					result.part = 'scaleX';
-
-					return true;
-				}
-
-				// Scale Y
-				dx = x;
-				dy = y - h;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor, true))
-				{
-					result.x = dx;
-					result.y = dy;
-					result.offset = this.scaleY;
-					result.node = this;
-					result.part = 'scaleY';
-
-					return true;
-				}
-
-				// Scale
-				dx = x - w;
-				dy = y - h;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor, true))
-				{
-					result.x = dx;
-					result.y = dy;
-					result.initialX = this.scaleX;
-					result.initialY = this.scaleY;
-					result.offset = Math.sqrt(x * x + y * y);
-					result.node = this;
-					result.part = 'scale';
-
-					return true;
-				}
-			}
-
-			w = Math.abs(w);
-			h = Math.abs(h);
 			if(x >= -w && x <= w && y >= -h && y <= h)
 			{
 				result.x = x;

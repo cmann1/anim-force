@@ -10,10 +10,10 @@ namespace app.model
 
 		public boneWorldAABB:AABB = new AABB();
 
-		public baseHandle:Handle = new Handle('base');
-		public endPointHandle:Handle = new Handle('rotation');
-		public boneHandle:Handle = new Handle('base', Config.boneThickness, HandleShape.LINE);
-		public stretchHandle:Handle = new Handle('stretch', Config.subHandleRadius, HandleShape.SQUARE);
+		public baseHandle:Handle;
+		public endPointHandle:Handle;
+		public boneHandle:Handle;
+		public stretchHandle:Handle;
 
 		constructor(name:string=null)
 		{
@@ -21,6 +21,10 @@ namespace app.model
 
 			this.type = 'bone';
 
+			this.baseHandle = new Handle(this, 'base');
+			this.endPointHandle = new Handle(this, 'rotation', Config.handleRadius, HandleShape.CIRCLE, HandleType.ROTATION);
+			this.boneHandle = new Handle(this, 'base', Config.boneThickness, HandleShape.LINE);
+			this.stretchHandle = new Handle(this, 'stretchY', Config.subHandleRadius, HandleShape.SQUARE, HandleType.AXIS);
 			this.handles.push(this.boneHandle);
 			this.handles.push(this.baseHandle);
 			this.handles.push(this.endPointHandle);
@@ -29,69 +33,17 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			// TODO: Auto hit testing using handles
 			if(this.boneWorldAABB.contains(x, y))
 			{
-				var dx:number, dy:number;
 
 				result.offset = this.parent ? -this.parent.worldRotation : 0;
 				result.node = this;
 
-				// End point
-
-				dx = x - this.worldEndPointX;
-				dy = y - this.worldEndPointY;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor))
+				if(this.hitTestHandles(x, y, worldScaleFactor, result))
 				{
-					dx = x - this.worldX;
-					dy = y - this.worldY;
-					result.initialX = this.rotation;
-					result.offset = Math.atan2(dy, dx) - this.rotation;
-
-					result.part = 'rotation';
-
 					return true;
 				}
 
-				// Base
-
-				dx = x - this.worldX;
-				dy = y - this.worldY;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor))
-				{
-					result.x = dx;
-					result.y = dy;
-					result.part = 'base';
-					return true;
-				}
-
-				// Stretch
-
-				var hx = this.worldEndPointX + ((this.worldEndPointX - this.worldX) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist * worldScaleFactor);
-				var hy = this.worldEndPointY + ((this.worldEndPointY - this.worldY) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist * worldScaleFactor);
-				dx = x - hx;
-				dy = y - hy;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor, true, Config.subHandleClick))
-				{
-					result.x = dx;
-					result.y = dy;
-					result.offset = this.stretchY;
-					result.part = 'stretchY';
-					return true;
-				}
-
-				// Bone
-
-				var boneHit = this.getClosestPointOnBone(x, y);
-				dx = x - boneHit.x;
-				dy = y - boneHit.y;
-				if(this.hitTestHandle(dx, dy, worldScaleFactor, false, Config.boneClick))
-				{
-					result.x = x - this.worldX;
-					result.y = y - this.worldY;
-					result.part = 'base';
-					return true;
-				}
 			}
 
 			return super.hitTest(x, y, worldScaleFactor, result);
@@ -176,30 +128,6 @@ namespace app.model
 			}
 
 			ctx.restore();
-		}
-
-		public getClosestPointOnBone(x:number, y:number)
-		{
-			var dx = this.worldEndPointX - this.worldX;
-			var dy = this.worldEndPointY - this.worldY;
-
-			var u = ((x - this.worldX) * dx + (y - this.worldY) * dy) / (dx * dx + dy * dy);
-			var lineX, lineY;
-
-			if(u < 0){
-				lineX = this.worldX;
-				lineY = this.worldY;
-			}
-			else if(u > 1){
-				lineX = this.worldEndPointX;
-				lineY = this.worldEndPointY;
-			}
-			else{
-				lineX = this.worldX + u * dx;
-				lineY = this.worldY + u * dy;
-			}
-
-			return {x: lineX, y: lineY};
 		}
 
 	}

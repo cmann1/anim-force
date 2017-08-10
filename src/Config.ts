@@ -4,7 +4,7 @@ namespace app
 	export class Config
 	{
 
-		static drawAABB = true;
+		static drawAABB = false;
 
 		static control = '#333';
 		static handle = '#5c7ecd';
@@ -20,12 +20,11 @@ namespace app
 		static interactionTolerance = 2;
 
 		static boneThickness = 3;
-		static boneClick = Config.boneThickness + Config.interactionTolerance;
 		static boneStretchHandleDist = 20;
 
-		static handleRadius = 4;
+		static handleRadius = 5;
 		static handleClick = Config.handleRadius + Config.interactionTolerance;
-		static subHandleRadius = 3;
+		static subHandleRadius = 4;
 		static subHandleClick = Config.subHandleRadius + Config.interactionTolerance;
 
 	}

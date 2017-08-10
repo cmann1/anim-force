@@ -140,6 +140,14 @@ namespace app.model
 			return this.selectedNode;
 		}
 
+		public clear():void
+		{
+			this.selectedNode = null;
+			this.highlightedNode = null;
+
+			super.clear();
+		}
+
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
 			if(this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result))

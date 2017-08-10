@@ -25,15 +25,15 @@ var app;
                 _this.srcY = 0;
                 _this.srcWidth = 0;
                 _this.srcHeight = 0;
-                _this.rotationHandle = new model.Handle('rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, app.Config.handle);
-                _this.scaleHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
-                _this.scaleXHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
-                _this.scaleYHandle = new model.Handle('scale', app.Config.handleRadius, model.HandleShape.SQUARE, app.Config.handle);
                 _this.type = 'sprite';
                 _this.asset = asset;
                 _this.palette = palette;
                 _this.frame = frame;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
+                _this.rotationHandle = new model.Handle(_this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION, app.Config.handle);
+                _this.scaleHandle = new model.Handle(_this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
+                _this.scaleXHandle = new model.Handle(_this, 'scaleX', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
+                _this.scaleYHandle = new model.Handle(_this, 'scaleY', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
                 _this.handles.push(_this.rotationHandle);
                 _this.handles.push(_this.scaleHandle);
                 _this.handles.push(_this.scaleXHandle);
@@ -43,61 +43,14 @@ var app;
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (!this.worldAABB.contains(x, y))
                     return false;
-                var dx, dy;
+                if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
+                    return true;
+                }
                 var local = app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-                var w = this.srcWidth * 0.5 * this.scaleX;
-                var h = this.srcHeight * 0.5 * this.scaleY;
+                var w = Math.abs(this.srcWidth * 0.5 * this.scaleX);
+                var h = Math.abs(this.srcHeight * 0.5 * this.scaleY);
                 x = local.x;
                 y = local.y;
-                if (this.selected) {
-                    // Rotation
-                    dx = x;
-                    dy = y + h;
-                    if (this.hitTestHandle(dx, dy, worldScaleFactor)) {
-                        result.initialX = this.rotation;
-                        result.offset = Math.atan2(y, x) - this.rotation + this.worldRotation;
-                        result.node = this;
-                        result.part = 'rotation';
-                        return true;
-                    }
-                    // Scale X
-                    dx = x - w;
-                    dy = y;
-                    if (this.hitTestHandle(dx, dy, worldScaleFactor, true)) {
-                        result.x = dx;
-                        result.y = dy;
-                        result.offset = this.scaleX;
-                        result.node = this;
-                        result.part = 'scaleX';
-                        return true;
-                    }
-                    // Scale Y
-                    dx = x;
-                    dy = y - h;
-                    if (this.hitTestHandle(dx, dy, worldScaleFactor, true)) {
-                        result.x = dx;
-                        result.y = dy;
-                        result.offset = this.scaleY;
-                        result.node = this;
-                        result.part = 'scaleY';
-                        return true;
-                    }
-                    // Scale
-                    dx = x - w;
-                    dy = y - h;
-                    if (this.hitTestHandle(dx, dy, worldScaleFactor, true)) {
-                        result.x = dx;
-                        result.y = dy;
-                        result.initialX = this.scaleX;
-                        result.initialY = this.scaleY;
-                        result.offset = Math.sqrt(x * x + y * y);
-                        result.node = this;
-                        result.part = 'scale';
-                        return true;
-                    }
-                }
-                w = Math.abs(w);
-                h = Math.abs(h);
                 if (x >= -w && x <= w && y >= -h && y <= h) {
                     result.x = x;
                     result.y = y;
