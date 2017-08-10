@@ -15,6 +15,7 @@ namespace app.model
 	{
 		VECTOR,
 		AXIS,
+		SCALE,
 		ROTATION
 	}
 
@@ -211,6 +212,16 @@ namespace app.model
 					result.x = worldX - x;
 					result.y = worldY - y;
 					result.offset = 1;
+				}
+				else if(this.type == HandleType.SCALE)
+				{
+					var local = MathUtils.rotate(worldX - this.node.worldX, worldY - this.node.worldY, this.rotation);
+
+					result.x = worldX - x;
+					result.y = worldY - y;
+					result.initialX = this.node.scaleX;
+					result.initialY = this.node.scaleY;
+					result.offset = Math.sqrt(local.x * local.x + local.y * local.y);
 				}
 				else if(this.type == HandleType.ROTATION)
 				{

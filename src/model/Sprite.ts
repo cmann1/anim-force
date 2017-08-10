@@ -37,7 +37,7 @@ namespace app.model
 			(asset || SpriteAsset.NULL).setSpriteSource(this);
 
 			this.rotationHandle = new Handle(this, 'rotation', Config.handleRadius, HandleShape.CIRCLE, HandleType.ROTATION, Config.handle);
-			this.scaleHandle = new Handle(this, 'scale', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
+			this.scaleHandle = new Handle(this, 'scale', Config.handleRadius, HandleShape.SQUARE, HandleType.SCALE, Config.handle);
 			this.scaleXHandle = new Handle(this, 'scaleX', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
 			this.scaleYHandle = new Handle(this, 'scaleY', Config.handleRadius, HandleShape.SQUARE, HandleType.AXIS, Config.handle);
 
@@ -91,11 +91,11 @@ namespace app.model
 				{
 					if(interaction.part == 'scale' || interaction.part == 'scaleX')
 					{
-						this.scaleX = (local.x) / (this.srcWidth * 0.5 * interaction.offset) * interaction.offset;
+						this.scaleX = local.x / (this.srcWidth * 0.5);
 					}
 					if(interaction.part == 'scale' || interaction.part == 'scaleY')
 					{
-						this.scaleY = (local.y) / (this.srcHeight * 0.5 * interaction.offset) * interaction.offset;
+						this.scaleY = local.y / (this.srcHeight * 0.5);
 					}
 				}
 

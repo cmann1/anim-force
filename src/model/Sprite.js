@@ -31,7 +31,7 @@ var app;
                 _this.frame = frame;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
                 _this.rotationHandle = new model.Handle(_this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION, app.Config.handle);
-                _this.scaleHandle = new model.Handle(_this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
+                _this.scaleHandle = new model.Handle(_this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.SCALE, app.Config.handle);
                 _this.scaleXHandle = new model.Handle(_this, 'scaleX', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
                 _this.scaleYHandle = new model.Handle(_this, 'scaleY', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
                 _this.handles.push(_this.rotationHandle);
@@ -71,10 +71,10 @@ var app;
                     }
                     else {
                         if (interaction.part == 'scale' || interaction.part == 'scaleX') {
-                            this.scaleX = (local.x) / (this.srcWidth * 0.5 * interaction.offset) * interaction.offset;
+                            this.scaleX = local.x / (this.srcWidth * 0.5);
                         }
                         if (interaction.part == 'scale' || interaction.part == 'scaleY') {
-                            this.scaleY = (local.y) / (this.srcHeight * 0.5 * interaction.offset) * interaction.offset;
+                            this.scaleY = local.y / (this.srcHeight * 0.5);
                         }
                     }
                     return true;
