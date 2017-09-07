@@ -1,5 +1,18 @@
 /*
+// TODO: Initial export to AngelScript
 // TODO: Separate edit and animate modes
+// TODO: - Edit mode:
+// TODO: - - Replace stretch handle with length handle
+// TODO: - Animate mode:
+// TODO: - - Disable adding, removing and dragging in the timeline.
+// TODO: Loading sprites
+// TODO: Export to AngelScript
+// TODO: Allow frames to be animated
+// TODO: Animation events
+// TODO: Sprite Selector:
+// TODO: - Use different modal script
+// TODO: - Improve all-round
+// TODO: - Lazy load/create groups
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:
@@ -8,8 +21,6 @@
 // TODO: - ????
 // TODO: Help?
 // TODO: - List of shortcut keys
-
-// TODO: Organise CSS
  */
 var app;
 (function (app) {
@@ -17,10 +28,12 @@ var app;
     var Splitter = app.ui.Splitter;
     var SpriteManager = app.assets.SpriteManager;
     var Model = app.model.Model;
+    var SpriteSelector = app.ui.SpriteSelector;
     var App = (function () {
         function App() {
             var _this = this;
             this.model = new Model();
+            this.spriteSelector = null;
             this.runningTime = 0;
             /*
             * Events
@@ -73,6 +86,10 @@ var app;
             this.timeline.init();
             this.viewport.focus();
             this.fpsDisplay = new app.Fps.Display(this.ticker.getFps);
+            new jBox('Tooltip', {
+                attach: '.tooltip',
+                theme: 'TooltipDark'
+            });
         };
         Object.defineProperty(App.prototype, "spriteManager", {
             get: function () {
@@ -81,6 +98,13 @@ var app;
             enumerable: true,
             configurable: true
         });
+        App.prototype.showSpriteSelector = function (callback) {
+            if (callback === void 0) { callback = null; }
+            if (this.spriteSelector == null) {
+                this.spriteSelector = new SpriteSelector();
+            }
+            this.spriteSelector.show(callback);
+        };
         return App;
     }());
     // Used for debugging

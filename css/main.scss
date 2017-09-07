@@ -1,7 +1,9 @@
+@import "vars";
 @import 'tooltip';
 @import 'forms';
 @import 'splitter';
 @import 'timeline-tree';
+@import 'sprite-selector';
 
 ::-webkit-scrollbar{
 	width: 8px;
@@ -46,11 +48,6 @@ div#properties-panel{
 div#timeline-panel{
 	position: absolute;
 }
-canvas#timeline{
-	width: 100%;
-	height: 100%;
-	outline: 0;
-}
 
 .viewport-message
 {
@@ -61,4 +58,51 @@ canvas#timeline{
 	background: #ffffff;
 	box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
 	border-radius: 4px;
+}
+
+div#timeline-container{
+	display: flex;
+	flex-direction: column;
+}
+canvas#timeline{
+	flex-grow: 1;
+	flex-shrink: 1;
+}
+#timeline-toolbar
+{
+	background-color: $ui-bg;
+	border-top: $border-size solid $border-colour;
+
+	display: flex;
+	padding: $ui-padding;
+}
+
+i.fa{
+	padding: 4px;
+	margin: 0 2px;
+	border-radius: 2px;
+}
+i.fa:hover{
+	background: $selected-bg;
+	color: $selected-color;
+}
+i.fa.disabled, i.fa.disabled:hover{
+	background: inherit !important;
+	color: $disabled-color !important;
+}
+
+.jBox-title{
+	font-size: 150%;
+	text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+}
+
+.jBox-Tooltip.jBox-TooltipDark .jBox-container,
+.jBox-Mouse.jBox-TooltipDark .jBox-container{
+	color: #fff;
+	background: #333;
+}
+
+.jBox-Tooltip.jBox-TooltipDark .jBox-pointer:after,
+.jBox-Mouse.jBox-TooltipDark .jBox-pointer:after{
+	background: #333;
 }

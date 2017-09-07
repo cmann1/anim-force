@@ -23,9 +23,7 @@ namespace app
 		static boneStretchHandleDist = 20;
 
 		static handleRadius = 5;
-		static handleClick = Config.handleRadius + Config.interactionTolerance;
 		static subHandleRadius = 4;
-		static subHandleClick = Config.subHandleRadius + Config.interactionTolerance;
 
 	}
 

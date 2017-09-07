@@ -43,6 +43,11 @@ namespace app.assets
 			return sprite.asset = new SpriteAsset(spriteSetName, spriteName, `${this.basePath}${spriteSetName}/${spriteName}`);
 		}
 
+		public getSpriteList()
+		{
+			return this.spriteSetsList;
+		}
+
 		/*
 		 * Events
 		 */

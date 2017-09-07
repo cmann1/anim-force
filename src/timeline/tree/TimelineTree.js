@@ -74,6 +74,7 @@ var app;
                             parentTree.clear();
                         }
                         else if (type == 'addChild') {
+                            // Reparent an existing node
                             if (_this.nodeMap[target.id]) {
                                 if (other) {
                                     parentTree.addChildBefore(_this.nodeMap[target.id], _this.nodeMap[other.id]);

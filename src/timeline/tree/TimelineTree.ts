@@ -327,6 +327,7 @@ namespace app.timeline.tree
 			}
 			else if(type == 'addChild')
 			{
+				// Reparent an existing node
 				if(this.nodeMap[target.id])
 				{
 					if(other)
@@ -338,6 +339,7 @@ namespace app.timeline.tree
 						parentTree.addChild(this.nodeMap[target.id]);
 					}
 				}
+				// Add a new node
 				else
 				{
 					parentTree.addChild(this.nodeMap[target.id] = this.fromNode(target));

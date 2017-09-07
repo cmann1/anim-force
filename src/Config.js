@@ -19,9 +19,7 @@ var app;
     Config.boneThickness = 3;
     Config.boneStretchHandleDist = 20;
     Config.handleRadius = 5;
-    Config.handleClick = Config.handleRadius + Config.interactionTolerance;
     Config.subHandleRadius = 4;
-    Config.subHandleClick = Config.subHandleRadius + Config.interactionTolerance;
     app.Config = Config;
 })(app || (app = {}));
 //# sourceMappingURL=Config.js.map

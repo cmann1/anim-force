@@ -138,6 +138,8 @@ namespace app.model
 					this.offsetY /= this.parent.stretchY;
 				}
 
+				this.onPropertyChange('offset');
+
 				return true;
 			}
 
@@ -152,6 +154,8 @@ namespace app.model
 				{
 					this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
 				}
+
+				this.onPropertyChange('rotation');
 
 				return true;
 			}

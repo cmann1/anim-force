@@ -15,6 +15,11 @@ var app;
         var EventDispatcher = events.EventDispatcher;
         var StructureChangeEvent = events.StructureChangeEvent;
         var SelectionEvent = events.SelectionEvent;
+        var EditMode;
+        (function (EditMode) {
+            EditMode[EditMode["EDIT"] = 0] = "EDIT";
+            EditMode[EditMode["ANIMATE"] = 1] = "ANIMATE";
+        })(EditMode = model.EditMode || (model.EditMode = {}));
         var Model = (function (_super) {
             __extends(Model, _super);
             function Model() {
@@ -22,6 +27,10 @@ var app;
                 _this.selectedNode = null;
                 _this.highlightedNode = null;
                 _this.drawList = new model.DrawList();
+                _this.mode = EditMode.ANIMATE;
+                // TODO: Set to private
+                _this.bindPose = new app.anim.Animation('BindPose', _this);
+                _this.animations = {};
                 /// Events
                 _this.selectionChange = new EventDispatcher();
                 _this.nodeDrawOrder = function (a, b) {
@@ -41,7 +50,10 @@ var app;
                 };
                 _this.model = _this;
                 _this.type = 'model';
+                _this.bindPose.active = true;
+                _this.bindPose.forceKeyframe();
                 return _this;
+                // TODO: Force a keyframe on bind pose when adding nodes
             }
             Model.prototype.draw = function (ctx, worldScale) {
                 console.error('Use drawModel instead');

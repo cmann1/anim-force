@@ -25,16 +25,16 @@ var app;
                 _this.endPointHandle = new model.Handle(_this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION);
                 _this.boneHandle = new model.Handle(_this, 'base', app.Config.boneThickness, model.HandleShape.LINE);
                 _this.stretchHandle = new model.Handle(_this, 'stretchY', app.Config.subHandleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS);
+                _this.lengthHandle = new model.Handle(_this, 'length', app.Config.subHandleRadius, model.HandleShape.TRI, model.HandleType.AXIS);
                 _this.handles.push(_this.boneHandle);
                 _this.handles.push(_this.baseHandle);
                 _this.handles.push(_this.endPointHandle);
                 _this.handles.push(_this.stretchHandle);
+                _this.handles.push(_this.lengthHandle);
                 return _this;
             }
             Bone.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (this.boneWorldAABB.contains(x, y)) {
-                    result.offset = this.parent ? -this.parent.worldRotation : 0;
-                    result.node = this;
                     if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
                         return true;
                     }
@@ -45,6 +45,12 @@ var app;
                 if (interaction.part == 'stretchY') {
                     var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
                     this.stretchY = (-local.y - app.Config.boneStretchHandleDist * worldScaleFactor) / this.length;
+                    this.onPropertyChange('stretchY');
+                }
+                else if (interaction.part == 'length') {
+                    var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
+                    this.length = Math.max(0, -local.y - app.Config.boneStretchHandleDist * worldScaleFactor);
+                    this.onPropertyChange('length');
                 }
                 return _super.prototype.updateInteraction.call(this, x, y, worldScaleFactor, interaction);
             };
@@ -53,14 +59,15 @@ var app;
                 var endPoint = app.MathUtils.rotate(0, -this.length * this.stretchY, this.worldRotation);
                 this.worldEndPointX = this.worldX + endPoint.x;
                 this.worldEndPointY = this.worldY + endPoint.y;
-                this.stretchHandle.active = this.selected;
+                this.stretchHandle.active = this.selected && this.model.mode == model.EditMode.ANIMATE;
+                this.lengthHandle.active = this.selected && this.model.mode == model.EditMode.EDIT;
                 this.baseHandle.x = this.boneHandle.x = this.worldX;
                 this.baseHandle.y = this.boneHandle.y = this.worldY;
                 this.endPointHandle.x = this.boneHandle.x2 = this.worldEndPointX;
                 this.endPointHandle.y = this.boneHandle.y2 = this.worldEndPointY;
-                this.stretchHandle.x = this.worldEndPointX + ((this.worldEndPointX - this.worldX) / (this.length * this.stretchY)) * (app.Config.boneStretchHandleDist / worldScale);
-                this.stretchHandle.y = this.worldEndPointY + ((this.worldEndPointY - this.worldY) / (this.length * this.stretchY)) * (app.Config.boneStretchHandleDist / worldScale);
-                this.stretchHandle.rotation = this.worldRotation;
+                this.stretchHandle.x = this.lengthHandle.x = this.worldEndPointX + Math.cos(this.worldRotation - Math.PI * 0.5) * (app.Config.boneStretchHandleDist / worldScale);
+                this.stretchHandle.y = this.lengthHandle.y = this.worldEndPointY + Math.sin(this.worldRotation - Math.PI * 0.5) * (app.Config.boneStretchHandleDist / worldScale);
+                this.stretchHandle.rotation = this.lengthHandle.rotation = this.worldRotation;
                 this.prepareAABB(worldScale);
                 this.boneWorldAABB.from(this.worldAABB);
                 this.childrenWorldAABB.reset();

@@ -28,6 +28,8 @@ OUT_DIR = '../assets/sprites'
 # How many pixels of padding to add between each frame
 FRAME_PADDING = 1
 
+THUMB_SIZE = 42
+
 #
 # SETUP
 # ---------------------------------------------------------------------
@@ -44,7 +46,11 @@ os.makedirs(OUT_DIR, exist_ok=True)
 sprites_out_data = []
 
 for sprite_set, sprite_set_data in sprite_sets_data.items():
-	if sprite_set != 'props6': continue
+	# if sprite_set != 'props6':
+	# if sprite_set != 'props6' and sprite_set != 'dustman':
+	# 	continue
+	if sprite_set == 'tile6':
+		continue
 
 	print('GENERATING SPRITE SET: ' + sprite_set)
 
@@ -54,6 +60,7 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 	sprite_set_src_path = os.path.join(SPRITES_PATH, sprite_set)
 
 	sprite_set_out_data = []
+	sprite_thumb_data = []
 
 	for sprite_name, data in sprite_set_data.items():
 		sprite_data = data['sprites'][-1]
@@ -80,6 +87,7 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 			palettes=[]
 		)
 
+		first = True
 		frame_y = 0
 		for palette_index in range(palette_count):
 			frame_x = 0
@@ -98,7 +106,10 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 				if os.path.exists(frame_path):
 					frame_image = Image.open(frame_path)
 					sheet_image.paste(frame_image, (sprite_frame_x, sprite_frame_y))
-					frame_image.close()
+
+					if first:
+						first = False
+						sprite_thumb_data.append((sprite_name, frame_image))
 				else:
 					print('ERROR: cannot open file %s' % frame_path)
 
@@ -121,9 +132,33 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 	sprite_set_out_data = natsorted(sprite_set_out_data)
 	sprites_out_data.append(dict(name=sprite_set, sprites=sprite_set_out_data))
 
-	break
+	# Generate thumbnails
+
+	thumb_sheet = Image.new('RGBA', (len(sprite_set_data) * THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
+	sprite_thumb_data = natsorted(sprite_thumb_data, lambda x: x[0])
+	thumb_x = 0
+	group_first = True
+
+	for sprite_name, thumb_image in sprite_thumb_data:
+		thumb_image.thumbnail((THUMB_SIZE, THUMB_SIZE))
+		thumb_w, thumb_h = thumb_image.size
+		thumb_sheet.paste(thumb_image, (thumb_x + int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
+		thumb_x += THUMB_SIZE
+
+		if group_first:
+			group_thumb_image = Image.new('RGBA', (THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
+			group_thumb_image.paste(thumb_image, (int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
+			group_thumb_image.save('%s/_group_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
+			group_thumb_image.close()
+			group_first = False
+
+		thumb_image.close()
+
+	thumb_sheet.save('%s/_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
+	thumb_sheet.close()
+
 	pass
 
-sprites_out_data = natsorted(sprites_out_data)
-with open('%s/sprites.json' % (OUT_DIR), 'w') as f:
+sprites_out_data = natsorted(sprites_out_data, lambda x: x['name'])
+with open('%s/sprites.json' % OUT_DIR, 'w') as f:
 	json.dump(sprites_out_data, f, indent='\t')

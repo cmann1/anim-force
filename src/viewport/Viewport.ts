@@ -367,6 +367,11 @@ namespace app.viewport
 				}
 			}
 
+			else if(keyCode == Key.Zero)
+			{
+				Config.drawAABB = !Config.drawAABB;
+			}
+
 			// TODO: REMOVE
 			else if(keyCode == Key.A)
 			{
@@ -398,8 +403,38 @@ namespace app.viewport
 				sprite2.offsetY = bone2.length / 2;
 				sprite3.offsetX = 50;
 				sprite3.offsetY = 50;
+
+				this.model.bindPose.forceKeyframe();
+			}
+
+			// TODO: REMOVE
+			else if(keyCode == Key.LeftArrow)
+			{
+				this.model.bindPose.gotoPrevFrame();
+				this.showMessage('Frame: ' + this.model.bindPose.getPosition());
+			}
+			// TODO: REMOVE
+			else if(keyCode == Key.RightArrow)
+			{
+				this.model.bindPose.gotoNextFrame();
+				this.showMessage('Frame: ' + this.model.bindPose.getPosition());
+			}
+			// TODO: REMOVE
+			else if(keyCode == Key.Enter)
+			{
+				app.main.showSpriteSelector(this.onSpritesSelect);
 			}
 		}
+
+		// TODO: REMOVE
+		protected onSpritesSelect = (spriteGroup:string, spriteName:string) =>
+		{
+			var node = <Sprite> this.model.getSelectedNode();
+			if(node)
+			{
+				node.loadSprite(spriteGroup, spriteName);
+			}
+		};
 
 		protected onKeyUp(event)
 		{

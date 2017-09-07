@@ -14,6 +14,7 @@ namespace app.model
 		public endPointHandle:Handle;
 		public boneHandle:Handle;
 		public stretchHandle:Handle;
+		public lengthHandle:Handle;
 
 		constructor(name:string=null)
 		{
@@ -25,25 +26,22 @@ namespace app.model
 			this.endPointHandle = new Handle(this, 'rotation', Config.handleRadius, HandleShape.CIRCLE, HandleType.ROTATION);
 			this.boneHandle = new Handle(this, 'base', Config.boneThickness, HandleShape.LINE);
 			this.stretchHandle = new Handle(this, 'stretchY', Config.subHandleRadius, HandleShape.SQUARE, HandleType.AXIS);
+			this.lengthHandle = new Handle(this, 'length', Config.subHandleRadius, HandleShape.TRI, HandleType.AXIS);
 			this.handles.push(this.boneHandle);
 			this.handles.push(this.baseHandle);
 			this.handles.push(this.endPointHandle);
 			this.handles.push(this.stretchHandle);
+			this.handles.push(this.lengthHandle);
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
 			if(this.boneWorldAABB.contains(x, y))
 			{
-
-				result.offset = this.parent ? -this.parent.worldRotation : 0;
-				result.node = this;
-
 				if(this.hitTestHandles(x, y, worldScaleFactor, result))
 				{
 					return true;
 				}
-
 			}
 
 			return super.hitTest(x, y, worldScaleFactor, result);
@@ -55,6 +53,14 @@ namespace app.model
 			{
 				const local = MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
 				this.stretchY = (-local.y - Config.boneStretchHandleDist * worldScaleFactor) / this.length;
+				this.onPropertyChange('stretchY');
+			}
+
+			else if(interaction.part == 'length')
+			{
+				const local = MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
+				this.length = Math.max(0, -local.y - Config.boneStretchHandleDist * worldScaleFactor);
+				this.onPropertyChange('length');
 			}
 
 			return super.updateInteraction(x, y, worldScaleFactor, interaction);
@@ -68,14 +74,16 @@ namespace app.model
 			this.worldEndPointX = this.worldX + endPoint.x;
 			this.worldEndPointY = this.worldY + endPoint.y;
 
-			this.stretchHandle.active = this.selected;
+
+			this.stretchHandle.active = this.selected && this.model.mode == EditMode.ANIMATE;
+			this.lengthHandle.active = this.selected && this.model.mode == EditMode.EDIT;
 			this.baseHandle.x = this.boneHandle.x = this.worldX;
 			this.baseHandle.y = this.boneHandle.y = this.worldY;
 			this.endPointHandle.x = this.boneHandle.x2 = this.worldEndPointX;
 			this.endPointHandle.y = this.boneHandle.y2 = this.worldEndPointY;
-			this.stretchHandle.x = this.worldEndPointX + ((this.worldEndPointX - this.worldX) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist / worldScale);
-			this.stretchHandle.y = this.worldEndPointY + ((this.worldEndPointY - this.worldY) / (this.length * this.stretchY)) * (Config.boneStretchHandleDist / worldScale);
-			this.stretchHandle.rotation = this.worldRotation;
+			this.stretchHandle.x = this.lengthHandle.x = this.worldEndPointX + Math.cos(this.worldRotation - Math.PI * 0.5) * (Config.boneStretchHandleDist / worldScale);
+			this.stretchHandle.y = this.lengthHandle.y = this.worldEndPointY + Math.sin(this.worldRotation - Math.PI * 0.5) * (Config.boneStretchHandleDist / worldScale);
+			this.stretchHandle.rotation = this.lengthHandle.rotation = this.worldRotation;
 
 			this.prepareAABB(worldScale);
 			this.boneWorldAABB.from(this.worldAABB);

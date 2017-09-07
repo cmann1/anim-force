@@ -1,0 +1,70 @@
+@import "vars";
+
+#sprite_selector{
+	width: 900px;
+
+	.sprite_group{
+		margin-bottom: 10px;
+		min-width: 500px;
+
+		.fold-icon:before{
+			content: "\f078"; // fa-chevron-down
+		}
+		&.collapsed .fold-icon:before{
+			content: "\f054"; // fa-chevron-right
+		}
+		&.collapsed .content{
+			height: 0;
+			display: none;
+		}
+	}
+
+	.heading{
+		cursor: pointer;
+		border: 1px solid $margin-border-colour;
+		border-radius: 3px;
+		padding: 5px;
+
+		.fold-icon{
+			margin-left: 10px;
+		}
+
+		&:hover{
+			background-color: $highlighted-soft-bg;
+			border-color: $highlighted-soft-border-colour;
+		}
+		& > *{
+			vertical-align: middle;
+		}
+		& > .thumb{
+			display: inline-block;
+		}
+	}
+
+	.content{
+		display: flex;
+		margin-left: 20px;
+		border-left: 1px dashed;
+		padding: 10px 0 0 10px;
+		border-left: 1px $margin-border-colour dashed;
+		overflow: hidden;
+		flex-wrap: wrap;
+	}
+
+	.thumb-outer{
+		cursor: pointer;
+		border: 1px solid transparent;
+		border-radius: 3px;
+		padding: 5px;
+
+		&:hover{
+			background-color: $highlighted-soft-bg;
+			border-color: $highlighted-soft-border-colour;
+		}
+	}
+
+	.thumb{
+		width: 42px;
+		height: 42px;
+	}
+}

@@ -1,5 +1,18 @@
 /*
+// TODO: Initial export to AngelScript
 // TODO: Separate edit and animate modes
+// TODO: - Edit mode:
+// TODO: - - Replace stretch handle with length handle
+// TODO: - Animate mode:
+// TODO: - - Disable adding, removing and dragging in the timeline.
+// TODO: Loading sprites
+// TODO: Export to AngelScript
+// TODO: Allow frames to be animated
+// TODO: Animation events
+// TODO: Sprite Selector:
+// TODO: - Use different modal script
+// TODO: - Improve all-round
+// TODO: - Lazy load/create groups
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:
@@ -8,8 +21,6 @@
 // TODO: - ????
 // TODO: Help?
 // TODO: - List of shortcut keys
-
-// TODO: Organise CSS
  */
 
 namespace app
@@ -22,6 +33,8 @@ namespace app
 	import Model = app.model.Model;
 	import Bone = app.model.Bone;
 	import Sprite = app.model.Sprite;
+	import SpriteSelector = app.ui.SpriteSelector;
+	import SpriteSelectCallback = app.ui.SpriteSelectCallback;
 
 	class App{
 		protected ticker:Ticker;
@@ -32,6 +45,8 @@ namespace app
 		protected timeline:app.timeline.TimelinePanel;
 
 		protected model:Model = new Model();
+
+		protected spriteSelector:SpriteSelector = null;
 
 		public runningTime:number = 0;
 
@@ -70,11 +85,26 @@ namespace app
 			this.viewport.focus();
 
 			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
+
+			new jBox('Tooltip', {
+				attach: '.tooltip',
+				theme: 'TooltipDark'
+			});
 		}
 
 		get spriteManager():app.assets.SpriteManager
 		{
 			return this._spriteManager;
+		}
+
+		showSpriteSelector(callback:SpriteSelectCallback=null)
+		{
+			if(this.spriteSelector == null)
+			{
+				this.spriteSelector = new SpriteSelector();
+			}
+
+			this.spriteSelector.show(callback);
 		}
 
 		/*

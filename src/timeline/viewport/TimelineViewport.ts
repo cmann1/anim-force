@@ -7,7 +7,10 @@ namespace app.timeline
 	export class TimelineViewport extends app.Canvas
 	{
 
-		constructor(elementId)
+		private model:Model;
+		private $toolbar:JQuery;
+
+		constructor(elementId, model:Model)
 		{
 			super(elementId);
 
@@ -17,6 +20,8 @@ namespace app.timeline
 			this.$canvas
 				.on('keydown', this.onKeyDown)
 				.on('keyup', this.onKeyUp);
+
+			this.setupToolbar();
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -41,14 +46,35 @@ namespace app.timeline
 			this.requiresUpdate = false;
 		}
 
+		private setupToolbar()
+		{
+			this.$toolbar = this.$container.find('#timeline-toolbar');
+			// this.$toolbar
+			// 	.on('click', 'i', this.onToolbarButtonClick)
+			// 	.on('mousewheel', this.onToolbarMouseWheel);
+			// this.$toolbar.find('.fa-plus').parent()
+			// 	.on('mouseenter', this.onToolbarAddHover)
+			// 	.on('mouseleave', this.onToolbarAddLeave);
+			// this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
+			//
+			// this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
+			// this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
+			// this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
+			// this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
+
+			tippy(this.$toolbar.find('i').toArray());
+
+			// this.$toolbarAddMenu.hide();
+		}
+
 		/*
 		 * Events
 		 */
 
 		protected onKeyDown(event)
 		{
-			// console.log(event.keyCode);
 			const keyCode = event.keyCode;
+			console.log(keyCode);
 
 
 		}

@@ -93,6 +93,7 @@ var app;
                         this.offsetX /= this.parent.stretchX;
                         this.offsetY /= this.parent.stretchY;
                     }
+                    this.onPropertyChange('offset');
                     return true;
                 }
                 if (interaction.part == 'rotation') {
@@ -102,6 +103,7 @@ var app;
                     if (interaction.constrain) {
                         this.rotation = Math.round((this.rotation - interaction.initialX) / (Math.PI * 0.25)) * (Math.PI * 0.25) + interaction.initialX;
                     }
+                    this.onPropertyChange('rotation');
                     return true;
                 }
                 return false;

@@ -40,6 +40,10 @@ var app;
                 _this.handles.push(_this.scaleYHandle);
                 return _this;
             }
+            Sprite.prototype.loadSprite = function (spriteGroup, spriteName) {
+                this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
+                this.asset.setSpriteSource(this);
+            };
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (!this.worldAABB.contains(x, y))
                     return false;
@@ -62,19 +66,30 @@ var app;
                 return false;
             };
             Sprite.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
-                if (interaction.part == 'scale' || interaction.part == 'scaleX' || interaction.part == 'scaleY') {
+                var part = interaction.part;
+                if (part == 'scale' || part == 'scaleX' || part == 'scaleY') {
                     var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
-                    if (interaction.part == 'scale' && interaction.constrain) {
+                    if (part == 'scale' && interaction.constrain) {
                         var scale = Math.sqrt(local.x * local.x + local.y * local.y) / interaction.offset;
                         this.scaleX = interaction.initialX * scale;
                         this.scaleY = interaction.initialY * scale;
+                        this.onPropertyChange('scale');
                     }
                     else {
-                        if (interaction.part == 'scale' || interaction.part == 'scaleX') {
+                        if (part == 'scale' || part == 'scaleX') {
                             this.scaleX = local.x / (this.srcWidth * 0.5);
                         }
-                        if (interaction.part == 'scale' || interaction.part == 'scaleY') {
+                        if (part == 'scale' || part == 'scaleY') {
                             this.scaleY = local.y / (this.srcHeight * 0.5);
+                        }
+                        if (part == 'scale') {
+                            this.onPropertyChange('scale');
+                        }
+                        else if (part == 'scaleX') {
+                            this.onPropertyChange('scaleX');
+                        }
+                        else {
+                            this.onPropertyChange('scaleY');
                         }
                     }
                     return true;

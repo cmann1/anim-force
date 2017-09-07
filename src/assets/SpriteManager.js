@@ -50,6 +50,9 @@ var app;
                 }
                 return sprite.asset = new assets.SpriteAsset(spriteSetName, spriteName, "" + this.basePath + spriteSetName + "/" + spriteName);
             };
+            SpriteManager.prototype.getSpriteList = function () {
+                return this.spriteSetsList;
+            };
             return SpriteManager;
         }());
         assets.SpriteManager = SpriteManager;

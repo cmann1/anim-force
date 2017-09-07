@@ -58,6 +58,13 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
+                // TODO: REMOVE
+                _this.onSpritesSelect = function (spriteGroup, spriteName) {
+                    var node = _this.model.getSelectedNode();
+                    if (node) {
+                        node.loadSprite(spriteGroup, spriteName);
+                    }
+                };
                 _this.onZoomComplete = function () {
                     _this.anchorToScreen(_this.mouseX, _this.mouseY, _this.stageAnchorX, _this.stageAnchorY);
                     _this.stageAnchorX = NaN;
@@ -263,6 +270,9 @@ var app;
                         }
                     }
                 }
+                else if (keyCode == Key.Zero) {
+                    app.Config.drawAABB = !app.Config.drawAABB;
+                }
                 else if (keyCode == Key.A) {
                     var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
                     var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
@@ -287,6 +297,18 @@ var app;
                     sprite2.offsetY = bone2.length / 2;
                     sprite3.offsetX = 50;
                     sprite3.offsetY = 50;
+                    this.model.bindPose.forceKeyframe();
+                }
+                else if (keyCode == Key.LeftArrow) {
+                    this.model.bindPose.gotoPrevFrame();
+                    this.showMessage('Frame: ' + this.model.bindPose.getPosition());
+                }
+                else if (keyCode == Key.RightArrow) {
+                    this.model.bindPose.gotoNextFrame();
+                    this.showMessage('Frame: ' + this.model.bindPose.getPosition());
+                }
+                else if (keyCode == Key.Enter) {
+                    app.main.showSpriteSelector(this.onSpritesSelect);
                 }
             };
             Viewport.prototype.onKeyUp = function (event) {

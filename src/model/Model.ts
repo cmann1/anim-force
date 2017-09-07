@@ -7,6 +7,12 @@ namespace app.model
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
 
+	export enum EditMode
+	{
+		EDIT,
+		ANIMATE
+	}
+
 	export class Model extends ContainerNode
 	{
 
@@ -14,6 +20,12 @@ namespace app.model
 		private highlightedNode:Node = null;
 
 		protected drawList:DrawList = new DrawList();
+
+		public mode:EditMode = EditMode.ANIMATE;
+
+		// TODO: Set to private
+		public bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this);
+		private animations:{[id:string]:app.anim.Animation} = {};
 
 		/// Events
 
@@ -24,6 +36,10 @@ namespace app.model
 			super('Unnamed Model');
 			this.model = this;
 			this.type = 'model';
+
+			this.bindPose.active = true;
+			this.bindPose.forceKeyframe();
+			// TODO: Force a keyframe on bind pose when adding nodes
 		}
 
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)

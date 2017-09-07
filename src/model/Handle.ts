@@ -8,6 +8,7 @@ namespace app.model
 	{
 		CIRCLE,
 		SQUARE,
+		TRI,
 		LINE
 	}
 
@@ -67,30 +68,7 @@ namespace app.model
 
 			// Outline
 			ctx.beginPath();
-			ctx.fillStyle = this.outline;
-			if(shape == HandleShape.CIRCLE)
-			{
-				ctx.arc(0, 0, radius + 1, 0, Math.PI * 2);
-			}
-			else if(shape == HandleShape.SQUARE)
-			{
-				ctx.rect(
-					-radius - 1, -radius - 1,
-					(radius + 1) * 2, (radius + 1) * 2);
-			}
-			else if(shape == HandleShape.LINE)
-			{
-				ctx.lineWidth = radius + 2;
-				ctx.strokeStyle = this.outline;
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-				ctx.lineTo(x2 - x, y2 - y);
-				ctx.stroke();
-			}
-			ctx.fill();
-
-			// Fill
-			ctx.beginPath();
+			ctx.strokeStyle = this.outline;
 			ctx.fillStyle = fill;
 			if(shape == HandleShape.CIRCLE)
 			{
@@ -102,8 +80,22 @@ namespace app.model
 					-radius, -radius,
 					radius * 2, radius * 2);
 			}
+			else if(shape == HandleShape.TRI)
+			{
+				ctx.moveTo(-radius, radius);
+				ctx.lineTo(radius, radius);
+				ctx.lineTo(0, -radius);
+				ctx.closePath();
+			}
 			else if(shape == HandleShape.LINE)
 			{
+				ctx.lineWidth = radius + 2;
+				ctx.strokeStyle = this.outline;
+				ctx.beginPath();
+				ctx.moveTo(0, 0);
+				ctx.lineTo(x2 - x, y2 - y);
+				ctx.stroke();
+
 				ctx.lineWidth = radius;
 				ctx.strokeStyle = fill;
 				ctx.beginPath();
@@ -112,6 +104,7 @@ namespace app.model
 				ctx.stroke();
 			}
 			ctx.fill();
+			ctx.stroke();
 
 			ctx.restore();
 		}
@@ -125,8 +118,7 @@ namespace app.model
 			const radius = (this.radius + Config.interactionTolerance) / worldScale;
 			const shape = this.shape;
 
-			if(shape == HandleShape
-					.CIRCLE || shape == HandleShape.SQUARE)
+			if(shape == HandleShape.CIRCLE || shape == HandleShape.SQUARE || shape == HandleShape.TRI)
 			{
 				aabb.unionF(
 					x - radius, y - radius,
@@ -191,7 +183,7 @@ namespace app.model
 			{
 				hit = Math.sqrt(dx * dx + dy * dy) <= radius;
 			}
-			else if(shape == HandleShape.SQUARE)
+			else if(shape == HandleShape.SQUARE || shape == HandleShape.TRI)
 			{
 				hit = dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
 			}
@@ -205,7 +197,7 @@ namespace app.model
 				{
 					result.x = worldX - x;
 					result.y = worldY - y;
-					result.offset = 0;
+					result.offset = this.node.parent ? -this.node.parent.worldRotation : 0;
 				}
 				else if(this.type == HandleType.AXIS)
 				{

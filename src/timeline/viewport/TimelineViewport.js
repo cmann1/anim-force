@@ -14,13 +14,14 @@ var app;
     (function (timeline) {
         var TimelineViewport = (function (_super) {
             __extends(TimelineViewport, _super);
-            function TimelineViewport(elementId) {
+            function TimelineViewport(elementId, model) {
                 var _this = _super.call(this, elementId) || this;
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$canvas
                     .on('keydown', _this.onKeyDown)
                     .on('keyup', _this.onKeyUp);
+                _this.setupToolbar();
                 return _this;
             }
             TimelineViewport.prototype.step = function (deltaTime, timestamp) {
@@ -38,12 +39,29 @@ var app;
                 ctx.restore();
                 this.requiresUpdate = false;
             };
+            TimelineViewport.prototype.setupToolbar = function () {
+                this.$toolbar = this.$container.find('#timeline-toolbar');
+                // this.$toolbar
+                // 	.on('click', 'i', this.onToolbarButtonClick)
+                // 	.on('mousewheel', this.onToolbarMouseWheel);
+                // this.$toolbar.find('.fa-plus').parent()
+                // 	.on('mouseenter', this.onToolbarAddHover)
+                // 	.on('mouseleave', this.onToolbarAddLeave);
+                // this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
+                //
+                // this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
+                // this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
+                // this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
+                // this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
+                tippy(this.$toolbar.find('i').toArray());
+                // this.$toolbarAddMenu.hide();
+            };
             /*
              * Events
              */
             TimelineViewport.prototype.onKeyDown = function (event) {
-                // console.log(event.keyCode);
                 var keyCode = event.keyCode;
+                console.log(keyCode);
             };
             TimelineViewport.prototype.onKeyUp = function (event) {
             };

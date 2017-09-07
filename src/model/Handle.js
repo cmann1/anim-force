@@ -6,7 +6,8 @@ var app;
         (function (HandleShape) {
             HandleShape[HandleShape["CIRCLE"] = 0] = "CIRCLE";
             HandleShape[HandleShape["SQUARE"] = 1] = "SQUARE";
-            HandleShape[HandleShape["LINE"] = 2] = "LINE";
+            HandleShape[HandleShape["TRI"] = 2] = "TRI";
+            HandleShape[HandleShape["LINE"] = 3] = "LINE";
         })(HandleShape = model.HandleShape || (model.HandleShape = {}));
         var HandleType;
         (function (HandleType) {
@@ -45,12 +46,19 @@ var app;
                 ctx.rotate(this.rotation);
                 // Outline
                 ctx.beginPath();
-                ctx.fillStyle = this.outline;
+                ctx.strokeStyle = this.outline;
+                ctx.fillStyle = fill;
                 if (shape == HandleShape.CIRCLE) {
-                    ctx.arc(0, 0, radius + 1, 0, Math.PI * 2);
+                    ctx.arc(0, 0, radius, 0, Math.PI * 2);
                 }
                 else if (shape == HandleShape.SQUARE) {
-                    ctx.rect(-radius - 1, -radius - 1, (radius + 1) * 2, (radius + 1) * 2);
+                    ctx.rect(-radius, -radius, radius * 2, radius * 2);
+                }
+                else if (shape == HandleShape.TRI) {
+                    ctx.moveTo(-radius, radius);
+                    ctx.lineTo(radius, radius);
+                    ctx.lineTo(0, -radius);
+                    ctx.closePath();
                 }
                 else if (shape == HandleShape.LINE) {
                     ctx.lineWidth = radius + 2;
@@ -59,18 +67,6 @@ var app;
                     ctx.moveTo(0, 0);
                     ctx.lineTo(x2 - x, y2 - y);
                     ctx.stroke();
-                }
-                ctx.fill();
-                // Fill
-                ctx.beginPath();
-                ctx.fillStyle = fill;
-                if (shape == HandleShape.CIRCLE) {
-                    ctx.arc(0, 0, radius, 0, Math.PI * 2);
-                }
-                else if (shape == HandleShape.SQUARE) {
-                    ctx.rect(-radius, -radius, radius * 2, radius * 2);
-                }
-                else if (shape == HandleShape.LINE) {
                     ctx.lineWidth = radius;
                     ctx.strokeStyle = fill;
                     ctx.beginPath();
@@ -79,6 +75,7 @@ var app;
                     ctx.stroke();
                 }
                 ctx.fill();
+                ctx.stroke();
                 ctx.restore();
             };
             Handle.prototype.expand = function (aabb, worldScale) {
@@ -88,8 +85,7 @@ var app;
                 var y2 = this.y2;
                 var radius = (this.radius + app.Config.interactionTolerance) / worldScale;
                 var shape = this.shape;
-                if (shape == HandleShape
-                    .CIRCLE || shape == HandleShape.SQUARE) {
+                if (shape == HandleShape.CIRCLE || shape == HandleShape.SQUARE || shape == HandleShape.TRI) {
                     aabb.unionF(x - radius, y - radius, x + radius, y + radius);
                 }
                 else if (shape == HandleShape.LINE) {
@@ -134,7 +130,7 @@ var app;
                 if (shape == HandleShape.CIRCLE || shape == HandleShape.LINE) {
                     hit = Math.sqrt(dx * dx + dy * dy) <= radius;
                 }
-                else if (shape == HandleShape.SQUARE) {
+                else if (shape == HandleShape.SQUARE || shape == HandleShape.TRI) {
                     hit = dx >= -radius && dx <= radius && dy >= -radius && dy <= radius;
                 }
                 if (hit) {
@@ -143,7 +139,7 @@ var app;
                     if (this.type == HandleType.VECTOR) {
                         result.x = worldX - x;
                         result.y = worldY - y;
-                        result.offset = 0;
+                        result.offset = this.node.parent ? -this.node.parent.worldRotation : 0;
                     }
                     else if (this.type == HandleType.AXIS) {
                         result.x = worldX - x;

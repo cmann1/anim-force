@@ -9,9 +9,11 @@
 	<link rel="stylesheet" href="css/main.css">
 	<link rel="stylesheet" href="css/lib/font-awesome.min.css">
 	<link rel="stylesheet" href="css/lib/tippy.css">
+	<link rel="stylesheet" href="css/lib/jBox.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
 	<script src="lib/jquery.scrollintoview.min.js"></script>
+	<script src="lib/jBox.min.js"></script>
 	
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
@@ -51,7 +53,14 @@
 	<script src="src/model/Sprite.js"></script>
 	<script src="src/model/Model.js"></script>
 	<script src="src/model/KeyFrame.js"></script>
-	<script src="src/model/Animation.js"></script>
+	
+	<script src="src/anim/Animation.js"></script>
+	<script src="src/anim/Track.js"></script>
+	<script src="src/anim/BoneTrack.js"></script>
+	<script src="src/anim/SpriteTrack.js"></script>
+	<script src="src/anim/Keyframe.js"></script>
+	<script src="src/anim/NumberKeyframe.js"></script>
+	<script src="src/anim/VectorKeyframe.js"></script>
 	
 	<script src="src/Canvas.js"></script>
 	<script src="src/viewport/Viewport.js"></script>
@@ -62,6 +71,8 @@
 	<script src="src/timeline/tree/RootTreeNode.js"></script>
 	<script src="src/timeline/viewport/TimelineViewport.js"></script>
 	<script src="src/timeline/TimelinePanel.js"></script>
+	
+	<script src="src/ui/SpriteSelector.js"></script>
 	
 	<script src="src/AnimForce.js"></script>
 
@@ -91,6 +102,14 @@
 		
 		<div id="timeline-container">
 			<canvas id="timeline" tabindex="2" class="no-select"></canvas>
+			<div id="timeline-toolbar">
+				<i class="fa fa-play btn-play" title="Play"></i>
+				<i class="fa fa-pause btn-pause" title="Pause"></i>
+				<i class="fa fa-backward btn-prev" title="Previous Frame"></i>
+				<i class="fa fa-forward btn-next" title="Next Frame"></i>
+				<i class="fa fa-fast-backward btn-prev-keyframe" title="Previous Keyframe"></i>
+				<i class="fa fa-fast-forward btn-next" title="Next Keyframe"></i>
+			</div>
 		</div>
 		
 	</div>
@@ -99,6 +118,9 @@
 	
 </div>
 
+<div id="sprite_selector" style="display: none">
+	
+</div>
 
 </body>
 </html>
