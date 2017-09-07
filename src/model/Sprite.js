@@ -44,6 +44,10 @@ var app;
                 this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
                 this.asset.setSpriteSource(this);
             };
+            Sprite.prototype.setFrame = function (newFrame) {
+                this.frame = newFrame;
+                this.asset.setSpriteSource(this);
+            };
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (!this.worldAABB.contains(x, y))
                     return false;
@@ -73,7 +77,8 @@ var app;
                         var scale = Math.sqrt(local.x * local.x + local.y * local.y) / interaction.offset;
                         this.scaleX = interaction.initialX * scale;
                         this.scaleY = interaction.initialY * scale;
-                        this.onPropertyChange('scale');
+                        this.onPropertyChange('scaleX');
+                        this.onPropertyChange('scaleY');
                     }
                     else {
                         if (part == 'scale' || part == 'scaleX') {
@@ -83,7 +88,8 @@ var app;
                             this.scaleY = local.y / (this.srcHeight * 0.5);
                         }
                         if (part == 'scale') {
-                            this.onPropertyChange('scale');
+                            this.onPropertyChange('scaleX');
+                            this.onPropertyChange('scaleY');
                         }
                         else if (part == 'scaleX') {
                             this.onPropertyChange('scaleX');
@@ -127,7 +133,7 @@ var app;
                 var w1 = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
                 var h1 = (this.srcWidth * scaleX * sinR + this.srcHeight * scaleY * cosR) * 0.5;
                 this.worldAABB.unionF(this.worldX - w1, this.worldY - h1, this.worldX + w1, this.worldY + h1);
-                if (this.worldAABB.intersects(viewport)) {
+                if (drawList && this.worldAABB.intersects(viewport)) {
                     drawList.add(this);
                 }
             };

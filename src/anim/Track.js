@@ -3,11 +3,13 @@ var app;
     var anim;
     (function (anim) {
         var Track = (function () {
-            function Track(node) {
+            function Track(animation, node) {
                 this.properties = {};
+                this.length = 1;
+                this.animation = animation;
                 this.node = node;
-                this.properties['offset'] = new TrackProperty(TrackPropertyType.VECTOR);
-                this.properties['rotation'] = new TrackProperty(TrackPropertyType.ANGLE);
+                this.properties['offset'] = new TrackProperty(this, TrackPropertyType.VECTOR);
+                this.properties['rotation'] = new TrackProperty(this, TrackPropertyType.ANGLE);
             }
             Track.prototype.forceKeyframe = function () {
                 for (var propertyName in this.properties) {
@@ -40,16 +42,24 @@ var app;
                     property.updateFrame(node, propertyName);
                 }
             };
+            Track.prototype.extendLength = function (newLength) {
+                if (newLength > this.length) {
+                    this.length = newLength;
+                    this.animation.extendLength(newLength);
+                }
+            };
             return Track;
         }());
         anim.Track = Track;
         var TrackProperty = (function () {
-            function TrackProperty(type) {
+            function TrackProperty(track, type) {
                 this.frameIndex = 0;
                 this.frames = null;
+                this.length = 1;
                 this.current = null;
                 this.prev = null;
                 this.next = null;
+                this.track = track;
                 this.type = type;
             }
             TrackProperty.prototype.gotoNextFrame = function () {
@@ -156,7 +166,8 @@ var app;
                         var t = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
                         var delta = (next.value - prev.value);
                         if (this.type == TrackPropertyType.ANGLE) {
-                            delta += (delta > Math.PI) ? -Math.PI * 2 : (delta < -Math.PI) ? Math.PI * 2 : 0;
+                            // delta += (delta > Math.PI) ? -Math.PI * 2 : (delta < -Math.PI) ? Math.PI * 2 : 0;
+                            delta = Math.normalizeAngle(delta);
                         }
                         value = prev.value + delta * t;
                     }
@@ -175,20 +186,25 @@ var app;
                     if (this.frameIndex == key.frameIndex) {
                         this.current = key;
                     }
-                    return;
                 }
-                if (this.next) {
-                    if (this.next.prev == this.frames) {
-                        this.frames = key;
+                else {
+                    if (this.next) {
+                        if (this.next.prev == this.frames) {
+                            this.frames = key;
+                        }
+                        this.next.prev = key;
+                        key.next = this.next;
                     }
-                    this.next.prev = key;
-                    key.next = this.next;
+                    if (this.prev) {
+                        this.prev.next = key;
+                        key.prev = this.prev;
+                    }
+                    this.current = key;
                 }
-                if (this.prev) {
-                    this.prev.next = key;
-                    key.prev = this.prev;
+                if (key.frameIndex + 1 > this.length) {
+                    this.length = key.frameIndex + 1;
+                    this.track.extendLength(this.length);
                 }
-                this.current = key;
             };
             return TrackProperty;
         }());

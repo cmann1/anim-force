@@ -9,12 +9,12 @@ namespace app.anim
 
 		protected node:Sprite;
 
-		constructor(node:Node)
+		constructor(animation:Animation, node:Node)
 		{
-			super(node);
+			super(animation, node);
 
-			this.properties['scaleX'] = new TrackProperty(TrackPropertyType.NUMBER);
-			this.properties['scaleY'] = new TrackProperty(TrackPropertyType.NUMBER);
+			this.properties['scaleX'] = new TrackProperty(this, TrackPropertyType.NUMBER);
+			this.properties['scaleY'] = new TrackProperty(this, TrackPropertyType.NUMBER);
 		}
 
 	}

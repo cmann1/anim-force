@@ -7,12 +7,14 @@
 // TODO: - - Disable adding, removing and dragging in the timeline.
 // TODO: Loading sprites
 // TODO: Export to AngelScript
+// TODO: Add bone as sibling if selected node doesn't allow children
 // TODO: Allow frames to be animated
 // TODO: Animation events
 // TODO: Sprite Selector:
 // TODO: - Use different modal script
 // TODO: - Improve all-round
 // TODO: - Lazy load/create groups
+// TODO: Ghosts
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:

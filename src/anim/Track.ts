@@ -7,15 +7,19 @@ namespace app.anim
 	export class Track
 	{
 
+		protected animation:Animation;
 		protected properties:{[id:string]:TrackProperty} = {};
 		protected node:Node;
 
-		constructor(node:Node)
+		public length:number = 1;
+
+		constructor(animation:Animation, node:Node)
 		{
+			this.animation = animation;
 			this.node = node;
 
-			this.properties['offset'] = new TrackProperty(TrackPropertyType.VECTOR);
-			this.properties['rotation'] = new TrackProperty(TrackPropertyType.ANGLE);
+			this.properties['offset'] = new TrackProperty(this, TrackPropertyType.VECTOR);
+			this.properties['rotation'] = new TrackProperty(this, TrackPropertyType.ANGLE);
 		}
 
 		public forceKeyframe()
@@ -65,22 +69,34 @@ namespace app.anim
 				property.updateFrame(node, propertyName);
 			}
 		}
+
+		public extendLength(newLength)
+		{
+			if(newLength > this.length)
+			{
+				this.length = newLength;
+				this.animation.extendLength(newLength);
+			}
+		}
 	}
 
 	export class TrackProperty
 	{
 
+		public track:Track;
 		public type:TrackPropertyType;
 
 		public frameIndex:number = 0;
 		public frames:Keyframe = null;
+		public length:number = 1;
 
 		public current:Keyframe = null;
 		public prev:Keyframe = null;
 		public next:Keyframe = null;
 
-		constructor(type:TrackPropertyType)
+		constructor(track:Track, type:TrackPropertyType)
 		{
+			this.track = track;
 			this.type = type;
 		}
 
@@ -231,7 +247,8 @@ namespace app.anim
 
 					if(this.type == TrackPropertyType.ANGLE)
 					{
-						delta += (delta > Math.PI) ? -Math.PI * 2 : (delta < -Math.PI) ? Math.PI * 2 : 0;
+						// delta += (delta > Math.PI) ? -Math.PI * 2 : (delta < -Math.PI) ? Math.PI * 2 : 0;
+						delta = Math.normalizeAngle(delta);
 					}
 
 
@@ -259,28 +276,35 @@ namespace app.anim
 				{
 					this.current = key;
 				}
-
-				return;
 			}
 
-			if(this.next)
+			else
 			{
-				if(this.next.prev == this.frames)
+				if(this.next)
 				{
-					this.frames = key;
+					if(this.next.prev == this.frames)
+					{
+						this.frames = key;
+					}
+
+					this.next.prev = key;
+					key.next = this.next;
 				}
 
-				this.next.prev = key;
-				key.next = this.next;
+				if(this.prev)
+				{
+					this.prev.next = key;
+					key.prev = this.prev;
+				}
+
+				this.current = key;
 			}
 
-			if(this.prev)
+			if(key.frameIndex + 1 > this.length)
 			{
-				this.prev.next = key;
-				key.prev = this.prev;
+				this.length = key.frameIndex + 1;
+				this.track.extendLength(this.length);
 			}
-
-			this.current = key;
 		}
 
 	}

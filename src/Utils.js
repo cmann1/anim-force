@@ -9,4 +9,23 @@ String.prototype.toTitleCase = function () {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
 };
+String.prototype.toVarName = function () {
+    var out = this.replace(/^([0-9])/, '_$1');
+    return out.toTitleCase()
+        .replace(/[^a-zA-Z0-9_$]/g, '')
+        .replace(/\s+([a-z])/g, function (txt) { return txt.toUpperCase(); })
+        .replace(/\s+/g, '');
+};
+// public static double normalizeAngle(double a, double center) {
+// 	return a - TWO_PI * FastMath.floor((a + FastMath.PI - center) / TWO_PI);
+// }
+Math.TWO_PI = Math.PI * 2;
+Math.RAD_TO_DEG = 1 / Math.PI * 180;
+Math.DEG_TO_RAD = 1 / 180 * Math.PI;
+Math.normalizeAngle = function (theta) {
+    return theta - Math.TWO_PI * Math.floor((theta + Math.PI) / Math.TWO_PI);
+};
+Math.lerpAngle = function (start, end, t) {
+    return start + t * Math.normalizeAngle(end - start);
+};
 //# sourceMappingURL=Utils.js.map

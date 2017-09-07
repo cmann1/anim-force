@@ -14,10 +14,10 @@ var app;
     (function (anim) {
         var BoneTrack = (function (_super) {
             __extends(BoneTrack, _super);
-            function BoneTrack(node) {
-                var _this = _super.call(this, node) || this;
-                _this.properties['length'] = new anim.TrackProperty(anim.TrackPropertyType.NUMBER);
-                _this.properties['stretchY'] = new anim.TrackProperty(anim.TrackPropertyType.NUMBER);
+            function BoneTrack(animation, node) {
+                var _this = _super.call(this, animation, node) || this;
+                _this.properties['length'] = new anim.TrackProperty(_this, anim.TrackPropertyType.NUMBER);
+                _this.properties['stretchY'] = new anim.TrackProperty(_this, anim.TrackPropertyType.NUMBER);
                 return _this;
             }
             return BoneTrack;

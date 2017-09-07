@@ -14,10 +14,10 @@ var app;
     (function (anim) {
         var SpriteTrack = (function (_super) {
             __extends(SpriteTrack, _super);
-            function SpriteTrack(node) {
-                var _this = _super.call(this, node) || this;
-                _this.properties['scaleX'] = new anim.TrackProperty(anim.TrackPropertyType.NUMBER);
-                _this.properties['scaleY'] = new anim.TrackProperty(anim.TrackPropertyType.NUMBER);
+            function SpriteTrack(animation, node) {
+                var _this = _super.call(this, animation, node) || this;
+                _this.properties['scaleX'] = new anim.TrackProperty(_this, anim.TrackPropertyType.NUMBER);
+                _this.properties['scaleY'] = new anim.TrackProperty(_this, anim.TrackPropertyType.NUMBER);
                 return _this;
             }
             return SpriteTrack;

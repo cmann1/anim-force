@@ -15,6 +15,7 @@ var app;
         var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
         var Bone = app.model.Bone;
+        var AngelScriptExporter = app.exporters.AngelScriptExporter;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId, model) {
@@ -61,7 +62,7 @@ var app;
                 // TODO: REMOVE
                 _this.onSpritesSelect = function (spriteGroup, spriteName) {
                     var node = _this.model.getSelectedNode();
-                    if (node) {
+                    if (node instanceof Sprite) {
                         node.loadSprite(spriteGroup, spriteName);
                     }
                 };
@@ -299,6 +300,13 @@ var app;
                     sprite3.offsetY = 50;
                     this.model.bindPose.forceKeyframe();
                 }
+                else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
+                    var node = this.model.getSelectedNode();
+                    if (node instanceof Sprite) {
+                        node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+                        this.showMessage('Frame: ' + node.frame);
+                    }
+                }
                 else if (keyCode == Key.LeftArrow) {
                     this.model.bindPose.gotoPrevFrame();
                     this.showMessage('Frame: ' + this.model.bindPose.getPosition());
@@ -309,6 +317,9 @@ var app;
                 }
                 else if (keyCode == Key.Enter) {
                     app.main.showSpriteSelector(this.onSpritesSelect);
+                }
+                else if (keyCode == Key.E) {
+                    console.log((new AngelScriptExporter()).exportModel(this.model));
                 }
             };
             Viewport.prototype.onKeyUp = function (event) {

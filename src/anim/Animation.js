@@ -11,6 +11,7 @@ var app;
                 this.tracks = {};
                 this.active = false;
                 this.fps = 15;
+                this.loop = true;
                 this.frameIndex = 0;
                 this.length = 1;
                 /*
@@ -63,10 +64,10 @@ var app;
             Animation.prototype.createTrack = function (target) {
                 var track = null;
                 if (target instanceof Bone) {
-                    track = new anim.BoneTrack(target);
+                    track = new anim.BoneTrack(this, target);
                 }
                 if (target instanceof Sprite) {
-                    track = new anim.SpriteTrack(target);
+                    track = new anim.SpriteTrack(this, target);
                 }
                 target.propertyChange.on(this.onNodePropertyChange);
                 if (!track) {
@@ -112,6 +113,14 @@ var app;
             };
             Animation.prototype.getPosition = function () {
                 return this.frameIndex;
+            };
+            Animation.prototype.getLength = function () {
+                return this.length;
+            };
+            Animation.prototype.extendLength = function (newLength) {
+                if (newLength > this.length) {
+                    this.length = newLength;
+                }
             };
             return Animation;
         }());

@@ -53,6 +53,12 @@ namespace app.model
 			this.asset.setSpriteSource(this);
 		}
 
+		public setFrame(newFrame:number)
+		{
+			this.frame = newFrame;
+			this.asset.setSpriteSource(this);
+		}
+
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
 			if(!this.worldAABB.contains(x, y)) return false;
@@ -94,7 +100,8 @@ namespace app.model
 					var scale = Math.sqrt(local.x * local.x + local.y * local.y) / interaction.offset;
 					this.scaleX = interaction.initialX * scale;
 					this.scaleY = interaction.initialY * scale;
-					this.onPropertyChange('scale');
+					this.onPropertyChange('scaleX');
+					this.onPropertyChange('scaleY');
 				}
 				else
 				{
@@ -109,7 +116,8 @@ namespace app.model
 
 					if(part == 'scale')
 					{
-						this.onPropertyChange('scale');
+						this.onPropertyChange('scaleX');
+						this.onPropertyChange('scaleY');
 					}
 					else if(part == 'scaleX')
 					{
@@ -169,7 +177,7 @@ namespace app.model
 				this.worldX + w1, this.worldY + h1
 			);
 
-			if(this.worldAABB.intersects(viewport))
+			if(drawList && this.worldAABB.intersects(viewport))
 			{
 				drawList.add(this);
 			}

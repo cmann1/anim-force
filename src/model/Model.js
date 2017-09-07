@@ -58,6 +58,13 @@ var app;
             Model.prototype.draw = function (ctx, worldScale) {
                 console.error('Use drawModel instead');
             };
+            Model.prototype.prepareChildren = function () {
+                this.drawList.clear();
+                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                    var child = _a[_i];
+                    child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
+                }
+            };
             Model.prototype.drawModel = function (ctx, worldScale, viewport) {
                 this.drawList.clear();
                 var i = 0;

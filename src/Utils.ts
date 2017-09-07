@@ -2,6 +2,16 @@ interface String
 {
 	ucFirst(this:string): string;
 	toTitleCase(this:string): string;
+	toVarName(this:string): string;
+}
+interface Math
+{
+	TWO_PI:number;
+	RAD_TO_DEG:number;
+	DEG_TO_RAD:number;
+
+	normalizeAngle(theta:number):number;
+	lerpAngle(start:number, end:number, t:number):number;
 }
 String.prototype.ucFirst = function()
 {
@@ -15,4 +25,28 @@ String.prototype.toTitleCase = function()
 		.replace(/\w\S*/g, function(txt){
 			return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
 		});
+};
+String.prototype.toVarName = function()
+{
+	var out = this.replace(/^([0-9])/, '_$1');
+	return out.toTitleCase()
+		.replace(/[^a-zA-Z0-9_$]/g, '')
+		.replace(/\s+([a-z])/g, function(txt){ return txt.toUpperCase(); })
+		.replace(/\s+/g, '');
+};
+
+// public static double normalizeAngle(double a, double center) {
+// 	return a - TWO_PI * FastMath.floor((a + FastMath.PI - center) / TWO_PI);
+// }
+
+Math.TWO_PI = Math.PI * 2;
+Math.RAD_TO_DEG = 1 / Math.PI * 180;
+Math.DEG_TO_RAD = 1 / 180 * Math.PI;
+Math.normalizeAngle = function (theta:number)
+{
+	return theta - Math.TWO_PI * Math.floor((theta + Math.PI) / Math.TWO_PI);
+};
+Math.lerpAngle = function (start:number, end:number, t:number):number
+{
+	return start + t * Math.normalizeAngle(end - start);
 };

@@ -16,6 +16,7 @@ namespace app.anim
 		public tracks:{[id:string]:Track} = {};
 		public active:boolean = false;
 		public fps = 15;
+		public loop = true;
 
 		protected model:app.model.Model;
 
@@ -58,12 +59,12 @@ namespace app.anim
 
 			if(target instanceof Bone)
 			{
-				track = new BoneTrack(target);
+				track = new BoneTrack(this, target);
 			}
 
 			if(target instanceof Sprite)
 			{
-				track = new SpriteTrack(target);
+				track = new SpriteTrack(this, target);
 			}
 
 			target.propertyChange.on(this.onNodePropertyChange);
@@ -131,6 +132,19 @@ namespace app.anim
 		public getPosition():number
 		{
 			return this.frameIndex;
+		}
+
+		public getLength()
+		{
+			return this.length;
+		}
+
+		public extendLength(newLength)
+		{
+			if(newLength > this.length)
+			{
+				this.length = newLength;
+			}
 		}
 
 		/*

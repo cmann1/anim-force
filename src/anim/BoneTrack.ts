@@ -10,12 +10,12 @@ namespace app.anim
 
 		protected node:Bone;
 
-		constructor(node:Node)
+		constructor(animation:Animation, node:Node)
 		{
-			super(node);
+			super(animation, node);
 
-			this.properties['length'] = new TrackProperty(TrackPropertyType.NUMBER);
-			this.properties['stretchY'] = new TrackProperty(TrackPropertyType.NUMBER);
+			this.properties['length'] = new TrackProperty(this, TrackPropertyType.NUMBER);
+			this.properties['stretchY'] = new TrackProperty(this, TrackPropertyType.NUMBER);
 		}
 
 	}

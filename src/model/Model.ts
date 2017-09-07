@@ -47,6 +47,16 @@ namespace app.model
 			console.error('Use drawModel instead');
 		}
 
+		public prepareChildren()
+		{
+			this.drawList.clear();
+
+			for(var child of this.children)
+			{
+				child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
+			}
+		}
+
 		public drawModel(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
 			this.drawList.clear();

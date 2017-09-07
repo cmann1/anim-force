@@ -8,6 +8,7 @@ namespace app.viewport
 	import SelectionEvent = events.SelectionEvent;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import Node = app.model.Node;
+	import AngelScriptExporter = app.exporters.AngelScriptExporter;
 
 	export class Viewport extends app.Canvas
 	{
@@ -408,6 +409,17 @@ namespace app.viewport
 			}
 
 			// TODO: REMOVE
+			else if(keyCode == Key.UpArrow || keyCode == Key.DownArrow)
+			{
+				var node = this.model.getSelectedNode();
+				if(node instanceof Sprite)
+				{
+					node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+					this.showMessage('Frame: ' + node.frame);
+				}
+			}
+
+			// TODO: REMOVE
 			else if(keyCode == Key.LeftArrow)
 			{
 				this.model.bindPose.gotoPrevFrame();
@@ -424,13 +436,18 @@ namespace app.viewport
 			{
 				app.main.showSpriteSelector(this.onSpritesSelect);
 			}
+			// TODO: REMOVE
+			else if(keyCode == Key.E)
+			{
+				console.log((new AngelScriptExporter()).exportModel(this.model));
+			}
 		}
 
 		// TODO: REMOVE
 		protected onSpritesSelect = (spriteGroup:string, spriteName:string) =>
 		{
-			var node = <Sprite> this.model.getSelectedNode();
-			if(node)
+			var node = this.model.getSelectedNode();
+			if(node instanceof Sprite)
 			{
 				node.loadSprite(spriteGroup, spriteName);
 			}
