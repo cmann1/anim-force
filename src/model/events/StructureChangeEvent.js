@@ -8,20 +8,27 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var events;
-(function (events) {
-    var StructureChangeEvent = (function (_super) {
-        __extends(StructureChangeEvent, _super);
-        function StructureChangeEvent(type, parent, target, index, other) {
-            var _this = _super.call(this, type, null) || this;
-            _this.parent = parent;
-            _this.target = target;
-            _this.index = index;
-            _this.other = other;
-            return _this;
-        }
-        return StructureChangeEvent;
-    }(events.Event));
-    events.StructureChangeEvent = StructureChangeEvent;
-})(events || (events = {}));
+var app;
+(function (app) {
+    var model;
+    (function (model) {
+        var events;
+        (function (events) {
+            var Event = app.events.Event;
+            var StructureChangeEvent = (function (_super) {
+                __extends(StructureChangeEvent, _super);
+                function StructureChangeEvent(type, parent, target, index, other) {
+                    var _this = _super.call(this, type, null) || this;
+                    _this.parent = parent;
+                    _this.target = target;
+                    _this.index = index;
+                    _this.other = other;
+                    return _this;
+                }
+                return StructureChangeEvent;
+            }(Event));
+            events.StructureChangeEvent = StructureChangeEvent;
+        })(events = model.events || (model.events = {}));
+    })(model = app.model || (app.model = {}));
+})(app || (app = {}));
 //# sourceMappingURL=StructureChangeEvent.js.map

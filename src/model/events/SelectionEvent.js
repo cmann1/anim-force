@@ -8,17 +8,24 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var events;
-(function (events) {
-    var SelectionEvent = (function (_super) {
-        __extends(SelectionEvent, _super);
-        function SelectionEvent(type, target) {
-            var _this = _super.call(this, type, null) || this;
-            _this.target = target;
-            return _this;
-        }
-        return SelectionEvent;
-    }(events.Event));
-    events.SelectionEvent = SelectionEvent;
-})(events || (events = {}));
+var app;
+(function (app) {
+    var model;
+    (function (model) {
+        var events;
+        (function (events) {
+            var Event = app.events.Event;
+            var SelectionEvent = (function (_super) {
+                __extends(SelectionEvent, _super);
+                function SelectionEvent(type, target) {
+                    var _this = _super.call(this, type, null) || this;
+                    _this.target = target;
+                    return _this;
+                }
+                return SelectionEvent;
+            }(Event));
+            events.SelectionEvent = SelectionEvent;
+        })(events = model.events || (model.events = {}));
+    })(model = app.model || (app.model = {}));
+})(app || (app = {}));
 //# sourceMappingURL=SelectionEvent.js.map

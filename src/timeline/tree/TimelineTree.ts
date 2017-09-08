@@ -4,10 +4,14 @@ namespace app.timeline.tree
 	import Model = app.model.Model;
 	import Bone = app.model.Bone;
 	import Sprite = app.model.Sprite;
-	import StructureChangeEvent = events.StructureChangeEvent;
-	import SelectionEvent = events.SelectionEvent;
+	import StructureChangeEvent = app.model.events.StructureChangeEvent;
+	import SelectionEvent = app.model.events.SelectionEvent;
 	import Node = app.model.Node;
 	import Key = KeyCodes.Key;
+	import EventDispatcher = app.events.EventDispatcher;
+	import ScrollEvent = app.events.ScrollEvent;
+	import ContainerNode = app.model.ContainerNode;
+	import Event = app.events.Event;
 
 	export class TimelineTree
 	{
@@ -15,7 +19,7 @@ namespace app.timeline.tree
 		private $element:JQuery;
 		private $container:JQuery;
 		private model:Model;
-		private rootNode:TreeNode;
+		private rootNode:RootTreeNode;
 
 		private selectedNode:TreeNode;
 		private highlightedNode:TreeNode;
@@ -38,6 +42,11 @@ namespace app.timeline.tree
 		private dragX:number;
 		private dragY:number;
 
+		/// Events
+
+		public scrollChange:EventDispatcher<TimelineTree> = new EventDispatcher<TimelineTree>();
+		public treeNodeUpdate:EventDispatcher<TreeNode> = new EventDispatcher<TreeNode>();
+
 		constructor(elementId, model:Model)
 		{
 			this.model = model;
@@ -46,9 +55,11 @@ namespace app.timeline.tree
 
 			this.setupToolbar();
 
-			this.$container.append((this.rootNode = this.fromNode(this.model)).$element);
+			this.$container.append((this.rootNode = <RootTreeNode> this.fromNode(this.model)).$element);
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
+
+			this.rootNode.$children.on('scroll', this.onTreeScroll);
 
 			this.nodeMap[this.model.id] = this.rootNode;
 
@@ -214,6 +225,7 @@ namespace app.timeline.tree
 					}
 					else
 					{
+						this.stopDrag(true);
 						console.error('Drag and drop error: Cannot find parent node');
 					}
 				}
@@ -242,6 +254,16 @@ namespace app.timeline.tree
 		/*
 		 * Events
 		 */
+
+		public onNodeCollapse(node:ContainerTreeNode)
+		{
+			this.treeNodeUpdate.dispatch(node, new Event('nodeCollapse', null));
+		}
+
+		private onTreeScroll = (event) =>
+		{
+			this.scrollChange.dispatch(this, new ScrollEvent(this.rootNode.$children.scrollLeft(), this.rootNode.$children.scrollTop(), event))
+		};
 
 		private onDragWindowMouseMove = (event) =>
 		{

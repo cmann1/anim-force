@@ -20,6 +20,9 @@ var app;
     Config.boneStretchHandleDist = 20;
     Config.handleRadius = 5;
     Config.subHandleRadius = 4;
+    Config.node = '#FBFBFB';
+    Config.nodeBorder = '#DCDCDC';
+    Config.frameWidth = 15;
     app.Config = Config;
 })(app || (app = {}));
 //# sourceMappingURL=Config.js.map

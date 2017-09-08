@@ -13,14 +13,19 @@ namespace app.timeline.tree
 		public children:TreeNode[] = [];
 		public childrenVisible:boolean = true;
 
-		constructor(tree:TimelineTree, nodeType:string, node:Node)
+		constructor(tree:TimelineTree, nodeType:string, node:Node, allowFold=true)
 		{
 			super(tree, nodeType, node);
 
 			this.$element.append(this.$children = $('<div class="children"></div>'));
-			this.$item.prepend(
-				this.$foldIcon = $('<i class="fa fold-icon"></i>').on('click', this.onToggleChildren)
-			);
+			if(allowFold)
+			{
+				this.$item.prepend(
+					this.$foldIcon = $('<i class="fa fold-icon"></i>')
+						.on('mousedown', this.onFoldIconMouseDown)
+						.on('click', this.onToggleChildren)
+				);
+			}
 		}
 
 		public setOpen(open:boolean=true)
@@ -39,6 +44,8 @@ namespace app.timeline.tree
 			}
 
 			this.$foldIcon.toggleClass('collapsed', !this.childrenVisible);
+			(<ContainerNode> this.node).collapsed = !this.childrenVisible;
+			this.tree.onNodeCollapse(this);
 		}
 
 		public clear()
@@ -85,7 +92,7 @@ namespace app.timeline.tree
 			return node;
 		}
 
-		public handleDragOver(treeNode:TreeNode, x:number, y:number, recurse:boolean=true):boolean
+		public handleDragOver(treeNode:TreeNode, x:number, y:number, recurse:boolean=true, forceLast:boolean=false):boolean
 		{
 			if(treeNode == this) return false;
 
@@ -114,7 +121,7 @@ namespace app.timeline.tree
 					const childY1 = childPos.top;
 					const childY2 = childY1 + $child.height();
 
-					if(y >= childY1 && y <= childY2)
+					if(y >= childY1 && y <= childY2 || (forceLast && i == $children.length - 1))
 					{
 						this.setOpen(true);
 						return (<TreeNode>$child.data('tree-node')).handleDragOver(treeNode, x, y, x > childPos.left);
@@ -131,9 +138,20 @@ namespace app.timeline.tree
 		 * Events
 		 */
 
+		protected onFoldIconMouseDown = (event) =>
+		{
+			event.stopPropagation();
+			event.preventDefault();
+			return false;
+		};
+
 		protected onToggleChildren = (event) =>
 		{
 			this.setOpen(!this.childrenVisible);
+
+			event.stopPropagation();
+			event.preventDefault();
+			return false;
 		};
 
 	}

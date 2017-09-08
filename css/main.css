@@ -60,6 +60,7 @@ div#timeline-tree {
     width: 0; }
 
 div#timeline-tree-container {
+  display: flex;
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto; }
@@ -149,6 +150,17 @@ div#timeline-tree-toolbar {
   border-left: 1px #B7B7B7 dashed; }
 .model-node:hover > .children:before {
   border-color: #703535; }
+.model-node.model {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; }
+  .model-node.model .item {
+    flex-shrink: 0; }
+  .model-node.model > .children {
+    flex-grow: 1;
+    overflow: auto; }
+  .model-node.model > .children:before {
+    content: normal; }
 
 #sprite_selector {
   width: 900px; }
@@ -246,9 +258,15 @@ div#timeline-container {
   display: flex;
   flex-direction: column; }
 
-canvas#timeline {
+#time-canvas-container {
   flex-grow: 1;
-  flex-shrink: 1; }
+  flex-shrink: 1;
+  position: relative; }
+
+canvas#timeline {
+  width: 100%;
+  height: 100%;
+  position: absolute; }
 
 #timeline-toolbar {
   background-color: #ECECEC;

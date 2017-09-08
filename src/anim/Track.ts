@@ -2,7 +2,7 @@ namespace app.anim
 {
 
 	import Node = app.model.Node;
-	import PropertyChangeEvent = events.PropertyChangeEvent;
+	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
 	export class Track
 	{
@@ -18,24 +18,20 @@ namespace app.anim
 			this.animation = animation;
 			this.node = node;
 
-			this.properties['offset'] = new TrackProperty(this, TrackPropertyType.VECTOR);
-			this.properties['rotation'] = new TrackProperty(this, TrackPropertyType.ANGLE);
+			this.addProperty('offset', TrackPropertyType.VECTOR);
+			this.addProperty('rotation', TrackPropertyType.ANGLE);
+		}
+
+		protected addProperty(propertyName:string, type:TrackPropertyType)
+		{
+			this.properties[propertyName] = new TrackProperty(this, propertyName, type);
 		}
 
 		public forceKeyframe()
 		{
 			for(var propertyName in this.properties)
 			{
-				const property:TrackProperty = this.properties[propertyName];
-
-				if(property.type == TrackPropertyType.VECTOR)
-				{
-					property.setVector(this.node[propertyName + 'X'], this.node[propertyName + 'Y']);
-				}
-				else if(property.type == TrackPropertyType.NUMBER || property.type == TrackPropertyType.ANGLE)
-				{
-					property.setNumber(this.node[propertyName]);
-				}
+				this.properties[propertyName].updateFrame(this.node);
 			}
 		}
 
@@ -46,7 +42,7 @@ namespace app.anim
 			{
 				const property = this.properties[propertyName];
 				property.gotoNextFrame();
-				property.updateNode(this.node, propertyName);
+				property.updateNode(this.node);
 			}
 		}
 
@@ -56,17 +52,22 @@ namespace app.anim
 			{
 				const property = this.properties[propertyName];
 				property.gotoPrevFrame();
-				property.updateNode(this.node, propertyName);
+				property.updateNode(this.node);
 			}
 		}
 
 		public onNodePropertyChange(node:Node, propertyName:string)
 		{
-			const property:TrackProperty = this.properties[propertyName];
+			// const property:TrackProperty = this.properties[propertyName];
+			//
+			// if(property)
+			// {
+			// 	property.updateFrame(node);
+			// }
 
-			if(property)
+			for(var propertyName in this.properties)
 			{
-				property.updateFrame(node, propertyName);
+				this.properties[propertyName].updateFrame(this.node);
 			}
 		}
 
@@ -84,6 +85,7 @@ namespace app.anim
 	{
 
 		public track:Track;
+		public propertyName:string;
 		public type:TrackPropertyType;
 
 		public frameIndex:number = 0;
@@ -94,9 +96,10 @@ namespace app.anim
 		public prev:Keyframe = null;
 		public next:Keyframe = null;
 
-		constructor(track:Track, type:TrackPropertyType)
+		constructor(track:Track, propertyName:string, type:TrackPropertyType)
 		{
 			this.track = track;
+			this.propertyName = propertyName;
 			this.type = type;
 		}
 
@@ -165,37 +168,35 @@ namespace app.anim
 			this.insert(new VectorKeyframe(this.frameIndex, x, y));
 		}
 
-		public updateFrame(node:Node, propertyName:string)
+		public updateFrame(node:Node)
 		{
 			if(this.type == TrackPropertyType.VECTOR)
 			{
 				if(this.current)
 				{
-					(<VectorKeyframe> this.current).x = node[propertyName + 'X'];
-					(<VectorKeyframe> this.current).y = node[propertyName + 'Y'];
+					(<VectorKeyframe> this.current).x = node[this.propertyName + 'X'];
+					(<VectorKeyframe> this.current).y = node[this.propertyName + 'Y'];
 				}
 				else
 				{
-					this.insert(new VectorKeyframe(this.frameIndex, node[propertyName + 'X'], node[propertyName + 'Y']));
+					this.insert(new VectorKeyframe(this.frameIndex, node[this.propertyName + 'X'], node[this.propertyName + 'Y']));
 				}
 			}
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
 			{
 				if(this.current)
 				{
-					(<NumberKeyframe> this.current).value = node[propertyName];
+					(<NumberKeyframe> this.current).value = node[this.propertyName];
 				}
 				else
 				{
-					this.insert(new NumberKeyframe(this.frameIndex, node[propertyName]));
+					this.insert(new NumberKeyframe(this.frameIndex, node[this.propertyName]));
 				}
 			}
 		}
 
-		public updateNode(node:Node, propertyName:string)
+		public updateNode(node:Node)
 		{
-			const type = this.type;
-
 			if(this.type == TrackPropertyType.VECTOR)
 			{
 				var x:number;
@@ -226,8 +227,8 @@ namespace app.anim
 					y = next.y;
 				}
 
-				node[propertyName + 'X'] = x;
-				node[propertyName + 'Y'] = y;
+				node[this.propertyName + 'X'] = x;
+				node[this.propertyName + 'Y'] = y;
 			}
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
 			{
@@ -263,7 +264,7 @@ namespace app.anim
 					value = next.value;
 				}
 
-				node[propertyName] = value;
+				node[this.propertyName] = value;
 			}
 		}
 

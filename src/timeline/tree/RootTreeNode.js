@@ -13,11 +13,11 @@ var app;
     var timeline;
     (function (timeline) {
         var tree;
-        (function (tree) {
+        (function (tree_1) {
             var RootTreeNode = (function (_super) {
                 __extends(RootTreeNode, _super);
-                function RootTreeNode() {
-                    return _super !== null && _super.apply(this, arguments) || this;
+                function RootTreeNode(tree, nodeType, node) {
+                    return _super.call(this, tree, nodeType, node, false) || this;
                 }
                 RootTreeNode.prototype.handleDragOver = function (treeNode, x, y, recurse) {
                     if (recurse === void 0) { recurse = true; }
@@ -26,11 +26,11 @@ var app;
                     if (y < this.$item.height() * 0.5) {
                         return false;
                     }
-                    return _super.prototype.handleDragOver.call(this, treeNode, x, y);
+                    return _super.prototype.handleDragOver.call(this, treeNode, x, y, true, true);
                 };
                 return RootTreeNode;
-            }(tree.ContainerTreeNode));
-            tree.RootTreeNode = RootTreeNode;
+            }(tree_1.ContainerTreeNode));
+            tree_1.RootTreeNode = RootTreeNode;
         })(tree = timeline.tree || (timeline.tree = {}));
     })(timeline = app.timeline || (app.timeline = {}));
 })(app || (app = {}));

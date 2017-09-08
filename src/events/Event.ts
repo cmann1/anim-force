@@ -1,4 +1,4 @@
-namespace events
+namespace app.events
 {
 
 	export class Event

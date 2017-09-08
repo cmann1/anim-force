@@ -1,7 +1,7 @@
 namespace app.model
 {
 
-	import EventDispatcher = events.EventDispatcher;
+	import EventDispatcher = app.events.EventDispatcher;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import SelectionEvent = events.SelectionEvent;
 	import AABB = app.viewport.AABB;
@@ -26,10 +26,12 @@ namespace app.model
 		// TODO: Set to private
 		public bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this);
 		private animations:{[id:string]:app.anim.Animation} = {};
+		private activeAnimation:app.anim.Animation = null;
 
 		/// Events
 
 		public selectionChange:EventDispatcher<Model> = new EventDispatcher<Model>();
+		public activeAnimationChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 
 		constructor()
 		{
@@ -39,6 +41,7 @@ namespace app.model
 
 			this.bindPose.active = true;
 			this.bindPose.forceKeyframe();
+			this.activeAnimation = this.bindPose;
 			// TODO: Force a keyframe on bind pose when adding nodes
 		}
 
@@ -164,6 +167,11 @@ namespace app.model
 		public getSelectedNode():Node
 		{
 			return this.selectedNode;
+		}
+
+		public getActiveAnimation():app.anim.Animation
+		{
+			return this.activeAnimation;
 		}
 
 		public clear():void

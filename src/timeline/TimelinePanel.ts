@@ -27,9 +27,9 @@ namespace app.timeline
 		public init()
 		{
 			this.tree = new TimelineTree('timeline-tree', this.model);
-			this.viewport = new TimelineViewport('timeline', this.model);
+			this.viewport = new TimelineViewport('timeline', this.model, this.tree);
 
-			new Splitter(this.tree.getContainer(), this.viewport.getContainer(), SplitterOrientation.HORIZONTAL, 350, SplitterAnchor.FIRST, 'timeline-tree');
+			new Splitter(this.tree.getContainer(), $('#timeline-container'), SplitterOrientation.HORIZONTAL, 350, SplitterAnchor.FIRST, 'timeline-tree');
 		}
 
 		public getContainer()

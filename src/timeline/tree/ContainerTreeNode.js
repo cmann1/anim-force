@@ -16,7 +16,8 @@ var app;
         (function (tree_1) {
             var ContainerTreeNode = (function (_super) {
                 __extends(ContainerTreeNode, _super);
-                function ContainerTreeNode(tree, nodeType, node) {
+                function ContainerTreeNode(tree, nodeType, node, allowFold) {
+                    if (allowFold === void 0) { allowFold = true; }
                     var _this = _super.call(this, tree, nodeType, node) || this;
                     _this.$children = null;
                     _this.$foldIcon = null;
@@ -25,11 +26,23 @@ var app;
                     /*
                      * Events
                      */
+                    _this.onFoldIconMouseDown = function (event) {
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    };
                     _this.onToggleChildren = function (event) {
                         _this.setOpen(!_this.childrenVisible);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
                     };
                     _this.$element.append(_this.$children = $('<div class="children"></div>'));
-                    _this.$item.prepend(_this.$foldIcon = $('<i class="fa fold-icon"></i>').on('click', _this.onToggleChildren));
+                    if (allowFold) {
+                        _this.$item.prepend(_this.$foldIcon = $('<i class="fa fold-icon"></i>')
+                            .on('mousedown', _this.onFoldIconMouseDown)
+                            .on('click', _this.onToggleChildren));
+                    }
                     return _this;
                 }
                 ContainerTreeNode.prototype.setOpen = function (open) {
@@ -44,6 +57,8 @@ var app;
                         this.$children.slideUp(50);
                     }
                     this.$foldIcon.toggleClass('collapsed', !this.childrenVisible);
+                    this.node.collapsed = !this.childrenVisible;
+                    this.tree.onNodeCollapse(this);
                 };
                 ContainerTreeNode.prototype.clear = function () {
                     this.$children.empty();
@@ -78,8 +93,9 @@ var app;
                     this.node.addChild(node);
                     return node;
                 };
-                ContainerTreeNode.prototype.handleDragOver = function (treeNode, x, y, recurse) {
+                ContainerTreeNode.prototype.handleDragOver = function (treeNode, x, y, recurse, forceLast) {
                     if (recurse === void 0) { recurse = true; }
+                    if (forceLast === void 0) { forceLast = false; }
                     if (treeNode == this)
                         return false;
                     if (y < this.$item.height() * 0.5 || (!recurse && y < this.$element.height() * 0.5)) {
@@ -100,7 +116,7 @@ var app;
                             var childPos = $child.position();
                             var childY1 = childPos.top;
                             var childY2 = childY1 + $child.height();
-                            if (y >= childY1 && y <= childY2) {
+                            if (y >= childY1 && y <= childY2 || (forceLast && i == $children.length - 1)) {
                                 this.setOpen(true);
                                 return $child.data('tree-node').handleDragOver(treeNode, x, y, x > childPos.left);
                             }

@@ -10,19 +10,19 @@ var __extends = (this && this.__extends) || (function () {
 })();
 var app;
 (function (app) {
-    var anim;
-    (function (anim) {
-        var BoneTrack = (function (_super) {
-            __extends(BoneTrack, _super);
-            function BoneTrack(animation, node) {
-                var _this = _super.call(this, animation, node) || this;
-                _this.addProperty('length', anim.TrackPropertyType.NUMBER);
-                _this.addProperty('stretchY', anim.TrackPropertyType.NUMBER);
+    var events;
+    (function (events) {
+        var ScrollEvent = (function (_super) {
+            __extends(ScrollEvent, _super);
+            function ScrollEvent(scrollX, scrollY, nativeEvent) {
+                var _this = _super.call(this, 'scroll', nativeEvent) || this;
+                _this.scrollX = scrollX;
+                _this.scrollY = scrollY;
                 return _this;
             }
-            return BoneTrack;
-        }(anim.Track));
-        anim.BoneTrack = BoneTrack;
-    })(anim = app.anim || (app.anim = {}));
+            return ScrollEvent;
+        }(events.Event));
+        events.ScrollEvent = ScrollEvent;
+    })(events = app.events || (app.events = {}));
 })(app || (app = {}));
-//# sourceMappingURL=BoneTrack.js.map
+//# sourceMappingURL=ScrollEvent.js.map

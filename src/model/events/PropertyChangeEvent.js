@@ -8,15 +8,22 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var events;
-(function (events) {
-    var PropertyChangeEvent = (function (_super) {
-        __extends(PropertyChangeEvent, _super);
-        function PropertyChangeEvent(type) {
-            return _super.call(this, type, null) || this;
-        }
-        return PropertyChangeEvent;
-    }(events.Event));
-    events.PropertyChangeEvent = PropertyChangeEvent;
-})(events || (events = {}));
+var app;
+(function (app) {
+    var model;
+    (function (model) {
+        var events;
+        (function (events) {
+            var Event = app.events.Event;
+            var PropertyChangeEvent = (function (_super) {
+                __extends(PropertyChangeEvent, _super);
+                function PropertyChangeEvent(type) {
+                    return _super.call(this, type, null) || this;
+                }
+                return PropertyChangeEvent;
+            }(Event));
+            events.PropertyChangeEvent = PropertyChangeEvent;
+        })(events = model.events || (model.events = {}));
+    })(model = app.model || (app.model = {}));
+})(app || (app = {}));
 //# sourceMappingURL=PropertyChangeEvent.js.map

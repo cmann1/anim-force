@@ -2,9 +2,9 @@ var app;
 (function (app) {
     var model;
     (function (model_1) {
-        var EventDispatcher = events.EventDispatcher;
-        var StructureChangeEvent = events.StructureChangeEvent;
-        var PropertyChangeEvent = events.PropertyChangeEvent;
+        var EventDispatcher = app.events.EventDispatcher;
+        var StructureChangeEvent = model_1.events.StructureChangeEvent;
+        var PropertyChangeEvent = model_1.events.PropertyChangeEvent;
         var AABB = app.viewport.AABB;
         var Node = (function () {
             ///

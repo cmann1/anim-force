@@ -1,4 +1,4 @@
-namespace events
+namespace app.events
 {
 	type Callback<TSender> = (sender: TSender, event:Event) => void;
 

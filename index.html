@@ -29,8 +29,10 @@
 	
 	<script src="src/math/Rectangle.js"></script>
 	<script src="src/math/Vector.js"></script>
+	
 	<script src="src/events/EventDispatcher.js"></script>
 	<script src="src/events/Event.js"></script>
+	<script src="src/events/ScrollEvent.js"></script>
 	
 	<script src="src/Config.js"></script>
 	
@@ -63,7 +65,7 @@
 	<script src="src/anim/VectorKeyframe.js"></script>
 	
 	<script src="src/exporters/Exporter.js"></script>
-	<script src="src/exporters/AngelScript.js"></script>
+	<script src="src/exporters/AngelScriptExporter.js"></script>
 	
 	<script src="src/Canvas.js"></script>
 	<script src="src/viewport/Viewport.js"></script>
@@ -104,7 +106,9 @@
 		</div>
 		
 		<div id="timeline-container">
-			<canvas id="timeline" tabindex="2" class="no-select"></canvas>
+			<div id="time-canvas-container">
+				<canvas id="timeline" tabindex="2" class="no-select"></canvas>
+			</div>
 			<div id="timeline-toolbar">
 				<i class="fa fa-play btn-play" title="Play"></i>
 				<i class="fa fa-pause btn-pause" title="Pause"></i>

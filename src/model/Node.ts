@@ -1,7 +1,7 @@
 namespace app.model
 {
 
-	import EventDispatcher = events.EventDispatcher;
+	import EventDispatcher = app.events.EventDispatcher;
 	import StructureChangeEvent = events.StructureChangeEvent;
 	import PropertyChangeEvent = events.PropertyChangeEvent;
 	import AABB = app.viewport.AABB;

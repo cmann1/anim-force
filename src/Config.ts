@@ -25,6 +25,11 @@ namespace app
 		static handleRadius = 5;
 		static subHandleRadius = 4;
 
+		static node = '#FBFBFB';
+		static nodeBorder = '#DCDCDC';
+
+		static frameWidth = 15;
+
 	}
 
 }

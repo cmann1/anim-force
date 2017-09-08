@@ -12,9 +12,9 @@ var app;
 (function (app) {
     var model;
     (function (model) {
-        var EventDispatcher = events.EventDispatcher;
-        var StructureChangeEvent = events.StructureChangeEvent;
-        var SelectionEvent = events.SelectionEvent;
+        var EventDispatcher = app.events.EventDispatcher;
+        var StructureChangeEvent = model.events.StructureChangeEvent;
+        var SelectionEvent = model.events.SelectionEvent;
         var EditMode;
         (function (EditMode) {
             EditMode[EditMode["EDIT"] = 0] = "EDIT";
@@ -31,8 +31,10 @@ var app;
                 // TODO: Set to private
                 _this.bindPose = new app.anim.Animation('BindPose', _this);
                 _this.animations = {};
+                _this.activeAnimation = null;
                 /// Events
                 _this.selectionChange = new EventDispatcher();
+                _this.activeAnimationChange = new EventDispatcher();
                 _this.nodeDrawOrder = function (a, b) {
                     if (a.layer < b.layer || b == _this.selectedNode) {
                         return -1;
@@ -52,6 +54,7 @@ var app;
                 _this.type = 'model';
                 _this.bindPose.active = true;
                 _this.bindPose.forceKeyframe();
+                _this.activeAnimation = _this.bindPose;
                 return _this;
                 // TODO: Force a keyframe on bind pose when adding nodes
             }
@@ -137,6 +140,9 @@ var app;
             };
             Model.prototype.getSelectedNode = function () {
                 return this.selectedNode;
+            };
+            Model.prototype.getActiveAnimation = function () {
+                return this.activeAnimation;
             };
             Model.prototype.clear = function () {
                 this.selectedNode = null;

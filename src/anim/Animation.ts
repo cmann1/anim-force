@@ -2,12 +2,12 @@ namespace app.anim
 {
 
 	import ContainerTreeNode = app.timeline.tree.ContainerTreeNode;
-	import StructureChangeEvent = events.StructureChangeEvent;
+	import StructureChangeEvent = app.model.events.StructureChangeEvent;
 	import Node = app.model.Node;
 	import ContainerNode = app.model.ContainerNode;
 	import Bone = app.model.Bone;
 	import Sprite = app.model.Sprite;
-	import PropertyChangeEvent = events.PropertyChangeEvent;
+	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
 	export class Animation
 	{

@@ -8,14 +8,20 @@ var app;
             var Bone = app.model.Bone;
             var Sprite = app.model.Sprite;
             var Key = KeyCodes.Key;
+            var EventDispatcher = app.events.EventDispatcher;
+            var ScrollEvent = app.events.ScrollEvent;
+            var Event = app.events.Event;
             var TimelineTree = (function () {
                 function TimelineTree(elementId, model) {
                     var _this = this;
                     this.nodeMap = {};
                     this.dragNode = null;
-                    /*
-                     * Events
-                     */
+                    /// Events
+                    this.scrollChange = new EventDispatcher();
+                    this.treeNodeUpdate = new EventDispatcher();
+                    this.onTreeScroll = function (event) {
+                        _this.scrollChange.dispatch(_this, new ScrollEvent(_this.rootNode.$children.scrollLeft(), _this.rootNode.$children.scrollTop(), event));
+                    };
                     this.onDragWindowMouseMove = function (event) {
                         if (_this.dragNode) {
                             if (_this.dragWait) {
@@ -169,6 +175,7 @@ var app;
                     this.$container.append((this.rootNode = this.fromNode(this.model)).$element);
                     model.structureChange.on(this.onModelStructureChange);
                     model.selectionChange.on(this.onModelSelectionChange);
+                    this.rootNode.$children.on('scroll', this.onTreeScroll);
                     this.nodeMap[this.model.id] = this.rootNode;
                     this.$element
                         .keyup(this.onKeyDown)
@@ -291,6 +298,7 @@ var app;
                                 parent_1.node.addChildBefore(this.dragNode.node, next ? next.node : null);
                             }
                             else {
+                                this.stopDrag(true);
                                 console.error('Drag and drop error: Cannot find parent node');
                             }
                         }
@@ -307,6 +315,12 @@ var app;
                         return new tree.ContainerTreeNode(this, node.type, node);
                     }
                     return new tree.TreeNode(this, node.type, node);
+                };
+                /*
+                 * Events
+                 */
+                TimelineTree.prototype.onNodeCollapse = function (node) {
+                    this.treeNodeUpdate.dispatch(node, new Event('nodeCollapse', null));
                 };
                 return TimelineTree;
             }());

@@ -1,5 +1,8 @@
 /*
-// TODO: Initial export to AngelScript
+// TODO: Timeline:
+// TODO: - Update on insert/delete keyframe
+// TODO: - Draw time bar and scrubber
+// TODO: - Scroll with mouse wheel and right click drag
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
 // TODO: - - Replace stretch handle with length handle
@@ -7,19 +10,21 @@
 // TODO: - - Disable adding, removing and dragging in the timeline.
 // TODO: Loading sprites
 // TODO: Export to AngelScript
-// TODO: Add bone as sibling if selected node doesn't allow children
+// TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
 // TODO: Allow frames to be animated
 // TODO: Animation events
 // TODO: Sprite Selector:
 // TODO: - Use different modal script
 // TODO: - Improve all-round
 // TODO: - Lazy load/create groups
+// TODO: - Auto show when adding a sprite
+// TODO: - - Auto set sprite node name to sprite name
+// TODO: - Add cancel button
 // TODO: Ghosts
+// TODO: Show loading sprite when changing sprites
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:
-// TODO: - ????
-// TODO: Timeline:
 // TODO: - ????
 // TODO: Help?
 // TODO: - List of shortcut keys

@@ -13,8 +13,8 @@ namespace app.anim
 		{
 			super(animation, node);
 
-			this.properties['scaleX'] = new TrackProperty(this, TrackPropertyType.NUMBER);
-			this.properties['scaleY'] = new TrackProperty(this, TrackPropertyType.NUMBER);
+			this.addProperty('scaleX', TrackPropertyType.NUMBER);
+			this.addProperty('scaleY', TrackPropertyType.NUMBER);
 		}
 
 	}

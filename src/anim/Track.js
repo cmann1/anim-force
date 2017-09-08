@@ -8,38 +8,40 @@ var app;
                 this.length = 1;
                 this.animation = animation;
                 this.node = node;
-                this.properties['offset'] = new TrackProperty(this, TrackPropertyType.VECTOR);
-                this.properties['rotation'] = new TrackProperty(this, TrackPropertyType.ANGLE);
+                this.addProperty('offset', TrackPropertyType.VECTOR);
+                this.addProperty('rotation', TrackPropertyType.ANGLE);
             }
+            Track.prototype.addProperty = function (propertyName, type) {
+                this.properties[propertyName] = new TrackProperty(this, propertyName, type);
+            };
             Track.prototype.forceKeyframe = function () {
                 for (var propertyName in this.properties) {
-                    var property = this.properties[propertyName];
-                    if (property.type == TrackPropertyType.VECTOR) {
-                        property.setVector(this.node[propertyName + 'X'], this.node[propertyName + 'Y']);
-                    }
-                    else if (property.type == TrackPropertyType.NUMBER || property.type == TrackPropertyType.ANGLE) {
-                        property.setNumber(this.node[propertyName]);
-                    }
+                    this.properties[propertyName].updateFrame(this.node);
                 }
             };
             Track.prototype.gotoNextFrame = function () {
                 for (var propertyName in this.properties) {
                     var property = this.properties[propertyName];
                     property.gotoNextFrame();
-                    property.updateNode(this.node, propertyName);
+                    property.updateNode(this.node);
                 }
             };
             Track.prototype.gotoPrevFrame = function () {
                 for (var propertyName in this.properties) {
                     var property = this.properties[propertyName];
                     property.gotoPrevFrame();
-                    property.updateNode(this.node, propertyName);
+                    property.updateNode(this.node);
                 }
             };
             Track.prototype.onNodePropertyChange = function (node, propertyName) {
-                var property = this.properties[propertyName];
-                if (property) {
-                    property.updateFrame(node, propertyName);
+                // const property:TrackProperty = this.properties[propertyName];
+                //
+                // if(property)
+                // {
+                // 	property.updateFrame(node);
+                // }
+                for (var propertyName in this.properties) {
+                    this.properties[propertyName].updateFrame(this.node);
                 }
             };
             Track.prototype.extendLength = function (newLength) {
@@ -52,7 +54,7 @@ var app;
         }());
         anim.Track = Track;
         var TrackProperty = (function () {
-            function TrackProperty(track, type) {
+            function TrackProperty(track, propertyName, type) {
                 this.frameIndex = 0;
                 this.frames = null;
                 this.length = 1;
@@ -60,6 +62,7 @@ var app;
                 this.prev = null;
                 this.next = null;
                 this.track = track;
+                this.propertyName = propertyName;
                 this.type = type;
             }
             TrackProperty.prototype.gotoNextFrame = function () {
@@ -107,27 +110,26 @@ var app;
                 }
                 this.insert(new anim.VectorKeyframe(this.frameIndex, x, y));
             };
-            TrackProperty.prototype.updateFrame = function (node, propertyName) {
+            TrackProperty.prototype.updateFrame = function (node) {
                 if (this.type == TrackPropertyType.VECTOR) {
                     if (this.current) {
-                        this.current.x = node[propertyName + 'X'];
-                        this.current.y = node[propertyName + 'Y'];
+                        this.current.x = node[this.propertyName + 'X'];
+                        this.current.y = node[this.propertyName + 'Y'];
                     }
                     else {
-                        this.insert(new anim.VectorKeyframe(this.frameIndex, node[propertyName + 'X'], node[propertyName + 'Y']));
+                        this.insert(new anim.VectorKeyframe(this.frameIndex, node[this.propertyName + 'X'], node[this.propertyName + 'Y']));
                     }
                 }
                 else if (this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE) {
                     if (this.current) {
-                        this.current.value = node[propertyName];
+                        this.current.value = node[this.propertyName];
                     }
                     else {
-                        this.insert(new anim.NumberKeyframe(this.frameIndex, node[propertyName]));
+                        this.insert(new anim.NumberKeyframe(this.frameIndex, node[this.propertyName]));
                     }
                 }
             };
-            TrackProperty.prototype.updateNode = function (node, propertyName) {
-                var type = this.type;
+            TrackProperty.prototype.updateNode = function (node) {
                 if (this.type == TrackPropertyType.VECTOR) {
                     var x;
                     var y;
@@ -151,8 +153,8 @@ var app;
                         x = next.x;
                         y = next.y;
                     }
-                    node[propertyName + 'X'] = x;
-                    node[propertyName + 'Y'] = y;
+                    node[this.propertyName + 'X'] = x;
+                    node[this.propertyName + 'Y'] = y;
                 }
                 else if (this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE) {
                     var value;
@@ -177,7 +179,7 @@ var app;
                     else if (next) {
                         value = next.value;
                     }
-                    node[propertyName] = value;
+                    node[this.propertyName] = value;
                 }
             };
             TrackProperty.prototype.insert = function (key) {

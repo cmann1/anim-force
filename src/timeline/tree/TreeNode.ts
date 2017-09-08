@@ -4,7 +4,7 @@ namespace app.timeline.tree
 	import Node = app.model.Node;
 	import Model = app.model.Model;
 	import Key = KeyCodes.Key;
-	import PropertyChangeEvent = events.PropertyChangeEvent;
+	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
 	export class TreeNode
 	{

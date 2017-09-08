@@ -1,8 +1,9 @@
-namespace events
+namespace app.model.events
 {
 
 	import Node = app.model.Node;
 	import ContainerNode = app.model.ContainerNode;
+	import Event = app.events.Event;
 
 	export class StructureChangeEvent extends Event
 	{

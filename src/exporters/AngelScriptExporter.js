@@ -107,4 +107,4 @@ var app;
         exporters.AngelScriptExporter = AngelScriptExporter;
     })(exporters = app.exporters || (app.exporters = {}));
 })(app || (app = {}));
-//# sourceMappingURL=AngelScript.js.map
+//# sourceMappingURL=AngelScriptExporter.js.map

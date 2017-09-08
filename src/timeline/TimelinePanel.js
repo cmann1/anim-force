@@ -11,8 +11,8 @@ var app;
             }
             TimelinePanel.prototype.init = function () {
                 this.tree = new TimelineTree('timeline-tree', this.model);
-                this.viewport = new timeline.TimelineViewport('timeline', this.model);
-                new Splitter(this.tree.getContainer(), this.viewport.getContainer(), 1 /* HORIZONTAL */, 350, 0 /* FIRST */, 'timeline-tree');
+                this.viewport = new timeline.TimelineViewport('timeline', this.model, this.tree);
+                new Splitter(this.tree.getContainer(), $('#timeline-container'), 1 /* HORIZONTAL */, 350, 0 /* FIRST */, 'timeline-tree');
             };
             TimelinePanel.prototype.getContainer = function () {
                 return this.$container;

@@ -19,6 +19,7 @@ div#timeline-tree{
 }
 
 div#timeline-tree-container{
+	display: flex;
 	flex-grow: 1;
 	flex-shrink: 1;
 	overflow: auto;
@@ -54,9 +55,9 @@ div#timeline-tree-toolbar{
 		height: 29px;
 		line-height: 29px;
 		padding: 0 10px;
-		border-bottom: 1px solid #DCDCDC;
+		border-bottom: 1px solid $item-border-colour;
 		box-sizing: border-box;
-		background: #FBFBFB;
+		background: $item-bg;
 		display: flex;
 		align-items: center;
 	}
@@ -136,5 +137,22 @@ div#timeline-tree-toolbar{
 	&:hover > .children:before{
 		border-color: #703535;
 		//border-color: #355770;
+	}
+
+	&.model{
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+
+		& > .item{
+			flex-shrink: 0;
+		}
+		& > .children{
+			flex-grow: 1;
+			overflow: auto;
+		}
+		& > .children:before{
+			content: normal;
+		}
 	}
 }

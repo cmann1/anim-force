@@ -1,7 +1,7 @@
 namespace app.anim
 {
 
-	import PropertyChangeEvent = events.PropertyChangeEvent;
+	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 	import Node = app.model.Node;
 	import Bone = app.model.Bone;
 
@@ -14,8 +14,8 @@ namespace app.anim
 		{
 			super(animation, node);
 
-			this.properties['length'] = new TrackProperty(this, TrackPropertyType.NUMBER);
-			this.properties['stretchY'] = new TrackProperty(this, TrackPropertyType.NUMBER);
+			this.addProperty('length', TrackPropertyType.NUMBER);
+			this.addProperty('stretchY', TrackPropertyType.NUMBER);
 		}
 
 	}

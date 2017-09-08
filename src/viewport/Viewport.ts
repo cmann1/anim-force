@@ -5,16 +5,16 @@ namespace app.viewport
 	import Sprite = app.model.Sprite;
 	import Model = app.model.Model;
 	import Bone = app.model.Bone;
-	import SelectionEvent = events.SelectionEvent;
-	import StructureChangeEvent = events.StructureChangeEvent;
+	import SelectionEvent = app.model.events.SelectionEvent;
+	import StructureChangeEvent = app.model.events.StructureChangeEvent;
 	import Node = app.model.Node;
 	import AngelScriptExporter = app.exporters.AngelScriptExporter;
 
 	export class Viewport extends app.Canvas
 	{
-		protected scales = [0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16, 32];
+		protected scales = [0.1, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 4, 6, 8, 12, 16, 24, 32];
 		protected scale:number = 1;
-		protected scaleIndex:number = 3;
+		protected scaleIndex:number = 9;
 		protected cameraX:number = 0;
 		protected cameraY:number = 0;
 
@@ -393,6 +393,8 @@ namespace app.viewport
 
 				sprite3 = new Sprite(spriteAsset3, 0, 0);
 				sprite3.rotation = Math.PI * 0.25;
+				sprite3.offsetX = 50;
+				sprite3.offsetY = 50;
 				bone.addChild(sprite3);
 
 				bone2 = new Bone();
@@ -402,8 +404,24 @@ namespace app.viewport
 
 				sprite.offsetY = bone.length / 2;
 				sprite2.offsetY = bone2.length / 2;
-				sprite3.offsetX = 50;
+
+				sprite3 = new Sprite(spriteAsset3, 0, 0);
+				sprite3.rotation = -Math.PI * 0.25;
+				sprite3.offsetX = -50;
 				sprite3.offsetY = 50;
+				bone.addChild(sprite3);
+
+				sprite3 = new Sprite(spriteAsset3, 0, 0);
+				sprite3.rotation = -Math.PI * 0.5;
+				sprite3.offsetX = 0;
+				sprite3.offsetY = 150;
+				bone.addChild(sprite3);
+
+				sprite3 = new Sprite(spriteAsset2, 0, 0);
+				sprite3.rotation = -Math.PI * 0.5;
+				sprite3.offsetX = 0;
+				sprite3.offsetY = -150;
+				bone.addChild(sprite3);
 
 				this.model.bindPose.forceKeyframe();
 			}
