@@ -16,6 +16,7 @@ var app;
         var Sprite = app.model.Sprite;
         var Bone = app.model.Bone;
         var AngelScriptExporter = app.exporters.AngelScriptExporter;
+        var EditMode = app.model.EditMode;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId, model) {
@@ -66,6 +67,12 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
+                _this.onModelModeChange = function (model, event) {
+                    _this.mode = model.mode;
+                    if (_this.mode == EditMode.PLAYBACK) {
+                        _this.interaction.success = false;
+                    }
+                };
                 // TODO: REMOVE
                 _this.onSpritesSelect = function (spriteGroup, spriteName) {
                     var node = _this.model.getSelectedNode();
@@ -82,6 +89,7 @@ var app;
                 _this.model.bindPose.change.on(_this.onAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
+                model.modeChange.on(_this.onModelModeChange);
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$message = $('<div class="viewport-message"></div>');
@@ -90,6 +98,9 @@ var app;
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
+                if (this.mode == EditMode.PLAYBACK) {
+                    this.model.animateStep(deltaTime);
+                }
                 if (!this.requiresUpdate && document.activeElement != this.canvas)
                     return;
                 if (this.cameraVelX != 0 || this.cameraVelY != 0) {
@@ -275,14 +286,6 @@ var app;
                 else if (keyCode == Key.Subtract || keyCode == Key.Dash) {
                     this.zoom(-1);
                 }
-                else if (keyCode == Key.Delete) {
-                    if (!this.interaction.success) {
-                        var selectedNode = this.model.getSelectedNode();
-                        if (selectedNode) {
-                            selectedNode.parent.removeChild(selectedNode);
-                        }
-                    }
-                }
                 else if (keyCode == Key.Zero) {
                     app.Config.drawAABB = !app.Config.drawAABB;
                 }
@@ -327,21 +330,33 @@ var app;
                     bone.addChild(sprite3);
                     this.model.bindPose.forceKeyframe();
                 }
-                else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
-                    var node = this.model.getSelectedNode();
-                    if (node instanceof Sprite) {
-                        node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
-                        this.showMessage('Frame: ' + node.frame);
+                else if (this.mode == EditMode.EDIT) {
+                    if (keyCode == Key.Delete) {
+                        if (!this.interaction.success) {
+                            var selectedNode = this.model.getSelectedNode();
+                            if (selectedNode) {
+                                selectedNode.parent.removeChild(selectedNode);
+                            }
+                        }
                     }
-                }
-                else if (keyCode == Key.Enter) {
-                    app.main.showSpriteSelector(this.onSpritesSelect);
-                }
-                else if (keyCode == Key.E) {
-                    console.log((new AngelScriptExporter()).exportModel(this.model));
+                    else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
+                        var node = this.model.getSelectedNode();
+                        if (node instanceof Sprite) {
+                            node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+                            this.showMessage('Frame: ' + node.frame);
+                        }
+                    }
+                    else if (keyCode == Key.Enter) {
+                        app.main.showSpriteSelector(this.onSpritesSelect);
+                    }
+                    else if (keyCode == Key.E) {
+                        console.log((new AngelScriptExporter()).exportModel(this.model));
+                    }
                 }
             };
             Viewport.prototype.commonKey = function (event) {
+                if (this.mode == EditMode.PLAYBACK)
+                    return false;
                 return false;
             };
             Viewport.prototype.onKeyUp = function (event) {
@@ -349,13 +364,15 @@ var app;
             Viewport.prototype.onMouseDown = function (event) {
                 this.$canvas.focus();
                 if (event.button == 0) {
-                    this.interaction.success = false;
-                    if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction)) {
-                        this.interaction.node.setSelected(true);
-                        this.interaction.success = true;
-                    }
-                    else {
-                        this.model.setSelectedNode(null);
+                    if (this.mode != EditMode.PLAYBACK) {
+                        this.interaction.success = false;
+                        if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction)) {
+                            this.interaction.node.setSelected(true);
+                            this.interaction.success = true;
+                        }
+                        else {
+                            this.model.setSelectedNode(null);
+                        }
                     }
                 }
                 else if (event.button == 2) {
