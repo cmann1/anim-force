@@ -2,9 +2,6 @@
 // TODO: Timeline:
 // TODO: - Copy/paste frames
 // TODO: - Dragging keyframes + keyboard shortcuts
-// TODO: - Toolbar
-// TODO: - - Make play/pause one button
-// TODO: - - Focus timeline canvas after clicking a button
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
 // TODO: - - Replace stretch handle with length handle

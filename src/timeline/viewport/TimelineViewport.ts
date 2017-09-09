@@ -24,6 +24,9 @@ namespace app.timeline
 		private mode:EditMode;
 
 		private $toolbar:JQuery;
+		private $toolbarButtons:JQuery;
+		private $playButton:JQuery;
+		private $pauseButton:JQuery;
 		private $frameLabel:JQuery;
 
 		private scrollX:number = 0;
@@ -249,8 +252,12 @@ namespace app.timeline
 			this.$toolbar = this.$container.parent().find('#timeline-toolbar');
 			this.$frameLabel = this.$toolbar.find('.frame-label .value');
 
-			// this.$toolbar
-			// 	.on('click', 'i', this.onToolbarButtonClick)
+			this.$toolbarButtons = this.$toolbar.find('i');
+			this.$playButton = this.$toolbar.find('.btn-play');
+			this.$pauseButton = this.$toolbar.find('.btn-pause');
+
+			this.$toolbar
+				.on('click', 'i', this.onToolbarButtonClick);
 			// 	.on('mousewheel', this.onToolbarMouseWheel);
 			// this.$toolbar.find('.fa-plus').parent()
 			// 	.on('mouseenter', this.onToolbarAddHover)
@@ -265,11 +272,37 @@ namespace app.timeline
 			tippy(this.$toolbar.find('i').toArray());
 
 			this.updateFrameLabel();
+			this.updateToolbarButtons();
 		}
 
 		private updateFrameLabel()
 		{
 			this.$frameLabel.text((this.currentFrame + 1) + '/' + this.animation.getLength());
+		}
+
+		private updateToolbarButtons()
+		{
+			if(this.mode == EditMode.PLAYBACK)
+			{
+				this.$playButton.hide();
+				this.$pauseButton.show();
+			}
+			else
+			{
+				this.$playButton.show();
+				this.$pauseButton.hide();
+			}
+
+			if(this.mode == EditMode.ANIMATE)
+			{
+				this.$toolbarButtons.removeClass('disabled');
+			}
+			else
+			{
+				this.$toolbarButtons.addClass('disabled');
+				this.$playButton.removeClass('disabled');
+				this.$pauseButton.removeClass('disabled');
+			}
 		}
 
 		private setFrame(frame:number)
@@ -291,6 +324,34 @@ namespace app.timeline
 			}
 
 			this.requiresUpdate = true;
+		}
+
+		private togglePlayback()
+		{
+			if(this.mode == EditMode.ANIMATE)
+			{
+				this.model.mode = EditMode.PLAYBACK;
+			}
+			else if(this.mode == EditMode.PLAYBACK)
+			{
+				this.model.mode = EditMode.ANIMATE;
+			}
+		}
+
+		private prevFrame(shiftKey)
+		{
+			if(shiftKey)
+				this.animation.setPosition(this.animation.getPosition() - 5);
+			else
+				this.animation.gotoPrevFrame();
+		}
+
+		private nextFrame(shiftKey)
+		{
+			if(shiftKey)
+				this.animation.setPosition(this.animation.getPosition() + 5);
+			else
+				this.animation.gotoNextFrame();
 		}
 
 		/*
@@ -337,6 +398,7 @@ namespace app.timeline
 		private onModelModeChange = (model:Model, event:Event) =>
 		{
 			this.mode = model.mode;
+			this.updateToolbarButtons();
 		};
 
 		protected onTreeNodeUpdate = (node:TreeNode, event:Event) =>
@@ -348,6 +410,48 @@ namespace app.timeline
 		{
 			this.scrollY = event.scrollY;
 			this.requiresUpdate = true;
+		};
+
+		private onToolbarButtonClick = (event) =>
+		{
+			this.$canvas.focus();
+
+			var $btn = $(event.target);
+			if($btn.hasClass('disabled')) return;
+
+			const type = $btn.data('action');
+
+			if(type == 'play' || type == 'pause')
+			{
+				this.togglePlayback();
+			}
+
+			else if(type == 'prev-frame')
+			{
+				this.prevFrame(event.shiftKey);
+			}
+			else if(type == 'next-frame')
+			{
+				this.nextFrame(event.shiftKey);
+			}
+
+			else if(type == 'prev-keyframe')
+			{
+				this.animation.gotoPrevKeyframe();
+			}
+			else if(type == 'next-keyframe')
+			{
+				this.animation.gotoNextKeyframe();
+			}
+
+			else if(type == 'insert-keyframe')
+			{
+				this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+			}
+			else if(type == 'delete-keyframe')
+			{
+				this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+			}
 		};
 
 		protected onKeyDown(event)
@@ -383,16 +487,8 @@ namespace app.timeline
 				// Playback
 				if(keyCode == Key.ForwardSlash)
 				{
-					if(this.mode == EditMode.ANIMATE)
-					{
-						this.model.mode = EditMode.PLAYBACK;
-						return true;
-					}
-					else if(this.mode == EditMode.PLAYBACK)
-					{
-						this.model.mode = EditMode.ANIMATE;
-						return true;
-					}
+					this.togglePlayback();
+					return true;
 				}
 			}
 
@@ -401,20 +497,12 @@ namespace app.timeline
 				// Prev/Next frame
 				if(keyCode == Key.Comma)
 				{
-					if(event.shiftKey)
-						this.animation.setPosition(this.animation.getPosition() - 5);
-					else
-						this.animation.gotoPrevFrame();
-
+					this.prevFrame(event.shiftKey);
 					return true;
 				}
 				else if(keyCode == Key.Period)
 				{
-					if(event.shiftKey)
-						this.animation.setPosition(this.animation.getPosition() + 5);
-					else
-						this.animation.gotoNextFrame();
-
+					this.nextFrame(event.shiftKey);
 					return true;
 				}
 
