@@ -119,6 +119,8 @@ div#timeline-tree-toolbar {
 .model-node .item label, .model-node .item input {
   flex-grow: 1;
   flex-shrink: 1; }
+.model-node .item input {
+  user-select: initial !important; }
 .model-node.model > .item .icon:before {
   content: "\f1ae"; }
 .model-node.sprite > .item .icon:before {
@@ -181,7 +183,8 @@ canvas#timeline {
   background-color: #ECECEC;
   border-top: 1px solid #C1C1C1;
   display: flex;
-  padding: 5px; }
+  padding: 5px;
+  user-select: none; }
   #timeline-toolbar .frame-label {
     vertical-align: middle;
     padding-top: 3px;

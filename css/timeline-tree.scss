@@ -94,6 +94,9 @@ div#timeline-tree-toolbar{
 		flex-grow: 1;
 		flex-shrink: 1;
 	}
+	.item input{
+		user-select: initial !important;
+	}
 
 	&.model > .item .icon:before{
 		content: "\f1ae"; // child

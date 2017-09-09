@@ -1,5 +1,6 @@
 /*
-// TODO: Timeline tree edit names focus not working, f2 not working
+// TODO: Tree: Shift tab not working correctly
+// TODO: Hiding node controls
 // TODO: Timeline:
 // TODO: - Copy/Cut/paste frames
 // TODO: - Dragging keyframes + keyboard shortcuts
@@ -19,7 +20,6 @@
 // TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
 // TODO: Allow sprite frames to be animated
 // TODO: Animation events
-// TODO: Hiding node controls
 // TODO: Sprite Selector:
 // TODO: - Use different modal script
 // TODO: - Improve all-round

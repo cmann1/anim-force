@@ -25,10 +25,12 @@ var app;
                         return false;
                     };
                     this.onMouseDown = function (event) {
+                        if (TreeNode.renameNode == _this)
+                            return;
                         _this.node.setSelected(true);
                         _this.tree.waitForDrag(_this, event);
-                        event.preventDefault();
-                        return false;
+                        // event.preventDefault();
+                        // return false;
                     };
                     this.onMouseEnter = function (event) {
                         _this.node.setHighlighted(true);

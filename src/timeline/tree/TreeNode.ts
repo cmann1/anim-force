@@ -151,12 +151,13 @@ namespace app.timeline.tree
 
 		protected onMouseDown = (event) =>
 		{
-			this.node.setSelected(true);
+			if(TreeNode.renameNode == this) return;
 
+			this.node.setSelected(true);
 			this.tree.waitForDrag(this, event);
 
-			event.preventDefault();
-			return false;
+			// event.preventDefault();
+			// return false;
 		};
 
 		protected onMouseEnter = (event) =>
