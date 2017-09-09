@@ -1,7 +1,7 @@
 /*
-// TODO: Hiding node controls
+// TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
+// TODO: ? Cubic interpolation
 // TODO: Timeline:
-// TODO: - Copy/Cut/paste frames
 // TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
@@ -16,9 +16,10 @@
 // TODO: Show/hide controls
 // TODO: Loading sprites
 // TODO: Export to AngelScript
-// TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
 // TODO: Allow sprite frames to be animated
 // TODO: Animation events
+// TODO: Some sort of options window/popup:
+// TODO: - Show/Hide controls
 // TODO: Sprite Selector:
 // TODO: - Use different modal script
 // TODO: - Improve all-round

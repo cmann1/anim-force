@@ -336,10 +336,10 @@ namespace app.viewport
 		{
 			const type = event.type;
 
-			if(type == 'position')
-			{
-				this.showMessage('Frame: ' + (this.model.getActiveAnimation().getPosition() + 1));
-			}
+			// if(type == 'position')
+			// {
+			// 	this.showMessage('Frame: ' + (this.model.getActiveAnimation().getPosition() + 1));
+			// }
 
 			this.requiresUpdate = true;
 		};
@@ -496,7 +496,14 @@ namespace app.viewport
 
 		public commonKey(event):boolean
 		{
-			if(this.mode == EditMode.PLAYBACK) return false;
+			const keyCode = event.keyCode;
+
+			// if(this.mode == EditMode.PLAYBACK) return false;
+
+			if(keyCode == Key.H)
+			{
+				this.model.showControls = !this.model.showControls;
+			}
 
 			return false;
 		}

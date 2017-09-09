@@ -35,6 +35,7 @@ var app;
                 _this.bindPose = new app.anim.Animation('BindPose', _this);
                 _this.animations = {};
                 _this.activeAnimation = null;
+                _this.showControls = true;
                 /// Events
                 _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
@@ -93,14 +94,16 @@ var app;
                 }
                 ctx.restore();
                 ctx.save();
-                for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
-                    var child = _d[_c];
-                    if (child != this.selectedNode) {
-                        child.drawControls(ctx, worldScale, viewport);
+                if (this.showControls) {
+                    for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
+                        var child = _d[_c];
+                        if (child != this.selectedNode && child.worldAABB.intersects(viewport)) {
+                            child.drawControls(ctx, worldScale, viewport);
+                        }
                     }
-                }
-                if (this.selectedNode) {
-                    this.selectedNode.drawControls(ctx, worldScale, viewport);
+                    if (this.selectedNode && this.selectedNode.worldAABB.intersects(viewport)) {
+                        this.selectedNode.drawControls(ctx, worldScale, viewport);
+                    }
                 }
                 if (app.Config.drawAABB) {
                     // this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);

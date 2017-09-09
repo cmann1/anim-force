@@ -64,13 +64,15 @@ var app;
             };
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
-                // Do it in reverse order so that handles in front are checked first
-                for (var i = this.handles.length - 1; i >= 0; i--) {
-                    var handle = this.handles[i];
-                    if (!handle.active)
-                        continue;
-                    if (handle.hitTest(x, y, worldScaleFactor, result)) {
-                        return true;
+                if (this.model.showControls) {
+                    // Do it in reverse order so that handles in front are checked first
+                    for (var i = this.handles.length - 1; i >= 0; i--) {
+                        var handle = this.handles[i];
+                        if (!handle.active)
+                            continue;
+                        if (handle.hitTest(x, y, worldScaleFactor, result)) {
+                            return true;
+                        }
                     }
                 }
                 return false;

@@ -20,7 +20,7 @@ namespace app.model
 		private selectedNode:Node = null;
 		private highlightedNode:Node = null;
 
-		protected drawList:DrawList = new DrawList();
+		private drawList:DrawList = new DrawList();
 
 		private _mode:EditMode = EditMode.ANIMATE;
 
@@ -28,6 +28,8 @@ namespace app.model
 		public bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this);
 		private animations:{[id:string]:app.anim.Animation} = {};
 		private activeAnimation:app.anim.Animation = null;
+
+		public showControls = true;
 
 		/// Events
 
@@ -93,17 +95,20 @@ namespace app.model
 
 			ctx.save();
 
-			for(var child of this.children)
+			if(this.showControls)
 			{
-				if(child != this.selectedNode)
+				for(var child of this.children)
 				{
-					child.drawControls(ctx, worldScale, viewport);
+					if(child != this.selectedNode && child.worldAABB.intersects(viewport))
+					{
+						child.drawControls(ctx, worldScale, viewport);
+					}
 				}
-			}
 
-			if(this.selectedNode)
-			{
-				this.selectedNode.drawControls(ctx, worldScale, viewport);
+				if(this.selectedNode && this.selectedNode.worldAABB.intersects(viewport))
+				{
+					this.selectedNode.drawControls(ctx, worldScale, viewport);
+				}
 			}
 
 			if(Config.drawAABB)

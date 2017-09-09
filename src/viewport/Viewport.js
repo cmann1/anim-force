@@ -56,9 +56,10 @@ var app;
                  */
                 _this.onAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'position') {
-                        _this.showMessage('Frame: ' + (_this.model.getActiveAnimation().getPosition() + 1));
-                    }
+                    // if(type == 'position')
+                    // {
+                    // 	this.showMessage('Frame: ' + (this.model.getActiveAnimation().getPosition() + 1));
+                    // }
                     _this.requiresUpdate = true;
                 };
                 _this.onModelSelectionChange = function (model, event) {
@@ -355,8 +356,11 @@ var app;
                 }
             };
             Viewport.prototype.commonKey = function (event) {
-                if (this.mode == EditMode.PLAYBACK)
-                    return false;
+                var keyCode = event.keyCode;
+                // if(this.mode == EditMode.PLAYBACK) return false;
+                if (keyCode == Key.H) {
+                    this.model.showControls = !this.model.showControls;
+                }
                 return false;
             };
             Viewport.prototype.onKeyUp = function (event) {

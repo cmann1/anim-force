@@ -98,15 +98,18 @@ namespace app.model
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			// Do it in reverse order so that handles in front are checked first
-			for(var i = this.handles.length - 1; i >= 0; i--)
+			if(this.model.showControls)
 			{
-				var handle = this.handles[i];
-				if(!handle.active) continue;
-
-				if(handle.hitTest(x, y, worldScaleFactor, result))
+				// Do it in reverse order so that handles in front are checked first
+				for(var i = this.handles.length - 1; i >= 0; i--)
 				{
-					return true;
+					var handle = this.handles[i];
+					if(!handle.active) continue;
+
+					if(handle.hitTest(x, y, worldScaleFactor, result))
+					{
+						return true;
+					}
 				}
 			}
 
