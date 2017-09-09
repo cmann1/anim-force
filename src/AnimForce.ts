@@ -1,6 +1,4 @@
 /*
-// TODO: Updating keyframes when reparenting nodes
-// TODO: ? Cubic interpolation
 // TODO: Timeline:
 // TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: Separate edit and animate modes

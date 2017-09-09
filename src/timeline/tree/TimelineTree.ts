@@ -217,7 +217,7 @@ namespace app.timeline.tree
 				else
 				{
 					const next:TreeNode = this.dragNode.$element.next().data('tree-node');
-					const parent = this.dragNode.$element.parent().closest('.model-node').data('tree-node');
+					const parent:ContainerTreeNode = this.dragNode.$element.parent().closest('.model-node').data('tree-node');
 
 					if(parent)
 					{

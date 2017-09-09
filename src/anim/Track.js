@@ -31,6 +31,14 @@ var app;
                     this.properties[propertyName].updateFrame(this.node, frameIndex);
                 }
             };
+            Track.prototype.updateKeyframe = function (frameIndex) {
+                if (frameIndex === void 0) { frameIndex = -1; }
+                for (var propertyName in this.properties) {
+                    var property = this.properties[propertyName];
+                    property.updateFrame(this.node, frameIndex, false);
+                    property.updateNode(this.node, this.interpolation);
+                }
+            };
             Track.prototype.gotoPrevFrame = function () {
                 for (var propertyName in this.properties) {
                     var property = this.properties[propertyName];
@@ -267,23 +275,28 @@ var app;
                 }
                 return false;
             };
-            TrackProperty.prototype.updateFrame = function (node, frameIndex) {
+            TrackProperty.prototype.updateFrame = function (node, frameIndex, createKeyframe) {
                 if (frameIndex === void 0) { frameIndex = -1; }
+                if (createKeyframe === void 0) { createKeyframe = true; }
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 var frame = this.frameList[frameIndex];
                 if (this.type == TrackPropertyType.VECTOR) {
-                    if (!frame) {
+                    if (!frame && createKeyframe) {
                         this.insert(frame = new anim.VectorKeyframe(frameIndex));
                     }
-                    frame.x = node[this.propertyName + 'X'];
-                    frame.y = node[this.propertyName + 'Y'];
+                    if (frame) {
+                        frame.x = node[this.propertyName + 'X'];
+                        frame.y = node[this.propertyName + 'Y'];
+                    }
                 }
                 else if (this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE) {
-                    if (!frame) {
+                    if (!frame && createKeyframe) {
                         this.insert(frame = new anim.NumberKeyframe(frameIndex));
                     }
-                    frame.value = node[this.propertyName];
+                    if (frame) {
+                        frame.value = node[this.propertyName];
+                    }
                 }
             };
             TrackProperty.prototype.updateNode = function (node, interpolation, atCurrent, prevKey, currentKey, nextKey) {
@@ -439,10 +452,12 @@ var app;
                 }
                 else if (this.prev && this.next) {
                     if (frameIndex > this.prev.frameIndex && frameIndex < this.next.frameIndex) {
-                        if (frameIndex > this.frameIndex)
+                        if (frameIndex > this.frameIndex) {
                             this.next = key;
-                        else
+                        }
+                        else {
                             this.prev = key;
+                        }
                     }
                 }
                 else if (this.prev) {

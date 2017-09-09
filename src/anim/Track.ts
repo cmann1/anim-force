@@ -49,6 +49,16 @@ namespace app.anim
 			}
 		}
 
+		public updateKeyframe(frameIndex = -1)
+		{
+			for(var propertyName in this.properties)
+			{
+				const property = this.properties[propertyName];
+				property.updateFrame(this.node, frameIndex, false);
+				property.updateNode(this.node, this.interpolation);
+			}
+		}
+
 		public gotoPrevFrame()
 		{
 			for(var propertyName in this.properties)
@@ -374,29 +384,35 @@ namespace app.anim
 			return false;
 		}
 
-		public updateFrame(node:Node|any, frameIndex = -1)
+		public updateFrame(node:Node|any, frameIndex = -1, createKeyframe = true)
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 			var frame:Keyframe = this.frameList[frameIndex];
 
 			if(this.type == TrackPropertyType.VECTOR)
 			{
-				if(!frame)
+				if(!frame && createKeyframe)
 				{
 					this.insert(frame = new VectorKeyframe(frameIndex));
 				}
 
-				(<VectorKeyframe> frame).x = node[this.propertyName + 'X'];
-				(<VectorKeyframe> frame).y = node[this.propertyName + 'Y'];
+				if(frame)
+				{
+					(<VectorKeyframe> frame).x = node[this.propertyName + 'X'];
+					(<VectorKeyframe> frame).y = node[this.propertyName + 'Y'];
+				}
 			}
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
 			{
-				if(!frame)
+				if(!frame && createKeyframe)
 				{
 					this.insert(frame = new NumberKeyframe(frameIndex));
 				}
 
-				(<NumberKeyframe> frame).value = node[this.propertyName];
+				if(frame)
+				{
+					(<NumberKeyframe> frame).value = node[this.propertyName];
+				}
 			}
 		}
 
@@ -604,9 +620,13 @@ namespace app.anim
 				if(frameIndex > this.prev.frameIndex && frameIndex < this.next.frameIndex)
 				{
 					if(frameIndex > this.frameIndex)
+					{
 						this.next = key;
+					}
 					else
+					{
 						this.prev = key;
+					}
 				}
 			}
 			else if(this.prev)

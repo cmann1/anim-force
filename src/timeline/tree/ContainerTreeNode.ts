@@ -7,6 +7,8 @@ namespace app.timeline.tree
 	export class ContainerTreeNode extends TreeNode
 	{
 
+		public node:ContainerNode;
+
 		public $children:JQuery = null;
 		public $foldIcon:JQuery = null;
 

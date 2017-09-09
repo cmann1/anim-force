@@ -64,7 +64,7 @@ namespace app.anim
 			}
 		}
 
-		private createTrack(target:Node)
+		private createTrack(target:Node):Track
 		{
 			var track:Track = null;
 
@@ -309,6 +309,11 @@ namespace app.anim
 				}
 			}
 
+			if(frameCount && cut)
+			{
+				this.dispatchChange('cut');
+			}
+
 			return frameCount;
 		}
 
@@ -328,6 +333,11 @@ namespace app.anim
 					track.pasteKeyframes(frameData[nodeId], frameIndex);
 					frameCount++;
 				}
+			}
+
+			if(frameCount)
+			{
+				this.dispatchChange('paste');
 			}
 
 			return frameCount;
@@ -383,9 +393,15 @@ namespace app.anim
 			}
 			else if(type == 'addChild')
 			{
-				if(!this.tracks[target.id])
+				const track = this.tracks[target.id];
+
+				if(!track)
 				{
 					this.tracks[target.id] = this.createTrack(target);
+				}
+				else
+				{
+					track.updateKeyframe();
 				}
 			}
 			else if(type == 'removeChild')

@@ -39,8 +39,12 @@ var app;
                         _this.tracks = {};
                     }
                     else if (type == 'addChild') {
-                        if (!_this.tracks[target.id]) {
+                        var track = _this.tracks[target.id];
+                        if (!track) {
                             _this.tracks[target.id] = _this.createTrack(target);
+                        }
+                        else {
+                            track.updateKeyframe();
                         }
                     }
                     else if (type == 'removeChild') {
@@ -236,6 +240,9 @@ var app;
                         frameCount++;
                     }
                 }
+                if (frameCount && cut) {
+                    this.dispatchChange('cut');
+                }
                 return frameCount;
             };
             Animation.prototype.pasteKeyframes = function (frameData, frameIndex) {
@@ -251,6 +258,9 @@ var app;
                         track.pasteKeyframes(frameData[nodeId], frameIndex);
                         frameCount++;
                     }
+                }
+                if (frameCount) {
+                    this.dispatchChange('paste');
                 }
                 return frameCount;
             };
