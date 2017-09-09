@@ -1,5 +1,4 @@
 /*
-// TODO: Tree: Shift tab not working correctly
 // TODO: Hiding node controls
 // TODO: Timeline:
 // TODO: - Copy/Cut/paste frames

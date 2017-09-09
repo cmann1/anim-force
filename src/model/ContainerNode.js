@@ -107,9 +107,13 @@ var app;
                 if (node.parent != this)
                     return this;
                 var index = this.children.indexOf(node) - 1;
-                return index < 0
-                    ? this
-                    : this.children[index];
+                if (index < 0)
+                    return this;
+                var previous = this.children[index];
+                if (previous instanceof ContainerNode) {
+                    return previous.childCount ? previous.children[previous.childCount - 1] : previous;
+                }
+                return previous;
             };
             ContainerNode.prototype.next = function (node) {
                 if (node === void 0) { node = null; }
