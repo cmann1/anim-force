@@ -111,15 +111,22 @@ var app;
                 ctx.rect(0, nodeHeight, this.width, this.height - nodeHeight);
                 ctx.clip();
                 ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
-                var nodes = this.model.children;
-                var nodeCount = nodes.length;
-                var i = 0;
+                var nodes = this.model.children.slice();
+                var i = -1;
+                for (var j = this.model.childCount - 1; j >= 0; j--)
+                    nodes[++i] = this.model.children[i];
                 var y = 0;
-                while (i < nodeCount) {
-                    var node = nodes[i];
+                while (i >= 0) {
+                    var node = nodes[i--];
                     if (node instanceof ContainerNode && !node.collapsed) {
-                        nodes = nodes.concat(node.children);
-                        nodeCount += node.childCount;
+                        for (var j = node.childCount - 1; j >= 0; j--)
+                            nodes[++i] = node.children[j];
+                        // for(var child of node.children)
+                        // {
+                        // 	nodes[++i] = child;
+                        // }
+                        // nodes = nodes.concat(node.children);
+                        // i += node.childCount;
                     }
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
@@ -163,7 +170,6 @@ var app;
                         }
                     }
                     y += nodeHeight;
-                    i++;
                 }
                 var currentFrameX = currentFrame * frameWidth;
                 if (currentFrameX <= right && currentFrameX + frameWidth >= left) {

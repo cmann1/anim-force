@@ -106,19 +106,24 @@ namespace app.timeline
 
 			ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
 
-			var nodes:Node[] = this.model.children;
-			var nodeCount = nodes.length;
-			var i = 0;
+			var nodes:Node[] = this.model.children.slice();
+			var i = -1;
+			for(var j = this.model.childCount - 1; j >= 0; j--) nodes[++i] = this.model.children[i];
 
 			var y = 0;
-			while(i < nodeCount)
+			while(i >= 0)
 			{
-				var node:Node = nodes[i];
+				var node:Node = nodes[i--];
 
 				if(node instanceof ContainerNode && !node.collapsed)
 				{
-					nodes = nodes.concat(node.children);
-					nodeCount += node.childCount;
+					for(var j = node.childCount - 1; j >= 0; j--) nodes[++i] = node.children[j];
+					// for(var child of node.children)
+					// {
+					// 	nodes[++i] = child;
+					// }
+					// nodes = nodes.concat(node.children);
+					// i += node.childCount;
 				}
 
 				if(y <= bottom && y + nodeHeight >= top)
@@ -173,7 +178,6 @@ namespace app.timeline
 				}
 
 				y += nodeHeight;
-				i++;
 			}
 
 			const currentFrameX = currentFrame * frameWidth;
@@ -393,7 +397,6 @@ namespace app.timeline
 			}
 
 			// Keyframes
-
 			else if(keyCode == Key.X)
 			{
 				this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
