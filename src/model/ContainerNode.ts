@@ -82,15 +82,26 @@ namespace app.model
 					child.offsetY = local.y / this.stretchY;
 
 					child.parent.removeChild(child, false);
-					this.childCount++;
 				}
 			}
 
 			child.parent = this;
 			child.setModel(this.model);
 			this.children.splice(this.children.indexOf(sibling), 0, child);
+			this.childCount = this.children.length;
 
 			this.onStructureChange('addChild', this, child, this.children.indexOf(child), sibling);
+
+			return child;
+		}
+
+		public addChildAfter(child:Node, sibling:Node):Node
+		{
+			if(!sibling) return this.addChild(child);
+			if(sibling.parent != this) return child;
+			var index = this.children.indexOf(sibling);
+
+			this.addChildBefore(child, this.children[index + 1]);
 
 			return child;
 		}

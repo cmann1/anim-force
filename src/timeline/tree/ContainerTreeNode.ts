@@ -92,6 +92,13 @@ namespace app.timeline.tree
 			return node;
 		}
 
+		public addNodeAfter(node:Node, sibling:TreeNode):Node
+		{
+			(<ContainerNode> this.node).addChildAfter(node, sibling.node);
+
+			return node;
+		}
+
 		public handleDragOver(treeNode:TreeNode, x:number, y:number, recurse:boolean=true, forceLast:boolean=false):boolean
 		{
 			if(treeNode == this) return false;

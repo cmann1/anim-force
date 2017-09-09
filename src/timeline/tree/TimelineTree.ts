@@ -104,20 +104,20 @@ namespace app.timeline.tree
 		{
 			const isRoot = this.selectedNode == this.rootNode;
 			const allowChildren = this.selectedNode.node.canHaveChildren;
-			this.$toolbarAddBtn.toggleClass('disabled', !allowChildren);
-			this.$toolbarAddBoneBtn.toggleClass('disabled', !allowChildren);
-			this.$toolbarAddSpriteBtn.toggleClass('disabled', !allowChildren);
+			this.$toolbarAddBtn.toggleClass('disabled', false);
+			this.$toolbarAddBoneBtn.toggleClass('disabled', false);
+			this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
 			this.$toolbarAddDeleteBtn.toggleClass('disabled', isRoot);
 
-			if(!allowChildren)
-			{
-				this.showAddMenu(false);
-			}
+			// if(!allowChildren)
+			// {
+			// 	this.showAddMenu(false);
+			// }
 		}
 		
 		private showAddMenu(show:boolean)
 		{
-			show = show && this.selectedNode.node.canHaveChildren;
+			// show = show && this.selectedNode.node.canHaveChildren;
 			this.$toolbarAddMenu.stop(true).animate({width:show  ? 'show' : 'hide'}, 250);
 		}
 
@@ -362,21 +362,30 @@ namespace app.timeline.tree
 			else if(type == 'addChild')
 			{
 				// Reparent an existing node
-				if(this.nodeMap[target.id])
+				if(targetTree)
 				{
 					if(other)
 					{
-						parentTree.addChildBefore(this.nodeMap[target.id], this.nodeMap[other.id]);
+						parentTree.addChildBefore(targetTree, this.nodeMap[other.id]);
 					}
 					else
 					{
-						parentTree.addChild(this.nodeMap[target.id]);
+						parentTree.addChild(targetTree);
 					}
 				}
 				// Add a new node
 				else
 				{
-					parentTree.addChild(this.nodeMap[target.id] = this.fromNode(target));
+					var newTree = this.nodeMap[target.id] = this.fromNode(target);
+
+					if(other)
+					{
+						parentTree.addChildBefore(newTree, this.nodeMap[other.id]);
+					}
+					else
+					{
+						parentTree.addChild(newTree);
+					}
 				}
 			}
 			else if(type == 'removeChild')
@@ -455,19 +464,24 @@ namespace app.timeline.tree
 
 			if(type.substr(0, 3) == 'Add')
 			{
-				if(this.selectedNode instanceof ContainerTreeNode)
+				let newNode:Node;
+
+				if(type == 'Add Bone')
+					newNode = new Bone();
+				else if(type == 'Add Sprite')
+					newNode = new Sprite(null);
+
+				if(newNode)
 				{
-					let newNode:Node;
+					if(this.selectedNode instanceof ContainerTreeNode && (!event.ctrlKey || this.selectedNode == this.rootNode))
+						this.selectedNode.addNode(newNode);
+					else
+						this.selectedNode.parent.addNodeAfter(newNode, this.selectedNode);
+				}
 
-					if(type == 'Add Bone')
-						newNode = this.selectedNode.addNode(new Bone());
-					else if(type == 'Add Sprite')
-						newNode = this.selectedNode.addNode(new Sprite(null));
-
-					if(newNode && !event.shiftKey)
-					{
-						newNode.setSelected(true);
-					}
+				if(newNode && !event.shiftKey)
+				{
+					newNode.setSelected(true);
 				}
 			}
 			else if(type == 'Delete')

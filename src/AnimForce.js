@@ -1,5 +1,5 @@
 /*
-// TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
+// TODO: Updating keyframes when reparenting nodes
 // TODO: ? Cubic interpolation
 // TODO: Timeline:
 // TODO: - Dragging keyframes + keyboard shortcuts

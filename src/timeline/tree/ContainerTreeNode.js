@@ -93,6 +93,10 @@ var app;
                     this.node.addChild(node);
                     return node;
                 };
+                ContainerTreeNode.prototype.addNodeAfter = function (node, sibling) {
+                    this.node.addChildAfter(node, sibling.node);
+                    return node;
+                };
                 ContainerTreeNode.prototype.handleDragOver = function (treeNode, x, y, recurse, forceLast) {
                     if (recurse === void 0) { recurse = true; }
                     if (forceLast === void 0) { forceLast = false; }

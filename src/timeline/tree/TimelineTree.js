@@ -81,16 +81,22 @@ var app;
                         }
                         else if (type == 'addChild') {
                             // Reparent an existing node
-                            if (_this.nodeMap[target.id]) {
+                            if (targetTree) {
                                 if (other) {
-                                    parentTree.addChildBefore(_this.nodeMap[target.id], _this.nodeMap[other.id]);
+                                    parentTree.addChildBefore(targetTree, _this.nodeMap[other.id]);
                                 }
                                 else {
-                                    parentTree.addChild(_this.nodeMap[target.id]);
+                                    parentTree.addChild(targetTree);
                                 }
                             }
                             else {
-                                parentTree.addChild(_this.nodeMap[target.id] = _this.fromNode(target));
+                                var newTree = _this.nodeMap[target.id] = _this.fromNode(target);
+                                if (other) {
+                                    parentTree.addChildBefore(newTree, _this.nodeMap[other.id]);
+                                }
+                                else {
+                                    parentTree.addChild(newTree);
+                                }
                             }
                         }
                         else if (type == 'removeChild') {
@@ -144,15 +150,19 @@ var app;
                             return;
                         var type = $btn.prop('title') != '' ? $btn.prop('title') : $btn.data('original-title');
                         if (type.substr(0, 3) == 'Add') {
-                            if (_this.selectedNode instanceof tree.ContainerTreeNode) {
-                                var newNode = void 0;
-                                if (type == 'Add Bone')
-                                    newNode = _this.selectedNode.addNode(new Bone());
-                                else if (type == 'Add Sprite')
-                                    newNode = _this.selectedNode.addNode(new Sprite(null));
-                                if (newNode && !event.shiftKey) {
-                                    newNode.setSelected(true);
-                                }
+                            var newNode = void 0;
+                            if (type == 'Add Bone')
+                                newNode = new Bone();
+                            else if (type == 'Add Sprite')
+                                newNode = new Sprite(null);
+                            if (newNode) {
+                                if (_this.selectedNode instanceof tree.ContainerTreeNode && (!event.ctrlKey || _this.selectedNode == _this.rootNode))
+                                    _this.selectedNode.addNode(newNode);
+                                else
+                                    _this.selectedNode.parent.addNodeAfter(newNode, _this.selectedNode);
+                            }
+                            if (newNode && !event.shiftKey) {
+                                newNode.setSelected(true);
                             }
                         }
                         else if (type == 'Delete') {
@@ -207,16 +217,17 @@ var app;
                 TimelineTree.prototype.updateToolbar = function () {
                     var isRoot = this.selectedNode == this.rootNode;
                     var allowChildren = this.selectedNode.node.canHaveChildren;
-                    this.$toolbarAddBtn.toggleClass('disabled', !allowChildren);
-                    this.$toolbarAddBoneBtn.toggleClass('disabled', !allowChildren);
-                    this.$toolbarAddSpriteBtn.toggleClass('disabled', !allowChildren);
+                    this.$toolbarAddBtn.toggleClass('disabled', false);
+                    this.$toolbarAddBoneBtn.toggleClass('disabled', false);
+                    this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
                     this.$toolbarAddDeleteBtn.toggleClass('disabled', isRoot);
-                    if (!allowChildren) {
-                        this.showAddMenu(false);
-                    }
+                    // if(!allowChildren)
+                    // {
+                    // 	this.showAddMenu(false);
+                    // }
                 };
                 TimelineTree.prototype.showAddMenu = function (show) {
-                    show = show && this.selectedNode.node.canHaveChildren;
+                    // show = show && this.selectedNode.node.canHaveChildren;
                     this.$toolbarAddMenu.stop(true).animate({ width: show ? 'show' : 'hide' }, 250);
                 };
                 TimelineTree.prototype.updateHighlight = function (target) {
