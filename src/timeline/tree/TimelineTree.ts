@@ -236,6 +236,18 @@ namespace app.timeline.tree
 			this.$dragNodePrev = null;
 		}
 
+		public triggerScroll(event)
+		{
+			this.rootNode.$children.scrollTop(this.rootNode.$children.scrollTop() - event.originalEvent.wheelDelta);
+			this.onTreeScroll(event);
+		}
+
+		public setScroll(scrollY)
+		{
+			this.rootNode.$children.scrollTop(scrollY);
+			this.onTreeScroll(null);
+		}
+
 		private fromNode(node:Node):TreeNode
 		{
 			if(node instanceof Model)

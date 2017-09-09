@@ -7,7 +7,7 @@ namespace app.events
 		public type:string;
 		public nativeEvent:any;
 
-		constructor(type:string, nativeEvent:any)
+		constructor(type:string, nativeEvent:any=null)
 		{
 			this.type = type;
 			this.nativeEvent = nativeEvent;

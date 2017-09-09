@@ -10,13 +10,6 @@ namespace app.anim
 		public prev:VectorKeyframe = null;
 		public next:VectorKeyframe = null;
 
-		constructor(frameIndex:number, x:number, y:number)
-		{
-			super(frameIndex);
-			this.x = x;
-			this.y = y;
-		}
-
 	}
 
 }

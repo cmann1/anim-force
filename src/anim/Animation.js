@@ -5,6 +5,8 @@ var app;
         var ContainerNode = app.model.ContainerNode;
         var Bone = app.model.Bone;
         var Sprite = app.model.Sprite;
+        var EventDispatcher = app.events.EventDispatcher;
+        var Event = app.events.Event;
         var Animation = (function () {
             function Animation(name, model) {
                 var _this = this;
@@ -14,6 +16,9 @@ var app;
                 this.loop = true;
                 this.frameIndex = 0;
                 this.length = 1;
+                this.suppressEvents = false;
+                /// Events
+                this.change = new EventDispatcher();
                 /*
                  * Events
                  */
@@ -23,6 +28,7 @@ var app;
                     var track = _this.tracks[node.id];
                     if (track) {
                         track.onNodePropertyChange(node, event.type);
+                        _this.dispatchChange('keyframe');
                     }
                 };
                 this.onModelStructureChange = function (model, event) {
@@ -76,16 +82,23 @@ var app;
                 track.forceKeyframe();
                 return track;
             };
-            Animation.prototype.forceKeyframe = function () {
-                for (var trackId in this.tracks) {
-                    this.tracks[trackId].forceKeyframe();
+            Animation.prototype.forceKeyframe = function (node, frameIndex) {
+                if (node === void 0) { node = null; }
+                if (frameIndex === void 0) { frameIndex = -1; }
+                if (frameIndex < 0)
+                    frameIndex = this.frameIndex;
+                if (node) {
+                    var track = this.tracks[node.id];
+                    if (track) {
+                        track.forceKeyframe(frameIndex);
+                    }
                 }
-            };
-            Animation.prototype.gotoNextFrame = function () {
-                this.frameIndex++;
-                for (var trackId in this.tracks) {
-                    this.tracks[trackId].gotoNextFrame();
+                else {
+                    for (var trackId in this.tracks) {
+                        this.tracks[trackId].forceKeyframe(frameIndex);
+                    }
                 }
+                this.dispatchChange('keyframe');
             };
             Animation.prototype.gotoPrevFrame = function () {
                 if (this.frameIndex <= 0)
@@ -93,6 +106,46 @@ var app;
                 this.frameIndex--;
                 for (var trackId in this.tracks) {
                     this.tracks[trackId].gotoPrevFrame();
+                }
+                this.dispatchChange('position');
+            };
+            Animation.prototype.gotoNextFrame = function () {
+                this.frameIndex++;
+                for (var trackId in this.tracks) {
+                    this.tracks[trackId].gotoNextFrame();
+                }
+                this.dispatchChange('position');
+            };
+            Animation.prototype.getPrevKeyframe = function () {
+                var prev = null;
+                for (var trackId in this.tracks) {
+                    var key = this.tracks[trackId].getPrevKeyframe();
+                    if (key && (!prev || key.frameIndex > prev.frameIndex)) {
+                        prev = key;
+                    }
+                }
+                return prev;
+            };
+            Animation.prototype.getNextKeyframe = function () {
+                var next = null;
+                for (var trackId in this.tracks) {
+                    var key = this.tracks[trackId].getNextKeyframe();
+                    if (key && (!next || key.frameIndex < next.frameIndex)) {
+                        next = key;
+                    }
+                }
+                return next;
+            };
+            Animation.prototype.gotoPrevKeyframe = function () {
+                var prev = this.getPrevKeyframe();
+                if (prev) {
+                    this.setPosition(prev.frameIndex);
+                }
+            };
+            Animation.prototype.gotoNextKeyframe = function () {
+                var next = this.getNextKeyframe();
+                if (next) {
+                    this.setPosition(next.frameIndex);
                 }
             };
             Animation.prototype.setPosition = function (frameIndex) {
@@ -109,10 +162,31 @@ var app;
                     return;
                 }
                 this.frameIndex = frameIndex;
-                // TODO: Seeking to any position
+                for (var trackId in this.tracks) {
+                    this.tracks[trackId].setPosition(frameIndex);
+                }
+                this.dispatchChange('position');
             };
             Animation.prototype.getPosition = function () {
                 return this.frameIndex;
+            };
+            Animation.prototype.deleteKeyframe = function (node, frameIndex) {
+                if (node === void 0) { node = null; }
+                if (frameIndex === void 0) { frameIndex = -1; }
+                if (frameIndex < 0)
+                    frameIndex = this.frameIndex;
+                if (node) {
+                    var track = this.tracks[node.id];
+                    if (track) {
+                        track.deleteKeyframe(frameIndex);
+                    }
+                }
+                else {
+                    for (var trackId in this.tracks) {
+                        this.tracks[trackId].deleteKeyframe(frameIndex);
+                    }
+                }
+                this.dispatchChange('deleteKeyframe');
             };
             Animation.prototype.getLength = function () {
                 return this.length;
@@ -120,6 +194,12 @@ var app;
             Animation.prototype.extendLength = function (newLength) {
                 if (newLength > this.length) {
                     this.length = newLength;
+                    this.dispatchChange('length');
+                }
+            };
+            Animation.prototype.dispatchChange = function (type) {
+                if (!this.suppressEvents) {
+                    this.change.dispatch(this, new Event(type));
                 }
             };
             return Animation;

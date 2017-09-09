@@ -73,14 +73,24 @@ canvas#timeline{
 	width: 100%;
 	height: 100%;
 	position: absolute;
+	outline: 0;
 }
-#timeline-toolbar
-{
+#timeline-toolbar{
 	background-color: $ui-bg;
 	border-top: $border-size solid $border-colour;
 
 	display: flex;
 	padding: $ui-padding;
+
+	.frame-label{
+		vertical-align: middle;
+		padding-top: 3px;
+		margin: 0 10px;
+
+		.value{
+
+		}
+	}
 }
 
 i.fa{

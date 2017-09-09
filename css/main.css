@@ -154,7 +154,7 @@ div#timeline-tree-toolbar {
   display: flex;
   flex-direction: column;
   flex-grow: 1; }
-  .model-node.model .item {
+  .model-node.model > .item {
     flex-shrink: 0; }
   .model-node.model > .children {
     flex-grow: 1;
@@ -266,13 +266,18 @@ div#timeline-container {
 canvas#timeline {
   width: 100%;
   height: 100%;
-  position: absolute; }
+  position: absolute;
+  outline: 0; }
 
 #timeline-toolbar {
   background-color: #ECECEC;
   border-top: 1px solid #C1C1C1;
   display: flex;
   padding: 5px; }
+  #timeline-toolbar .frame-label {
+    vertical-align: middle;
+    padding-top: 3px;
+    margin: 0 10px; }
 
 i.fa {
   padding: 4px;

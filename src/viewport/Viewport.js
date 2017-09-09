@@ -53,6 +53,13 @@ var app;
                 /*
                  * Model Events
                  */
+                _this.onAnimationChange = function (animation, event) {
+                    var type = event.type;
+                    if (type == 'position') {
+                        _this.showMessage('Frame: ' + (_this.model.getActiveAnimation().getPosition() + 1));
+                    }
+                    _this.requiresUpdate = true;
+                };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
@@ -72,6 +79,7 @@ var app;
                     _this.stageAnchorY = NaN;
                 };
                 _this.model = model;
+                _this.model.bindPose.change.on(_this.onAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
                 _this.$container.on('resize', _this.onResize);
@@ -249,6 +257,10 @@ var app;
              * Events
              */
             Viewport.prototype.onKeyDown = function (event) {
+                if (this.timeline.commonKey(event))
+                    return;
+                if (this.commonKey(event))
+                    return;
                 var keyCode = event.keyCode;
                 // console.log(keyCode);
                 if (keyCode == Key.Home) {
@@ -322,20 +334,15 @@ var app;
                         this.showMessage('Frame: ' + node.frame);
                     }
                 }
-                else if (keyCode == Key.LeftArrow) {
-                    this.model.bindPose.gotoPrevFrame();
-                    this.showMessage('Frame: ' + this.model.bindPose.getPosition());
-                }
-                else if (keyCode == Key.RightArrow) {
-                    this.model.bindPose.gotoNextFrame();
-                    this.showMessage('Frame: ' + this.model.bindPose.getPosition());
-                }
                 else if (keyCode == Key.Enter) {
                     app.main.showSpriteSelector(this.onSpritesSelect);
                 }
                 else if (keyCode == Key.E) {
                     console.log((new AngelScriptExporter()).exportModel(this.model));
                 }
+            };
+            Viewport.prototype.commonKey = function (event) {
+                return false;
             };
             Viewport.prototype.onKeyUp = function (event) {
             };
@@ -355,6 +362,8 @@ var app;
                     if (!this.interaction.success) {
                         this.mouseGrabX = this.stageMouse.x;
                         this.mouseGrabY = this.stageMouse.y;
+                        this.cameraVelX = 0;
+                        this.cameraVelY = 0;
                     }
                 }
             };

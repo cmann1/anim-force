@@ -307,6 +307,14 @@ var app;
                     this.$dragNodeParent = null;
                     this.$dragNodePrev = null;
                 };
+                TimelineTree.prototype.triggerScroll = function (event) {
+                    this.rootNode.$children.scrollTop(this.rootNode.$children.scrollTop() - event.originalEvent.wheelDelta);
+                    this.onTreeScroll(event);
+                };
+                TimelineTree.prototype.setScroll = function (scrollY) {
+                    this.rootNode.$children.scrollTop(scrollY);
+                    this.onTreeScroll(null);
+                };
                 TimelineTree.prototype.fromNode = function (node) {
                     if (node instanceof Model) {
                         return new tree.RootTreeNode(this, node.type, node);

@@ -47,7 +47,6 @@ var app;
                     }
                     i++;
                 }
-                // TODO: Use animation length when implemented
                 var anims = [model.bindPose]; // TODO: TEMP
                 var animFrameCount = [];
                 var animFps = [];
@@ -60,13 +59,12 @@ var app;
                 var outScaleY = [];
                 for (var _i = 0, anims_1 = anims; _i < anims_1.length; _i++) {
                     var anim = anims_1[_i];
+                    anim.suppressEvents = true;
+                    var currentFrame = anim.getPosition();
                     var frameCount = anim.getLength();
-                    // TODO: REMOVE and use setPosition once it's implemented
-                    while (anim.getPosition() > 0) {
-                        anim.gotoPrevFrame();
-                    }
+                    anim.setPosition(0);
                     model.prepareChildren();
-                    animFrameCount.push(frameCount); // TODO: Use animation length when implemented
+                    animFrameCount.push(frameCount);
                     animFps.push(anim.fps / 60);
                     animLoop.push(anim.loop);
                     var animFrames = [];
@@ -99,6 +97,8 @@ var app;
                     outRotation.push(animRotation.join(','));
                     outScaleX.push(animScaleX.join(','));
                     outScaleY.push(animScaleY.join(','));
+                    anim.setPosition(currentFrame);
+                    anim.suppressEvents = false;
                 }
                 return "class " + className + " : trigger_base{\n\tscene@ g;\n\tscript@ script;\n\tscripttrigger@ self;\n\n\t[hidden] int _sprite_count = " + spriteGroupList.length + ";\n\t[hidden] array<string> _sprite_sets = {'" + spriteGroupList.join("','") + "'};\n\t[hidden] array<string> _sprite_names = {'" + spriteNameList.join("','") + "'};\n\t[hidden] array<sprites@> _sprite_list(_sprite_count);\n\t[hidden] array<int> _layers = {" + spriteLayers.join(',') + "};\n\t[hidden] array<int> _sub_layers = {" + spriteSubLayers.join(',') + "};\n\t[hidden] array<int> _palettes = {" + spritePalettes.join(',') + "};\n\t\n\t// Animations\n\t[hidden] array<int> _frame_count = {" + animFrameCount.join(',') + "};\n\t[hidden] array<float> _fps_step = {" + animFps.join(',') + "};\n\t[hidden] array<bool> _loop = {" + animLoop.join(',') + "};\n\t[hidden] array<array<int>> _frames = {{" + outFrames.join('},{') + "}};\n\t[hidden] array<array<float>> _x = {{" + outX.join('},{') + "}};\n\t[hidden] array<array<float>> _y = {{" + outY.join('},{') + "}};\n\t[hidden] array<array<float>> _rotation = {{" + outRotation.join('},{') + "}};\n\t[hidden] array<array<float>> _scale_x = {{" + outScaleX.join('},{') + "}};\n\t[hidden] array<array<float>> _scale_y = {{" + outScaleY.join('},{') + "}};\n\t[hidden] dictionary _names = {{'__bind__', 0}};\n\t\n\t// Current animation\n\t[hidden] float _anim_frame = 0;\n\t[hidden] int _anim_frame_count = _frame_count[0];\n\t[hidden] float _anim_fps_step = _fps_step[0];\n\t[hidden] bool _anim_loop = _loop[0];\n\t[hidden] array<int>@ _anim_frames = @_frames[0];\n\t[hidden] array<float>@ _anim_x = @_x[0];\n\t[hidden] array<float>@ _anim_y = @_y[0];\n\t[hidden] array<float>@ _anim_rotation = @_rotation[0];\n\t[hidden] array<float>@ _anim_scale_x = @_scale_x[0];\n\t[hidden] array<float>@ _anim_scale_y = @_scale_y[0];\n\t\n\t" + className + "(){\n\t\t@g = get_scene();\n\t\t\n\t\tfor(int i = 0; i < _sprite_count; i++){\n\t\t\tsprites@ spr = @_sprite_list[i] = create_sprites();\n\t\t\tspr.add_sprite_set(_sprite_sets[i]);\n\t\t}\n\t}\n\t\n\tvoid init(script@ script, scripttrigger@ self)\n\t{\n\t\t@this.script = @script;\n\t\t@this.self = @self;\n\t}\n\t\n\tvoid step(){\n\t\t_anim_frame += _anim_fps_step;\n\t\t\n\t\tif(_anim_frame > _anim_frame_count - 1){\n\t\t\t_anim_frame = _anim_loop ? 0 : _anim_frame_count - 1;\n\t\t}\n\t}\n\t\n\tvoid draw(float sub_frame){\n\t\tconst float x = self.x();\n\t\tconst float y = self.y();\n\t\t\n\t\tconst uint colour = 0xFFFFFFFF;\n\t\t\n\t\tconst int fi = int(_anim_frame) * _sprite_count;\n\t\t\n\t\tfor(int i = 0; i < _sprite_count; i++){\n\t\t\t_sprite_list[i].draw_world(\n\t\t\t\t_layers[i], _sub_layers[i], _sprite_names[i],\n\t\t\t\t_anim_frames[fi + i], _palettes[i],\n\t\t\t\tx + _anim_x[fi + i], y + _anim_y[fi + i], _anim_rotation[fi + i],\n\t\t\t\t_anim_scale_x[fi + i], _anim_scale_y[fi + i], colour);\n\t\t\tg.draw_rectangle_world(22, 20, x + _anim_x[fi + i]-4, y + _anim_y[fi + i]-4, x + _anim_x[fi + i]+4, y + _anim_y[fi + i]+4, 0, i >= 2 ? 0xFF0000FF : (i == 1 ? 0xFF00FF00 : 0xFFFF0000));\n\t\t}\n\t\t\n\t\tg.draw_rectangle_world(22, 20, x-4, y-4, x+4, y+4, 0, 0xFFFF0000);\n\t}\n\t\n\tvoid editor_draw(float sub_frame){\n\t\tdraw(sub_frame);\n\t}\n}";
             };

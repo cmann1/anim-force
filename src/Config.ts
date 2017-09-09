@@ -4,7 +4,12 @@ namespace app
 	export class Config
 	{
 
+		private static bgGradientTop = '';
+
 		static drawAABB = false;
+
+		static text = '#444';
+		static font = 'monospace';
 
 		static control = '#333';
 		static handle = '#5c7ecd';
@@ -26,8 +31,11 @@ namespace app
 		static subHandleRadius = 4;
 
 		static node = '#FBFBFB';
+		static nodeBottom = '#F0F0F0';
 		static nodeBorder = '#DCDCDC';
+		static line = '#999';
 
+		static nodeHeight = 29;
 		static frameWidth = 15;
 
 	}

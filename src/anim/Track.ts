@@ -1,6 +1,12 @@
 namespace app.anim
 {
 
+	export enum Interpolation
+	{
+		LINEAR,
+		COSINE
+	}
+
 	import Node = app.model.Node;
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
@@ -12,6 +18,7 @@ namespace app.anim
 		protected node:Node;
 
 		public length:number = 1;
+		public interpolation:Interpolation = Interpolation.LINEAR;
 
 		constructor(animation:Animation, node:Node)
 		{
@@ -27,11 +34,21 @@ namespace app.anim
 			this.properties[propertyName] = new TrackProperty(this, propertyName, type);
 		}
 
-		public forceKeyframe()
+		public forceKeyframe(frameIndex = -1)
 		{
 			for(var propertyName in this.properties)
 			{
-				this.properties[propertyName].updateFrame(this.node);
+				this.properties[propertyName].updateFrame(this.node, frameIndex);
+			}
+		}
+
+		public gotoPrevFrame()
+		{
+			for(var propertyName in this.properties)
+			{
+				const property = this.properties[propertyName];
+				property.gotoPrevFrame();
+				property.updateNode(this.node, this.interpolation);
 			}
 		}
 
@@ -42,29 +59,81 @@ namespace app.anim
 			{
 				const property = this.properties[propertyName];
 				property.gotoNextFrame();
-				property.updateNode(this.node);
+				property.updateNode(this.node, this.interpolation);
 			}
 		}
 
-		public gotoPrevFrame()
+		public getKeyFrame(frameIndex:number):Keyframe
 		{
 			for(var propertyName in this.properties)
 			{
 				const property = this.properties[propertyName];
-				property.gotoPrevFrame();
-				property.updateNode(this.node);
+
+				if(frameIndex < property.length && property.frameList[frameIndex])
+				{
+					return property.frameList[frameIndex];
+				}
+			}
+
+			return null;
+		}
+
+		public getPrevKeyframe():Keyframe
+		{
+			var prev:Keyframe = null;
+
+			for(var propertyName in this.properties)
+			{
+				var key = this.properties[propertyName].prev;
+
+				if(key && (!prev || key.frameIndex > prev.frameIndex))
+				{
+					prev = key;
+				}
+			}
+
+			return prev;
+		}
+
+		public getNextKeyframe():Keyframe
+		{
+			var next:Keyframe = null;
+
+			for(var propertyName in this.properties)
+			{
+				var key = this.properties[propertyName].next;
+
+				if(key && (!next || key.frameIndex < next.frameIndex))
+				{
+					next = key;
+				}
+			}
+
+			return next;
+		}
+
+		public deleteKeyframe(frameIndex = -1)
+		{
+			for(var propertyName in this.properties)
+			{
+				const property = this.properties[propertyName];
+				property.deleteKeyframe(frameIndex);
+				property.updateNode(this.node, this.interpolation);
+			}
+		}
+
+		public setPosition(frameIndex:number)
+		{
+			for(var propertyName in this.properties)
+			{
+				const property = this.properties[propertyName];
+				property.setPosition(frameIndex);
+				property.updateNode(this.node, this.interpolation);
 			}
 		}
 
 		public onNodePropertyChange(node:Node, propertyName:string)
 		{
-			// const property:TrackProperty = this.properties[propertyName];
-			//
-			// if(property)
-			// {
-			// 	property.updateFrame(node);
-			// }
-
 			for(var propertyName in this.properties)
 			{
 				this.properties[propertyName].updateFrame(this.node);
@@ -77,6 +146,7 @@ namespace app.anim
 			{
 				this.length = newLength;
 				this.animation.extendLength(newLength);
+
 			}
 		}
 	}
@@ -90,11 +160,13 @@ namespace app.anim
 
 		public frameIndex:number = 0;
 		public frames:Keyframe = null;
+		public frameList:Keyframe[] = [];
 		public length:number = 1;
 
 		public current:Keyframe = null;
 		public prev:Keyframe = null;
 		public next:Keyframe = null;
+		public last:Keyframe = null;
 
 		constructor(track:Track, propertyName:string, type:TrackPropertyType)
 		{
@@ -145,57 +217,121 @@ namespace app.anim
 			}
 		}
 
-		public setNumber(value:number)
+		public setPosition(frameIndex:number)
 		{
-			if(this.current)
+			if(frameIndex < 0) frameIndex = 0;
+			if(frameIndex == this.frameIndex) return;
+
+			const length = this.length;
+
+			if(frameIndex >= length)
 			{
-				(<NumberKeyframe> this.current).value = value;
-				return;
+				this.prev = this.last;
+				this.current = null;
+				this.next = null;
+			}
+			else if(this.frameList[frameIndex])
+			{
+				this.current = this.frameList[frameIndex];
+				this.prev = this.current.prev;
+				this.next = this.current.next;
+			}
+			else if(this.frames)
+			{
+				this.current = null;
+				this.prev = null;
+				this.next = null;
+
+				const groupCheckCount = 20;
+				var i1 = frameIndex - 1;
+				var i2 = frameIndex + 1;
+
+				while(i1 >= 0 || i2 < length)
+				{
+					if(i1 >= 0)
+					{
+						for(var iMin = Math.max(0, i1 - groupCheckCount); i1 >= iMin; i1--)
+						{
+							var frame =  this.frameList[i1];
+							if(frame)
+							{
+								this.prev = frame;
+								this.next = frame.next;
+								i1 = -1;
+								i2 = length;
+								break;
+							}
+						}
+					}
+
+					if(i2 < length)
+					{
+						for(var iMax = Math.min(length - 1, i2 + groupCheckCount); i2 <= iMax; i2++)
+						{
+							var frame =  this.frameList[i2];
+							if(frame)
+							{
+								this.next = frame;
+								this.prev = frame.prev;
+								i1 = -1;
+								i2 = length;
+								break;
+							}
+						}
+					}
+				}
 			}
 
-			this.insert(new NumberKeyframe(this.frameIndex, value));
+			this.frameIndex = frameIndex;
 		}
 
-		public setVector(x:number, y:number)
+		public deleteKeyframe(frameIndex = -1)
 		{
-			if(this.current)
-			{
-				(<VectorKeyframe> this.current).x = x;
-				(<VectorKeyframe> this.current).y = y;
-				return;
-			}
+			if(frameIndex < 0) frameIndex = this.frameIndex;
 
-			this.insert(new VectorKeyframe(this.frameIndex, x, y));
+			const key = this.frameList[frameIndex];
+			if(!key) return;
+
+			if(key == this.next) this.next = key.next;
+			if(key == this.prev) this.prev = key.prev;
+			if(key == this.current) this.current = null;
+			if(key == this.last) this.last = this.last.prev;
+
+			if(key.prev) key.prev.next = key.next;
+			if(key.next) key.next.prev = key.prev;
+			this.frameList[frameIndex] = null;
+
+			if(this.frames == key) this.frames = null;
 		}
 
-		public updateFrame(node:Node)
+		public updateFrame(node:Node, frameIndex = -1)
 		{
+			if(frameIndex < 0) frameIndex = this.frameIndex;
+
+			var frame:Keyframe = this.frameList[frameIndex];
+
 			if(this.type == TrackPropertyType.VECTOR)
 			{
-				if(this.current)
+				if(!frame)
 				{
-					(<VectorKeyframe> this.current).x = node[this.propertyName + 'X'];
-					(<VectorKeyframe> this.current).y = node[this.propertyName + 'Y'];
+					this.insert(frame = new VectorKeyframe(frameIndex));
 				}
-				else
-				{
-					this.insert(new VectorKeyframe(this.frameIndex, node[this.propertyName + 'X'], node[this.propertyName + 'Y']));
-				}
+
+				(<VectorKeyframe> frame).x = node[this.propertyName + 'X'];
+				(<VectorKeyframe> frame).y = node[this.propertyName + 'Y'];
 			}
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
 			{
-				if(this.current)
+				if(!frame)
 				{
-					(<NumberKeyframe> this.current).value = node[this.propertyName];
+					this.insert(frame = new NumberKeyframe(frameIndex));
 				}
-				else
-				{
-					this.insert(new NumberKeyframe(this.frameIndex, node[this.propertyName]));
-				}
+
+				(<NumberKeyframe> frame).value = node[this.propertyName];
 			}
 		}
 
-		public updateNode(node:Node)
+		public updateNode(node:Node, interpolation:Interpolation)
 		{
 			if(this.type == TrackPropertyType.VECTOR)
 			{
@@ -213,8 +349,18 @@ namespace app.anim
 				else if(prev && next)
 				{
 					const t:number = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
-					x = prev.x + (next.x - prev.x) * t;
-					y = prev.y + (next.y - prev.y) * t;
+
+					if(interpolation == Interpolation.COSINE)
+					{
+						var t2 = (1 - Math.cos(t * Math.PI)) / 2;
+						x = prev.x * (1 - t2) + next.x * t2;
+						y = prev.y * (1 - t2) + next.y * t2;
+					}
+					else
+					{
+						x = prev.x + (next.x - prev.x) * t;
+						y = prev.y + (next.y - prev.y) * t;
+					}
 				}
 				else if(prev)
 				{
@@ -225,6 +371,11 @@ namespace app.anim
 				{
 					x = next.x;
 					y = next.y;
+				}
+				else
+				{
+					x = node[this.propertyName + 'X'];
+					y = node[this.propertyName + 'Y'];
 				}
 
 				node[this.propertyName + 'X'] = x;
@@ -248,12 +399,19 @@ namespace app.anim
 
 					if(this.type == TrackPropertyType.ANGLE)
 					{
-						// delta += (delta > Math.PI) ? -Math.PI * 2 : (delta < -Math.PI) ? Math.PI * 2 : 0;
 						delta = Math.normalizeAngle(delta);
 					}
 
+					if(interpolation == Interpolation.COSINE)
+					{
+						var t2 = (1 - Math.cos(t * Math.PI)) / 2;
+						value = prev.value * (1 - t2) + (prev.value + delta) * t2;
+					}
+					else
+					{
+						value = prev.value + delta * t;
+					}
 
-					value = prev.value + delta * t;
 				}
 				else if(prev)
 				{
@@ -263,49 +421,111 @@ namespace app.anim
 				{
 					value = next.value;
 				}
+				else
+				{
+					value = node[this.propertyName];
+				}
 
 				node[this.propertyName] = value;
 			}
 		}
 
+		// TODO: Test inserting keyframes at frames that aren't current
 		protected insert(key:Keyframe)
 		{
-			if(!this.frames)
-			{
-				this.frames = key;
-				if(this.frameIndex == key.frameIndex)
-				{
-					this.current = key;
-				}
-			}
+			const frameIndex = key.frameIndex;
 
+			if(this.frameList[frameIndex]) return;
+
+			var prev:Keyframe = null;
+			var next:Keyframe = null;
+
+			if(this.frames && frameIndex < this.frames.frameIndex)
+			{
+				next = this.frames;
+			}
+			else if(this.last && frameIndex > this.last.frameIndex)
+			{
+				prev = this.last;
+			}
 			else
 			{
-				if(this.next)
+				for(var i = frameIndex - 1; i >= 0; i--)
 				{
-					if(this.next.prev == this.frames)
+					if(prev = this.frameList[i]) break;
+				}
+				if(!prev)
+				{
+					for(var i = frameIndex + 1; i < this.length; i++)
 					{
-						this.frames = key;
+						if(next = this.frameList[i]) break;
 					}
-
-					this.next.prev = key;
-					key.next = this.next;
 				}
-
-				if(this.prev)
+				else
 				{
-					this.prev.next = key;
-					key.prev = this.prev;
+					next = prev.next;
 				}
-
-				this.current = key;
 			}
 
-			if(key.frameIndex + 1 > this.length)
+			if(prev)
+			{
+				key.prev = prev;
+				prev.next = key;
+			}
+			if(next)
+			{
+				key.next = next;
+				next.prev = key;
+			}
+
+			if(!key.prev)
+			{
+				this.frames = key;
+			}
+			if(!key.next)
+			{
+				this.last = key;
+			}
+
+			if(frameIndex == this.frameIndex)
+			{
+				this.current = key;
+				this.prev = key.prev;
+				this.next = key.next;
+			}
+			else if(this.current)
+			{
+				if(this.prev && frameIndex > this.prev.frameIndex && frameIndex < this.current.frameIndex)
+					this.prev = key;
+				else if(this.next && frameIndex > this.current.frameIndex && frameIndex < this.next.frameIndex)
+					this.next = key;
+			}
+			else if(this.prev && this.next)
+			{
+				if(frameIndex > this.prev.frameIndex && frameIndex < this.next.frameIndex)
+				{
+					if(frameIndex > this.frameIndex)
+						this.next = key;
+					else
+						this.prev = key;
+				}
+			}
+			else if(this.prev)
+			{
+				this.next = key;
+			}
+			else if(this.next)
+			{
+				this.prev = key;
+			}
+
+			if(frameIndex >= this.length)
 			{
 				this.length = key.frameIndex + 1;
 				this.track.extendLength(this.length);
 			}
+
+			this.frameList[frameIndex] = key;
 		}
 
 	}

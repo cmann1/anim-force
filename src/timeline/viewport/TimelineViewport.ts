@@ -3,7 +3,7 @@ namespace app.timeline
 
 	import Animation = app.anim.Animation;
 	import Model = app.model.Model;
-	import Event = events.Event;
+	import Event = app.events.Event;
 	import TimelineTree = app.timeline.tree.TimelineTree;
 	import ScrollEvent = app.events.ScrollEvent;
 	import SelectionEvent = app.model.events.SelectionEvent;
@@ -12,6 +12,7 @@ namespace app.timeline
 	import Node = app.model.Node;
 	import ContainerNode = app.model.ContainerNode;
 	import Track = app.anim.Track;
+	import Key = KeyCodes.Key;
 
 	export class TimelineViewport extends app.Canvas
 	{
@@ -21,9 +22,27 @@ namespace app.timeline
 		private animation:Animation;
 
 		private $toolbar:JQuery;
+		private $frameLabel:JQuery;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
+		private currentFrame:number = 0;
+
+		private dragFrame = false;
+		private dragView = false;
+		private dragViewX = 0;
+		private dragViewY = 0;
+
+		private headerGrad:CanvasGradient;
+		private headerFontSize = '12px';
+		private headerTickSize:number = 4;
+		private headerFrameInterval:number = 5;
+		private scrubColour = 'rgba(255, 50, 50, 0.5)';
+		private keyframeSize = 4;
+		private keyframeColour = '#f9e26f';
+		private keyframeBorderColour = '#d4b82d';
+
+		public viewport:app.viewport.Viewport;
 
 		constructor(elementId, model:Model, tree:TimelineTree)
 		{
@@ -33,6 +52,7 @@ namespace app.timeline
 			this.tree = tree;
 
 			this.animation = model.getActiveAnimation();
+			this.animation.change.on(this.onAnimationChange);
 			model.activeAnimationChange.on(this.onActiveAnimationChange);
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
@@ -42,12 +62,13 @@ namespace app.timeline
 			this.$container.on('resize', this.onResize);
 			this.$container.parent().on('resize', this.onResize);
 			this.$container.parent().parent().parent().on('resize', this.onResize);
-
-			this.$canvas
-				.on('keydown', this.onKeyDown)
-				.on('keyup', this.onKeyUp);
+			app.$window.on('resize', this.onResize);
 
 			this.setupToolbar();
+
+			this.headerGrad = this.ctx.createLinearGradient(0, 0, 0, Config.nodeHeight);
+			this.headerGrad.addColorStop(0, Config.node);
+			this.headerGrad.addColorStop(1, Config.nodeBottom);
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -60,7 +81,7 @@ namespace app.timeline
 			if(!this.requiresUpdate && document.activeElement != this.canvas) return;
 
 			const ctx = this.ctx;
-			const nodeHeight = 29;
+			const nodeHeight = Config.nodeHeight;
 			const top  = this.scrollY;
 			const bottom = top + this.height;
 			const left  = this.scrollX;
@@ -68,14 +89,24 @@ namespace app.timeline
 
 			const animation = this.animation;
 			const animationLength = animation.getLength();
+			const currentFrame = this.currentFrame;
 			const frameWidth = Config.frameWidth;
+			const frameCX = frameWidth * 0.5;
+			const frameCY = nodeHeight * 0.5;
+			const keyframeSize = this.keyframeSize;
 
 			ctx.clearRect(0, 0, this.width, this.height);
 			ctx.save();
 
-			ctx.translate(-this.scrollX, -this.scrollY);
+			this.drawHeader();
 
-			var nodes:Node[] = [this.model];
+			ctx.beginPath();
+			ctx.rect(0, nodeHeight, this.width, this.height - nodeHeight);
+			ctx.clip();
+
+			ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
+
+			var nodes:Node[] = this.model.children;
 			var nodeCount = nodes.length;
 			var i = 0;
 
@@ -93,24 +124,51 @@ namespace app.timeline
 				if(y <= bottom && y + nodeHeight >= top)
 				{
 					ctx.fillStyle = Config.node;
-					ctx.fillRect(0, y, this.width, nodeHeight);
+					ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
 					ctx.fillStyle = Config.nodeBorder;
-					ctx.fillRect(0, y + nodeHeight - 1, this.width, 1);
+					ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
 
-					if(i > 0)
+					var track:Track = animation.tracks[node.id];
+					var j = Math.floor(left / frameWidth);
+					var x = j * frameWidth;
+
+					for(; j < animationLength; j++)
 					{
-						var track:Track = animation.tracks[node.id];
-						var j = Math.floor(left / frameWidth);
-						var x = j * frameWidth;
+						if(x > right) break;
 
-						for(; j < animationLength; j++)
+						const keyframe = track.getKeyFrame(j);
+						if(keyframe)
 						{
-							if(x > right) break;
+							var cx = x + frameCX;
+							var cy = y + frameCY;
+							ctx.fillStyle = this.keyframeColour;
+							ctx.strokeStyle = this.keyframeBorderColour;
+							ctx.beginPath();
+							ctx.moveTo(cx - keyframeSize, cy);
+							ctx.lineTo(cx, cy - keyframeSize);
+							ctx.lineTo(cx + keyframeSize, cy);
+							ctx.lineTo(cx, cy + keyframeSize);
+							ctx.closePath();
+							ctx.fill();
+							ctx.stroke();
 
-							ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
-
-							x += frameWidth;
+							if(keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1)
+							{
+								cx = keyframe.frameIndex * frameWidth - 3;
+								ctx.beginPath();
+								ctx.moveTo(keyframe.prev.frameIndex * frameWidth + frameWidth + 2, cy);
+								ctx.lineTo(cx, cy);
+								ctx.lineTo(cx - 4, cy - 4);
+								ctx.moveTo(cx, cy);
+								ctx.lineTo(cx - 4, cy + 4);
+								ctx.stroke();
+							}
 						}
+
+						ctx.fillStyle = Config.nodeBorder;
+						ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+
+						x += frameWidth;
 					}
 				}
 
@@ -118,14 +176,77 @@ namespace app.timeline
 				i++;
 			}
 
+			const currentFrameX = currentFrame * frameWidth;
+			if(currentFrameX <= right && currentFrameX + frameWidth >= left)
+			{
+				ctx.fillStyle = this.scrubColour;
+				ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, 0, 2, this.width);
+			}
+
 			ctx.restore();
 
 			this.requiresUpdate = false;
 		}
 
+		public drawHeader()
+		{
+			const ctx = this.ctx;
+			const nodeHeight = Config.nodeHeight;
+			const headerTickSize = this.headerTickSize;
+			const headerFrameInterval = this.headerFrameInterval;
+
+			const left  = this.scrollX;
+			const right = left + this.width;
+
+			const animation = this.animation;
+			const animationLength = animation.getLength();
+			const currentFrame = this.currentFrame;
+			const frameWidth = Config.frameWidth;
+
+			ctx.fillStyle = this.headerGrad;
+			ctx.fillRect(0, 0, this.width, nodeHeight);
+			ctx.fillStyle = Config.nodeBorder;
+			ctx.fillRect(0, nodeHeight - 1, this.width, 1);
+
+			ctx.font = `${this.headerFontSize} ${Config.font}`;
+
+			var frameIndex = Math.floor(left / frameWidth);
+			var x = frameIndex * frameWidth;
+
+			while(x <= right)
+			{
+				const drawX = x - this.scrollX;
+				if(frameIndex == currentFrame)
+				{
+					ctx.fillStyle = this.scrubColour;
+					ctx.fillRect(drawX + 3, 0, frameWidth - 6, nodeHeight - 1);
+				}
+
+				if(frameIndex % headerFrameInterval == 0)
+				{
+					ctx.fillStyle = Config.line;
+					ctx.fillRect(drawX, nodeHeight - headerTickSize - 4, 1, headerTickSize + 2);
+
+					ctx.fillStyle = Config.text;
+					ctx.fillText(String(frameIndex + 1), drawX + 1, nodeHeight - headerTickSize - 6);
+				}
+				else
+				{
+					ctx.fillStyle = Config.line;
+					ctx.fillRect(drawX, nodeHeight - headerTickSize - 2, 1, headerTickSize);
+				}
+
+				frameIndex++;
+				x += frameWidth;
+			}
+		}
+
 		private setupToolbar()
 		{
+			// TODO: Toolbar buttons
 			this.$toolbar = this.$container.parent().find('#timeline-toolbar');
+			this.$frameLabel = this.$toolbar.find('.frame-label .value');
+
 			// this.$toolbar
 			// 	.on('click', 'i', this.onToolbarButtonClick)
 			// 	.on('mousewheel', this.onToolbarMouseWheel);
@@ -141,7 +262,33 @@ namespace app.timeline
 
 			tippy(this.$toolbar.find('i').toArray());
 
-			// this.$toolbarAddMenu.hide();
+			this.updateFrameLabel();
+		}
+
+		private updateFrameLabel()
+		{
+			this.$frameLabel.text((this.currentFrame + 1) + '/' + this.animation.getLength());
+		}
+
+		private setFrame(frame:number)
+		{
+			if(this.currentFrame == frame) return;
+
+			this.animation.setPosition(frame);
+			this.currentFrame = this.animation.getPosition();
+			this.updateFrameLabel();
+
+			var frameX = this.currentFrame * Config.frameWidth;
+			if(frameX + Config.frameWidth > this.scrollX + this.width)
+			{
+				this.scrollX = Math.floor(Math.max(0, frameX - this.width + Config.frameWidth));
+			}
+			else if(frameX < this.scrollX)
+			{
+				this.scrollX = Math.floor(Math.max(0, frameX));
+			}
+
+			this.requiresUpdate = true;
 		}
 
 		/*
@@ -149,9 +296,29 @@ namespace app.timeline
 		 */
 
 		// TODO: Implement
-		private onActiveAnimationChange = (node:Model, event:Event) =>
+		private onActiveAnimationChange = (model:Model, event:Event) =>
 		{
-			console.log(node, event);
+			// console.log(model, event);
+
+			this.updateFrameLabel();
+
+			this.requiresUpdate = true;
+		};
+
+		private onAnimationChange = (animation:Animation, event:Event) =>
+		{
+			const type = event.type;
+
+			if(type == 'position')
+			{
+				this.setFrame(animation.getPosition());
+				this.updateFrameLabel();
+			}
+			else if(type == 'length')
+			{
+				this.updateFrameLabel();
+			}
+
 			this.requiresUpdate = true;
 		};
 
@@ -178,10 +345,67 @@ namespace app.timeline
 
 		protected onKeyDown(event)
 		{
+			if(this.viewport.commonKey(event)) return;
+			if(this.commonKey(event)) return;
+
 			const keyCode = event.keyCode;
-			console.log(keyCode);
+			// console.log(keyCode);
 
+			if(keyCode == Key.Home)
+			{
+				this.setFrame(0);
+			}
 
+			else if(keyCode == Key.End)
+			{
+				this.setFrame(this.animation.getLength() - 1);
+			}
+		}
+
+		public commonKey(event):boolean
+		{
+			const keyCode = event.keyCode;
+
+			// Prev/Next frame
+			if(keyCode == Key.Comma)
+			{
+				if(event.shiftKey)
+					this.animation.setPosition(this.animation.getPosition() - 5);
+				else
+					this.animation.gotoPrevFrame();
+			}
+			else if(keyCode == Key.Period)
+			{
+				if(event.shiftKey)
+					this.animation.setPosition(this.animation.getPosition() + 5);
+				else
+					this.animation.gotoNextFrame();
+			}
+
+			// Prev/Next keyframe
+			if(keyCode == Key.OpenBracket)
+			{
+				this.animation.gotoPrevKeyframe();
+			}
+			else if(keyCode == Key.ClosedBracket)
+			{
+				this.animation.gotoNextKeyframe();
+			}
+
+			// Keyframes
+
+			else if(keyCode == Key.X)
+			{
+				this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+			}
+			else if(keyCode == Key.I)
+			{
+				this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+			}
+
+			// Other
+
+			return false;
 		}
 
 		protected onKeyUp(event)
@@ -191,21 +415,58 @@ namespace app.timeline
 
 		protected onMouseDown(event)
 		{
+			this.$canvas.focus();
+
+			// Drag view
+			if(event.button == 2)
+			{
+				this.dragViewX = this.scrollX + this.mouseX;
+				this.dragViewY = this.scrollY + this.mouseY;
+				this.dragView = true;
+				return;
+			}
+
+			// Clicked on header
+			if(this.mouseY <= Config.nodeHeight)
+			{
+				if(event.button == 0)
+				{
+					this.setFrame(Math.floor((this.mouseX + this.scrollX) / Config.frameWidth));
+					this.dragFrame = true;
+				}
+			}
+
+			else
+			{
+
+			}
 		}
 
 		protected onMouseUp(event)
 		{
+			this.dragFrame = false;
+			this.dragView = false;
 		}
 
 		protected onMouseWheel(event)
 		{
-
+			this.tree.triggerScroll(event);
 		}
 
 		protected onMouseMove(event)
 		{
+			if(this.dragFrame)
+			{
+				this.setFrame(Math.floor((this.mouseX + this.scrollX) / Config.frameWidth));
+			}
 
-
+			else if(this.dragView)
+			{
+				this.scrollX = Math.max(0, this.dragViewX - this.mouseX);
+				this.scrollY = Math.max(0, this.dragViewY - this.mouseY);
+				this.tree.setScroll(this.scrollY);
+				this.requiresUpdate = true;
+			}
 		}
 
 	}

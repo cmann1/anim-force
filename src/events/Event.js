@@ -4,6 +4,7 @@ var app;
     (function (events) {
         var Event = (function () {
             function Event(type, nativeEvent) {
+                if (nativeEvent === void 0) { nativeEvent = null; }
                 this.type = type;
                 this.nativeEvent = nativeEvent;
             }

@@ -14,11 +14,10 @@ var app;
     (function (anim) {
         var NumberKeyframe = (function (_super) {
             __extends(NumberKeyframe, _super);
-            function NumberKeyframe(frameIndex, value) {
-                var _this = _super.call(this, frameIndex) || this;
+            function NumberKeyframe() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
                 _this.prev = null;
                 _this.next = null;
-                _this.value = value;
                 return _this;
             }
             return NumberKeyframe;

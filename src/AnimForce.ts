@@ -1,18 +1,26 @@
 /*
 // TODO: Timeline:
-// TODO: - Update on insert/delete keyframe
-// TODO: - Draw time bar and scrubber
-// TODO: - Scroll with mouse wheel and right click drag
+// TODO: - Play/Pause disable editing + toolbar + common key
+// TODO: - Toolbar
+// TODO: - - Make play/pause one button
+// TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
 // TODO: - - Replace stretch handle with length handle
+// TODO: - - Force frame to stay at zero
+// TODO: - - Don't allow deleting keyframes
+// TODO: - - Don't allow dragging timeline  frame
 // TODO: - Animate mode:
-// TODO: - - Disable adding, removing and dragging in the timeline.
+// TODO: - - ? Disable adding, removing in the timeline.
+// TODO: Manually change animation length
+// TODO: Add, remove, and rename animations
+// TODO: Show/hide controls
 // TODO: Loading sprites
 // TODO: Export to AngelScript
 // TODO: Add bone as next sibling if selected node doesn't allow children (ctrl forces sibling)
-// TODO: Allow frames to be animated
+// TODO: Allow sprite frames to be animated
 // TODO: Animation events
+// TODO: Hiding node controls
 // TODO: Sprite Selector:
 // TODO: - Use different modal script
 // TODO: - Improve all-round
@@ -88,8 +96,10 @@ namespace app
 			new Splitter(this.viewport.getContainer(), this.timeline.getContainer(), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
 
 			this.timeline.init();
-
 			this.viewport.focus();
+
+			this.viewport.timeline = this.timeline.viewport;
+			this.timeline.viewport.viewport = this.viewport;
 
 			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
 

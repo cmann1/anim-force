@@ -9,6 +9,8 @@ namespace app.viewport
 	import StructureChangeEvent = app.model.events.StructureChangeEvent;
 	import Node = app.model.Node;
 	import AngelScriptExporter = app.exporters.AngelScriptExporter;
+	import Animation = app.anim.Animation;
+	import Event = app.events.Event;
 
 	export class Viewport extends app.Canvas
 	{
@@ -61,11 +63,14 @@ namespace app.viewport
 
 		private model:Model;
 
+		public timeline:app.timeline.TimelineViewport;
+
 		constructor(elementId, model:Model)
 		{
 			super(elementId);
 
 			this.model = model;
+			this.model.bindPose.change.on(this.onAnimationChange);
 
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
@@ -319,6 +324,18 @@ namespace app.viewport
 		 * Model Events
 		 */
 
+		private onAnimationChange = (animation:Animation, event:Event) =>
+		{
+			const type = event.type;
+
+			if(type == 'position')
+			{
+				this.showMessage('Frame: ' + (this.model.getActiveAnimation().getPosition() + 1));
+			}
+
+			this.requiresUpdate = true;
+		};
+
 		protected onModelSelectionChange = (model:Model, event:SelectionEvent) =>
 		{
 			this.requiresUpdate = true;
@@ -335,6 +352,9 @@ namespace app.viewport
 
 		protected onKeyDown(event)
 		{
+			if(this.timeline.commonKey(event)) return;
+			if(this.commonKey(event)) return;
+
 			const keyCode = event.keyCode;
 			// console.log(keyCode);
 
@@ -438,18 +458,6 @@ namespace app.viewport
 			}
 
 			// TODO: REMOVE
-			else if(keyCode == Key.LeftArrow)
-			{
-				this.model.bindPose.gotoPrevFrame();
-				this.showMessage('Frame: ' + this.model.bindPose.getPosition());
-			}
-			// TODO: REMOVE
-			else if(keyCode == Key.RightArrow)
-			{
-				this.model.bindPose.gotoNextFrame();
-				this.showMessage('Frame: ' + this.model.bindPose.getPosition());
-			}
-			// TODO: REMOVE
 			else if(keyCode == Key.Enter)
 			{
 				app.main.showSpriteSelector(this.onSpritesSelect);
@@ -459,6 +467,11 @@ namespace app.viewport
 			{
 				console.log((new AngelScriptExporter()).exportModel(this.model));
 			}
+		}
+
+		public commonKey(event):boolean
+		{
+			return false;
 		}
 
 		// TODO: REMOVE
@@ -501,6 +514,8 @@ namespace app.viewport
 				{
 					this.mouseGrabX = this.stageMouse.x;
 					this.mouseGrabY = this.stageMouse.y;
+					this.cameraVelX = 0;
+					this.cameraVelY = 0;
 				}
 			}
 		}

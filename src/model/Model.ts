@@ -10,7 +10,8 @@ namespace app.model
 	export enum EditMode
 	{
 		EDIT,
-		ANIMATE
+		ANIMATE,
+		PLAYBACK
 	}
 
 	export class Model extends ContainerNode

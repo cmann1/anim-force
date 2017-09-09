@@ -14,12 +14,10 @@ var app;
     (function (anim) {
         var VectorKeyframe = (function (_super) {
             __extends(VectorKeyframe, _super);
-            function VectorKeyframe(frameIndex, x, y) {
-                var _this = _super.call(this, frameIndex) || this;
+            function VectorKeyframe() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
                 _this.prev = null;
                 _this.next = null;
-                _this.x = x;
-                _this.y = y;
                 return _this;
             }
             return VectorKeyframe;

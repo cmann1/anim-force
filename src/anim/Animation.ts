@@ -8,6 +8,8 @@ namespace app.anim
 	import Bone = app.model.Bone;
 	import Sprite = app.model.Sprite;
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
+	import EventDispatcher = app.events.EventDispatcher;
+	import Event = app.events.Event;
 
 	export class Animation
 	{
@@ -22,6 +24,12 @@ namespace app.anim
 
 		protected frameIndex:number = 0;
 		protected length:number = 1;
+
+		public suppressEvents:boolean = false;
+
+		/// Events
+
+		public change:EventDispatcher<Animation> = new EventDispatcher<Animation>();
 
 		constructor(name:string, model:app.model.Model)
 		{
@@ -78,22 +86,27 @@ namespace app.anim
 			return track;
 		}
 
-		public forceKeyframe()
+		public forceKeyframe(node:Node = null, frameIndex = -1)
 		{
-			for(var trackId in this.tracks)
-			{
-				this.tracks[trackId].forceKeyframe();
-			}
-		}
+			if(frameIndex < 0) frameIndex = this.frameIndex;
 
-		public gotoNextFrame()
-		{
-			this.frameIndex++;
-
-			for(var trackId in this.tracks)
+			if(node)
 			{
-				this.tracks[trackId].gotoNextFrame();
+				const track = this.tracks[node.id];
+				if(track)
+				{
+					track.forceKeyframe(frameIndex);
+				}
 			}
+			else
+			{
+				for(var trackId in this.tracks)
+				{
+					this.tracks[trackId].forceKeyframe(frameIndex);
+				}
+			}
+
+			this.dispatchChange('keyframe');
 		}
 
 		public gotoPrevFrame()
@@ -105,6 +118,74 @@ namespace app.anim
 			for(var trackId in this.tracks)
 			{
 				this.tracks[trackId].gotoPrevFrame();
+			}
+
+			this.dispatchChange('position');
+		}
+
+		public gotoNextFrame()
+		{
+			this.frameIndex++;
+
+			for(var trackId in this.tracks)
+			{
+				this.tracks[trackId].gotoNextFrame();
+			}
+
+			this.dispatchChange('position');
+		}
+
+		public getPrevKeyframe()
+		{
+			var prev:Keyframe = null;
+
+			for(var trackId in this.tracks)
+			{
+				var key = this.tracks[trackId].getPrevKeyframe();
+
+				if(key && (!prev || key.frameIndex > prev.frameIndex))
+				{
+					prev = key;
+				}
+			}
+
+			return prev;
+		}
+
+		public getNextKeyframe()
+		{
+			var next:Keyframe = null;
+
+			for(var trackId in this.tracks)
+			{
+				var key = this.tracks[trackId].getNextKeyframe();
+
+				if(key && (!next || key.frameIndex < next.frameIndex))
+				{
+					next = key;
+				}
+			}
+
+			return next;
+		}
+
+		public gotoPrevKeyframe()
+		{
+			var prev = this.getPrevKeyframe();
+
+			if(prev)
+			{
+				this.setPosition(prev.frameIndex);
+			}
+		}
+
+		public gotoNextKeyframe()
+		{
+			var next = this.getNextKeyframe();
+
+			if(next)
+			{
+				this.setPosition(next.frameIndex);
 			}
 		}
 
@@ -126,12 +207,41 @@ namespace app.anim
 			}
 
 			this.frameIndex = frameIndex;
-			// TODO: Seeking to any position
+
+			for(var trackId in this.tracks)
+			{
+				this.tracks[trackId].setPosition(frameIndex);
+			}
+
+			this.dispatchChange('position');
 		}
 
 		public getPosition():number
 		{
 			return this.frameIndex;
+		}
+
+		public deleteKeyframe(node:Node = null, frameIndex = -1)
+		{
+			if(frameIndex < 0) frameIndex = this.frameIndex;
+
+			if(node)
+			{
+				const track = this.tracks[node.id];
+				if(track)
+				{
+					track.deleteKeyframe(frameIndex);
+				}
+			}
+			else
+			{
+				for(var trackId in this.tracks)
+				{
+					this.tracks[trackId].deleteKeyframe(frameIndex);
+				}
+			}
+
+			this.dispatchChange('deleteKeyframe');
 		}
 
 		public getLength()
@@ -144,6 +254,15 @@ namespace app.anim
 			if(newLength > this.length)
 			{
 				this.length = newLength;
+				this.dispatchChange('length');
+			}
+		}
+
+		protected dispatchChange(type:string)
+		{
+			if(!this.suppressEvents)
+			{
+				this.change.dispatch(this, new Event(type));
 			}
 		}
 
@@ -160,6 +279,7 @@ namespace app.anim
 			if(track)
 			{
 				track.onNodePropertyChange(node, event.type);
+				this.dispatchChange('keyframe');
 			}
 		};
 

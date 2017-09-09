@@ -13,18 +13,43 @@ var app;
     var timeline;
     (function (timeline) {
         var ContainerNode = app.model.ContainerNode;
+        var Key = KeyCodes.Key;
         var TimelineViewport = (function (_super) {
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId, model, tree) {
                 var _this = _super.call(this, elementId) || this;
                 _this.scrollX = 0;
                 _this.scrollY = 0;
+                _this.currentFrame = 0;
+                _this.dragFrame = false;
+                _this.dragView = false;
+                _this.dragViewX = 0;
+                _this.dragViewY = 0;
+                _this.headerFontSize = '12px';
+                _this.headerTickSize = 4;
+                _this.headerFrameInterval = 5;
+                _this.scrubColour = 'rgba(255, 50, 50, 0.5)';
+                _this.keyframeSize = 4;
+                _this.keyframeColour = '#f9e26f';
+                _this.keyframeBorderColour = '#d4b82d';
                 /*
                  * Events
                  */
                 // TODO: Implement
-                _this.onActiveAnimationChange = function (node, event) {
-                    console.log(node, event);
+                _this.onActiveAnimationChange = function (model, event) {
+                    // console.log(model, event);
+                    _this.updateFrameLabel();
+                    _this.requiresUpdate = true;
+                };
+                _this.onAnimationChange = function (animation, event) {
+                    var type = event.type;
+                    if (type == 'position') {
+                        _this.setFrame(animation.getPosition());
+                        _this.updateFrameLabel();
+                    }
+                    else if (type == 'length') {
+                        _this.updateFrameLabel();
+                    }
                     _this.requiresUpdate = true;
                 };
                 _this.onModelSelectionChange = function (model, event) {
@@ -43,6 +68,7 @@ var app;
                 _this.model = model;
                 _this.tree = tree;
                 _this.animation = model.getActiveAnimation();
+                _this.animation.change.on(_this.onAnimationChange);
                 model.activeAnimationChange.on(_this.onActiveAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
@@ -51,10 +77,11 @@ var app;
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$container.parent().parent().parent().on('resize', _this.onResize);
-                _this.$canvas
-                    .on('keydown', _this.onKeyDown)
-                    .on('keyup', _this.onKeyUp);
+                app.$window.on('resize', _this.onResize);
                 _this.setupToolbar();
+                _this.headerGrad = _this.ctx.createLinearGradient(0, 0, 0, app.Config.nodeHeight);
+                _this.headerGrad.addColorStop(0, app.Config.node);
+                _this.headerGrad.addColorStop(1, app.Config.nodeBottom);
                 return _this;
             }
             TimelineViewport.prototype.step = function (deltaTime, timestamp) {
@@ -65,18 +92,26 @@ var app;
                 if (!this.requiresUpdate && document.activeElement != this.canvas)
                     return;
                 var ctx = this.ctx;
-                var nodeHeight = 29;
+                var nodeHeight = app.Config.nodeHeight;
                 var top = this.scrollY;
                 var bottom = top + this.height;
                 var left = this.scrollX;
                 var right = left + this.width;
                 var animation = this.animation;
                 var animationLength = animation.getLength();
+                var currentFrame = this.currentFrame;
                 var frameWidth = app.Config.frameWidth;
+                var frameCX = frameWidth * 0.5;
+                var frameCY = nodeHeight * 0.5;
+                var keyframeSize = this.keyframeSize;
                 ctx.clearRect(0, 0, this.width, this.height);
                 ctx.save();
-                ctx.translate(-this.scrollX, -this.scrollY);
-                var nodes = [this.model];
+                this.drawHeader();
+                ctx.beginPath();
+                ctx.rect(0, nodeHeight, this.width, this.height - nodeHeight);
+                ctx.clip();
+                ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
+                var nodes = this.model.children;
                 var nodeCount = nodes.length;
                 var i = 0;
                 var y = 0;
@@ -88,29 +123,98 @@ var app;
                     }
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
-                        ctx.fillRect(0, y, this.width, nodeHeight);
+                        ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
                         ctx.fillStyle = app.Config.nodeBorder;
-                        ctx.fillRect(0, y + nodeHeight - 1, this.width, 1);
-                        if (i > 0) {
-                            var track = animation.tracks[node.id];
-                            var j = Math.floor(left / frameWidth);
-                            var x = j * frameWidth;
-                            for (; j < animationLength; j++) {
-                                if (x > right)
-                                    break;
-                                ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
-                                x += frameWidth;
+                        ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
+                        var track = animation.tracks[node.id];
+                        var j = Math.floor(left / frameWidth);
+                        var x = j * frameWidth;
+                        for (; j < animationLength; j++) {
+                            if (x > right)
+                                break;
+                            var keyframe = track.getKeyFrame(j);
+                            if (keyframe) {
+                                var cx = x + frameCX;
+                                var cy = y + frameCY;
+                                ctx.fillStyle = this.keyframeColour;
+                                ctx.strokeStyle = this.keyframeBorderColour;
+                                ctx.beginPath();
+                                ctx.moveTo(cx - keyframeSize, cy);
+                                ctx.lineTo(cx, cy - keyframeSize);
+                                ctx.lineTo(cx + keyframeSize, cy);
+                                ctx.lineTo(cx, cy + keyframeSize);
+                                ctx.closePath();
+                                ctx.fill();
+                                ctx.stroke();
+                                if (keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1) {
+                                    cx = keyframe.frameIndex * frameWidth - 3;
+                                    ctx.beginPath();
+                                    ctx.moveTo(keyframe.prev.frameIndex * frameWidth + frameWidth + 2, cy);
+                                    ctx.lineTo(cx, cy);
+                                    ctx.lineTo(cx - 4, cy - 4);
+                                    ctx.moveTo(cx, cy);
+                                    ctx.lineTo(cx - 4, cy + 4);
+                                    ctx.stroke();
+                                }
                             }
+                            ctx.fillStyle = app.Config.nodeBorder;
+                            ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+                            x += frameWidth;
                         }
                     }
                     y += nodeHeight;
                     i++;
                 }
+                var currentFrameX = currentFrame * frameWidth;
+                if (currentFrameX <= right && currentFrameX + frameWidth >= left) {
+                    ctx.fillStyle = this.scrubColour;
+                    ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, 0, 2, this.width);
+                }
                 ctx.restore();
                 this.requiresUpdate = false;
             };
+            TimelineViewport.prototype.drawHeader = function () {
+                var ctx = this.ctx;
+                var nodeHeight = app.Config.nodeHeight;
+                var headerTickSize = this.headerTickSize;
+                var headerFrameInterval = this.headerFrameInterval;
+                var left = this.scrollX;
+                var right = left + this.width;
+                var animation = this.animation;
+                var animationLength = animation.getLength();
+                var currentFrame = this.currentFrame;
+                var frameWidth = app.Config.frameWidth;
+                ctx.fillStyle = this.headerGrad;
+                ctx.fillRect(0, 0, this.width, nodeHeight);
+                ctx.fillStyle = app.Config.nodeBorder;
+                ctx.fillRect(0, nodeHeight - 1, this.width, 1);
+                ctx.font = this.headerFontSize + " " + app.Config.font;
+                var frameIndex = Math.floor(left / frameWidth);
+                var x = frameIndex * frameWidth;
+                while (x <= right) {
+                    var drawX = x - this.scrollX;
+                    if (frameIndex == currentFrame) {
+                        ctx.fillStyle = this.scrubColour;
+                        ctx.fillRect(drawX + 3, 0, frameWidth - 6, nodeHeight - 1);
+                    }
+                    if (frameIndex % headerFrameInterval == 0) {
+                        ctx.fillStyle = app.Config.line;
+                        ctx.fillRect(drawX, nodeHeight - headerTickSize - 4, 1, headerTickSize + 2);
+                        ctx.fillStyle = app.Config.text;
+                        ctx.fillText(String(frameIndex + 1), drawX + 1, nodeHeight - headerTickSize - 6);
+                    }
+                    else {
+                        ctx.fillStyle = app.Config.line;
+                        ctx.fillRect(drawX, nodeHeight - headerTickSize - 2, 1, headerTickSize);
+                    }
+                    frameIndex++;
+                    x += frameWidth;
+                }
+            };
             TimelineViewport.prototype.setupToolbar = function () {
+                // TODO: Toolbar buttons
                 this.$toolbar = this.$container.parent().find('#timeline-toolbar');
+                this.$frameLabel = this.$toolbar.find('.frame-label .value');
                 // this.$toolbar
                 // 	.on('click', 'i', this.onToolbarButtonClick)
                 // 	.on('mousewheel', this.onToolbarMouseWheel);
@@ -124,21 +228,109 @@ var app;
                 // this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
                 // this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
                 tippy(this.$toolbar.find('i').toArray());
-                // this.$toolbarAddMenu.hide();
+                this.updateFrameLabel();
+            };
+            TimelineViewport.prototype.updateFrameLabel = function () {
+                this.$frameLabel.text((this.currentFrame + 1) + '/' + this.animation.getLength());
+            };
+            TimelineViewport.prototype.setFrame = function (frame) {
+                if (this.currentFrame == frame)
+                    return;
+                this.animation.setPosition(frame);
+                this.currentFrame = this.animation.getPosition();
+                this.updateFrameLabel();
+                var frameX = this.currentFrame * app.Config.frameWidth;
+                if (frameX + app.Config.frameWidth > this.scrollX + this.width) {
+                    this.scrollX = Math.floor(Math.max(0, frameX - this.width + app.Config.frameWidth));
+                }
+                else if (frameX < this.scrollX) {
+                    this.scrollX = Math.floor(Math.max(0, frameX));
+                }
+                this.requiresUpdate = true;
             };
             TimelineViewport.prototype.onKeyDown = function (event) {
+                if (this.viewport.commonKey(event))
+                    return;
+                if (this.commonKey(event))
+                    return;
                 var keyCode = event.keyCode;
-                console.log(keyCode);
+                // console.log(keyCode);
+                if (keyCode == Key.Home) {
+                    this.setFrame(0);
+                }
+                else if (keyCode == Key.End) {
+                    this.setFrame(this.animation.getLength() - 1);
+                }
+            };
+            TimelineViewport.prototype.commonKey = function (event) {
+                var keyCode = event.keyCode;
+                // Prev/Next frame
+                if (keyCode == Key.Comma) {
+                    if (event.shiftKey)
+                        this.animation.setPosition(this.animation.getPosition() - 5);
+                    else
+                        this.animation.gotoPrevFrame();
+                }
+                else if (keyCode == Key.Period) {
+                    if (event.shiftKey)
+                        this.animation.setPosition(this.animation.getPosition() + 5);
+                    else
+                        this.animation.gotoNextFrame();
+                }
+                // Prev/Next keyframe
+                if (keyCode == Key.OpenBracket) {
+                    this.animation.gotoPrevKeyframe();
+                }
+                else if (keyCode == Key.ClosedBracket) {
+                    this.animation.gotoNextKeyframe();
+                }
+                else if (keyCode == Key.X) {
+                    this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                }
+                else if (keyCode == Key.I) {
+                    this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                }
+                // Other
+                return false;
             };
             TimelineViewport.prototype.onKeyUp = function (event) {
             };
             TimelineViewport.prototype.onMouseDown = function (event) {
+                this.$canvas.focus();
+                // Drag view
+                if (event.button == 2) {
+                    this.dragViewX = this.scrollX + this.mouseX;
+                    this.dragViewY = this.scrollY + this.mouseY;
+                    this.dragView = true;
+                    return;
+                }
+                // Clicked on header
+                if (this.mouseY <= app.Config.nodeHeight) {
+                    if (event.button == 0) {
+                        this.setFrame(Math.floor((this.mouseX + this.scrollX) / app.Config.frameWidth));
+                        this.dragFrame = true;
+                    }
+                }
+                else {
+                }
             };
             TimelineViewport.prototype.onMouseUp = function (event) {
+                this.dragFrame = false;
+                this.dragView = false;
             };
             TimelineViewport.prototype.onMouseWheel = function (event) {
+                this.tree.triggerScroll(event);
             };
             TimelineViewport.prototype.onMouseMove = function (event) {
+                if (this.dragFrame) {
+                    this.setFrame(Math.floor((this.mouseX + this.scrollX) / app.Config.frameWidth));
+                }
+                else if (this.dragView) {
+                    this.scrollX = Math.max(0, this.dragViewX - this.mouseX);
+                    this.scrollY = Math.max(0, this.dragViewY - this.mouseY);
+                    this.tree.setScroll(this.scrollY);
+                    this.requiresUpdate = true;
+                }
             };
             return TimelineViewport;
         }(app.Canvas));

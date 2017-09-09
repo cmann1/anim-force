@@ -48,7 +48,6 @@ namespace app.exporters
 				i++;
 			}
 
-			// TODO: Use animation length when implemented
 			var anims:Animation[] = [model.bindPose]; // TODO: TEMP
 			var animFrameCount = [];
 			var animFps = [];
@@ -62,16 +61,14 @@ namespace app.exporters
 
 			for(var anim of anims)
 			{
+				anim.suppressEvents = true;
+				const currentFrame = anim.getPosition();
 				const frameCount = anim.getLength();
 
-				// TODO: REMOVE and use setPosition once it's implemented
-				while(anim.getPosition() > 0)
-				{
-					anim.gotoPrevFrame();
-				}
+				anim.setPosition(0);
 				model.prepareChildren();
 
-				animFrameCount.push(frameCount); // TODO: Use animation length when implemented
+				animFrameCount.push(frameCount);
 				animFps.push(anim.fps / 60);
 				animLoop.push(anim.loop);
 
@@ -110,6 +107,9 @@ namespace app.exporters
 				outRotation.push(animRotation.join(','));
 				outScaleX.push(animScaleX.join(','));
 				outScaleY.push(animScaleY.join(','));
+
+				anim.setPosition(currentFrame);
+				anim.suppressEvents = false;
 			}
 
 

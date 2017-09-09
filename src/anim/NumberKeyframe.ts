@@ -9,12 +9,6 @@ namespace app.anim
 		public prev:NumberKeyframe = null;
 		public next:NumberKeyframe = null;
 
-		constructor(frameIndex:number, value:number)
-		{
-			super(frameIndex);
-			this.value = value;
-		}
-
 	}
 
 }

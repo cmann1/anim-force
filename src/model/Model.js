@@ -19,6 +19,7 @@ var app;
         (function (EditMode) {
             EditMode[EditMode["EDIT"] = 0] = "EDIT";
             EditMode[EditMode["ANIMATE"] = 1] = "ANIMATE";
+            EditMode[EditMode["PLAYBACK"] = 2] = "PLAYBACK";
         })(EditMode = model.EditMode || (model.EditMode = {}));
         var Model = (function (_super) {
             __extends(Model, _super);
