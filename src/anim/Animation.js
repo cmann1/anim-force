@@ -210,6 +210,50 @@ var app;
                 }
                 this.dispatchChange('deleteKeyframe');
             };
+            Animation.prototype.copyKeyframes = function (frameData, node, forceAll, cut, frameIndex) {
+                if (node === void 0) { node = null; }
+                if (forceAll === void 0) { forceAll = false; }
+                if (cut === void 0) { cut = false; }
+                if (frameIndex === void 0) { frameIndex = -1; }
+                if (frameIndex < 0)
+                    frameIndex = this.frameIndex;
+                var frameCount = 0;
+                var tracks;
+                if (node) {
+                    tracks = {};
+                    var track = this.tracks[node.id];
+                    if (track)
+                        tracks[node.id] = track;
+                }
+                else {
+                    tracks = this.tracks;
+                }
+                for (var trackId in tracks) {
+                    var trackFrameData = {};
+                    var copyCount = this.tracks[trackId].copyKeyframes(trackFrameData, forceAll, cut, frameIndex);
+                    if (copyCount > 0) {
+                        frameData[trackId] = trackFrameData;
+                        frameCount++;
+                    }
+                }
+                return frameCount;
+            };
+            Animation.prototype.pasteKeyframes = function (frameData, frameIndex) {
+                if (frameIndex === void 0) { frameIndex = -1; }
+                if (frameIndex < 0)
+                    frameIndex = this.frameIndex;
+                var frameCount = 0;
+                for (var nodeId in frameData) {
+                    if (!frameData.hasOwnProperty(nodeId))
+                        continue;
+                    var track = this.tracks[nodeId];
+                    if (track) {
+                        track.pasteKeyframes(frameData[nodeId], frameIndex);
+                        frameCount++;
+                    }
+                }
+                return frameCount;
+            };
             Animation.prototype.getLength = function () {
                 return this.length;
             };

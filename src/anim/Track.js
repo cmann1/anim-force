@@ -7,6 +7,11 @@ var app;
             Interpolation[Interpolation["LINEAR"] = 0] = "LINEAR";
             Interpolation[Interpolation["COSINE"] = 1] = "COSINE";
         })(Interpolation = anim.Interpolation || (anim.Interpolation = {}));
+        var KEYFRAME_DATA = {
+            prev: null,
+            current: null,
+            next: null,
+        };
         var Track = (function () {
             function Track(animation, node) {
                 this.properties = {};
@@ -75,6 +80,33 @@ var app;
                     var property = this.properties[propertyName];
                     property.deleteKeyframe(frameIndex);
                     property.updateNode(this.node, this.interpolation);
+                }
+            };
+            Track.prototype.copyKeyframes = function (frameData, forceAll, cut, frameIndex) {
+                if (forceAll === void 0) { forceAll = false; }
+                if (cut === void 0) { cut = false; }
+                if (frameIndex === void 0) { frameIndex = -1; }
+                var frameCount = 0;
+                for (var propertyName in this.properties) {
+                    var property = this.properties[propertyName];
+                    if (property.copy(this.node, frameData, forceAll, frameIndex)) {
+                        frameCount++;
+                    }
+                    if (cut && property.deleteKeyframe(frameIndex)) {
+                        property.updateNode(this.node, this.interpolation);
+                    }
+                }
+                return frameCount;
+            };
+            Track.prototype.pasteKeyframes = function (frameData, frameIndex) {
+                for (var propertyName in frameData) {
+                    if (!frameData.hasOwnProperty(propertyName))
+                        continue;
+                    var property = this.properties[propertyName];
+                    if (property) {
+                        property.updateFrame(frameData[propertyName], frameIndex);
+                        property.updateNode(this.node, this.interpolation);
+                    }
                 }
             };
             Track.prototype.setPosition = function (frameIndex) {
@@ -200,7 +232,7 @@ var app;
                     frameIndex = this.frameIndex;
                 var key = this.frameList[frameIndex];
                 if (!key)
-                    return;
+                    return false;
                 if (key == this.next)
                     this.next = key.next;
                 if (key == this.prev)
@@ -216,6 +248,24 @@ var app;
                 this.frameList[frameIndex] = null;
                 if (this.frames == key)
                     this.frames = null;
+                return true;
+            };
+            TrackProperty.prototype.copy = function (node, frameData, forceAll, frameIndex) {
+                if (forceAll === void 0) { forceAll = false; }
+                if (frameIndex === void 0) { frameIndex = -1; }
+                if (frameIndex < 0)
+                    frameIndex = this.frameIndex;
+                var frame = this.frameList[frameIndex];
+                if (frame) {
+                    this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, frame.prev, frame, frame.next);
+                    return true;
+                }
+                else if (forceAll) {
+                    this.getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+                    this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, KEYFRAME_DATA.prev, KEYFRAME_DATA.current, KEYFRAME_DATA.next);
+                    return true;
+                }
+                return false;
             };
             TrackProperty.prototype.updateFrame = function (node, frameIndex) {
                 if (frameIndex === void 0) { frameIndex = -1; }
@@ -236,16 +286,25 @@ var app;
                     frame.value = node[this.propertyName];
                 }
             };
-            TrackProperty.prototype.updateNode = function (node, interpolation) {
+            TrackProperty.prototype.updateNode = function (node, interpolation, atCurrent, prevKey, currentKey, nextKey) {
+                if (atCurrent === void 0) { atCurrent = true; }
+                if (prevKey === void 0) { prevKey = null; }
+                if (currentKey === void 0) { currentKey = null; }
+                if (nextKey === void 0) { nextKey = null; }
+                if (atCurrent) {
+                    prevKey = this.prev;
+                    currentKey = this.current;
+                    nextKey = this.next;
+                }
                 if (this.type == TrackPropertyType.VECTOR) {
                     var x;
                     var y;
-                    var prev = this.prev;
-                    var next = this.next;
-                    var current = this.current;
+                    var prev = prevKey;
+                    var next = nextKey;
+                    var current = currentKey;
                     if (current) {
-                        x = this.current.x;
-                        y = this.current.y;
+                        x = current.x;
+                        y = current.y;
                     }
                     else if (prev && next) {
                         var t = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
@@ -276,9 +335,9 @@ var app;
                 }
                 else if (this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE) {
                     var value;
-                    var prev = this.prev;
-                    var next = this.next;
-                    var current = this.current;
+                    var prev = prevKey;
+                    var next = nextKey;
+                    var current = currentKey;
                     if (current) {
                         value = current.value;
                     }
@@ -308,34 +367,51 @@ var app;
                     node[this.propertyName] = value;
                 }
             };
+            TrackProperty.prototype.getKeyFrameAt = function (frameIndex, out) {
+                var current = null;
+                var prev = null;
+                var next = null;
+                if (this.frameList[frameIndex]) {
+                    current = this.frameList[frameIndex];
+                    prev = out.current.prev;
+                    next = out.current.next;
+                }
+                else {
+                    if (this.frames && frameIndex < this.frames.frameIndex) {
+                        next = this.frames;
+                    }
+                    else if (this.last && frameIndex > this.last.frameIndex) {
+                        prev = this.last;
+                    }
+                    else {
+                        for (var i = frameIndex - 1; i >= 0; i--) {
+                            if (prev = this.frameList[i])
+                                break;
+                        }
+                        if (!prev) {
+                            for (var i = frameIndex + 1; i < this.length; i++) {
+                                if (next = this.frameList[i])
+                                    break;
+                            }
+                        }
+                        else {
+                            next = prev.next;
+                        }
+                    }
+                }
+                out.current = current;
+                out.prev = prev;
+                out.next = next;
+                return out;
+            };
             // TODO: Test inserting keyframes at frames that aren't current
             TrackProperty.prototype.insert = function (key) {
                 var frameIndex = key.frameIndex;
                 if (this.frameList[frameIndex])
                     return;
-                var prev = null;
-                var next = null;
-                if (this.frames && frameIndex < this.frames.frameIndex) {
-                    next = this.frames;
-                }
-                else if (this.last && frameIndex > this.last.frameIndex) {
-                    prev = this.last;
-                }
-                else {
-                    for (var i = frameIndex - 1; i >= 0; i--) {
-                        if (prev = this.frameList[i])
-                            break;
-                    }
-                    if (!prev) {
-                        for (var i = frameIndex + 1; i < this.length; i++) {
-                            if (next = this.frameList[i])
-                                break;
-                        }
-                    }
-                    else {
-                        next = prev.next;
-                    }
-                }
+                this.getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+                var prev = KEYFRAME_DATA.prev;
+                var next = KEYFRAME_DATA.next;
                 if (prev) {
                     key.prev = prev;
                     prev.next = key;

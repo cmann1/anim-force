@@ -279,6 +279,60 @@ namespace app.anim
 			this.dispatchChange('deleteKeyframe');
 		}
 
+		public copyKeyframes(frameData:any, node:Node = null, forceAll = false, cut = false, frameIndex = -1):number
+		{
+			if(frameIndex < 0) frameIndex = this.frameIndex;
+
+			var frameCount = 0;
+			var tracks:{[id:string]:Track};
+
+			if(node)
+			{
+				tracks = {};
+				const track = this.tracks[node.id];
+				if(track) tracks[node.id] = track;
+			}
+			else
+			{
+				tracks = this.tracks;
+			}
+
+			for(var trackId in tracks)
+			{
+				var trackFrameData = {};
+				var copyCount = this.tracks[trackId].copyKeyframes(trackFrameData, forceAll, cut, frameIndex);
+
+				if(copyCount > 0)
+				{
+					frameData[trackId] = trackFrameData;
+					frameCount++;
+				}
+			}
+
+			return frameCount;
+		}
+
+		public pasteKeyframes(frameData:any, frameIndex = -1):number
+		{
+			if(frameIndex < 0) frameIndex = this.frameIndex;
+
+			var frameCount = 0;
+
+			for(var nodeId in frameData)
+			{
+				if(!frameData.hasOwnProperty(nodeId)) continue;
+
+				const track = this.tracks[nodeId];
+				if(track)
+				{
+					track.pasteKeyframes(frameData[nodeId], frameIndex);
+					frameCount++;
+				}
+			}
+
+			return frameCount;
+		}
+
 		public getLength()
 		{
 			return this.length;

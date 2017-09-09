@@ -7,6 +7,13 @@ namespace app.anim
 		COSINE
 	}
 
+	type KeyframeStruct = {prev:Keyframe, current:Keyframe, next:Keyframe};
+	var KEYFRAME_DATA:KeyframeStruct = {
+		prev: null,
+		current: null,
+		next: null,
+	};
+
 	import Node = app.model.Node;
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
@@ -119,6 +126,44 @@ namespace app.anim
 				const property = this.properties[propertyName];
 				property.deleteKeyframe(frameIndex);
 				property.updateNode(this.node, this.interpolation);
+			}
+		}
+
+		public copyKeyframes(frameData:any, forceAll = false, cut = false, frameIndex = -1):number
+		{
+			var frameCount = 0;
+
+			for(var propertyName in this.properties)
+			{
+				const property = this.properties[propertyName];
+
+				if(property.copy(this.node, frameData, forceAll, frameIndex))
+				{
+					frameCount++;
+				}
+
+				if(cut && property.deleteKeyframe(frameIndex))
+				{
+					property.updateNode(this.node, this.interpolation);
+				}
+			}
+
+			return frameCount;
+		}
+
+		public pasteKeyframes(frameData:any, frameIndex:number)
+		{
+			for(var propertyName in frameData)
+			{
+				if(!frameData.hasOwnProperty(propertyName)) continue;
+
+				const property = this.properties[propertyName];
+
+				if(property)
+				{
+					property.updateFrame(frameData[propertyName], frameIndex);
+					property.updateNode(this.node, this.interpolation);
+				}
 			}
 		}
 
@@ -285,12 +330,12 @@ namespace app.anim
 			this.frameIndex = frameIndex;
 		}
 
-		public deleteKeyframe(frameIndex = -1)
+		public deleteKeyframe(frameIndex = -1):boolean
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			const key = this.frameList[frameIndex];
-			if(!key) return;
+			if(!key) return false;
 
 			if(key == this.next) this.next = key.next;
 			if(key == this.prev) this.prev = key.prev;
@@ -302,12 +347,36 @@ namespace app.anim
 			this.frameList[frameIndex] = null;
 
 			if(this.frames == key) this.frames = null;
+
+			return true;
 		}
 
-		public updateFrame(node:Node, frameIndex = -1)
+		public copy(node:Node, frameData:any, forceAll = false, frameIndex = -1):boolean
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
+			const frame = this.frameList[frameIndex];
+
+			if(frame)
+			{
+				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, frame.prev, frame, frame.next);
+
+				return true;
+			}
+			else if(forceAll)
+			{
+				this.getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, KEYFRAME_DATA.prev, KEYFRAME_DATA.current, KEYFRAME_DATA.next);
+
+				return true;
+			}
+
+			return false;
+		}
+
+		public updateFrame(node:Node|any, frameIndex = -1)
+		{
+			if(frameIndex < 0) frameIndex = this.frameIndex;
 			var frame:Keyframe = this.frameList[frameIndex];
 
 			if(this.type == TrackPropertyType.VECTOR)
@@ -331,20 +400,27 @@ namespace app.anim
 			}
 		}
 
-		public updateNode(node:Node, interpolation:Interpolation)
+		public updateNode(node:Node|any, interpolation:Interpolation, atCurrent = true, prevKey:Keyframe = null, currentKey:Keyframe = null, nextKey:Keyframe = null)
 		{
+			if(atCurrent)
+			{
+				prevKey = this.prev;
+				currentKey = this.current;
+				nextKey = this.next;
+			}
+
 			if(this.type == TrackPropertyType.VECTOR)
 			{
 				var x:number;
 				var y:number;
-				const prev = (<VectorKeyframe> this.prev);
-				const next = (<VectorKeyframe> this.next);
-				const current = (<VectorKeyframe> this.current);
+				const prev = (<VectorKeyframe> prevKey);
+				const next = (<VectorKeyframe> nextKey);
+				const current = (<VectorKeyframe> currentKey);
 
 				if(current)
 				{
-					x = (<VectorKeyframe> this.current).x;
-					y = (<VectorKeyframe> this.current).y;
+					x = (<VectorKeyframe> current).x;
+					y = (<VectorKeyframe> current).y;
 				}
 				else if(prev && next)
 				{
@@ -384,9 +460,9 @@ namespace app.anim
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
 			{
 				var value:number;
-				const prev = (<NumberKeyframe> this.prev);
-				const next = (<NumberKeyframe> this.next);
-				const current = (<NumberKeyframe> this.current);
+				const prev = (<NumberKeyframe> prevKey);
+				const next = (<NumberKeyframe> nextKey);
+				const current = (<NumberKeyframe> currentKey);
 
 				if(current)
 				{
@@ -430,6 +506,55 @@ namespace app.anim
 			}
 		}
 
+		public getKeyFrameAt(frameIndex:number, out:KeyframeStruct)
+		{
+			var current:Keyframe = null;
+			var prev:Keyframe = null;
+			var next:Keyframe = null;
+
+			if(this.frameList[frameIndex])
+			{
+				current = this.frameList[frameIndex];
+				prev = out.current.prev;
+				next = out.current.next;
+			}
+			else
+			{
+				if(this.frames && frameIndex < this.frames.frameIndex)
+				{
+					next = this.frames;
+				}
+				else if(this.last && frameIndex > this.last.frameIndex)
+				{
+					prev = this.last;
+				}
+				else
+				{
+					for(var i = frameIndex - 1; i >= 0; i--)
+					{
+						if(prev = this.frameList[i]) break;
+					}
+					if(!prev)
+					{
+						for(var i = frameIndex + 1; i < this.length; i++)
+						{
+							if(next = this.frameList[i]) break;
+						}
+					}
+					else
+					{
+						next = prev.next;
+					}
+				}
+			}
+
+			out.current = current;
+			out.prev = prev;
+			out.next = next;
+
+			return out;
+		}
+
 		// TODO: Test inserting keyframes at frames that aren't current
 		protected insert(key:Keyframe)
 		{
@@ -437,35 +562,9 @@ namespace app.anim
 
 			if(this.frameList[frameIndex]) return;
 
-			var prev:Keyframe = null;
-			var next:Keyframe = null;
-
-			if(this.frames && frameIndex < this.frames.frameIndex)
-			{
-				next = this.frames;
-			}
-			else if(this.last && frameIndex > this.last.frameIndex)
-			{
-				prev = this.last;
-			}
-			else
-			{
-				for(var i = frameIndex - 1; i >= 0; i--)
-				{
-					if(prev = this.frameList[i]) break;
-				}
-				if(!prev)
-				{
-					for(var i = frameIndex + 1; i < this.length; i++)
-					{
-						if(next = this.frameList[i]) break;
-					}
-				}
-				else
-				{
-					next = prev.next;
-				}
-			}
+			this.getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+			var prev:Keyframe = KEYFRAME_DATA.prev;
+			var next:Keyframe = KEYFRAME_DATA.next;
 
 			if(prev)
 			{

@@ -333,6 +333,9 @@ var app;
                 if (this.mode == EditMode.PLAYBACK)
                     return;
                 var keyCode = event.keyCode;
+                var ctrlKey = event.ctrlKey;
+                var shiftKey = event.shiftKey;
+                var altKey = event.altKey;
                 // console.log(keyCode);
                 if (this.mode == EditMode.ANIMATE) {
                     if (keyCode == Key.Home) {
@@ -340,6 +343,16 @@ var app;
                     }
                     else if (keyCode == Key.End) {
                         this.setFrame(this.animation.getLength() - 1);
+                    }
+                    else if (ctrlKey && (keyCode == Key.C || keyCode == Key.X)) {
+                        var frameData = {};
+                        var frameCount = this.animation.copyKeyframes(frameData, this.model.getSelectedNode(), altKey, keyCode == Key.X);
+                        app.Clipboard.setData('keyframes', frameData);
+                        this.viewport.showMessage("Copied " + frameCount + " frames");
+                    }
+                    else if (ctrlKey && keyCode == Key.V) {
+                        var frameCount = this.animation.pasteKeyframes(app.Clipboard.getData('keyframes'));
+                        this.viewport.showMessage("Pasted " + frameCount + " frames");
                     }
                 }
             };

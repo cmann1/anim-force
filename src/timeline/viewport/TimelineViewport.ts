@@ -462,6 +462,10 @@ namespace app.timeline
 			if(this.mode == EditMode.PLAYBACK) return;
 
 			const keyCode = event.keyCode;
+			const ctrlKey = event.ctrlKey;
+			const shiftKey = event.shiftKey;
+			const altKey = event.altKey;
+
 			// console.log(keyCode);
 
 			if(this.mode == EditMode.ANIMATE)
@@ -470,10 +474,22 @@ namespace app.timeline
 				{
 					this.setFrame(0);
 				}
-
 				else if(keyCode == Key.End)
 				{
 					this.setFrame(this.animation.getLength() - 1);
+				}
+
+				else if(ctrlKey && (keyCode == Key.C || keyCode == Key.X))
+				{
+					var frameData = {};
+					var frameCount = this.animation.copyKeyframes(frameData, this.model.getSelectedNode(), altKey, keyCode == Key.X);
+					Clipboard.setData('keyframes', frameData);
+					this.viewport.showMessage(`Copied ${frameCount} frames`);
+				}
+				else if(ctrlKey && keyCode == Key.V)
+				{
+					var frameCount = this.animation.pasteKeyframes(Clipboard.getData('keyframes'));
+					this.viewport.showMessage(`Pasted ${frameCount} frames`);
 				}
 			}
 		}

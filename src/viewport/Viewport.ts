@@ -307,7 +307,7 @@ namespace app.viewport
 			this.cameraY = stageY - (screenY - this.centreY) / this.scale;
 		}
 
-		protected showMessage(message:string, duration=1000)
+		public showMessage(message:string, duration=1000)
 		{
 			this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
 		}

@@ -1,6 +1,7 @@
 /*
+// TODO: Timeline tree edit names focus not working, f2 not working
 // TODO: Timeline:
-// TODO: - Copy/paste frames
+// TODO: - Copy/Cut/paste frames
 // TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
