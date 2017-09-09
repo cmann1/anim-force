@@ -17,10 +17,13 @@ namespace app.anim
 		public name:string;
 		public tracks:{[id:string]:Track} = {};
 		public active:boolean = false;
-		public fps = 15;
+		public fps = 30;
 		public loop = true;
 
 		protected model:app.model.Model;
+
+		protected accumulatedTime:number = 0;
+		protected fpsStep;
 
 		protected frameIndex:number = 0;
 		protected length:number = 1;
@@ -84,6 +87,38 @@ namespace app.anim
 
 			track.forceKeyframe();
 			return track;
+		}
+
+		public clear()
+		{
+			this.frameIndex = 0;
+			this.length = 1;
+			this.fps = 30;
+			this.tracks = {};
+
+			this.dispatchChange('clear');
+		}
+
+		public initForAnimation()
+		{
+			this.fpsStep = 1 / this.fps;
+			this.accumulatedTime = 0;
+		}
+
+		public animateStep(deltaTime:number)
+		{
+			this.accumulatedTime += deltaTime;
+
+			while(this.accumulatedTime > this.fpsStep)
+			{
+				this.gotoNextFrame();
+				this.accumulatedTime -= this.fpsStep;
+
+				if(this.frameIndex >= this.length)
+				{
+					this.setPosition(this.frameIndex - this.length);
+				}
+			}
 		}
 
 		public forceKeyframe(node:Node = null, frameIndex = -1)

@@ -12,8 +12,9 @@ var app;
                 var _this = this;
                 this.tracks = {};
                 this.active = false;
-                this.fps = 15;
+                this.fps = 30;
                 this.loop = true;
+                this.accumulatedTime = 0;
                 this.frameIndex = 0;
                 this.length = 1;
                 this.suppressEvents = false;
@@ -81,6 +82,27 @@ var app;
                 }
                 track.forceKeyframe();
                 return track;
+            };
+            Animation.prototype.clear = function () {
+                this.frameIndex = 0;
+                this.length = 1;
+                this.fps = 30;
+                this.tracks = {};
+                this.dispatchChange('clear');
+            };
+            Animation.prototype.initForAnimation = function () {
+                this.fpsStep = 1 / this.fps;
+                this.accumulatedTime = 0;
+            };
+            Animation.prototype.animateStep = function (deltaTime) {
+                this.accumulatedTime += deltaTime;
+                while (this.accumulatedTime > this.fpsStep) {
+                    this.gotoNextFrame();
+                    this.accumulatedTime -= this.fpsStep;
+                    if (this.frameIndex >= this.length) {
+                        this.setPosition(this.frameIndex - this.length);
+                    }
+                }
             };
             Animation.prototype.forceKeyframe = function (node, frameIndex) {
                 if (node === void 0) { node = null; }

@@ -162,6 +162,33 @@ div#timeline-tree-toolbar {
   .model-node.model > .children:before {
     content: normal; }
 
+div#timeline-container {
+  display: flex;
+  flex-direction: column; }
+
+#time-canvas-container {
+  flex-grow: 1;
+  flex-shrink: 1;
+  position: relative; }
+
+canvas#timeline {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  outline: 0; }
+
+#timeline-toolbar {
+  background-color: #ECECEC;
+  border-top: 1px solid #C1C1C1;
+  display: flex;
+  padding: 5px; }
+  #timeline-toolbar .frame-label {
+    vertical-align: middle;
+    padding-top: 3px;
+    margin: 0 10px; }
+  #timeline-toolbar .btn-play, #timeline-toolbar .btn-pause {
+    width: 12px; }
+
 #sprite_selector {
   width: 900px; }
   #sprite_selector .sprite_group {
@@ -253,31 +280,6 @@ div#timeline-panel {
   background: #ffffff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
   border-radius: 4px; }
-
-div#timeline-container {
-  display: flex;
-  flex-direction: column; }
-
-#time-canvas-container {
-  flex-grow: 1;
-  flex-shrink: 1;
-  position: relative; }
-
-canvas#timeline {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  outline: 0; }
-
-#timeline-toolbar {
-  background-color: #ECECEC;
-  border-top: 1px solid #C1C1C1;
-  display: flex;
-  padding: 5px; }
-  #timeline-toolbar .frame-label {
-    vertical-align: middle;
-    padding-top: 3px;
-    margin: 0 10px; }
 
 i.fa {
   padding: 4px;

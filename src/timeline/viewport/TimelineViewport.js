@@ -14,6 +14,7 @@ var app;
     (function (timeline) {
         var ContainerNode = app.model.ContainerNode;
         var Key = KeyCodes.Key;
+        var EditMode = app.model.EditMode;
         var TimelineViewport = (function (_super) {
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId, model, tree) {
@@ -43,7 +44,7 @@ var app;
                 };
                 _this.onAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'position') {
+                    if (type == 'position' || type == 'clear') {
                         _this.setFrame(animation.getPosition());
                         _this.updateFrameLabel();
                     }
@@ -58,6 +59,9 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
+                _this.onModelModeChange = function (model, event) {
+                    _this.mode = model.mode;
+                };
                 _this.onTreeNodeUpdate = function (node, event) {
                     _this.requiresUpdate = true;
                 };
@@ -67,11 +71,13 @@ var app;
                 };
                 _this.model = model;
                 _this.tree = tree;
+                _this.mode = model.mode;
                 _this.animation = model.getActiveAnimation();
                 _this.animation.change.on(_this.onAnimationChange);
                 model.activeAnimationChange.on(_this.onActiveAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
+                model.modeChange.on(_this.onModelModeChange);
                 tree.scrollChange.on(_this.onTreeScroll);
                 tree.treeNodeUpdate.on(_this.onTreeNodeUpdate);
                 _this.$container.on('resize', _this.onResize);
@@ -121,12 +127,6 @@ var app;
                     if (node instanceof ContainerNode && !node.collapsed) {
                         for (var j = node.childCount - 1; j >= 0; j--)
                             nodes[++i] = node.children[j];
-                        // for(var child of node.children)
-                        // {
-                        // 	nodes[++i] = child;
-                        // }
-                        // nodes = nodes.concat(node.children);
-                        // i += node.childCount;
                     }
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
@@ -259,50 +259,76 @@ var app;
                     return;
                 if (this.commonKey(event))
                     return;
+                if (this.mode == EditMode.PLAYBACK)
+                    return;
                 var keyCode = event.keyCode;
                 // console.log(keyCode);
-                if (keyCode == Key.Home) {
-                    this.setFrame(0);
-                }
-                else if (keyCode == Key.End) {
-                    this.setFrame(this.animation.getLength() - 1);
+                if (this.mode == EditMode.ANIMATE) {
+                    if (keyCode == Key.Home) {
+                        this.setFrame(0);
+                    }
+                    else if (keyCode == Key.End) {
+                        this.setFrame(this.animation.getLength() - 1);
+                    }
                 }
             };
             TimelineViewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;
-                // Prev/Next frame
-                if (keyCode == Key.Comma) {
-                    if (event.shiftKey)
-                        this.animation.setPosition(this.animation.getPosition() - 5);
-                    else
-                        this.animation.gotoPrevFrame();
+                if (this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK) {
+                    // Playback
+                    if (keyCode == Key.ForwardSlash) {
+                        if (this.mode == EditMode.ANIMATE) {
+                            this.model.mode = EditMode.PLAYBACK;
+                            return true;
+                        }
+                        else if (this.mode == EditMode.PLAYBACK) {
+                            this.model.mode = EditMode.ANIMATE;
+                            return true;
+                        }
+                    }
                 }
-                else if (keyCode == Key.Period) {
-                    if (event.shiftKey)
-                        this.animation.setPosition(this.animation.getPosition() + 5);
-                    else
-                        this.animation.gotoNextFrame();
+                if (this.mode == EditMode.ANIMATE) {
+                    // Prev/Next frame
+                    if (keyCode == Key.Comma) {
+                        if (event.shiftKey)
+                            this.animation.setPosition(this.animation.getPosition() - 5);
+                        else
+                            this.animation.gotoPrevFrame();
+                        return true;
+                    }
+                    else if (keyCode == Key.Period) {
+                        if (event.shiftKey)
+                            this.animation.setPosition(this.animation.getPosition() + 5);
+                        else
+                            this.animation.gotoNextFrame();
+                        return true;
+                    }
+                    // Prev/Next keyframe
+                    if (keyCode == Key.OpenBracket) {
+                        this.animation.gotoPrevKeyframe();
+                        return true;
+                    }
+                    else if (keyCode == Key.ClosedBracket) {
+                        this.animation.gotoNextKeyframe();
+                        return true;
+                    }
+                    else if (keyCode == Key.X) {
+                        this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                        return true;
+                    }
+                    else if (keyCode == Key.I) {
+                        this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                        return true;
+                    }
                 }
-                // Prev/Next keyframe
-                if (keyCode == Key.OpenBracket) {
-                    this.animation.gotoPrevKeyframe();
-                }
-                else if (keyCode == Key.ClosedBracket) {
-                    this.animation.gotoNextKeyframe();
-                }
-                else if (keyCode == Key.X) {
-                    this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-                }
-                else if (keyCode == Key.I) {
-                    this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-                }
-                // Other
                 return false;
             };
             TimelineViewport.prototype.onKeyUp = function (event) {
             };
             TimelineViewport.prototype.onMouseDown = function (event) {
                 this.$canvas.focus();
+                if (this.mode == EditMode.PLAYBACK)
+                    return;
                 // Drag view
                 if (event.button == 2) {
                     this.dragViewX = this.scrollX + this.mouseX;
@@ -328,6 +354,8 @@ var app;
                 this.tree.triggerScroll(event);
             };
             TimelineViewport.prototype.onMouseMove = function (event) {
+                if (this.mode == EditMode.PLAYBACK)
+                    return;
                 if (this.dragFrame) {
                     this.setFrame(Math.floor((this.mouseX + this.scrollX) / app.Config.frameWidth));
                 }

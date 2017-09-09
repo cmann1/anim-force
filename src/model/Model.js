@@ -15,6 +15,7 @@ var app;
         var EventDispatcher = app.events.EventDispatcher;
         var StructureChangeEvent = model.events.StructureChangeEvent;
         var SelectionEvent = model.events.SelectionEvent;
+        var Event = app.events.Event;
         var EditMode;
         (function (EditMode) {
             EditMode[EditMode["EDIT"] = 0] = "EDIT";
@@ -23,17 +24,19 @@ var app;
         })(EditMode = model.EditMode || (model.EditMode = {}));
         var Model = (function (_super) {
             __extends(Model, _super);
+            // TODO: Force a keyframe on bind pose when adding nodes
             function Model() {
                 var _this = _super.call(this, 'Unnamed Model') || this;
                 _this.selectedNode = null;
                 _this.highlightedNode = null;
                 _this.drawList = new model.DrawList();
-                _this.mode = EditMode.ANIMATE;
+                _this._mode = EditMode.ANIMATE;
                 // TODO: Set to private
                 _this.bindPose = new app.anim.Animation('BindPose', _this);
                 _this.animations = {};
                 _this.activeAnimation = null;
                 /// Events
+                _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
                 _this.activeAnimationChange = new EventDispatcher();
                 _this.nodeDrawOrder = function (a, b) {
@@ -54,10 +57,8 @@ var app;
                 _this.model = _this;
                 _this.type = 'model';
                 _this.bindPose.active = true;
-                _this.bindPose.forceKeyframe();
                 _this.activeAnimation = _this.bindPose;
                 return _this;
-                // TODO: Force a keyframe on bind pose when adding nodes
             }
             Model.prototype.draw = function (ctx, worldScale) {
                 console.error('Use drawModel instead');
@@ -148,6 +149,9 @@ var app;
             Model.prototype.clear = function () {
                 this.selectedNode = null;
                 this.highlightedNode = null;
+                this.bindPose.clear();
+                this.animations = {};
+                this.activeAnimation = this.bindPose;
                 _super.prototype.clear.call(this);
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
@@ -156,6 +160,25 @@ var app;
                 }
                 return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
             };
+            Model.prototype.animateStep = function (deltaTime) {
+                this.activeAnimation.animateStep(deltaTime);
+            };
+            Object.defineProperty(Model.prototype, "mode", {
+                get: function () {
+                    return this._mode;
+                },
+                set: function (value) {
+                    if (this._mode == value)
+                        return;
+                    if (value == EditMode.PLAYBACK) {
+                        this.activeAnimation.initForAnimation();
+                    }
+                    this._mode = value;
+                    this.modeChange.dispatch(this, new Event('mode'));
+                },
+                enumerable: true,
+                configurable: true
+            });
             /*
              * Events
              */

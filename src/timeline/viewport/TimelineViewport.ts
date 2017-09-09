@@ -13,6 +13,7 @@ namespace app.timeline
 	import ContainerNode = app.model.ContainerNode;
 	import Track = app.anim.Track;
 	import Key = KeyCodes.Key;
+	import EditMode = app.model.EditMode;
 
 	export class TimelineViewport extends app.Canvas
 	{
@@ -20,6 +21,7 @@ namespace app.timeline
 		private model:Model;
 		private tree:TimelineTree;
 		private animation:Animation;
+		private mode:EditMode;
 
 		private $toolbar:JQuery;
 		private $frameLabel:JQuery;
@@ -51,11 +53,13 @@ namespace app.timeline
 			this.model = model;
 			this.tree = tree;
 
+			this.mode = model.mode;
 			this.animation = model.getActiveAnimation();
 			this.animation.change.on(this.onAnimationChange);
 			model.activeAnimationChange.on(this.onActiveAnimationChange);
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
+			model.modeChange.on(this.onModelModeChange);
 			tree.scrollChange.on(this.onTreeScroll);
 			tree.treeNodeUpdate.on(this.onTreeNodeUpdate);
 
@@ -118,12 +122,6 @@ namespace app.timeline
 				if(node instanceof ContainerNode && !node.collapsed)
 				{
 					for(var j = node.childCount - 1; j >= 0; j--) nodes[++i] = node.children[j];
-					// for(var child of node.children)
-					// {
-					// 	nodes[++i] = child;
-					// }
-					// nodes = nodes.concat(node.children);
-					// i += node.childCount;
 				}
 
 				if(y <= bottom && y + nodeHeight >= top)
@@ -313,7 +311,7 @@ namespace app.timeline
 		{
 			const type = event.type;
 
-			if(type == 'position')
+			if(type == 'position' || type == 'clear')
 			{
 				this.setFrame(animation.getPosition());
 				this.updateFrameLabel();
@@ -336,6 +334,11 @@ namespace app.timeline
 			this.requiresUpdate = true;
 		};
 
+		private onModelModeChange = (model:Model, event:Event) =>
+		{
+			this.mode = model.mode;
+		};
+
 		protected onTreeNodeUpdate = (node:TreeNode, event:Event) =>
 		{
 			this.requiresUpdate = true;
@@ -352,17 +355,22 @@ namespace app.timeline
 			if(this.viewport.commonKey(event)) return;
 			if(this.commonKey(event)) return;
 
+			if(this.mode == EditMode.PLAYBACK) return;
+
 			const keyCode = event.keyCode;
 			// console.log(keyCode);
 
-			if(keyCode == Key.Home)
+			if(this.mode == EditMode.ANIMATE)
 			{
-				this.setFrame(0);
-			}
+				if(keyCode == Key.Home)
+				{
+					this.setFrame(0);
+				}
 
-			else if(keyCode == Key.End)
-			{
-				this.setFrame(this.animation.getLength() - 1);
+				else if(keyCode == Key.End)
+				{
+					this.setFrame(this.animation.getLength() - 1);
+				}
 			}
 		}
 
@@ -370,43 +378,70 @@ namespace app.timeline
 		{
 			const keyCode = event.keyCode;
 
-			// Prev/Next frame
-			if(keyCode == Key.Comma)
+			if(this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK)
 			{
-				if(event.shiftKey)
-					this.animation.setPosition(this.animation.getPosition() - 5);
-				else
-					this.animation.gotoPrevFrame();
-			}
-			else if(keyCode == Key.Period)
-			{
-				if(event.shiftKey)
-					this.animation.setPosition(this.animation.getPosition() + 5);
-				else
-					this.animation.gotoNextFrame();
-			}
-
-			// Prev/Next keyframe
-			if(keyCode == Key.OpenBracket)
-			{
-				this.animation.gotoPrevKeyframe();
-			}
-			else if(keyCode == Key.ClosedBracket)
-			{
-				this.animation.gotoNextKeyframe();
+				// Playback
+				if(keyCode == Key.ForwardSlash)
+				{
+					if(this.mode == EditMode.ANIMATE)
+					{
+						this.model.mode = EditMode.PLAYBACK;
+						return true;
+					}
+					else if(this.mode == EditMode.PLAYBACK)
+					{
+						this.model.mode = EditMode.ANIMATE;
+						return true;
+					}
+				}
 			}
 
-			// Keyframes
-			else if(keyCode == Key.X)
+			if(this.mode == EditMode.ANIMATE)
 			{
-				this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-			}
-			else if(keyCode == Key.I)
-			{
-				this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-			}
+				// Prev/Next frame
+				if(keyCode == Key.Comma)
+				{
+					if(event.shiftKey)
+						this.animation.setPosition(this.animation.getPosition() - 5);
+					else
+						this.animation.gotoPrevFrame();
 
-			// Other
+					return true;
+				}
+				else if(keyCode == Key.Period)
+				{
+					if(event.shiftKey)
+						this.animation.setPosition(this.animation.getPosition() + 5);
+					else
+						this.animation.gotoNextFrame();
+
+					return true;
+				}
+
+				// Prev/Next keyframe
+				if(keyCode == Key.OpenBracket)
+				{
+					this.animation.gotoPrevKeyframe();
+					return true;
+				}
+				else if(keyCode == Key.ClosedBracket)
+				{
+					this.animation.gotoNextKeyframe();
+					return true;
+				}
+
+				// Keyframes
+				else if(keyCode == Key.X)
+				{
+					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+					return true;
+				}
+				else if(keyCode == Key.I)
+				{
+					this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+					return true;
+				}
+			}
 
 			return false;
 		}
@@ -419,6 +454,8 @@ namespace app.timeline
 		protected onMouseDown(event)
 		{
 			this.$canvas.focus();
+
+			if(this.mode == EditMode.PLAYBACK) return;
 
 			// Drag view
 			if(event.button == 2)
@@ -458,6 +495,8 @@ namespace app.timeline
 
 		protected onMouseMove(event)
 		{
+			if(this.mode == EditMode.PLAYBACK) return;
+
 			if(this.dragFrame)
 			{
 				this.setFrame(Math.floor((this.mouseX + this.scrollX) / Config.frameWidth));

@@ -1,9 +1,10 @@
 /*
 // TODO: Timeline:
-// TODO: - Play/Pause disable editing + toolbar + common key
+// TODO: - Copy/paste frames
+// TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: - Toolbar
 // TODO: - - Make play/pause one button
-// TODO: - Dragging keyframes + keyboard shortcuts
+// TODO: - - Focus timeline canvas after clicking a button
 // TODO: Separate edit and animate modes
 // TODO: - Edit mode:
 // TODO: - - Replace stretch handle with length handle
@@ -30,6 +31,8 @@
 // TODO: - Add cancel button
 // TODO: Ghosts
 // TODO: Show loading sprite when changing sprites
+// TODO: Keyboard shortcuts from changing layer and sublayer
+
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:

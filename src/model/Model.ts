@@ -6,6 +6,7 @@ namespace app.model
 	import SelectionEvent = events.SelectionEvent;
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import Event = app.events.Event;
 
 	export enum EditMode
 	{
@@ -16,13 +17,12 @@ namespace app.model
 
 	export class Model extends ContainerNode
 	{
-
 		private selectedNode:Node = null;
 		private highlightedNode:Node = null;
 
 		protected drawList:DrawList = new DrawList();
 
-		public mode:EditMode = EditMode.ANIMATE;
+		private _mode:EditMode = EditMode.ANIMATE;
 
 		// TODO: Set to private
 		public bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this);
@@ -31,9 +31,11 @@ namespace app.model
 
 		/// Events
 
+		public modeChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public selectionChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public activeAnimationChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 
+		// TODO: Force a keyframe on bind pose when adding nodes
 		constructor()
 		{
 			super('Unnamed Model');
@@ -41,9 +43,7 @@ namespace app.model
 			this.type = 'model';
 
 			this.bindPose.active = true;
-			this.bindPose.forceKeyframe();
 			this.activeAnimation = this.bindPose;
-			// TODO: Force a keyframe on bind pose when adding nodes
 		}
 
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
@@ -180,6 +180,10 @@ namespace app.model
 			this.selectedNode = null;
 			this.highlightedNode = null;
 
+			this.bindPose.clear();
+			this.animations = {};
+			this.activeAnimation = this.bindPose;
+
 			super.clear();
 		}
 
@@ -191,6 +195,29 @@ namespace app.model
 			}
 
 			return super.hitTest(x, y, worldScaleFactor, result);
+		}
+
+		public animateStep(deltaTime:number)
+		{
+			this.activeAnimation.animateStep(deltaTime);
+		}
+
+		get mode():app.model.EditMode
+		{
+			return this._mode;
+		}
+
+		set mode(value:app.model.EditMode)
+		{
+			if(this._mode == value) return;
+
+			if(value == EditMode.PLAYBACK)
+			{
+				this.activeAnimation.initForAnimation();
+			}
+
+			this._mode = value;
+			this.modeChange.dispatch(this, new Event('mode'));
 		}
 
 		protected nodeDrawOrder = (a:Node, b:Node):number =>

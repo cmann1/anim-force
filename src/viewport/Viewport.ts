@@ -11,6 +11,7 @@ namespace app.viewport
 	import AngelScriptExporter = app.exporters.AngelScriptExporter;
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
+	import EditMode = app.model.EditMode;
 
 	export class Viewport extends app.Canvas
 	{
@@ -62,6 +63,7 @@ namespace app.viewport
 		protected $message:JQuery;
 
 		private model:Model;
+		private mode:EditMode;
 
 		public timeline:app.timeline.TimelineViewport;
 
@@ -74,6 +76,7 @@ namespace app.viewport
 
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
+			model.modeChange.on(this.onModelModeChange);
 
 			this.$container.on('resize', this.onResize);
 			this.$container.parent().on('resize', this.onResize);
@@ -85,6 +88,11 @@ namespace app.viewport
 
 		public step(deltaTime:number, timestamp:number)
 		{
+			if(this.mode == EditMode.PLAYBACK)
+			{
+				this.model.animateStep(deltaTime);
+			}
+
 			if(!this.requiresUpdate && document.activeElement != this.canvas) return;
 
 			if(this.cameraVelX != 0 || this.cameraVelY != 0)
@@ -346,6 +354,16 @@ namespace app.viewport
 			this.requiresUpdate = true;
 		};
 
+		protected onModelModeChange = (model:Model, event:Event) =>
+		{
+			this.mode = model.mode;
+
+			if(this.mode == EditMode.PLAYBACK)
+			{
+				this.interaction.success = false;
+			}
+		};
+
 		/*
 		 * Events
 		 */
@@ -366,28 +384,19 @@ namespace app.viewport
 				this.scaleIndex = 3;
 			}
 
+			// Zoom in
 			else if(keyCode == Key.Add || keyCode == Key.Equals)
 			{
 				this.zoom(1);
 			}
 
+			// Zoom out
 			else if(keyCode == Key.Subtract || keyCode == Key.Dash)
 			{
 				this.zoom(-1);
 			}
 
-			else if(keyCode == Key.Delete)
-			{
-				if(!this.interaction.success)
-				{
-					const selectedNode = this.model.getSelectedNode();
-					if(selectedNode)
-					{
-						selectedNode.parent.removeChild(selectedNode);
-					}
-				}
-			}
-
+			// Toggle AAB draw
 			else if(keyCode == Key.Zero)
 			{
 				Config.drawAABB = !Config.drawAABB;
@@ -446,31 +455,49 @@ namespace app.viewport
 				this.model.bindPose.forceKeyframe();
 			}
 
-			// TODO: REMOVE
-			else if(keyCode == Key.UpArrow || keyCode == Key.DownArrow)
+			else if(this.mode == EditMode.EDIT)
 			{
-				var node = this.model.getSelectedNode();
-				if(node instanceof Sprite)
+				if(keyCode == Key.Delete)
 				{
-					node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
-					this.showMessage('Frame: ' + node.frame);
+					if(!this.interaction.success)
+					{
+						const selectedNode = this.model.getSelectedNode();
+						if(selectedNode)
+						{
+							selectedNode.parent.removeChild(selectedNode);
+						}
+					}
+				}
+
+				// TODO: REMOVE
+				else if(keyCode == Key.UpArrow || keyCode == Key.DownArrow)
+				{
+					var node = this.model.getSelectedNode();
+					if(node instanceof Sprite)
+					{
+						node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+						this.showMessage('Frame: ' + node.frame);
+					}
+				}
+
+				// TODO: REMOVE
+				else if(keyCode == Key.Enter)
+				{
+					app.main.showSpriteSelector(this.onSpritesSelect);
+				}
+				// TODO: REMOVE
+				else if(keyCode == Key.E)
+				{
+					console.log((new AngelScriptExporter()).exportModel(this.model));
 				}
 			}
 
-			// TODO: REMOVE
-			else if(keyCode == Key.Enter)
-			{
-				app.main.showSpriteSelector(this.onSpritesSelect);
-			}
-			// TODO: REMOVE
-			else if(keyCode == Key.E)
-			{
-				console.log((new AngelScriptExporter()).exportModel(this.model));
-			}
 		}
 
 		public commonKey(event):boolean
 		{
+			if(this.mode == EditMode.PLAYBACK) return false;
+
 			return false;
 		}
 
@@ -495,16 +522,19 @@ namespace app.viewport
 
 			if(event.button == 0)
 			{
-				this.interaction.success = false;
+				if(this.mode != EditMode.PLAYBACK)
+				{
+					this.interaction.success = false;
 
-				if(this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction))
-				{
-					this.interaction.node.setSelected(true);
-					this.interaction.success = true;
-				}
-				else
-				{
-					this.model.setSelectedNode(null);
+					if(this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction))
+					{
+						this.interaction.node.setSelected(true);
+						this.interaction.success = true;
+					}
+					else
+					{
+						this.model.setSelectedNode(null);
+					}
 				}
 			}
 
