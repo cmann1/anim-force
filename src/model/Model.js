@@ -155,6 +155,7 @@ var app;
                 this.bindPose.clear();
                 this.animations = {};
                 this.activeAnimation = this.bindPose;
+                // TODO: Dispatch animatino change event?
                 _super.prototype.clear.call(this);
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {

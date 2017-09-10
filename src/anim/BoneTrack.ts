@@ -8,7 +8,7 @@ namespace app.anim
 	export class BoneTrack extends Track
 	{
 
-		protected node:Bone;
+		public node:Bone;
 
 		constructor(animation:Animation, node:Node)
 		{

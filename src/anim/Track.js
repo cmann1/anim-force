@@ -111,6 +111,7 @@ var app;
                     if (!frameData.hasOwnProperty(propertyName))
                         continue;
                     var property = this.properties[propertyName];
+                    console.log('  ', propertyName, frameIndex, property);
                     if (property) {
                         property.updateFrame(frameData[propertyName], frameIndex);
                         property.updateNode(this.node, this.interpolation);

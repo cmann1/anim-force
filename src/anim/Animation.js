@@ -245,7 +245,8 @@ var app;
                 }
                 return frameCount;
             };
-            Animation.prototype.pasteKeyframes = function (frameData, frameIndex) {
+            Animation.prototype.pasteKeyframes = function (frameData, node, frameIndex) {
+                if (node === void 0) { node = null; }
                 if (frameIndex === void 0) { frameIndex = -1; }
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
@@ -253,10 +254,13 @@ var app;
                 for (var nodeId in frameData) {
                     if (!frameData.hasOwnProperty(nodeId))
                         continue;
-                    var track = this.tracks[nodeId];
+                    var track = this.tracks[node ? node.id : nodeId];
                     if (track) {
                         track.pasteKeyframes(frameData[nodeId], frameIndex);
                         frameCount++;
+                        console.log(node ? node.id : nodeId);
+                        if (node)
+                            break;
                     }
                 }
                 if (frameCount) {

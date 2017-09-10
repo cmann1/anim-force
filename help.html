@@ -25,8 +25,19 @@ Timeline Tree:
 
 Timeline:
 	Pan: Right mouse
+	Select frame: Left mouse
+	Deselect frame: Shift + D
 	First frame: Home
 	Last frame: End
+	Delete selected keyframe: Delete
 	Copy keyframes: Ctrl + C (Shift: Include intermediate frames)
 	Cut keyframes: Ctrl + X (Shift: Include intermediate frames)
 	Paste keyframes: Ctrl + V
+
+Copying/Pasting frames:
+	By default will only copy keyframes. Holding shift will also copy intermediate frames.
+	If nothing is selected, keyframes from all nodes will be copied.
+	If a node is selected only that node's keyframe will be copied.
+
+	If a keyframe is selected, only that keyframe will be copied.
+	If a keyframe is selected when pasting, the data will be pasted into that keyframe (if compatible)

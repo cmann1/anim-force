@@ -317,7 +317,7 @@ namespace app.anim
 			return frameCount;
 		}
 
-		public pasteKeyframes(frameData:any, frameIndex = -1):number
+		public pasteKeyframes(frameData:any, node:Node = null, frameIndex = -1):number
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
@@ -327,11 +327,14 @@ namespace app.anim
 			{
 				if(!frameData.hasOwnProperty(nodeId)) continue;
 
-				const track = this.tracks[nodeId];
+				const track = this.tracks[node ? node.id : nodeId];
 				if(track)
 				{
 					track.pasteKeyframes(frameData[nodeId], frameIndex);
 					frameCount++;
+					console.log(node ? node.id : nodeId);
+
+					if(node) break;
 				}
 			}
 

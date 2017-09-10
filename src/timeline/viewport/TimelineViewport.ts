@@ -23,6 +23,8 @@ namespace app.timeline
 		private animation:Animation;
 		private mode:EditMode;
 
+		private nodeList:Node[] = [];
+
 		private $toolbar:JQuery;
 		private $toolbarButtons:JQuery;
 		private $playButton:JQuery;
@@ -32,6 +34,9 @@ namespace app.timeline
 		private scrollX:number = 0;
 		private scrollY:number = 0;
 		private currentFrame:number = 0;
+
+		private selectedTrack:Node = null;
+		private selectedFrame:number = -1;
 
 		private dragFrame = false;
 		private dragView = false;
@@ -113,20 +118,9 @@ namespace app.timeline
 
 			ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
 
-			var nodes:Node[] = this.model.children.slice();
-			var i = -1;
-			for(var j = this.model.childCount - 1; j >= 0; j--) nodes[++i] = this.model.children[i];
-
 			var y = 0;
-			while(i >= 0)
+			for(var node of this.nodeList)
 			{
-				var node:Node = nodes[i--];
-
-				if(node instanceof ContainerNode && !node.collapsed)
-				{
-					for(var j = node.childCount - 1; j >= 0; j--) nodes[++i] = node.children[j];
-				}
-
 				if(y <= bottom && y + nodeHeight >= top)
 				{
 					ctx.fillStyle = Config.node;
@@ -137,10 +131,17 @@ namespace app.timeline
 					var track:Track = animation.tracks[node.id];
 					var j = Math.floor(left / frameWidth);
 					var x = j * frameWidth;
+					const selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
 
 					for(; j < animationLength; j++)
 					{
 						if(x > right) break;
+
+						if(j == selectedFrame)
+						{
+							ctx.fillStyle = Config.selectedFrame;
+							ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
+						}
 
 						const keyframe = track.getKeyFrame(j);
 						if(keyframe)
@@ -158,6 +159,7 @@ namespace app.timeline
 							ctx.fill();
 							ctx.stroke();
 
+							// Arrow connecting keyframes
 							if(keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1)
 							{
 								cx = keyframe.frameIndex * frameWidth - 3;
@@ -248,7 +250,6 @@ namespace app.timeline
 
 		private setupToolbar()
 		{
-			// TODO: Toolbar buttons
 			this.$toolbar = this.$container.parent().find('#timeline-toolbar');
 			this.$frameLabel = this.$toolbar.find('.frame-label .value');
 
@@ -258,16 +259,6 @@ namespace app.timeline
 
 			this.$toolbar
 				.on('click', 'i', this.onToolbarButtonClick);
-			// 	.on('mousewheel', this.onToolbarMouseWheel);
-			// this.$toolbar.find('.fa-plus').parent()
-			// 	.on('mouseenter', this.onToolbarAddHover)
-			// 	.on('mouseleave', this.onToolbarAddLeave);
-			// this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
-			//
-			// this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
-			// this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
-			// this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
-			// this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
 
 			tippy(this.$toolbar.find('i').toArray());
 
@@ -303,6 +294,28 @@ namespace app.timeline
 				this.$playButton.removeClass('disabled');
 				this.$pauseButton.removeClass('disabled');
 			}
+		}
+
+		private updateNodeList()
+		{
+			var nodes:Node[] = [];
+			var nodeQueue:Node[] = [];
+			var i = -1;
+			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[i];
+
+			while(i >= 0)
+			{
+				var node:Node = nodeQueue[i--];
+
+				if(node instanceof ContainerNode && !node.collapsed)
+				{
+					for(var j = node.childCount - 1; j >= 0; j--) nodeQueue[++i] = node.children[j];
+				}
+
+				nodes.push(node);
+			}
+
+			this.nodeList = nodes;
 		}
 
 		private setFrame(frame:number)
@@ -354,6 +367,35 @@ namespace app.timeline
 				this.animation.gotoNextFrame();
 		}
 
+		private setSelectedFrame(node:Node, frameIndex:number, toggle=false)
+		{
+			if(frameIndex < 0 || frameIndex >= this.animation.getLength()) node = null;
+
+			if(node == this.selectedTrack && frameIndex == this.selectedFrame)
+			{
+				if(toggle && node)
+				{
+					this.selectedTrack = null;
+					this.selectedFrame = -1;
+				}
+				return;
+			}
+
+			this.selectedTrack = node;
+			this.selectedFrame = node ? frameIndex : -1;
+		}
+
+		private getFrameIndexAt(x:number):number
+		{
+			return Math.floor((x + this.scrollX) / Config.frameWidth);
+		}
+
+		private getNodeAt(y:number):Node
+		{
+			const i = Math.floor(y / Config.nodeHeight);
+			return i < 0 || i >= this.nodeList.length ? null : this.nodeList[i];
+		}
+
 		/*
 		 * Events
 		 */
@@ -379,6 +421,7 @@ namespace app.timeline
 			}
 			else if(type == 'length')
 			{
+				this.setSelectedFrame(this.selectedTrack, this.selectedFrame);
 				this.updateFrameLabel();
 			}
 
@@ -392,6 +435,7 @@ namespace app.timeline
 
 		private onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
 		{
+			this.updateNodeList();
 			this.requiresUpdate = true;
 		};
 
@@ -482,14 +526,24 @@ namespace app.timeline
 				else if(ctrlKey && (keyCode == Key.C || keyCode == Key.X))
 				{
 					var frameData = {};
-					var frameCount = this.animation.copyKeyframes(frameData, this.model.getSelectedNode(), altKey, keyCode == Key.X);
+					var frameCount = this.animation.copyKeyframes(
+						frameData, this.selectedTrack || this.model.getSelectedNode(),
+						altKey, keyCode == Key.X, this.selectedFrame);
 					Clipboard.setData('keyframes', frameData);
 					this.viewport.showMessage(`Copied ${frameCount} frames`);
 				}
 				else if(ctrlKey && keyCode == Key.V)
 				{
-					var frameCount = this.animation.pasteKeyframes(Clipboard.getData('keyframes'));
+					var frameCount = this.animation.pasteKeyframes(Clipboard.getData('keyframes'), this.selectedTrack, this.selectedFrame);
 					this.viewport.showMessage(`Pasted ${frameCount} frames`);
+				}
+
+				else if(keyCode == Key.Delete)
+				{
+					if(this.selectedTrack)
+					{
+						this.animation.deleteKeyframe(this.selectedTrack, this.selectedFrame);
+					}
 				}
 			}
 		}
@@ -575,14 +629,14 @@ namespace app.timeline
 			{
 				if(event.button == 0)
 				{
-					this.setFrame(Math.floor((this.mouseX + this.scrollX) / Config.frameWidth));
+					this.setFrame(this.getFrameIndexAt(this.mouseX));
 					this.dragFrame = true;
 				}
 			}
 
 			else
 			{
-
+				this.setSelectedFrame(this.getNodeAt(this.mouseY - Config.nodeHeight), this.getFrameIndexAt(this.mouseX), true);
 			}
 		}
 

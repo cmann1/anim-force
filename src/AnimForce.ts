@@ -9,11 +9,13 @@
 // TODO: - - Don't allow dragging timeline  frame
 // TODO: - Animate mode:
 // TODO: - - ? Disable adding, removing in the timeline.
+// TODO: Saving/Loading models
+// TODO: - Save to localdata/db and option to export/import from file
+// TODO: - Manage saved models
 // TODO: Manually change animation length
 // TODO: Add, remove, and rename animations
-// TODO: Show/hide controls
-// TODO: Loading sprites
 // TODO: Export to AngelScript
+// TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
 // TODO: Animation events
 // TODO: Some sort of options window/popup:

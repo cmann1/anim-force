@@ -188,6 +188,7 @@ namespace app.model
 			this.bindPose.clear();
 			this.animations = {};
 			this.activeAnimation = this.bindPose;
+			// TODO: Dispatch animatino change event?
 
 			super.clear();
 		}

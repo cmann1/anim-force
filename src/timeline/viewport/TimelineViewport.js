@@ -19,9 +19,12 @@ var app;
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId, model, tree) {
                 var _this = _super.call(this, elementId) || this;
+                _this.nodeList = [];
                 _this.scrollX = 0;
                 _this.scrollY = 0;
                 _this.currentFrame = 0;
+                _this.selectedTrack = null;
+                _this.selectedFrame = -1;
                 _this.dragFrame = false;
                 _this.dragView = false;
                 _this.dragViewX = 0;
@@ -49,6 +52,7 @@ var app;
                         _this.updateFrameLabel();
                     }
                     else if (type == 'length') {
+                        _this.setSelectedFrame(_this.selectedTrack, _this.selectedFrame);
                         _this.updateFrameLabel();
                     }
                     _this.requiresUpdate = true;
@@ -57,6 +61,7 @@ var app;
                     _this.requiresUpdate = true;
                 };
                 _this.onModelStructureChange = function (model, event) {
+                    _this.updateNodeList();
                     _this.requiresUpdate = true;
                 };
                 _this.onModelModeChange = function (model, event) {
@@ -146,17 +151,9 @@ var app;
                 ctx.rect(0, nodeHeight, this.width, this.height - nodeHeight);
                 ctx.clip();
                 ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
-                var nodes = this.model.children.slice();
-                var i = -1;
-                for (var j = this.model.childCount - 1; j >= 0; j--)
-                    nodes[++i] = this.model.children[i];
                 var y = 0;
-                while (i >= 0) {
-                    var node = nodes[i--];
-                    if (node instanceof ContainerNode && !node.collapsed) {
-                        for (var j = node.childCount - 1; j >= 0; j--)
-                            nodes[++i] = node.children[j];
-                    }
+                for (var _i = 0, _a = this.nodeList; _i < _a.length; _i++) {
+                    var node = _a[_i];
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
                         ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
@@ -165,9 +162,14 @@ var app;
                         var track = animation.tracks[node.id];
                         var j = Math.floor(left / frameWidth);
                         var x = j * frameWidth;
+                        var selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
                         for (; j < animationLength; j++) {
                             if (x > right)
                                 break;
+                            if (j == selectedFrame) {
+                                ctx.fillStyle = app.Config.selectedFrame;
+                                ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
+                            }
                             var keyframe = track.getKeyFrame(j);
                             if (keyframe) {
                                 var cx = x + frameCX;
@@ -182,6 +184,7 @@ var app;
                                 ctx.closePath();
                                 ctx.fill();
                                 ctx.stroke();
+                                // Arrow connecting keyframes
                                 if (keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1) {
                                     cx = keyframe.frameIndex * frameWidth - 3;
                                     ctx.beginPath();
@@ -247,7 +250,6 @@ var app;
                 }
             };
             TimelineViewport.prototype.setupToolbar = function () {
-                // TODO: Toolbar buttons
                 this.$toolbar = this.$container.parent().find('#timeline-toolbar');
                 this.$frameLabel = this.$toolbar.find('.frame-label .value');
                 this.$toolbarButtons = this.$toolbar.find('i');
@@ -255,16 +257,6 @@ var app;
                 this.$pauseButton = this.$toolbar.find('.btn-pause');
                 this.$toolbar
                     .on('click', 'i', this.onToolbarButtonClick);
-                // 	.on('mousewheel', this.onToolbarMouseWheel);
-                // this.$toolbar.find('.fa-plus').parent()
-                // 	.on('mouseenter', this.onToolbarAddHover)
-                // 	.on('mouseleave', this.onToolbarAddLeave);
-                // this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
-                //
-                // this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
-                // this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
-                // this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
-                // this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
                 tippy(this.$toolbar.find('i').toArray());
                 this.updateFrameLabel();
                 this.updateToolbarButtons();
@@ -289,6 +281,22 @@ var app;
                     this.$playButton.removeClass('disabled');
                     this.$pauseButton.removeClass('disabled');
                 }
+            };
+            TimelineViewport.prototype.updateNodeList = function () {
+                var nodes = [];
+                var nodeQueue = [];
+                var i = -1;
+                for (var j = this.model.childCount - 1; j >= 0; j--)
+                    nodeQueue[++i] = this.model.children[i];
+                while (i >= 0) {
+                    var node = nodeQueue[i--];
+                    if (node instanceof ContainerNode && !node.collapsed) {
+                        for (var j = node.childCount - 1; j >= 0; j--)
+                            nodeQueue[++i] = node.children[j];
+                    }
+                    nodes.push(node);
+                }
+                this.nodeList = nodes;
             };
             TimelineViewport.prototype.setFrame = function (frame) {
                 if (this.currentFrame == frame)
@@ -325,6 +333,27 @@ var app;
                 else
                     this.animation.gotoNextFrame();
             };
+            TimelineViewport.prototype.setSelectedFrame = function (node, frameIndex, toggle) {
+                if (toggle === void 0) { toggle = false; }
+                if (frameIndex < 0 || frameIndex >= this.animation.getLength())
+                    node = null;
+                if (node == this.selectedTrack && frameIndex == this.selectedFrame) {
+                    if (toggle && node) {
+                        this.selectedTrack = null;
+                        this.selectedFrame = -1;
+                    }
+                    return;
+                }
+                this.selectedTrack = node;
+                this.selectedFrame = node ? frameIndex : -1;
+            };
+            TimelineViewport.prototype.getFrameIndexAt = function (x) {
+                return Math.floor((x + this.scrollX) / app.Config.frameWidth);
+            };
+            TimelineViewport.prototype.getNodeAt = function (y) {
+                var i = Math.floor(y / app.Config.nodeHeight);
+                return i < 0 || i >= this.nodeList.length ? null : this.nodeList[i];
+            };
             TimelineViewport.prototype.onKeyDown = function (event) {
                 if (this.viewport.commonKey(event))
                     return;
@@ -346,13 +375,18 @@ var app;
                     }
                     else if (ctrlKey && (keyCode == Key.C || keyCode == Key.X)) {
                         var frameData = {};
-                        var frameCount = this.animation.copyKeyframes(frameData, this.model.getSelectedNode(), altKey, keyCode == Key.X);
+                        var frameCount = this.animation.copyKeyframes(frameData, this.selectedTrack || this.model.getSelectedNode(), altKey, keyCode == Key.X, this.selectedFrame);
                         app.Clipboard.setData('keyframes', frameData);
                         this.viewport.showMessage("Copied " + frameCount + " frames");
                     }
                     else if (ctrlKey && keyCode == Key.V) {
-                        var frameCount = this.animation.pasteKeyframes(app.Clipboard.getData('keyframes'));
+                        var frameCount = this.animation.pasteKeyframes(app.Clipboard.getData('keyframes'), this.selectedTrack, this.selectedFrame);
                         this.viewport.showMessage("Pasted " + frameCount + " frames");
+                    }
+                    else if (keyCode == Key.Delete) {
+                        if (this.selectedTrack) {
+                            this.animation.deleteKeyframe(this.selectedTrack, this.selectedFrame);
+                        }
                     }
                 }
             };
@@ -411,11 +445,12 @@ var app;
                 // Clicked on header
                 if (this.mouseY <= app.Config.nodeHeight) {
                     if (event.button == 0) {
-                        this.setFrame(Math.floor((this.mouseX + this.scrollX) / app.Config.frameWidth));
+                        this.setFrame(this.getFrameIndexAt(this.mouseX));
                         this.dragFrame = true;
                     }
                 }
                 else {
+                    this.setSelectedFrame(this.getNodeAt(this.mouseY - app.Config.nodeHeight), this.getFrameIndexAt(this.mouseX), true);
                 }
             };
             TimelineViewport.prototype.onMouseUp = function (event) {

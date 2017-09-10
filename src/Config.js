@@ -26,6 +26,7 @@ var app;
     Config.node = '#FBFBFB';
     Config.nodeBottom = '#F0F0F0';
     Config.nodeBorder = '#DCDCDC';
+    Config.selectedFrame = '#fdf4a8';
     Config.line = '#999';
     Config.nodeHeight = 29;
     Config.frameWidth = 15;

@@ -22,8 +22,8 @@ namespace app.anim
 
 		protected animation:Animation;
 		protected properties:{[id:string]:TrackProperty} = {};
-		protected node:Node;
 
+		public node:Node;
 		public length:number = 1;
 		public interpolation:Interpolation = Interpolation.LINEAR;
 
@@ -168,6 +168,7 @@ namespace app.anim
 				if(!frameData.hasOwnProperty(propertyName)) continue;
 
 				const property = this.properties[propertyName];
+				console.log('  ', propertyName, frameIndex, property);
 
 				if(property)
 				{

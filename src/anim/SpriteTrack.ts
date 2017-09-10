@@ -7,7 +7,7 @@ namespace app.anim
 	export class SpriteTrack extends Track
 	{
 
-		protected node:Sprite;
+		public node:Sprite;
 
 		constructor(animation:Animation, node:Node)
 		{
