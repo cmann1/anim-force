@@ -62,6 +62,17 @@ var app;
                 }
                 return null;
             };
+            Track.prototype.getClosestKeyframes = function (frameIndex, out) {
+                for (var propertyName in this.properties) {
+                    this.properties[propertyName].getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+                    if (KEYFRAME_DATA.prev && (!out.prev || KEYFRAME_DATA.prev.frameIndex > out.prev.frameIndex)) {
+                        out.prev = KEYFRAME_DATA.prev;
+                    }
+                    if (KEYFRAME_DATA.next && (!out.next || KEYFRAME_DATA.next.frameIndex < out.next.frameIndex)) {
+                        out.next = KEYFRAME_DATA.next;
+                    }
+                }
+            };
             Track.prototype.getPrevKeyframe = function () {
                 var prev = null;
                 for (var propertyName in this.properties) {

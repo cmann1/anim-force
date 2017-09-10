@@ -7,7 +7,7 @@ namespace app.anim
 		COSINE
 	}
 
-	type KeyframeStruct = {prev:Keyframe, current:Keyframe, next:Keyframe};
+	export type KeyframeStruct = {prev:Keyframe, current:Keyframe, next:Keyframe};
 	var KEYFRAME_DATA:KeyframeStruct = {
 		prev: null,
 		current: null,
@@ -93,6 +93,23 @@ namespace app.anim
 			}
 
 			return null;
+		}
+
+		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct)
+		{
+			for(var propertyName in this.properties)
+			{
+				this.properties[propertyName].getKeyFrameAt(frameIndex, KEYFRAME_DATA);
+
+				if(KEYFRAME_DATA.prev && (!out.prev || KEYFRAME_DATA.prev.frameIndex > out.prev.frameIndex))
+				{
+					out.prev = KEYFRAME_DATA.prev;
+				}
+				if(KEYFRAME_DATA.next && (!out.next || KEYFRAME_DATA.next.frameIndex < out.next.frameIndex))
+				{
+					out.next = KEYFRAME_DATA.next;
+				}
+			}
 		}
 
 		public getPrevKeyframe():Keyframe

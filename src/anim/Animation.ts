@@ -346,6 +346,35 @@ namespace app.anim
 			return frameCount;
 		}
 
+		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct, node:Node=null)
+		{
+			// var tmp:KeyframeStruct = {prev: null, current: null, next:  null};
+
+			if(node)
+			{
+				this.tracks[node.id].getClosestKeyframes(frameIndex, out);
+				return;
+			}
+
+			for(var trackId in this.tracks)
+			{
+				this.tracks[trackId].getClosestKeyframes(frameIndex, out);
+
+				// if(tmp.prev && (!out.prev || tmp.prev.frameIndex > out.prev.frameIndex))
+				// {
+				// 	out.prev = tmp.prev;
+				// }
+				// if(tmp.next && (!out.next || tmp.next.frameIndex < out.next.frameIndex))
+				// {
+				// 	out.next = tmp.next;
+				// }
+				//
+				// tmp.prev = null;
+				// tmp.current = null;
+				// tmp.next = null;
+			}
+		}
+
 		public getLength()
 		{
 			return this.length;

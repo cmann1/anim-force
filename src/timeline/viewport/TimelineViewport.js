@@ -152,7 +152,7 @@ var app;
                 var frameCY = nodeHeight * 0.5;
                 var keyframeSize = this.keyframeSize;
                 var firstFrame = Math.floor(left / frameWidth);
-                var lastFrame = Math.floor(right / frameWidth);
+                var lastFrame = Math.ceil(right / frameWidth);
                 ctx.clearRect(0, 0, this.width, this.height);
                 ctx.save();
                 this.drawHeader();
@@ -168,15 +168,15 @@ var app;
                         ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
                         ctx.fillStyle = app.Config.nodeBorder;
                         ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
+                        var lastKeyframe = -1;
                         var track = animation.tracks[node.id];
                         var j = firstFrame;
                         var x = j * frameWidth;
+                        var onScreenFrameCount = 0;
                         var selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
                         var dragFrame = this.dragKeyframeNode == node ? this.dragKeyframeIndex : -1;
                         var dropTargetFrame = this.dragKeyframeTargetNode == node ? this.dragKeyframeTargetIndex : -1;
                         for (; j < lastFrame; j++) {
-                            if (x > right)
-                                break;
                             if (j == selectedFrame || j == dropTargetFrame) {
                                 ctx.fillStyle = this.selectedFrameColour;
                                 ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
@@ -188,11 +188,15 @@ var app;
                                     ctx.fillRect(x + 1, y + nodeHeight - 2, frameWidth - 3, 1);
                                 }
                             }
+                            var prev = null;
+                            var next = null;
+                            var arrowCount = 0;
+                            var cx = x + frameCX;
+                            var cy = y + frameCY;
                             if (j < animationLength) {
                                 var keyframe = track.getKeyFrame(j);
                                 if (keyframe) {
-                                    var cx = x + frameCX;
-                                    var cy = y + frameCY;
+                                    onScreenFrameCount++;
                                     ctx.fillStyle = this.keyframeColour;
                                     ctx.strokeStyle = this.keyframeBorderColour;
                                     ctx.beginPath();
@@ -204,19 +208,53 @@ var app;
                                     ctx.fill();
                                     ctx.stroke();
                                     // Arrow connecting keyframes
-                                    if (keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1) {
-                                        cx = keyframe.frameIndex * frameWidth - 3;
-                                        ctx.beginPath();
-                                        ctx.moveTo(keyframe.prev.frameIndex * frameWidth + frameWidth + 2, cy);
-                                        ctx.lineTo(cx, cy);
-                                        ctx.lineTo(cx - 4, cy - 4);
-                                        ctx.moveTo(cx, cy);
-                                        ctx.lineTo(cx - 4, cy + 4);
-                                        ctx.stroke();
+                                    if (keyframe.next && keyframe.next.frameIndex > keyframe.frameIndex + 1) {
+                                        lastKeyframe = j;
+                                        prev = keyframe;
+                                        next = keyframe.next;
+                                        arrowCount++;
+                                        if (prev.prev && prev.prev.frameIndex < firstFrame) {
+                                            arrowCount++;
+                                        }
+                                    }
+                                    else if (keyframe.prev && keyframe.prev.frameIndex != lastKeyframe && keyframe.prev.frameIndex < keyframe.frameIndex - 1) {
+                                        lastKeyframe = j;
+                                        prev = keyframe.prev;
+                                        next = keyframe;
+                                        arrowCount++;
                                     }
                                 }
                                 ctx.fillStyle = app.Config.nodeBorder;
                                 ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+                            }
+                            // TODO: On the last frame check if no keyframes are in view and get the prev/next keyframes in order to draw on arrow
+                            //       for the two off-screen keyframes
+                            if (node.id == 1)
+                                if (onScreenFrameCount == 0 && j + 1 == lastFrame) {
+                                    // console.log('HERE', onScreenFrameCount);
+                                    var tmp = { prev: null, current: null, next: null };
+                                    this.animation.getClosestKeyframes(j, tmp, node);
+                                    if (tmp.prev && tmp.next) {
+                                        prev = tmp.prev;
+                                        next = tmp.next;
+                                        arrowCount++;
+                                    }
+                                }
+                            while (arrowCount--) {
+                                cx = next.frameIndex * frameWidth - 3;
+                                ctx.strokeStyle = this.keyframeBorderColour;
+                                ctx.strokeStyle = this.keyframeColour;
+                                ctx.beginPath();
+                                ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
+                                ctx.lineTo(cx, cy);
+                                ctx.lineTo(cx - 4, cy - 4);
+                                ctx.moveTo(cx, cy);
+                                ctx.lineTo(cx - 4, cy + 4);
+                                ctx.stroke();
+                                if (arrowCount > 0) {
+                                    prev = prev.prev;
+                                    next = prev.next;
+                                }
                             }
                             x += frameWidth;
                         }
