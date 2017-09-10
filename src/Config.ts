@@ -33,7 +33,6 @@ namespace app
 		static node = '#FBFBFB';
 		static nodeBottom = '#F0F0F0';
 		static nodeBorder = '#DCDCDC';
-		static selectedFrame = '#fdf4a8';
 		static line = '#999';
 
 		static nodeHeight = 29;

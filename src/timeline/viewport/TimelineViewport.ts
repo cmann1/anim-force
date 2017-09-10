@@ -38,7 +38,13 @@ namespace app.timeline
 		private selectedTrack:Node = null;
 		private selectedFrame:number = -1;
 
-		private dragFrame = false;
+		private dragFrameIndicator = false;
+		private dragKeyframeNode:Node = null;
+		private dragKeyframeIndex:number = -1;
+		private dragKeyframeTargetNode:Node = null;
+		private dragKeyframeTargetIndex:number = -1;
+		private dragKeyframeInitiated = false;
+		private deselectKeyframe = false;
 		private dragView = false;
 		private dragViewX = 0;
 		private dragViewY = 0;
@@ -51,6 +57,7 @@ namespace app.timeline
 		private keyframeSize = 4;
 		private keyframeColour = '#f9e26f';
 		private keyframeBorderColour = '#d4b82d';
+		private selectedFrameColour = '#fdf4a8';
 
 		public viewport:app.viewport.Viewport;
 
@@ -107,6 +114,9 @@ namespace app.timeline
 			const frameCY = nodeHeight * 0.5;
 			const keyframeSize = this.keyframeSize;
 
+			const firstFrame = Math.floor(left / frameWidth);
+			const lastFrame = Math.floor(right / frameWidth);
+
 			ctx.clearRect(0, 0, this.width, this.height);
 			ctx.save();
 
@@ -129,52 +139,66 @@ namespace app.timeline
 					ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
 
 					var track:Track = animation.tracks[node.id];
-					var j = Math.floor(left / frameWidth);
+					var j = firstFrame;
 					var x = j * frameWidth;
 					const selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
+					const dragFrame = this.dragKeyframeNode == node ? this.dragKeyframeIndex : -1;
+					const dropTargetFrame = this.dragKeyframeTargetNode == node ? this.dragKeyframeTargetIndex : -1;
 
-					for(; j < animationLength; j++)
+					for(; j < lastFrame; j++)
 					{
 						if(x > right) break;
 
-						if(j == selectedFrame)
+						if(j == selectedFrame || j == dropTargetFrame)
 						{
-							ctx.fillStyle = Config.selectedFrame;
+							ctx.fillStyle = this.selectedFrameColour;
 							ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
-						}
 
-						const keyframe = track.getKeyFrame(j);
-						if(keyframe)
-						{
-							var cx = x + frameCX;
-							var cy = y + frameCY;
-							ctx.fillStyle = this.keyframeColour;
-							ctx.strokeStyle = this.keyframeBorderColour;
-							ctx.beginPath();
-							ctx.moveTo(cx - keyframeSize, cy);
-							ctx.lineTo(cx, cy - keyframeSize);
-							ctx.lineTo(cx + keyframeSize, cy);
-							ctx.lineTo(cx, cy + keyframeSize);
-							ctx.closePath();
-							ctx.fill();
-							ctx.stroke();
-
-							// Arrow connecting keyframes
-							if(keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1)
+							if(j == dragFrame)
 							{
-								cx = keyframe.frameIndex * frameWidth - 3;
-								ctx.beginPath();
-								ctx.moveTo(keyframe.prev.frameIndex * frameWidth + frameWidth + 2, cy);
-								ctx.lineTo(cx, cy);
-								ctx.lineTo(cx - 4, cy - 4);
-								ctx.moveTo(cx, cy);
-								ctx.lineTo(cx - 4, cy + 4);
-								ctx.stroke();
+								ctx.fillStyle = this.keyframeBorderColour;
+								ctx.fillRect(x, y, 1, nodeHeight - 1);
+								ctx.fillRect(x + frameWidth - 2, y, 1, nodeHeight - 1);
+								ctx.fillRect(x + 1, y, frameWidth - 3, 1);
+								ctx.fillRect(x + 1, y + nodeHeight - 2, frameWidth - 3, 1);
 							}
 						}
 
-						ctx.fillStyle = Config.nodeBorder;
-						ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+						if(j < animationLength)
+						{
+							const keyframe = track.getKeyFrame(j);
+							if(keyframe)
+							{
+								let cx = x + frameCX;
+								let cy = y + frameCY;
+								ctx.fillStyle = this.keyframeColour;
+								ctx.strokeStyle = this.keyframeBorderColour;
+								ctx.beginPath();
+								ctx.moveTo(cx - keyframeSize, cy);
+								ctx.lineTo(cx, cy - keyframeSize);
+								ctx.lineTo(cx + keyframeSize, cy);
+								ctx.lineTo(cx, cy + keyframeSize);
+								ctx.closePath();
+								ctx.fill();
+								ctx.stroke();
+
+								// Arrow connecting keyframes
+								if(keyframe.prev && keyframe.prev.frameIndex < keyframe.frameIndex - 1)
+								{
+									cx = keyframe.frameIndex * frameWidth - 3;
+									ctx.beginPath();
+									ctx.moveTo(keyframe.prev.frameIndex * frameWidth + frameWidth + 2, cy);
+									ctx.lineTo(cx, cy);
+									ctx.lineTo(cx - 4, cy - 4);
+									ctx.moveTo(cx, cy);
+									ctx.lineTo(cx - 4, cy + 4);
+									ctx.stroke();
+								}
+							}
+
+							ctx.fillStyle = Config.nodeBorder;
+							ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+						}
 
 						x += frameWidth;
 					}
@@ -325,18 +349,7 @@ namespace app.timeline
 			this.animation.setPosition(frame);
 			this.currentFrame = this.animation.getPosition();
 			this.updateFrameLabel();
-
-			var frameX = this.currentFrame * Config.frameWidth;
-			if(frameX + Config.frameWidth > this.scrollX + this.width)
-			{
-				this.scrollX = Math.floor(Math.max(0, frameX - this.width + Config.frameWidth));
-			}
-			else if(frameX < this.scrollX)
-			{
-				this.scrollX = Math.floor(Math.max(0, frameX));
-			}
-
-			this.requiresUpdate = true;
+			this.scrollIntoView(null, this.currentFrame);
 		}
 
 		private togglePlayback()
@@ -367,9 +380,9 @@ namespace app.timeline
 				this.animation.gotoNextFrame();
 		}
 
-		private setSelectedFrame(node:Node, frameIndex:number, toggle=false)
+		private setSelectedFrame(node:Node, frameIndex:number=-1, toggle=false):boolean
 		{
-			if(frameIndex < 0 || frameIndex >= this.animation.getLength()) node = null;
+			if(frameIndex < 0) node = null;
 
 			if(node == this.selectedTrack && frameIndex == this.selectedFrame)
 			{
@@ -378,11 +391,12 @@ namespace app.timeline
 					this.selectedTrack = null;
 					this.selectedFrame = -1;
 				}
-				return;
+				return false;
 			}
 
 			this.selectedTrack = node;
 			this.selectedFrame = node ? frameIndex : -1;
+			return true;
 		}
 
 		private getFrameIndexAt(x:number):number
@@ -392,8 +406,65 @@ namespace app.timeline
 
 		private getNodeAt(y:number):Node
 		{
-			const i = Math.floor(y / Config.nodeHeight);
+			const i = Math.floor((y + this.scrollY) / Config.nodeHeight);
 			return i < 0 || i >= this.nodeList.length ? null : this.nodeList[i];
+		}
+
+		private scrollIntoView(node:Node=null, frame:number=NaN)
+		{
+			if(node)
+			{
+				var trackY = this.nodeList.indexOf(node) * Config.nodeHeight;
+				if(trackY + Config.nodeHeight > this.scrollY + this.height - Config.nodeHeight)
+				{
+					this.scrollY = Math.floor(Math.max(0, trackY - this.height + Config.nodeHeight + Config.nodeHeight));
+				}
+				else if(trackY < this.scrollY)
+				{
+					this.scrollY = Math.floor(Math.max(0, trackY));
+				}
+
+				this.tree.setScroll(this.scrollY);
+			}
+
+			if(!isNaN(frame))
+			{
+				var frameX = frame * Config.frameWidth;
+				if(frameX + Config.frameWidth > this.scrollX + this.width)
+				{
+					this.scrollX = Math.floor(Math.max(0, frameX - this.width + Config.frameWidth));
+				}
+				else if(frameX < this.scrollX)
+				{
+					this.scrollX = Math.floor(Math.max(0, frameX));
+				}
+			}
+
+			this.requiresUpdate = true;
+		}
+
+		private stopKeyframeDrag(move=false, cancel=true)
+		{
+			if(this.dragKeyframeNode)
+			{
+				if(!cancel && this.dragKeyframeTargetNode && (this.dragKeyframeNode != this.dragKeyframeTargetNode || this.dragKeyframeIndex != this.dragKeyframeTargetIndex))
+				{
+					var frameData = {};
+					this.animation.copyKeyframes(
+						frameData, this.dragKeyframeNode,
+						false, move, this.dragKeyframeIndex);
+
+					this.animation.pasteKeyframes(frameData, this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
+
+					this.setSelectedFrame(this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
+				}
+
+				this.dragKeyframeNode = null;
+				this.dragKeyframeIndex = -1;
+				this.dragKeyframeInitiated = false;
+				this.dragKeyframeTargetNode = null;
+				this.dragKeyframeTargetIndex = -1;
+			}
 		}
 
 		/*
@@ -531,18 +602,32 @@ namespace app.timeline
 						altKey, keyCode == Key.X, this.selectedFrame);
 					Clipboard.setData('keyframes', frameData);
 					this.viewport.showMessage(`Copied ${frameCount} frames`);
+
+					if(keyCode == Key.X)
+					{
+						this.setSelectedFrame(null);
+					}
 				}
 				else if(ctrlKey && keyCode == Key.V)
 				{
 					var frameCount = this.animation.pasteKeyframes(Clipboard.getData('keyframes'), this.selectedTrack, this.selectedFrame);
 					this.viewport.showMessage(`Pasted ${frameCount} frames`);
+					this.setSelectedFrame(null);
 				}
-
 				else if(keyCode == Key.Delete)
 				{
 					if(this.selectedTrack)
 					{
 						this.animation.deleteKeyframe(this.selectedTrack, this.selectedFrame);
+						this.setSelectedFrame(null);
+					}
+				}
+
+				else if(keyCode == Key.Escape)
+				{
+					if(this.dragKeyframeNode)
+					{
+						this.stopKeyframeDrag();
 					}
 				}
 			}
@@ -589,7 +674,7 @@ namespace app.timeline
 				}
 
 				// Keyframes
-				else if(keyCode == Key.X)
+				else if(keyCode == Key.D)
 				{
 					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
 					return true;
@@ -630,20 +715,37 @@ namespace app.timeline
 				if(event.button == 0)
 				{
 					this.setFrame(this.getFrameIndexAt(this.mouseX));
-					this.dragFrame = true;
+					this.dragFrameIndicator = true;
 				}
 			}
 
 			else
 			{
-				this.setSelectedFrame(this.getNodeAt(this.mouseY - Config.nodeHeight), this.getFrameIndexAt(this.mouseX), true);
+				if(!this.setSelectedFrame(this.getNodeAt(this.mouseY - Config.nodeHeight), this.getFrameIndexAt(this.mouseX)))
+				{
+					this.deselectKeyframe = true;
+				}
+
+				if(this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame))
+				{
+					this.dragKeyframeNode = this.selectedTrack;
+					this.dragKeyframeIndex = this.selectedFrame;
+				}
 			}
 		}
 
 		protected onMouseUp(event)
 		{
-			this.dragFrame = false;
+			this.dragFrameIndicator = false;
 			this.dragView = false;
+
+			if(this.deselectKeyframe)
+			{
+				this.setSelectedFrame(null);
+				this.deselectKeyframe = false;
+			}
+
+			this.stopKeyframeDrag(!event.ctrlKey, false);
 		}
 
 		protected onMouseWheel(event)
@@ -655,7 +757,7 @@ namespace app.timeline
 		{
 			if(this.mode == EditMode.PLAYBACK) return;
 
-			if(this.dragFrame)
+			if(this.dragFrameIndicator)
 			{
 				this.setFrame(Math.floor((this.mouseX + this.scrollX) / Config.frameWidth));
 			}
@@ -666,6 +768,30 @@ namespace app.timeline
 				this.scrollY = Math.max(0, this.dragViewY - this.mouseY);
 				this.tree.setScroll(this.scrollY);
 				this.requiresUpdate = true;
+			}
+
+			else if(this.dragKeyframeNode)
+			{
+				this.deselectKeyframe = false;
+
+				if(!this.dragKeyframeInitiated)
+				{
+					let node = this.getNodeAt(this.mouseY - Config.nodeHeight);
+					let frame = this.getFrameIndexAt(this.mouseX);
+
+					if(node && frame >= 0)
+					{
+						this.dragKeyframeInitiated = true;
+					}
+				}
+
+				if(this.dragKeyframeInitiated)
+				{
+					this.dragKeyframeTargetNode = this.getNodeAt(this.mouseY - Config.nodeHeight);
+					this.dragKeyframeTargetIndex = this.dragKeyframeTargetNode ? this.getFrameIndexAt(this.mouseX) : -1;
+
+					this.scrollIntoView(this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
+				}
 			}
 		}
 

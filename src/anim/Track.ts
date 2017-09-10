@@ -168,7 +168,6 @@ namespace app.anim
 				if(!frameData.hasOwnProperty(propertyName)) continue;
 
 				const property = this.properties[propertyName];
-				console.log('  ', propertyName, frameIndex, property);
 
 				if(property)
 				{

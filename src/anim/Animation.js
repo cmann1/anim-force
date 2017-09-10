@@ -85,6 +85,7 @@ var app;
                     console.error('Cannot create animation track for', target);
                 }
                 track.forceKeyframe();
+                track.setPosition(this.frameIndex);
                 return track;
             };
             Animation.prototype.clear = function () {
@@ -258,7 +259,6 @@ var app;
                     if (track) {
                         track.pasteKeyframes(frameData[nodeId], frameIndex);
                         frameCount++;
-                        console.log(node ? node.id : nodeId);
                         if (node)
                             break;
                     }

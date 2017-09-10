@@ -1,7 +1,6 @@
 /*
-// TODO: Timeline:
-// TODO: - Dragging keyframes + keyboard shortcuts
 // TODO: Separate edit and animate modes
+// TODO: - Add, remove, and rename animations
 // TODO: - Edit mode:
 // TODO: - - Replace stretch handle with length handle
 // TODO: - - Force frame to stay at zero
@@ -13,7 +12,6 @@
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
 // TODO: Manually change animation length
-// TODO: Add, remove, and rename animations
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
@@ -31,6 +29,8 @@
 // TODO: Show loading sprite when changing sprites
 // TODO: Keyboard shortcuts from changing layer and sublayer
 
+// TODO: Timeline:
+// TODO: - ???
 // TODO: Viewport:
 // TODO: - ???
 // TODO: Property panel:

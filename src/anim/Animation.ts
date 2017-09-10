@@ -86,6 +86,7 @@ namespace app.anim
 			}
 
 			track.forceKeyframe();
+			track.setPosition(this.frameIndex);
 			return track;
 		}
 
@@ -332,7 +333,6 @@ namespace app.anim
 				{
 					track.pasteKeyframes(frameData[nodeId], frameIndex);
 					frameCount++;
-					console.log(node ? node.id : nodeId);
 
 					if(node) break;
 				}
