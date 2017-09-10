@@ -30,6 +30,7 @@
 // TODO: Keyboard shortcuts from changing layer and sublayer
 
 // TODO: Timeline:
+// TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
 // TODO: - ???
 // TODO: Viewport:
 // TODO: - ???

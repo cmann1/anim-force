@@ -331,29 +331,28 @@ var app;
                     bone.addChild(sprite3);
                     this.model.bindPose.forceKeyframe();
                 }
-                else if (this.mode == EditMode.EDIT) {
-                    if (keyCode == Key.Delete) {
-                        if (!this.interaction.success) {
-                            var selectedNode = this.model.getSelectedNode();
-                            if (selectedNode) {
-                                selectedNode.parent.removeChild(selectedNode);
-                            }
+                else if (keyCode == Key.Delete) {
+                    if (!this.interaction.success) {
+                        var selectedNode = this.model.getSelectedNode();
+                        if (selectedNode) {
+                            selectedNode.parent.removeChild(selectedNode);
                         }
-                    }
-                    else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
-                        var node = this.model.getSelectedNode();
-                        if (node instanceof Sprite) {
-                            node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
-                            this.showMessage('Frame: ' + node.frame);
-                        }
-                    }
-                    else if (keyCode == Key.Enter) {
-                        app.main.showSpriteSelector(this.onSpritesSelect);
-                    }
-                    else if (keyCode == Key.E) {
-                        console.log((new AngelScriptExporter()).exportModel(this.model));
                     }
                 }
+                else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
+                    var node = this.model.getSelectedNode();
+                    if (node instanceof Sprite) {
+                        node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+                        this.showMessage('Frame: ' + node.frame);
+                    }
+                }
+                else if (keyCode == Key.Enter) {
+                    app.main.showSpriteSelector(this.onSpritesSelect);
+                }
+                else if (keyCode == Key.E) {
+                    console.log((new AngelScriptExporter()).exportModel(this.model));
+                }
+                // }
             };
             Viewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;

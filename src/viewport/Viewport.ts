@@ -455,9 +455,10 @@ namespace app.viewport
 				this.model.bindPose.forceKeyframe();
 			}
 
-			else if(this.mode == EditMode.EDIT)
-			{
-				if(keyCode == Key.Delete)
+			// TODO: Move keyboard actions to appropriate model mode
+			// else if(this.mode == EditMode.EDIT)
+			// {
+				else if(keyCode == Key.Delete)
 				{
 					if(!this.interaction.success)
 					{
@@ -490,7 +491,7 @@ namespace app.viewport
 				{
 					console.log((new AngelScriptExporter()).exportModel(this.model));
 				}
-			}
+			// }
 
 		}
 

@@ -170,13 +170,12 @@ var app;
                         ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
                         var lastKeyframe = -1;
                         var track = animation.tracks[node.id];
-                        var j = firstFrame;
-                        var x = j * frameWidth;
                         var onScreenFrameCount = 0;
                         var selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
                         var dragFrame = this.dragKeyframeNode == node ? this.dragKeyframeIndex : -1;
                         var dropTargetFrame = this.dragKeyframeTargetNode == node ? this.dragKeyframeTargetIndex : -1;
-                        for (; j < lastFrame; j++) {
+                        // Draw the background (selection and borders)
+                        for (var j = firstFrame, x = firstFrame * frameWidth; j < lastFrame; j++) {
                             if (j == selectedFrame || j == dropTargetFrame) {
                                 ctx.fillStyle = this.selectedFrameColour;
                                 ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
@@ -194,9 +193,24 @@ var app;
                             var cx = x + frameCX;
                             var cy = y + frameCY;
                             if (j < animationLength) {
+                                ctx.fillStyle = app.Config.nodeBorder;
+                                ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
+                            }
+                            x += frameWidth;
+                        }
+                        // Draw keyframes
+                        for (var j = firstFrame, x = firstFrame * frameWidth; j < lastFrame; j++) {
+                            var prev = null;
+                            var next = null;
+                            var arrowCount = 0;
+                            var cx = x + frameCX;
+                            var cy = y + frameCY;
+                            // TODO: Tween arrow should be drawn above selection and frame borders
+                            if (j < animationLength) {
                                 var keyframe = track.getKeyFrame(j);
                                 if (keyframe) {
                                     onScreenFrameCount++;
+                                    // Keyframe diamond
                                     ctx.fillStyle = this.keyframeColour;
                                     ctx.strokeStyle = this.keyframeBorderColour;
                                     ctx.beginPath();
@@ -207,7 +221,7 @@ var app;
                                     ctx.closePath();
                                     ctx.fill();
                                     ctx.stroke();
-                                    // Arrow connecting keyframes
+                                    // There needs to be an arrow connecting keyframes
                                     if (keyframe.next && keyframe.next.frameIndex > keyframe.frameIndex + 1) {
                                         lastKeyframe = j;
                                         prev = keyframe;
@@ -224,26 +238,21 @@ var app;
                                         arrowCount++;
                                     }
                                 }
-                                ctx.fillStyle = app.Config.nodeBorder;
-                                ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);
                             }
-                            // TODO: On the last frame check if no keyframes are in view and get the prev/next keyframes in order to draw on arrow
-                            //       for the two off-screen keyframes
-                            if (node.id == 1)
-                                if (onScreenFrameCount == 0 && j + 1 == lastFrame) {
-                                    // console.log('HERE', onScreenFrameCount);
-                                    var tmp = { prev: null, current: null, next: null };
-                                    this.animation.getClosestKeyframes(j, tmp, node);
-                                    if (tmp.prev && tmp.next) {
-                                        prev = tmp.prev;
-                                        next = tmp.next;
-                                        arrowCount++;
-                                    }
+                            // Connect two keyframes outside of the drawing range
+                            if (onScreenFrameCount == 0 && j + 1 == lastFrame) {
+                                var tmp = { prev: null, current: null, next: null };
+                                this.animation.getClosestKeyframes(j, tmp, node);
+                                if (tmp.prev && tmp.next) {
+                                    prev = tmp.prev;
+                                    next = tmp.next;
+                                    arrowCount++;
                                 }
+                            }
+                            // Draw keyframe connection arrows
                             while (arrowCount--) {
                                 cx = next.frameIndex * frameWidth - 3;
                                 ctx.strokeStyle = this.keyframeBorderColour;
-                                ctx.strokeStyle = this.keyframeColour;
                                 ctx.beginPath();
                                 ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
                                 ctx.lineTo(cx, cy);
@@ -258,7 +267,7 @@ var app;
                             }
                             x += frameWidth;
                         }
-                    }
+                    } // End if
                     y += nodeHeight;
                 }
                 var currentFrameX = currentFrame * frameWidth;
