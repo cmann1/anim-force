@@ -72,10 +72,11 @@ namespace app.viewport
 			super(elementId);
 
 			this.model = model;
-			this.model.bindPose.change.on(this.onAnimationChange);
+			this.model.getActiveAnimation().change.on(this.onAnimationChange);
 
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
+			model.animationChange.on(this.onModelAnimationChange);
 			model.modeChange.on(this.onModelModeChange);
 
 			this.$container.on('resize', this.onResize);
@@ -354,6 +355,17 @@ namespace app.viewport
 			this.requiresUpdate = true;
 		};
 
+		protected onModelAnimationChange = (animation:Animation, event:Event) =>
+		{
+			const type = event.type;
+
+			if(type == 'set-animation')
+			{
+				animation.change.on(this.onAnimationChange);
+				this.requiresUpdate = true;
+			}
+		};
+
 		protected onModelModeChange = (model:Model, event:Event) =>
 		{
 			this.mode = model.mode;
@@ -452,7 +464,7 @@ namespace app.viewport
 				sprite3.offsetY = -150;
 				bone.addChild(sprite3);
 
-				this.model.bindPose.forceKeyframe();
+				// this.model.bindPose.forceKeyframe();
 			}
 
 			// TODO: Move keyboard actions to appropriate model mode

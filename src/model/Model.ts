@@ -6,6 +6,7 @@ namespace app.model
 	import SelectionEvent = events.SelectionEvent;
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
 
 	export enum EditMode
@@ -17,15 +18,16 @@ namespace app.model
 
 	export class Model extends ContainerNode
 	{
+		private nextAnimationId:number = 0;
+
 		private selectedNode:Node = null;
 		private highlightedNode:Node = null;
 
 		private drawList:DrawList = new DrawList();
 
-		private _mode:EditMode = EditMode.ANIMATE;
+		private _mode:EditMode = EditMode.EDIT;
 
-		// TODO: Set to private
-		public bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this);
+		private bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this, true);
 		private animations:{[id:string]:app.anim.Animation} = {};
 		private activeAnimation:app.anim.Animation = null;
 
@@ -35,7 +37,7 @@ namespace app.model
 
 		public modeChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public selectionChange:EventDispatcher<Model> = new EventDispatcher<Model>();
-		public activeAnimationChange:EventDispatcher<Model> = new EventDispatcher<Model>();
+		public animationChange:EventDispatcher<Animation> = new EventDispatcher<Animation>();
 
 		// TODO: Force a keyframe on bind pose when adding nodes
 		constructor()
@@ -180,6 +182,30 @@ namespace app.model
 			return this.activeAnimation;
 		}
 
+		public getBindPose():app.anim.Animation
+		{
+			return this.bindPose;
+		}
+
+		public getAnimationList():app.anim.Animation[]
+		{
+			var animNames:string[] = [];
+
+			for(var animName in this.animations)
+			{
+				animNames.push(animName);
+			}
+			animNames.sort(Utils.naturalCompare);
+
+			var anims:app.anim.Animation[] = [this.bindPose];
+			for(var animName of animNames)
+			{
+				anims.push(this.animations[animName]);
+			}
+
+			return anims;
+		}
+
 		public clear():void
 		{
 			this.selectedNode = null;
@@ -188,7 +214,7 @@ namespace app.model
 			this.bindPose.clear();
 			this.animations = {};
 			this.activeAnimation = this.bindPose;
-			// TODO: Dispatch animatino change event?
+			this.animationChange.dispatch(this.bindPose, new Event('clear'));
 
 			super.clear();
 		}
@@ -208,13 +234,62 @@ namespace app.model
 			this.activeAnimation.animateStep(deltaTime);
 		}
 
-		get mode():app.model.EditMode
+		public addNewAnimation(name:string, select:boolean=false)
+		{
+			if(name == null)
+			{
+				name = 'Untitled Animation ' + (++this.nextAnimationId);
+			}
+
+			var newName = name;
+			var newIndex = 1;
+			while(this.animations[newName])
+			{
+				newName = name + ' ' + newIndex;
+				newIndex++;
+			}
+
+			var anim = new app.anim.Animation(newName, this);
+			this.animations[newName] = anim;
+			this.animationChange.dispatch(anim, new Event('new-animation'));
+
+			if(select)
+			{
+				this.setActiveAnimation(newName);
+			}
+		}
+
+		public setActiveAnimation(name:string)
+		{
+			if(this._mode == EditMode.PLAYBACK) return;
+
+			var anim = name == 'None' ? this.bindPose : this.animations[name];
+
+			if(anim && anim != this.activeAnimation)
+			{
+				if(this.activeAnimation)
+				{
+					this.activeAnimation.active = false;
+				}
+
+				anim.active = true;
+				this.activeAnimation = anim;
+				this.animationChange.dispatch(anim, new Event('set-animation'));
+				this.activeAnimation.updateNodes();
+
+				this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;
+			}
+		}
+
+		public get mode():app.model.EditMode
 		{
 			return this._mode;
 		}
 
-		set mode(value:app.model.EditMode)
+		public set mode(value:app.model.EditMode)
 		{
+			if(value == EditMode.EDIT) return;
+
 			if(this._mode == value) return;
 
 			if(value == EditMode.PLAYBACK)
@@ -257,6 +332,7 @@ namespace app.model
 		{
 			this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
 		}
+
 	}
 
 }

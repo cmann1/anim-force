@@ -41,11 +41,11 @@ namespace app.anim
 			this.properties[propertyName] = new TrackProperty(this, propertyName, type);
 		}
 
-		public forceKeyframe(frameIndex = -1)
+		public forceKeyframe(frameIndex = -1, copyFrom:Track=null)
 		{
 			for(var propertyName in this.properties)
 			{
-				this.properties[propertyName].updateFrame(this.node, frameIndex);
+				this.properties[propertyName].updateFrame(this.node, frameIndex, true, copyFrom ? copyFrom.properties[propertyName] : null);
 			}
 		}
 
@@ -201,6 +201,14 @@ namespace app.anim
 				const property = this.properties[propertyName];
 				property.setPosition(frameIndex);
 				property.updateNode(this.node, this.interpolation);
+			}
+		}
+
+		public updateNode()
+		{
+			for(var propertyName in this.properties)
+			{
+				this.properties[propertyName].updateNode(this.node, this.interpolation);
 			}
 		}
 
@@ -401,10 +409,11 @@ namespace app.anim
 			return false;
 		}
 
-		public updateFrame(node:Node|any, frameIndex = -1, createKeyframe = true)
+		public updateFrame(node:Node|any, frameIndex = -1, createKeyframe = true, copyFrom:TrackProperty=null)
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 			var frame:Keyframe = this.frameList[frameIndex];
+			var copyFrame:Keyframe = copyFrom ? copyFrom.frameList[frameIndex] : null;
 
 			if(this.type == TrackPropertyType.VECTOR)
 			{
@@ -415,8 +424,14 @@ namespace app.anim
 
 				if(frame)
 				{
-					(<VectorKeyframe> frame).x = node[this.propertyName + 'X'];
-					(<VectorKeyframe> frame).y = node[this.propertyName + 'Y'];
+					const vecFrame = <VectorKeyframe> frame;
+
+					vecFrame.x = copyFrame
+						? (<VectorKeyframe> copyFrame).x
+						: node[this.propertyName + 'X'];
+					vecFrame.y = copyFrame
+						? (<VectorKeyframe> copyFrame).y
+						: node[this.propertyName + 'Y'];
 				}
 			}
 			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
@@ -428,7 +443,9 @@ namespace app.anim
 
 				if(frame)
 				{
-					(<NumberKeyframe> frame).value = node[this.propertyName];
+					(<NumberKeyframe> frame).value = copyFrame
+						? (<NumberKeyframe> copyFrame).value
+						: node[this.propertyName];
 				}
 			}
 		}
@@ -588,7 +605,6 @@ namespace app.anim
 			return out;
 		}
 
-		// TODO: Test inserting keyframes at frames that aren't current
 		protected insert(key:Keyframe)
 		{
 			const frameIndex = key.frameIndex;

@@ -8,12 +8,14 @@ var app;
         var EventDispatcher = app.events.EventDispatcher;
         var Event = app.events.Event;
         var Animation = (function () {
-            function Animation(name, model) {
+            function Animation(name, model, readOnly) {
+                if (readOnly === void 0) { readOnly = false; }
                 var _this = this;
                 this.tracks = {};
                 this.active = false;
                 this.fps = 30;
                 this.loop = true;
+                this.readOnly = false;
                 this.accumulatedTime = 0;
                 this.frameIndex = 0;
                 this.length = 1;
@@ -43,7 +45,7 @@ var app;
                         if (!track) {
                             _this.tracks[target.id] = _this.createTrack(target);
                         }
-                        else {
+                        else if (_this.active) {
                             track.updateKeyframe();
                         }
                     }
@@ -53,8 +55,20 @@ var app;
                 };
                 this.name = name;
                 this.model = model;
+                this.readOnly = readOnly;
                 model.structureChange.on(this.onModelStructureChange);
+                this.initNodes(model.children, model.getBindPose());
             }
+            Animation.prototype.initNodes = function (nodes, copyFrom) {
+                if (copyFrom === void 0) { copyFrom = null; }
+                for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+                    var node = nodes_1[_i];
+                    this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null);
+                    if (node instanceof ContainerNode) {
+                        this.initNodes(node.children, copyFrom);
+                    }
+                }
+            };
             Animation.prototype.removeNodeRecursive = function (target) {
                 var a = 0;
                 var nodes = [target];
@@ -72,7 +86,8 @@ var app;
                     }
                 }
             };
-            Animation.prototype.createTrack = function (target) {
+            Animation.prototype.createTrack = function (target, copyFrom) {
+                if (copyFrom === void 0) { copyFrom = null; }
                 var track = null;
                 if (target instanceof Bone) {
                     track = new anim.BoneTrack(this, target);
@@ -84,7 +99,9 @@ var app;
                 if (!track) {
                     console.error('Cannot create animation track for', target);
                 }
-                track.forceKeyframe();
+                if (this.readOnly || copyFrom) {
+                    track.forceKeyframe(-1, copyFrom);
+                }
                 track.setPosition(this.frameIndex);
                 return track;
             };
@@ -112,6 +129,8 @@ var app;
             Animation.prototype.forceKeyframe = function (node, frameIndex) {
                 if (node === void 0) { node = null; }
                 if (frameIndex === void 0) { frameIndex = -1; }
+                if (this.readOnly)
+                    return;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 if (node) {
@@ -128,6 +147,8 @@ var app;
                 this.dispatchChange('keyframe');
             };
             Animation.prototype.gotoPrevFrame = function () {
+                if (this.readOnly)
+                    return;
                 if (this.frameIndex <= 0)
                     return;
                 this.frameIndex--;
@@ -137,6 +158,8 @@ var app;
                 this.dispatchChange('position');
             };
             Animation.prototype.gotoNextFrame = function () {
+                if (this.readOnly)
+                    return;
                 this.frameIndex++;
                 for (var trackId in this.tracks) {
                     this.tracks[trackId].gotoNextFrame();
@@ -164,18 +187,29 @@ var app;
                 return next;
             };
             Animation.prototype.gotoPrevKeyframe = function () {
+                if (this.readOnly)
+                    return;
                 var prev = this.getPrevKeyframe();
                 if (prev) {
                     this.setPosition(prev.frameIndex);
                 }
             };
             Animation.prototype.gotoNextKeyframe = function () {
+                if (this.readOnly)
+                    return;
                 var next = this.getNextKeyframe();
                 if (next) {
                     this.setPosition(next.frameIndex);
                 }
             };
+            Animation.prototype.updateNodes = function () {
+                for (var trackId in this.tracks) {
+                    this.tracks[trackId].updateNode();
+                }
+            };
             Animation.prototype.setPosition = function (frameIndex) {
+                if (this.readOnly)
+                    return;
                 if (frameIndex < 0)
                     frameIndex = 0;
                 if (frameIndex == this.frameIndex)
@@ -200,6 +234,8 @@ var app;
             Animation.prototype.deleteKeyframe = function (node, frameIndex) {
                 if (node === void 0) { node = null; }
                 if (frameIndex === void 0) { frameIndex = -1; }
+                if (this.readOnly)
+                    return;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 if (node) {
@@ -249,6 +285,8 @@ var app;
             Animation.prototype.pasteKeyframes = function (frameData, node, frameIndex) {
                 if (node === void 0) { node = null; }
                 if (frameIndex === void 0) { frameIndex = -1; }
+                if (this.readOnly)
+                    return 0;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 var frameCount = 0;
@@ -269,7 +307,6 @@ var app;
                 return frameCount;
             };
             Animation.prototype.getClosestKeyframes = function (frameIndex, out, node) {
-                // var tmp:KeyframeStruct = {prev: null, current: null, next:  null};
                 if (node === void 0) { node = null; }
                 if (node) {
                     this.tracks[node.id].getClosestKeyframes(frameIndex, out);
@@ -277,24 +314,14 @@ var app;
                 }
                 for (var trackId in this.tracks) {
                     this.tracks[trackId].getClosestKeyframes(frameIndex, out);
-                    // if(tmp.prev && (!out.prev || tmp.prev.frameIndex > out.prev.frameIndex))
-                    // {
-                    // 	out.prev = tmp.prev;
-                    // }
-                    // if(tmp.next && (!out.next || tmp.next.frameIndex < out.next.frameIndex))
-                    // {
-                    // 	out.next = tmp.next;
-                    // }
-                    //
-                    // tmp.prev = null;
-                    // tmp.current = null;
-                    // tmp.next = null;
                 }
             };
             Animation.prototype.getLength = function () {
                 return this.length;
             };
             Animation.prototype.extendLength = function (newLength) {
+                if (this.readOnly)
+                    return;
                 if (newLength > this.length) {
                     this.length = newLength;
                     this.dispatchChange('length');

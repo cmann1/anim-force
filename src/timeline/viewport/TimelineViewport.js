@@ -47,12 +47,27 @@ var app;
                  * Events
                  */
                 // TODO: Implement
-                _this.onActiveAnimationChange = function (model, event) {
-                    // console.log(model, event);
-                    _this.animation = model.getActiveAnimation();
-                    _this.currentFrame = _this.animation.getPosition();
-                    _this.updateFrameLabel();
-                    _this.requiresUpdate = true;
+                _this.onModelAnimationChange = function (animation, event) {
+                    var type = event.type;
+                    if (type == 'new-animation' || type == 'clear') {
+                        _this.$animationSelect.empty();
+                        var animList = _this.model.getAnimationList();
+                        var i = 0;
+                        for (var _i = 0, animList_1 = animList; _i < animList_1.length; _i++) {
+                            var anim = animList_1[_i];
+                            _this.$animationSelect.append($("<option>" + (i > 0 ? anim.name : 'None') + "</option>"));
+                            i++;
+                        }
+                        animation.change.on(_this.onAnimationChange);
+                    }
+                    if (type == 'set-animation' || type == 'clear') {
+                        _this.setSelectedFrame(null, -1);
+                        _this.animation = animation;
+                        _this.currentFrame = _this.animation.getPosition();
+                        _this.updateFrameLabel();
+                        _this.$animationSelect.val(animation.name != 'BindPose' ? animation.name : 'None');
+                        _this.requiresUpdate = true;
+                    }
                 };
                 _this.onAnimationChange = function (animation, event) {
                     var type = event.type;
@@ -67,7 +82,7 @@ var app;
                     _this.requiresUpdate = true;
                 };
                 _this.onAnimationSelect = function (event) {
-                    console.log(_this.$animationSelect.val());
+                    _this.model.setActiveAnimation(_this.$animationSelect.val());
                 };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
@@ -93,26 +108,33 @@ var app;
                     if ($btn.hasClass('disabled'))
                         return;
                     var type = $btn.data('action');
-                    if (type == 'play' || type == 'pause') {
-                        _this.togglePlayback();
+                    if (_this.mode != EditMode.EDIT) {
+                        if (type == 'play' || type == 'pause') {
+                            _this.togglePlayback();
+                        }
                     }
-                    else if (type == 'prev-frame') {
-                        _this.prevFrame(event.shiftKey);
+                    if (_this.mode == EditMode.ANIMATE) {
+                        if (type == 'prev-frame') {
+                            _this.prevFrame(event.shiftKey);
+                        }
+                        else if (type == 'next-frame') {
+                            _this.nextFrame(event.shiftKey);
+                        }
+                        else if (type == 'prev-keyframe') {
+                            _this.animation.gotoPrevKeyframe();
+                        }
+                        else if (type == 'next-keyframe') {
+                            _this.animation.gotoNextKeyframe();
+                        }
+                        else if (type == 'insert-keyframe') {
+                            _this.animation.forceKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
+                        }
+                        else if (type == 'delete-keyframe') {
+                            _this.animation.deleteKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
+                        }
                     }
-                    else if (type == 'next-frame') {
-                        _this.nextFrame(event.shiftKey);
-                    }
-                    else if (type == 'prev-keyframe') {
-                        _this.animation.gotoPrevKeyframe();
-                    }
-                    else if (type == 'next-keyframe') {
-                        _this.animation.gotoNextKeyframe();
-                    }
-                    else if (type == 'insert-keyframe') {
-                        _this.animation.forceKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
-                    }
-                    else if (type == 'delete-keyframe') {
-                        _this.animation.deleteKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
+                    if (type == 'add-anim') {
+                        _this.model.addNewAnimation(null, true);
                     }
                 };
                 _this.model = model;
@@ -120,7 +142,7 @@ var app;
                 _this.mode = model.mode;
                 _this.animation = model.getActiveAnimation();
                 _this.animation.change.on(_this.onAnimationChange);
-                model.activeAnimationChange.on(_this.onActiveAnimationChange);
+                model.animationChange.on(_this.onModelAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
                 model.modeChange.on(_this.onModelModeChange);
@@ -324,8 +346,11 @@ var app;
                 this.$toolbar = this.$container.parent().find('#timeline-toolbar');
                 this.$frameLabel = this.$toolbar.find('.frame-label .value');
                 this.$toolbarButtons = this.$toolbar.find('i');
+                this.$animControlButtons = this.$toolbarButtons.filter('.anim-controls');
                 this.$playButton = this.$toolbar.find('.btn-play');
                 this.$pauseButton = this.$toolbar.find('.btn-pause');
+                this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
+                this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
                 this.$animationSelect = this.$toolbar.find('select')
                     .on('change', this.onAnimationSelect);
                 this.$toolbar
@@ -347,13 +372,16 @@ var app;
                     this.$pauseButton.hide();
                 }
                 if (this.mode == EditMode.ANIMATE) {
-                    this.$toolbarButtons.removeClass('disabled');
+                    this.$animControlButtons.removeClass('disabled');
                 }
                 else {
-                    this.$toolbarButtons.addClass('disabled');
-                    this.$playButton.removeClass('disabled');
-                    this.$pauseButton.removeClass('disabled');
+                    this.$animControlButtons.addClass('disabled');
                 }
+                this.$playButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+                this.$pauseButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+                this.$frameLabel.parent().toggleClass('disabled', this.mode == EditMode.EDIT);
+                this.$editAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+                this.$deleteAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
             };
             TimelineViewport.prototype.updateNodeList = function () {
                 var nodes = [];
@@ -561,20 +589,22 @@ var app;
                     this.dragView = true;
                     return;
                 }
-                // Clicked on header
-                if (this.mouseY <= app.Config.nodeHeight) {
-                    if (event.button == 0) {
-                        this.setFrame(this.getFrameIndexAt(this.mouseX));
-                        this.dragFrameIndicator = true;
+                if (this.mode == EditMode.ANIMATE) {
+                    // Clicked on header
+                    if (this.mouseY <= app.Config.nodeHeight) {
+                        if (event.button == 0) {
+                            this.setFrame(this.getFrameIndexAt(this.mouseX));
+                            this.dragFrameIndicator = true;
+                        }
                     }
-                }
-                else {
-                    if (!this.setSelectedFrame(this.getNodeAt(this.mouseY - app.Config.nodeHeight), this.getFrameIndexAt(this.mouseX))) {
-                        this.deselectKeyframe = true;
-                    }
-                    if (this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame)) {
-                        this.dragKeyframeNode = this.selectedTrack;
-                        this.dragKeyframeIndex = this.selectedFrame;
+                    else {
+                        if (!this.setSelectedFrame(this.getNodeAt(this.mouseY - app.Config.nodeHeight), this.getFrameIndexAt(this.mouseX))) {
+                            this.deselectKeyframe = true;
+                        }
+                        if (this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame)) {
+                            this.dragKeyframeNode = this.selectedTrack;
+                            this.dragKeyframeIndex = this.selectedFrame;
+                        }
                     }
                 }
             };

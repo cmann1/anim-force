@@ -1,13 +1,10 @@
 /*
+// TODO: Timeline viewport: top level node order is wrong
+// TODO: Timeline viewport/tree: update viewport on node collapse
 // TODO: Separate edit and animate modes
-// TODO: - Add, remove, and rename animations
-// TODO: - Edit mode:
-// TODO: - - Replace stretch handle with length handle
-// TODO: - - Force frame to stay at zero
-// TODO: - - Don't allow deleting keyframes
-// TODO: - - Don't allow dragging timeline  frame
-// TODO: - Animate mode:
-// TODO: - - ? Disable adding, removing in the timeline.
+// TODO: - Remove, and rename animations
+// TODO: - - Tooltip type popup with name and fps
+// TODO: When creating new nodes: Force a keyframe at 0 when in edit mode, otherwise don't create a keyframe
 // TODO: Saving/Loading models
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models

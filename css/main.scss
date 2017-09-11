@@ -85,6 +85,10 @@ i.fa.disabled, i.fa.disabled:hover{
 	background: inherit !important;
 	color: $disabled-color !important;
 }
+div.disabled
+{
+	color: $disabled-color !important;
+}
 
 .jBox-title{
 	font-size: 150%;

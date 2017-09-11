@@ -25,10 +25,11 @@ var app;
             Track.prototype.addProperty = function (propertyName, type) {
                 this.properties[propertyName] = new TrackProperty(this, propertyName, type);
             };
-            Track.prototype.forceKeyframe = function (frameIndex) {
+            Track.prototype.forceKeyframe = function (frameIndex, copyFrom) {
                 if (frameIndex === void 0) { frameIndex = -1; }
+                if (copyFrom === void 0) { copyFrom = null; }
                 for (var propertyName in this.properties) {
-                    this.properties[propertyName].updateFrame(this.node, frameIndex);
+                    this.properties[propertyName].updateFrame(this.node, frameIndex, true, copyFrom ? copyFrom.properties[propertyName] : null);
                 }
             };
             Track.prototype.updateKeyframe = function (frameIndex) {
@@ -133,6 +134,11 @@ var app;
                     var property = this.properties[propertyName];
                     property.setPosition(frameIndex);
                     property.updateNode(this.node, this.interpolation);
+                }
+            };
+            Track.prototype.updateNode = function () {
+                for (var propertyName in this.properties) {
+                    this.properties[propertyName].updateNode(this.node, this.interpolation);
                 }
             };
             Track.prototype.onNodePropertyChange = function (node, propertyName) {
@@ -286,19 +292,26 @@ var app;
                 }
                 return false;
             };
-            TrackProperty.prototype.updateFrame = function (node, frameIndex, createKeyframe) {
+            TrackProperty.prototype.updateFrame = function (node, frameIndex, createKeyframe, copyFrom) {
                 if (frameIndex === void 0) { frameIndex = -1; }
                 if (createKeyframe === void 0) { createKeyframe = true; }
+                if (copyFrom === void 0) { copyFrom = null; }
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 var frame = this.frameList[frameIndex];
+                var copyFrame = copyFrom ? copyFrom.frameList[frameIndex] : null;
                 if (this.type == TrackPropertyType.VECTOR) {
                     if (!frame && createKeyframe) {
                         this.insert(frame = new anim.VectorKeyframe(frameIndex));
                     }
                     if (frame) {
-                        frame.x = node[this.propertyName + 'X'];
-                        frame.y = node[this.propertyName + 'Y'];
+                        var vecFrame = frame;
+                        vecFrame.x = copyFrame
+                            ? copyFrame.x
+                            : node[this.propertyName + 'X'];
+                        vecFrame.y = copyFrame
+                            ? copyFrame.y
+                            : node[this.propertyName + 'Y'];
                     }
                 }
                 else if (this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE) {
@@ -306,7 +319,9 @@ var app;
                         this.insert(frame = new anim.NumberKeyframe(frameIndex));
                     }
                     if (frame) {
-                        frame.value = node[this.propertyName];
+                        frame.value = copyFrame
+                            ? copyFrame.value
+                            : node[this.propertyName];
                     }
                 }
             };
@@ -428,7 +443,6 @@ var app;
                 out.next = next;
                 return out;
             };
-            // TODO: Test inserting keyframes at frames that aren't current
             TrackProperty.prototype.insert = function (key) {
                 var frameIndex = key.frameIndex;
                 if (this.frameList[frameIndex])

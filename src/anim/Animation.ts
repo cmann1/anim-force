@@ -20,6 +20,8 @@ namespace app.anim
 		public fps = 30;
 		public loop = true;
 
+		protected readOnly = false;
+
 		protected model:app.model.Model;
 
 		protected accumulatedTime:number = 0;
@@ -34,12 +36,27 @@ namespace app.anim
 
 		public change:EventDispatcher<Animation> = new EventDispatcher<Animation>();
 
-		constructor(name:string, model:app.model.Model)
+		constructor(name:string, model:app.model.Model, readOnly=false)
 		{
 			this.name = name;
 			this.model = model;
+			this.readOnly = readOnly;
 
 			model.structureChange.on(this.onModelStructureChange);
+			this.initNodes(model.children, model.getBindPose());
+		}
+
+		private initNodes(nodes:Node[], copyFrom:Animation=null)
+		{
+			for(var node of nodes)
+			{
+				this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null);
+
+				if(node instanceof ContainerNode)
+				{
+					this.initNodes((<ContainerNode> node).children, copyFrom);
+				}
+			}
 		}
 
 		private removeNodeRecursive(target:Node)
@@ -64,7 +81,7 @@ namespace app.anim
 			}
 		}
 
-		private createTrack(target:Node):Track
+		private createTrack(target:Node, copyFrom:Track=null):Track
 		{
 			var track:Track = null;
 
@@ -85,7 +102,11 @@ namespace app.anim
 				console.error('Cannot create animation track for', target);
 			}
 
-			track.forceKeyframe();
+			if(this.readOnly || copyFrom)
+			{
+				track.forceKeyframe(-1, copyFrom);
+			}
+
 			track.setPosition(this.frameIndex);
 			return track;
 		}
@@ -124,6 +145,8 @@ namespace app.anim
 
 		public forceKeyframe(node:Node = null, frameIndex = -1)
 		{
+			if(this.readOnly) return;
+
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			if(node)
@@ -147,6 +170,8 @@ namespace app.anim
 
 		public gotoPrevFrame()
 		{
+			if(this.readOnly) return;
+
 			if(this.frameIndex <= 0) return;
 
 			this.frameIndex--;
@@ -161,6 +186,9 @@ namespace app.anim
 
 		public gotoNextFrame()
 		{
+			if(this.readOnly) return;
+
+
 			this.frameIndex++;
 
 			for(var trackId in this.tracks)
@@ -207,6 +235,9 @@ namespace app.anim
 
 		public gotoPrevKeyframe()
 		{
+			if(this.readOnly) return;
+
+
 			var prev = this.getPrevKeyframe();
 
 			if(prev)
@@ -217,6 +248,9 @@ namespace app.anim
 
 		public gotoNextKeyframe()
 		{
+			if(this.readOnly) return;
+
+
 			var next = this.getNextKeyframe();
 
 			if(next)
@@ -225,8 +259,19 @@ namespace app.anim
 			}
 		}
 
+		public updateNodes()
+		{
+			for(var trackId in this.tracks)
+			{
+				this.tracks[trackId].updateNode();
+			}
+		}
+
 		public setPosition(frameIndex:number)
 		{
+			if(this.readOnly) return;
+
+
 			if(frameIndex < 0) frameIndex = 0;
 			if(frameIndex == this.frameIndex) return;
 
@@ -259,6 +304,9 @@ namespace app.anim
 
 		public deleteKeyframe(node:Node = null, frameIndex = -1)
 		{
+			if(this.readOnly) return;
+
+
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			if(node)
@@ -320,6 +368,9 @@ namespace app.anim
 
 		public pasteKeyframes(frameData:any, node:Node = null, frameIndex = -1):number
 		{
+			if(this.readOnly) return 0;
+
+
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			var frameCount = 0;
@@ -348,8 +399,6 @@ namespace app.anim
 
 		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct, node:Node=null)
 		{
-			// var tmp:KeyframeStruct = {prev: null, current: null, next:  null};
-
 			if(node)
 			{
 				this.tracks[node.id].getClosestKeyframes(frameIndex, out);
@@ -360,18 +409,6 @@ namespace app.anim
 			{
 				this.tracks[trackId].getClosestKeyframes(frameIndex, out);
 
-				// if(tmp.prev && (!out.prev || tmp.prev.frameIndex > out.prev.frameIndex))
-				// {
-				// 	out.prev = tmp.prev;
-				// }
-				// if(tmp.next && (!out.next || tmp.next.frameIndex < out.next.frameIndex))
-				// {
-				// 	out.next = tmp.next;
-				// }
-				//
-				// tmp.prev = null;
-				// tmp.current = null;
-				// tmp.next = null;
 			}
 		}
 
@@ -382,6 +419,9 @@ namespace app.anim
 
 		public extendLength(newLength)
 		{
+			if(this.readOnly) return;
+
+
 			if(newLength > this.length)
 			{
 				this.length = newLength;
@@ -431,7 +471,7 @@ namespace app.anim
 				{
 					this.tracks[target.id] = this.createTrack(target);
 				}
-				else
+				else if(this.active)
 				{
 					track.updateKeyframe();
 				}

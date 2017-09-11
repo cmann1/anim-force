@@ -184,7 +184,7 @@ canvas#timeline {
   padding: 5px;
   user-select: none; }
   #timeline-toolbar select {
-    width: 100px;
+    width: 160px;
     margin: 0 2px; }
   #timeline-toolbar .frame-label {
     vertical-align: middle;
@@ -308,6 +308,9 @@ i.fa:hover {
 i.fa.disabled, i.fa.disabled:hover {
   pointer-events: none;
   background: inherit !important;
+  color: #b5b5b5 !important; }
+
+div.disabled {
   color: #b5b5b5 !important; }
 
 .jBox-title {

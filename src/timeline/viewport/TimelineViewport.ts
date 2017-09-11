@@ -29,10 +29,14 @@ namespace app.timeline
 
 		private $toolbar:JQuery;
 		private $toolbarButtons:JQuery;
+		private $animControlButtons:JQuery;
+
 		private $playButton:JQuery;
 		private $pauseButton:JQuery;
 		private $frameLabel:JQuery;
 		private $animationSelect:JQuery;
+		private $editAnimButton:JQuery;
+		private $deleteAnimButton:JQuery;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
@@ -74,7 +78,7 @@ namespace app.timeline
 			this.mode = model.mode;
 			this.animation = model.getActiveAnimation();
 			this.animation.change.on(this.onAnimationChange);
-			model.activeAnimationChange.on(this.onActiveAnimationChange);
+			model.animationChange.on(this.onModelAnimationChange);
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
 			model.modeChange.on(this.onModelModeChange);
@@ -348,8 +352,12 @@ namespace app.timeline
 			this.$frameLabel = this.$toolbar.find('.frame-label .value');
 
 			this.$toolbarButtons = this.$toolbar.find('i');
+			this.$animControlButtons = this.$toolbarButtons.filter('.anim-controls');
 			this.$playButton = this.$toolbar.find('.btn-play');
 			this.$pauseButton = this.$toolbar.find('.btn-pause');
+
+			this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
+			this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
 
 			this.$animationSelect = this.$toolbar.find('select')
 				.on('change', this.onAnimationSelect);
@@ -383,14 +391,19 @@ namespace app.timeline
 
 			if(this.mode == EditMode.ANIMATE)
 			{
-				this.$toolbarButtons.removeClass('disabled');
+				this.$animControlButtons.removeClass('disabled');
 			}
 			else
 			{
-				this.$toolbarButtons.addClass('disabled');
-				this.$playButton.removeClass('disabled');
-				this.$pauseButton.removeClass('disabled');
+				this.$animControlButtons.addClass('disabled');
 			}
+
+			this.$playButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+			this.$pauseButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+			this.$frameLabel.parent().toggleClass('disabled', this.mode == EditMode.EDIT);
+
+			this.$editAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
+			this.$deleteAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
 		}
 
 		private updateNodeList()
@@ -545,15 +558,35 @@ namespace app.timeline
 		 */
 
 		// TODO: Implement
-		private onActiveAnimationChange = (model:Model, event:Event) =>
+		private onModelAnimationChange = (animation:Animation, event:Event) =>
 		{
-			// console.log(model, event);
+			const type = event.type;
 
-			this.animation = model.getActiveAnimation();
-			this.currentFrame = this.animation.getPosition();
-			this.updateFrameLabel();
+			if(type == 'new-animation' || type == 'clear')
+			{
+				this.$animationSelect.empty();
+				var animList:Animation[] = this.model.getAnimationList();
+				var i = 0;
+				for(var anim of animList)
+				{
+					this.$animationSelect.append($(`<option>${i > 0 ? anim.name : 'None'}</option>`));
+					i++;
+				}
 
-			this.requiresUpdate = true;
+				animation.change.on(this.onAnimationChange);
+			}
+
+			if(type == 'set-animation' || type == 'clear')
+			{
+				this.setSelectedFrame(null, -1);
+
+				this.animation = animation;
+				this.currentFrame = this.animation.getPosition();
+				this.updateFrameLabel();
+				this.$animationSelect.val(animation.name != 'BindPose' ? animation.name : 'None');
+
+				this.requiresUpdate = true;
+			}
 		};
 
 		private onAnimationChange = (animation:Animation, event:Event) =>
@@ -576,7 +609,7 @@ namespace app.timeline
 
 		private onAnimationSelect = (event) =>
 		{
-			console.log(this.$animationSelect.val());
+			this.model.setActiveAnimation(this.$animationSelect.val());
 		};
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
@@ -616,36 +649,47 @@ namespace app.timeline
 
 			const type = $btn.data('action');
 
-			if(type == 'play' || type == 'pause')
+			if(this.mode != EditMode.EDIT)
 			{
-				this.togglePlayback();
+				if(type == 'play' || type == 'pause')
+				{
+					this.togglePlayback();
+				}
 			}
 
-			else if(type == 'prev-frame')
+			if(this.mode == EditMode.ANIMATE)
 			{
-				this.prevFrame(event.shiftKey);
-			}
-			else if(type == 'next-frame')
-			{
-				this.nextFrame(event.shiftKey);
+				if(type == 'prev-frame')
+				{
+					this.prevFrame(event.shiftKey);
+				}
+				else if(type == 'next-frame')
+				{
+					this.nextFrame(event.shiftKey);
+				}
+
+				else if(type == 'prev-keyframe')
+				{
+					this.animation.gotoPrevKeyframe();
+				}
+				else if(type == 'next-keyframe')
+				{
+					this.animation.gotoNextKeyframe();
+				}
+
+				else if(type == 'insert-keyframe')
+				{
+					this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+				}
+				else if(type == 'delete-keyframe')
+				{
+					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+				}
 			}
 
-			else if(type == 'prev-keyframe')
+			if(type == 'add-anim')
 			{
-				this.animation.gotoPrevKeyframe();
-			}
-			else if(type == 'next-keyframe')
-			{
-				this.animation.gotoNextKeyframe();
-			}
-
-			else if(type == 'insert-keyframe')
-			{
-				this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-			}
-			else if(type == 'delete-keyframe')
-			{
-				this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+				this.model.addNewAnimation(null, true);
 			}
 		};
 
@@ -789,27 +833,30 @@ namespace app.timeline
 				return;
 			}
 
-			// Clicked on header
-			if(this.mouseY <= Config.nodeHeight)
+			if(this.mode == EditMode.ANIMATE)
 			{
-				if(event.button == 0)
+				// Clicked on header
+				if(this.mouseY <= Config.nodeHeight)
 				{
-					this.setFrame(this.getFrameIndexAt(this.mouseX));
-					this.dragFrameIndicator = true;
-				}
-			}
-
-			else
-			{
-				if(!this.setSelectedFrame(this.getNodeAt(this.mouseY - Config.nodeHeight), this.getFrameIndexAt(this.mouseX)))
-				{
-					this.deselectKeyframe = true;
+					if(event.button == 0)
+					{
+						this.setFrame(this.getFrameIndexAt(this.mouseX));
+						this.dragFrameIndicator = true;
+					}
 				}
 
-				if(this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame))
+				else
 				{
-					this.dragKeyframeNode = this.selectedTrack;
-					this.dragKeyframeIndex = this.selectedFrame;
+					if(!this.setSelectedFrame(this.getNodeAt(this.mouseY - Config.nodeHeight), this.getFrameIndexAt(this.mouseX)))
+					{
+						this.deselectKeyframe = true;
+					}
+
+					if(this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame))
+					{
+						this.dragKeyframeNode = this.selectedTrack;
+						this.dragKeyframeIndex = this.selectedFrame;
+					}
 				}
 			}
 		}

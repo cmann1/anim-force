@@ -27,19 +27,19 @@ var app;
             // TODO: Force a keyframe on bind pose when adding nodes
             function Model() {
                 var _this = _super.call(this, 'Unnamed Model') || this;
+                _this.nextAnimationId = 0;
                 _this.selectedNode = null;
                 _this.highlightedNode = null;
                 _this.drawList = new model.DrawList();
-                _this._mode = EditMode.ANIMATE;
-                // TODO: Set to private
-                _this.bindPose = new app.anim.Animation('BindPose', _this);
+                _this._mode = EditMode.EDIT;
+                _this.bindPose = new app.anim.Animation('BindPose', _this, true);
                 _this.animations = {};
                 _this.activeAnimation = null;
                 _this.showControls = true;
                 /// Events
                 _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
-                _this.activeAnimationChange = new EventDispatcher();
+                _this.animationChange = new EventDispatcher();
                 _this.nodeDrawOrder = function (a, b) {
                     if (a.layer < b.layer || b == _this.selectedNode) {
                         return -1;
@@ -149,13 +149,29 @@ var app;
             Model.prototype.getActiveAnimation = function () {
                 return this.activeAnimation;
             };
+            Model.prototype.getBindPose = function () {
+                return this.bindPose;
+            };
+            Model.prototype.getAnimationList = function () {
+                var animNames = [];
+                for (var animName in this.animations) {
+                    animNames.push(animName);
+                }
+                animNames.sort(Utils.naturalCompare);
+                var anims = [this.bindPose];
+                for (var _i = 0, animNames_1 = animNames; _i < animNames_1.length; _i++) {
+                    var animName = animNames_1[_i];
+                    anims.push(this.animations[animName]);
+                }
+                return anims;
+            };
             Model.prototype.clear = function () {
                 this.selectedNode = null;
                 this.highlightedNode = null;
                 this.bindPose.clear();
                 this.animations = {};
                 this.activeAnimation = this.bindPose;
-                // TODO: Dispatch animatino change event?
+                this.animationChange.dispatch(this.bindPose, new Event('clear'));
                 _super.prototype.clear.call(this);
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
@@ -167,11 +183,46 @@ var app;
             Model.prototype.animateStep = function (deltaTime) {
                 this.activeAnimation.animateStep(deltaTime);
             };
+            Model.prototype.addNewAnimation = function (name, select) {
+                if (select === void 0) { select = false; }
+                if (name == null) {
+                    name = 'Untitled Animation ' + (++this.nextAnimationId);
+                }
+                var newName = name;
+                var newIndex = 1;
+                while (this.animations[newName]) {
+                    newName = name + ' ' + newIndex;
+                    newIndex++;
+                }
+                var anim = new app.anim.Animation(newName, this);
+                this.animations[newName] = anim;
+                this.animationChange.dispatch(anim, new Event('new-animation'));
+                if (select) {
+                    this.setActiveAnimation(newName);
+                }
+            };
+            Model.prototype.setActiveAnimation = function (name) {
+                if (this._mode == EditMode.PLAYBACK)
+                    return;
+                var anim = name == 'None' ? this.bindPose : this.animations[name];
+                if (anim && anim != this.activeAnimation) {
+                    if (this.activeAnimation) {
+                        this.activeAnimation.active = false;
+                    }
+                    anim.active = true;
+                    this.activeAnimation = anim;
+                    this.animationChange.dispatch(anim, new Event('set-animation'));
+                    this.activeAnimation.updateNodes();
+                    this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;
+                }
+            };
             Object.defineProperty(Model.prototype, "mode", {
                 get: function () {
                     return this._mode;
                 },
                 set: function (value) {
+                    if (value == EditMode.EDIT)
+                        return;
                     if (this._mode == value)
                         return;
                     if (value == EditMode.PLAYBACK) {

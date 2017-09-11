@@ -68,6 +68,13 @@ var app;
                 _this.onModelStructureChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
+                _this.onModelAnimationChange = function (animation, event) {
+                    var type = event.type;
+                    if (type == 'set-animation') {
+                        animation.change.on(_this.onAnimationChange);
+                        _this.requiresUpdate = true;
+                    }
+                };
                 _this.onModelModeChange = function (model, event) {
                     _this.mode = model.mode;
                     if (_this.mode == EditMode.PLAYBACK) {
@@ -87,9 +94,10 @@ var app;
                     _this.stageAnchorY = NaN;
                 };
                 _this.model = model;
-                _this.model.bindPose.change.on(_this.onAnimationChange);
+                _this.model.getActiveAnimation().change.on(_this.onAnimationChange);
                 model.structureChange.on(_this.onModelStructureChange);
                 model.selectionChange.on(_this.onModelSelectionChange);
+                model.animationChange.on(_this.onModelAnimationChange);
                 model.modeChange.on(_this.onModelModeChange);
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
@@ -329,7 +337,7 @@ var app;
                     sprite3.offsetX = 0;
                     sprite3.offsetY = -150;
                     bone.addChild(sprite3);
-                    this.model.bindPose.forceKeyframe();
+                    // this.model.bindPose.forceKeyframe();
                 }
                 else if (keyCode == Key.Delete) {
                     if (!this.interaction.success) {
