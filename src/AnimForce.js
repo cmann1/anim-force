@@ -26,7 +26,6 @@
 // TODO: - - Auto set sprite node name to sprite name
 // TODO: - Add cancel button
 // TODO: Ghosts
-// TODO: Show loading sprite when changing sprites
 // TODO: Keyboard shortcuts from changing layer and sublayer
 
 // TODO: Timeline:

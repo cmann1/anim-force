@@ -53,6 +53,12 @@ namespace app.model
 			this.asset.setSpriteSource(this);
 		}
 
+		public setSrc(newSrc:HTMLImageElement)
+		{
+			this.src = newSrc;
+			this.onPropertyChange('src');
+		}
+
 		public setFrame(newFrame:number)
 		{
 			this.frame = newFrame;

@@ -34,6 +34,16 @@ html, body{
 .no-select {
 	user-select: none;
 }
+.flex-filler{
+	flex-grow: 1;
+	min-width: 10px;
+	min-height: 10px;
+}
+.toolbar-separator{
+	width: 1px;
+	background: $border-colour;
+	margin: 0 5px;
+}
 
 div#viewport-container{
 	position: absolute;
@@ -71,6 +81,7 @@ i.fa:hover{
 	color: $selected-color;
 }
 i.fa.disabled, i.fa.disabled:hover{
+	pointer-events: none;
 	background: inherit !important;
 	color: $disabled-color !important;
 }

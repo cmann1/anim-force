@@ -44,6 +44,10 @@ var app;
                 this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
                 this.asset.setSpriteSource(this);
             };
+            Sprite.prototype.setSrc = function (newSrc) {
+                this.src = newSrc;
+                this.onPropertyChange('src');
+            };
             Sprite.prototype.setFrame = function (newFrame) {
                 this.frame = newFrame;
                 this.asset.setSpriteSource(this);

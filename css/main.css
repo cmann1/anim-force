@@ -81,8 +81,6 @@ div#timeline-tree-toolbar {
     display: flex;
     align-items: stretch;
     flex-shrink: 0; }
-  div#timeline-tree-toolbar .filler {
-    flex-grow: 1; }
 
 .model-node .item {
   height: 29px;
@@ -185,10 +183,14 @@ canvas#timeline {
   display: flex;
   padding: 5px;
   user-select: none; }
+  #timeline-toolbar select {
+    width: 100px;
+    margin: 0 2px; }
   #timeline-toolbar .frame-label {
     vertical-align: middle;
     padding-top: 3px;
-    margin: 0 10px; }
+    margin: 0 10px;
+    white-space: nowrap; }
   #timeline-toolbar .btn-play, #timeline-toolbar .btn-pause {
     width: 12px; }
 
@@ -261,6 +263,16 @@ html, body {
 .no-select {
   user-select: none; }
 
+.flex-filler {
+  flex-grow: 1;
+  min-width: 10px;
+  min-height: 10px; }
+
+.toolbar-separator {
+  width: 1px;
+  background: #C1C1C1;
+  margin: 0 5px; }
+
 div#viewport-container {
   position: absolute; }
 
@@ -294,6 +306,7 @@ i.fa:hover {
   color: #FFF; }
 
 i.fa.disabled, i.fa.disabled:hover {
+  pointer-events: none;
   background: inherit !important;
   color: #b5b5b5 !important; }
 

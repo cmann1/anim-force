@@ -46,9 +46,10 @@ os.makedirs(OUT_DIR, exist_ok=True)
 sprites_out_data = []
 
 for sprite_set, sprite_set_data in sprite_sets_data.items():
-	# if sprite_set != 'props6':
+	# if sprite_set != 'fonts':
 	# if sprite_set != 'props6' and sprite_set != 'dustman':
 	# 	continue
+
 	if sprite_set == 'tile6':
 		continue
 
@@ -87,7 +88,12 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 			palettes=[]
 		)
 
-		first = True
+		thumb_palette = 0
+		thumb_frame = 0
+
+		if sprite_set == 'fonts':
+			thumb_frame = 50
+
 		frame_y = 0
 		for palette_index in range(palette_count):
 			frame_x = 0
@@ -107,8 +113,7 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 					frame_image = Image.open(frame_path)
 					sheet_image.paste(frame_image, (sprite_frame_x, sprite_frame_y))
 
-					if first:
-						first = False
+					if palette_index == thumb_palette and frame_index == thumb_frame:
 						sprite_thumb_data.append((sprite_name, frame_image))
 				else:
 					print('ERROR: cannot open file %s' % frame_path)

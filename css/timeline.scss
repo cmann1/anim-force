@@ -22,10 +22,16 @@ canvas#timeline{
 	padding: $ui-padding;
 	user-select: none;
 
+	select{
+		width: 100px;
+		margin: 0 2px;
+	}
+
 	.frame-label{
 		vertical-align: middle;
 		padding-top: 3px;
 		margin: 0 10px;
+		white-space: nowrap;
 
 		.value{
 

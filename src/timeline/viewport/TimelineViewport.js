@@ -49,6 +49,8 @@ var app;
                 // TODO: Implement
                 _this.onActiveAnimationChange = function (model, event) {
                     // console.log(model, event);
+                    _this.animation = model.getActiveAnimation();
+                    _this.currentFrame = _this.animation.getPosition();
                     _this.updateFrameLabel();
                     _this.requiresUpdate = true;
                 };
@@ -63,6 +65,9 @@ var app;
                         _this.updateFrameLabel();
                     }
                     _this.requiresUpdate = true;
+                };
+                _this.onAnimationSelect = function (event) {
+                    console.log(_this.$animationSelect.val());
                 };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
@@ -205,7 +210,6 @@ var app;
                             var arrowCount = 0;
                             var cx = x + frameCX;
                             var cy = y + frameCY;
-                            // TODO: Tween arrow should be drawn above selection and frame borders
                             if (j < animationLength) {
                                 var keyframe = track.getKeyFrame(j);
                                 if (keyframe) {
@@ -322,6 +326,8 @@ var app;
                 this.$toolbarButtons = this.$toolbar.find('i');
                 this.$playButton = this.$toolbar.find('.btn-play');
                 this.$pauseButton = this.$toolbar.find('.btn-pause');
+                this.$animationSelect = this.$toolbar.find('select')
+                    .on('change', this.onAnimationSelect);
                 this.$toolbar
                     .on('click', 'i', this.onToolbarButtonClick);
                 tippy(this.$toolbar.find('i').toArray());

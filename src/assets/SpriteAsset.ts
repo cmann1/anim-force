@@ -52,15 +52,14 @@ namespace app.assets
 			SpriteAsset.NULL_FRAME = new SpriteFrame([0, 0, 0, 0, 0, 0]);
 
 			SpriteAsset._NULL = new SpriteAsset(null, null, null);
+			SpriteAsset._NULL.error = true;
 		}
 
 		public setSpriteSource(sprite:app.model.Sprite)
 		{
-			var src;
-
 			if(this.error || this.loaded > 0)
 			{
-				sprite.src = this.error ? SpriteAsset.SPRITE_ERROR_IMG : SpriteAsset.SPRITE_LOADING_IMG;
+				sprite.setSrc(this.error ? SpriteAsset.SPRITE_ERROR_IMG : SpriteAsset.SPRITE_LOADING_IMG);
 				sprite.frameData = SpriteAsset.NULL_FRAME;
 				sprite.srcX = 0;
 				sprite.srcY = 0;
@@ -78,7 +77,7 @@ namespace app.assets
 				const frameIndex = sprite.frame < 0 || sprite.frame >= this.frameCount ? 0 : sprite.frame;
 				const frame = this.palettes[paletteIndex][frameIndex];
 
-				sprite.src = this.sheet;
+				sprite.setSrc(this.sheet);
 				sprite.frameData = frame;
 				sprite.srcX = frame.x;
 				sprite.srcY = frame.y;

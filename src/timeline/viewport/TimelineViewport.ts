@@ -32,6 +32,7 @@ namespace app.timeline
 		private $playButton:JQuery;
 		private $pauseButton:JQuery;
 		private $frameLabel:JQuery;
+		private $animationSelect:JQuery;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
@@ -193,7 +194,6 @@ namespace app.timeline
 						var cy = y + frameCY;
 
 
-						// TODO: Tween arrow should be drawn above selection and frame borders
 						if(j < animationLength)
 						{
 							const keyframe = track.getKeyFrame(j);
@@ -350,6 +350,9 @@ namespace app.timeline
 			this.$toolbarButtons = this.$toolbar.find('i');
 			this.$playButton = this.$toolbar.find('.btn-play');
 			this.$pauseButton = this.$toolbar.find('.btn-pause');
+
+			this.$animationSelect = this.$toolbar.find('select')
+				.on('change', this.onAnimationSelect);
 
 			this.$toolbar
 				.on('click', 'i', this.onToolbarButtonClick);
@@ -546,6 +549,8 @@ namespace app.timeline
 		{
 			// console.log(model, event);
 
+			this.animation = model.getActiveAnimation();
+			this.currentFrame = this.animation.getPosition();
 			this.updateFrameLabel();
 
 			this.requiresUpdate = true;
@@ -567,6 +572,11 @@ namespace app.timeline
 			}
 
 			this.requiresUpdate = true;
+		};
+
+		private onAnimationSelect = (event) =>
+		{
+			console.log(this.$animationSelect.val());
 		};
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
