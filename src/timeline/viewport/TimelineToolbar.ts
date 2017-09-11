@@ -5,6 +5,7 @@ namespace app.timeline
 	import EditMode = app.model.EditMode;
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
+	import Key = KeyCodes.Key;
 
 	export class TimelineToolbar
 	{
@@ -25,6 +26,12 @@ namespace app.timeline
 		private $deleteAnimButton:JQuery;
 		private $deleteConfirmDlg:JQuery;
 		private deleteConfirmDlg:jBox;
+
+		private $animEditDlg:JQuery;
+		private animEditDlg:jBox;
+		private $animEditName:JQuery;
+		private $animEditFps:JQuery;
+		private $animEditLoop:JQuery;
 
 		constructor(model:Model, timeline:TimelineViewport, $toolbar:JQuery)
 		{
@@ -54,7 +61,7 @@ namespace app.timeline
 
 			tippy(this.$toolbar.find('i').toArray());
 
-			this.$deleteConfirmDlg = $('#anim-delete-confirm');
+			this.$deleteConfirmDlg = $('#anim-delete-confirm-dlg');
 			this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
 			this.deleteConfirmDlg = new jBox('Modal', {
 				title: 'Delete this animation?',
@@ -71,6 +78,28 @@ namespace app.timeline
 				trigger: 'click',
 				onOpen: this.onDeleteConfirmDlgOpen
 			});
+
+			this.$animEditDlg = $('#anim-properties-dlg');
+			this.$animEditDlg.find('button').on('click', this.onAnimEditDlgButtonClick);
+			this.$animEditDlg.on('keypress', 'input', this.onAnimEditDlgInputKeyPress);
+			this.animEditDlg = new jBox('Modal', {
+				title: 'Animation Settings',
+				attach: '#timeline-toolbar i.btn-edit-anim',
+				overlay: false,
+				position: {x: 'right', y: 'bottom'},
+				offset: {y: 10},
+				outside: 'y',
+				closeButton: false,
+				closeOnEsc: true,
+				closeOnClick: 'body',
+				content: this.$animEditDlg,
+				target: this.$editAnimButton[0],
+				trigger: 'click',
+				onOpen: this.onAnimEditDlgOpen
+			});
+			this.$animEditName = this.$animEditDlg.find('#anim-prop-name');
+			this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
+			this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
 
 			this.updateFrameLabel();
 			this.updateToolbarButtons();
@@ -114,6 +143,21 @@ namespace app.timeline
 			this.$deleteAnimButton.toggleClass('disabled', inEditMode);
 		}
 
+		private acceptAnimEdit(accept=true)
+		{
+			if(accept)
+			{
+				this.model.renameAnimation(this.animation, this.$animEditName.val());
+				this.animation.fps = parseFloat(this.$animEditFps.val());
+				if(isNaN(this.animation.fps) || this.animation.fps <= 0)
+					this.animation.fps = 30;
+
+				this.animation.loop = this.$animEditLoop.prop('checked');
+			}
+
+			this.animEditDlg.close();
+		}
+
 		/*
 		 * Events
 		 */
@@ -130,6 +174,26 @@ namespace app.timeline
 			{
 				this.updateFrameLabel();
 			}
+		};
+
+		private onAnimEditDlgButtonClick = (event) =>
+		{
+			this.acceptAnimEdit(event.target.innerText == 'Save');
+		};
+
+		private onAnimEditDlgInputKeyPress = (event) =>
+		{
+			if(event.keyCode == Key.Enter)
+			{
+				this.acceptAnimEdit(true);
+			}
+		};
+
+		private onAnimEditDlgOpen = (event) =>
+		{
+			this.$animEditName.val(this.animation.name);
+			this.$animEditFps.val(this.animation.fps);
+			this.$animEditLoop.prop('checked', this.animation.loop);
 		};
 
 		private onAnimationSelect = (event) =>
@@ -165,6 +229,11 @@ namespace app.timeline
 				{
 					this.$animationSelect.append($(`<option>${i > 0 ? anim.name : 'None'}</option>`));
 					i++;
+				}
+
+				if(type == 'newAnimation')
+				{
+					animation.change.on(this.onAnimationChange);
 				}
 			}
 

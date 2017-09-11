@@ -1,9 +1,29 @@
 input{
 	outline: none;
-	border: 2px solid #505050;
+	border: 1px solid #a9a9a9;
 	border-radius: 3px;
 	padding: 2px;
-	background: #efefef;
+	background: #f7f7f7;
 	font-family: inherit;
 	font-size: inherit;
+	vertical-align: middle;
+}
+
+fieldset
+{
+	flex-direction: row;
+
+	border: none;
+	padding: 5px;
+}
+
+fieldset label
+{
+	width: 100px;
+	display: inline-block;
+}
+fieldset label + input
+{
+	display: inline-block;
+	flex-grow: 1;
 }

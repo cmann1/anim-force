@@ -303,6 +303,21 @@ namespace app.model
 			this.setActiveAnimation(animList[animIndex].name);
 		}
 
+		public renameAnimation(anim:app.anim.Animation, newName:string)
+		{
+			newName = $.trim(newName);
+
+			if(newName == anim.name || this.animations[newName]) return;
+
+			delete this.animations[anim.name];
+			this.animations[newName] = anim;
+			anim.name = newName;
+
+			this.animationList = null;
+			this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
+			this.animationChange.dispatch(anim, new Event('setAnimation'));
+		}
+
 		public get mode():app.model.EditMode
 		{
 			return this._mode;

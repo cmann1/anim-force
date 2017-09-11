@@ -1,7 +1,4 @@
 /*
-// TODO: Separate edit and animate modes
-// TODO: - Rename animations
-// TODO: - - Tooltip type popup with name and fps, loop
 // TODO: Saving/Loading models
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models

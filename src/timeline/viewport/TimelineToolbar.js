@@ -3,6 +3,7 @@ var app;
     var timeline;
     (function (timeline_1) {
         var EditMode = app.model.EditMode;
+        var Key = KeyCodes.Key;
         var TimelineToolbar = (function () {
             function TimelineToolbar(model, timeline, $toolbar) {
                 var _this = this;
@@ -17,6 +18,19 @@ var app;
                     else if (type == 'length') {
                         _this.updateFrameLabel();
                     }
+                };
+                this.onAnimEditDlgButtonClick = function (event) {
+                    _this.acceptAnimEdit(event.target.innerText == 'Save');
+                };
+                this.onAnimEditDlgInputKeyPress = function (event) {
+                    if (event.keyCode == Key.Enter) {
+                        _this.acceptAnimEdit(true);
+                    }
+                };
+                this.onAnimEditDlgOpen = function (event) {
+                    _this.$animEditName.val(_this.animation.name);
+                    _this.$animEditFps.val(_this.animation.fps);
+                    _this.$animEditLoop.prop('checked', _this.animation.loop);
                 };
                 this.onAnimationSelect = function (event) {
                     _this.model.setActiveAnimation(_this.$animationSelect.val());
@@ -40,6 +54,9 @@ var app;
                             var anim = animList_1[_i];
                             _this.$animationSelect.append($("<option>" + (i > 0 ? anim.name : 'None') + "</option>"));
                             i++;
+                        }
+                        if (type == 'newAnimation') {
+                            animation.change.on(_this.onAnimationChange);
                         }
                     }
                     if (type == 'setAnimation' || type == 'updateAnimationList') {
@@ -106,7 +123,7 @@ var app;
                 this.$toolbar
                     .on('click', 'i', this.onToolbarButtonClick);
                 tippy(this.$toolbar.find('i').toArray());
-                this.$deleteConfirmDlg = $('#anim-delete-confirm');
+                this.$deleteConfirmDlg = $('#anim-delete-confirm-dlg');
                 this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
                 this.deleteConfirmDlg = new jBox('Modal', {
                     title: 'Delete this animation?',
@@ -123,6 +140,27 @@ var app;
                     trigger: 'click',
                     onOpen: this.onDeleteConfirmDlgOpen
                 });
+                this.$animEditDlg = $('#anim-properties-dlg');
+                this.$animEditDlg.find('button').on('click', this.onAnimEditDlgButtonClick);
+                this.$animEditDlg.on('keypress', 'input', this.onAnimEditDlgInputKeyPress);
+                this.animEditDlg = new jBox('Modal', {
+                    title: 'Animation Settings',
+                    attach: '#timeline-toolbar i.btn-edit-anim',
+                    overlay: false,
+                    position: { x: 'right', y: 'bottom' },
+                    offset: { y: 10 },
+                    outside: 'y',
+                    closeButton: false,
+                    closeOnEsc: true,
+                    closeOnClick: 'body',
+                    content: this.$animEditDlg,
+                    target: this.$editAnimButton[0],
+                    trigger: 'click',
+                    onOpen: this.onAnimEditDlgOpen
+                });
+                this.$animEditName = this.$animEditDlg.find('#anim-prop-name');
+                this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
+                this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
                 this.updateFrameLabel();
                 this.updateToolbarButtons();
             }
@@ -151,6 +189,17 @@ var app;
                 this.$frameLabel.parent().toggleClass('disabled', inEditMode);
                 this.$editAnimButton.toggleClass('disabled', inEditMode);
                 this.$deleteAnimButton.toggleClass('disabled', inEditMode);
+            };
+            TimelineToolbar.prototype.acceptAnimEdit = function (accept) {
+                if (accept === void 0) { accept = true; }
+                if (accept) {
+                    this.model.renameAnimation(this.animation, this.$animEditName.val());
+                    this.animation.fps = parseFloat(this.$animEditFps.val());
+                    if (isNaN(this.animation.fps) || this.animation.fps <= 0)
+                        this.animation.fps = 30;
+                    this.animation.loop = this.$animEditLoop.prop('checked');
+                }
+                this.animEditDlg.close();
             };
             return TimelineToolbar;
         }());
