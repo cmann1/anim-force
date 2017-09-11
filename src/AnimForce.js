@@ -1,5 +1,4 @@
 /*
-// TODO: Timeline viewport/tree: update viewport on node collapse
 // TODO: Separate edit and animate modes
 // TODO: - Remove, and rename animations
 // TODO: - - Tooltip type popup with name and fps

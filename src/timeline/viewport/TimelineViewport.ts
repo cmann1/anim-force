@@ -64,6 +64,8 @@ namespace app.timeline
 		private keyframeSize = 4;
 		private keyframeColour = '#f9e26f';
 		private keyframeBorderColour = '#d4b82d';
+		private keyframeDisabledColour = '#fff4be';
+		private keyframeDisabledBorderColour = '#dacd8f';
 		private selectedFrameColour = '#fdf4a8';
 
 		public viewport:app.viewport.Viewport;
@@ -120,6 +122,9 @@ namespace app.timeline
 			const frameCX = frameWidth * 0.5;
 			const frameCY = nodeHeight * 0.5;
 			const keyframeSize = this.keyframeSize;
+
+			const keyframeColour = this.mode != EditMode.EDIT ? this.keyframeColour : this.keyframeDisabledColour;
+			const keyframeBorderColour = this.mode != EditMode.EDIT ? this.keyframeBorderColour : this.keyframeDisabledBorderColour;
 
 			const firstFrame = Math.floor(left / frameWidth);
 			const lastFrame = Math.ceil(right / frameWidth);
@@ -206,8 +211,8 @@ namespace app.timeline
 								onScreenFrameCount++;
 
 								// Keyframe diamond
-								ctx.fillStyle = this.keyframeColour;
-								ctx.strokeStyle = this.keyframeBorderColour;
+								ctx.fillStyle = keyframeColour;
+								ctx.strokeStyle = keyframeBorderColour;
 								ctx.beginPath();
 								ctx.moveTo(cx - keyframeSize, cy);
 								ctx.lineTo(cx, cy - keyframeSize);
@@ -257,7 +262,7 @@ namespace app.timeline
 						while(arrowCount--)
 						{
 							cx = next.frameIndex * frameWidth - 3;
-							ctx.strokeStyle = this.keyframeBorderColour;
+							ctx.strokeStyle = keyframeBorderColour;
 							ctx.beginPath();
 							ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
 							ctx.lineTo(cx, cy);
@@ -282,7 +287,7 @@ namespace app.timeline
 			}
 
 			const currentFrameX = currentFrame * frameWidth;
-			if(currentFrameX <= right && currentFrameX + frameWidth >= left)
+			if(this.mode != EditMode.EDIT && currentFrameX <= right && currentFrameX + frameWidth >= left)
 			{
 				ctx.fillStyle = this.scrubColour;
 				ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, 0, 2, this.width);
@@ -304,7 +309,6 @@ namespace app.timeline
 			const right = left + this.width;
 
 			const animation = this.animation;
-			const animationLength = animation.getLength();
 			const currentFrame = this.currentFrame;
 			const frameWidth = Config.frameWidth;
 
@@ -321,7 +325,7 @@ namespace app.timeline
 			while(x <= right)
 			{
 				const drawX = x - this.scrollX;
-				if(frameIndex == currentFrame)
+				if(frameIndex == currentFrame && this.mode != EditMode.EDIT)
 				{
 					ctx.fillStyle = this.scrubColour;
 					ctx.fillRect(drawX + 3, 0, frameWidth - 6, nodeHeight - 1);
@@ -561,7 +565,7 @@ namespace app.timeline
 		{
 			const type = event.type;
 
-			if(type == 'newAnimation' || type == 'clear')
+			if(type == 'updateAnimationList')
 			{
 				this.$animationSelect.empty();
 				var animList:Animation[] = this.model.getAnimationList();
@@ -575,7 +579,7 @@ namespace app.timeline
 				animation.change.on(this.onAnimationChange);
 			}
 
-			if(type == 'setAnimation' || type == 'clear')
+			if(type == 'setAnimation' || type == 'updateAnimationList')
 			{
 				this.setSelectedFrame(null, -1);
 
@@ -625,6 +629,7 @@ namespace app.timeline
 		private onModelModeChange = (model:Model, event:Event) =>
 		{
 			this.mode = model.mode;
+			this.requiresUpdate = true;
 			this.updateToolbarButtons();
 		};
 

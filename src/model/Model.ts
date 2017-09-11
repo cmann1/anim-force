@@ -39,7 +39,6 @@ namespace app.model
 		public selectionChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public animationChange:EventDispatcher<Animation> = new EventDispatcher<Animation>();
 
-		// TODO: Force a keyframe on bind pose when adding nodes
 		constructor()
 		{
 			super('Unnamed Model');
@@ -214,7 +213,8 @@ namespace app.model
 			this.bindPose.clear();
 			this.animations = {};
 			this.activeAnimation = this.bindPose;
-			this.animationChange.dispatch(this.bindPose, new Event('clear'));
+
+			this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
 
 			super.clear();
 		}
@@ -251,7 +251,7 @@ namespace app.model
 
 			var anim = new app.anim.Animation(newName, this);
 			this.animations[newName] = anim;
-			this.animationChange.dispatch(anim, new Event('newAnimation'));
+			this.animationChange.dispatch(anim, new Event('updateAnimationList'));
 
 			if(select)
 			{
@@ -277,7 +277,7 @@ namespace app.model
 				this.animationChange.dispatch(anim, new Event('setAnimation'));
 				this.activeAnimation.updateNodes();
 
-				this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;
+				this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
 			}
 		}
 
@@ -286,10 +286,15 @@ namespace app.model
 			return this._mode;
 		}
 
-		public set mode(value:app.model.EditMode)
+		public set mode(value:EditMode)
 		{
 			if(value == EditMode.EDIT) return;
 
+			this.setMode(value);
+		}
+
+		protected setMode(value:EditMode)
+		{
 			if(this._mode == value) return;
 
 			if(value == EditMode.PLAYBACK)

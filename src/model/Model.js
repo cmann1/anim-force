@@ -24,7 +24,6 @@ var app;
         })(EditMode = model.EditMode || (model.EditMode = {}));
         var Model = (function (_super) {
             __extends(Model, _super);
-            // TODO: Force a keyframe on bind pose when adding nodes
             function Model() {
                 var _this = _super.call(this, 'Unnamed Model') || this;
                 _this.nextAnimationId = 0;
@@ -171,7 +170,7 @@ var app;
                 this.bindPose.clear();
                 this.animations = {};
                 this.activeAnimation = this.bindPose;
-                this.animationChange.dispatch(this.bindPose, new Event('clear'));
+                this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
                 _super.prototype.clear.call(this);
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
@@ -196,7 +195,7 @@ var app;
                 }
                 var anim = new app.anim.Animation(newName, this);
                 this.animations[newName] = anim;
-                this.animationChange.dispatch(anim, new Event('newAnimation'));
+                this.animationChange.dispatch(anim, new Event('updateAnimationList'));
                 if (select) {
                     this.setActiveAnimation(newName);
                 }
@@ -213,7 +212,7 @@ var app;
                     this.activeAnimation = anim;
                     this.animationChange.dispatch(anim, new Event('setAnimation'));
                     this.activeAnimation.updateNodes();
-                    this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;
+                    this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
                 }
             };
             Object.defineProperty(Model.prototype, "mode", {
@@ -223,17 +222,20 @@ var app;
                 set: function (value) {
                     if (value == EditMode.EDIT)
                         return;
-                    if (this._mode == value)
-                        return;
-                    if (value == EditMode.PLAYBACK) {
-                        this.activeAnimation.initForAnimation();
-                    }
-                    this._mode = value;
-                    this.modeChange.dispatch(this, new Event('mode'));
+                    this.setMode(value);
                 },
                 enumerable: true,
                 configurable: true
             });
+            Model.prototype.setMode = function (value) {
+                if (this._mode == value)
+                    return;
+                if (value == EditMode.PLAYBACK) {
+                    this.activeAnimation.initForAnimation();
+                }
+                this._mode = value;
+                this.modeChange.dispatch(this, new Event('mode'));
+            };
             /*
              * Events
              */

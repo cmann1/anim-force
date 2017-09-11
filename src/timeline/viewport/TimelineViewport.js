@@ -42,13 +42,15 @@ var app;
                 _this.keyframeSize = 4;
                 _this.keyframeColour = '#f9e26f';
                 _this.keyframeBorderColour = '#d4b82d';
+                _this.keyframeDisabledColour = '#fff4be';
+                _this.keyframeDisabledBorderColour = '#dacd8f';
                 _this.selectedFrameColour = '#fdf4a8';
                 /*
                  * Events
                  */
                 _this.onModelAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'newAnimation' || type == 'clear') {
+                    if (type == 'updateAnimationList') {
                         _this.$animationSelect.empty();
                         var animList = _this.model.getAnimationList();
                         var i = 0;
@@ -59,7 +61,7 @@ var app;
                         }
                         animation.change.on(_this.onAnimationChange);
                     }
-                    if (type == 'setAnimation' || type == 'clear') {
+                    if (type == 'setAnimation' || type == 'updateAnimationList') {
                         _this.setSelectedFrame(null, -1);
                         _this.animation = animation;
                         _this.currentFrame = _this.animation.getPosition();
@@ -92,6 +94,7 @@ var app;
                 };
                 _this.onModelModeChange = function (model, event) {
                     _this.mode = model.mode;
+                    _this.requiresUpdate = true;
                     _this.updateToolbarButtons();
                 };
                 _this.onTreeNodeUpdate = function (node, event) {
@@ -181,6 +184,8 @@ var app;
                 var frameCX = frameWidth * 0.5;
                 var frameCY = nodeHeight * 0.5;
                 var keyframeSize = this.keyframeSize;
+                var keyframeColour = this.mode != EditMode.EDIT ? this.keyframeColour : this.keyframeDisabledColour;
+                var keyframeBorderColour = this.mode != EditMode.EDIT ? this.keyframeBorderColour : this.keyframeDisabledBorderColour;
                 var firstFrame = Math.floor(left / frameWidth);
                 var lastFrame = Math.ceil(right / frameWidth);
                 ctx.clearRect(0, 0, this.width, this.height);
@@ -240,8 +245,8 @@ var app;
                                 if (keyframe) {
                                     onScreenFrameCount++;
                                     // Keyframe diamond
-                                    ctx.fillStyle = this.keyframeColour;
-                                    ctx.strokeStyle = this.keyframeBorderColour;
+                                    ctx.fillStyle = keyframeColour;
+                                    ctx.strokeStyle = keyframeBorderColour;
                                     ctx.beginPath();
                                     ctx.moveTo(cx - keyframeSize, cy);
                                     ctx.lineTo(cx, cy - keyframeSize);
@@ -281,7 +286,7 @@ var app;
                             // Draw keyframe connection arrows
                             while (arrowCount--) {
                                 cx = next.frameIndex * frameWidth - 3;
-                                ctx.strokeStyle = this.keyframeBorderColour;
+                                ctx.strokeStyle = keyframeBorderColour;
                                 ctx.beginPath();
                                 ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
                                 ctx.lineTo(cx, cy);
@@ -300,7 +305,7 @@ var app;
                     y += nodeHeight;
                 }
                 var currentFrameX = currentFrame * frameWidth;
-                if (currentFrameX <= right && currentFrameX + frameWidth >= left) {
+                if (this.mode != EditMode.EDIT && currentFrameX <= right && currentFrameX + frameWidth >= left) {
                     ctx.fillStyle = this.scrubColour;
                     ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, 0, 2, this.width);
                 }
@@ -315,7 +320,6 @@ var app;
                 var left = this.scrollX;
                 var right = left + this.width;
                 var animation = this.animation;
-                var animationLength = animation.getLength();
                 var currentFrame = this.currentFrame;
                 var frameWidth = app.Config.frameWidth;
                 ctx.fillStyle = this.headerGrad;
@@ -327,7 +331,7 @@ var app;
                 var x = frameIndex * frameWidth;
                 while (x <= right) {
                     var drawX = x - this.scrollX;
-                    if (frameIndex == currentFrame) {
+                    if (frameIndex == currentFrame && this.mode != EditMode.EDIT) {
                         ctx.fillStyle = this.scrubColour;
                         ctx.fillRect(drawX + 3, 0, frameWidth - 6, nodeHeight - 1);
                     }
