@@ -1,5 +1,4 @@
 /*
-// TODO: Timeline viewport: top level node order is wrong
 // TODO: Timeline viewport/tree: update viewport on node collapse
 // TODO: Separate edit and animate modes
 // TODO: - Remove, and rename animations

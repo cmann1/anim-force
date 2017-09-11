@@ -46,10 +46,9 @@ var app;
                 /*
                  * Events
                  */
-                // TODO: Implement
                 _this.onModelAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'new-animation' || type == 'clear') {
+                    if (type == 'newAnimation' || type == 'clear') {
                         _this.$animationSelect.empty();
                         var animList = _this.model.getAnimationList();
                         var i = 0;
@@ -60,12 +59,12 @@ var app;
                         }
                         animation.change.on(_this.onAnimationChange);
                     }
-                    if (type == 'set-animation' || type == 'clear') {
+                    if (type == 'setAnimation' || type == 'clear') {
                         _this.setSelectedFrame(null, -1);
                         _this.animation = animation;
                         _this.currentFrame = _this.animation.getPosition();
                         _this.updateFrameLabel();
-                        _this.$animationSelect.val(animation.name != 'BindPose' ? animation.name : 'None');
+                        _this.$animationSelect.val(animation.name);
                         _this.requiresUpdate = true;
                     }
                 };
@@ -96,6 +95,10 @@ var app;
                     _this.updateToolbarButtons();
                 };
                 _this.onTreeNodeUpdate = function (node, event) {
+                    var type = event.type;
+                    if (type == 'nodeCollapse') {
+                        _this.updateNodeList();
+                    }
                     _this.requiresUpdate = true;
                 };
                 _this.onTreeScroll = function (tree, event) {
@@ -388,7 +391,7 @@ var app;
                 var nodeQueue = [];
                 var i = -1;
                 for (var j = this.model.childCount - 1; j >= 0; j--)
-                    nodeQueue[++i] = this.model.children[i];
+                    nodeQueue[++i] = this.model.children[j];
                 while (i >= 0) {
                     var node = nodeQueue[i--];
                     if (node instanceof ContainerNode && !node.collapsed) {

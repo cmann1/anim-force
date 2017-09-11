@@ -411,7 +411,7 @@ namespace app.timeline
 			var nodes:Node[] = [];
 			var nodeQueue:Node[] = [];
 			var i = -1;
-			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[i];
+			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[j];
 
 			while(i >= 0)
 			{
@@ -557,12 +557,11 @@ namespace app.timeline
 		 * Events
 		 */
 
-		// TODO: Implement
 		private onModelAnimationChange = (animation:Animation, event:Event) =>
 		{
 			const type = event.type;
 
-			if(type == 'new-animation' || type == 'clear')
+			if(type == 'newAnimation' || type == 'clear')
 			{
 				this.$animationSelect.empty();
 				var animList:Animation[] = this.model.getAnimationList();
@@ -576,14 +575,14 @@ namespace app.timeline
 				animation.change.on(this.onAnimationChange);
 			}
 
-			if(type == 'set-animation' || type == 'clear')
+			if(type == 'setAnimation' || type == 'clear')
 			{
 				this.setSelectedFrame(null, -1);
 
 				this.animation = animation;
 				this.currentFrame = this.animation.getPosition();
 				this.updateFrameLabel();
-				this.$animationSelect.val(animation.name != 'BindPose' ? animation.name : 'None');
+				this.$animationSelect.val(animation.name);
 
 				this.requiresUpdate = true;
 			}
@@ -631,6 +630,13 @@ namespace app.timeline
 
 		protected onTreeNodeUpdate = (node:TreeNode, event:Event) =>
 		{
+			const type = event.type;
+
+			if(type == 'nodeCollapse')
+			{
+				this.updateNodeList();
+			}
+
 			this.requiresUpdate = true;
 		};
 

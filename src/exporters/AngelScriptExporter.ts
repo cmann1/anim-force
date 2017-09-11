@@ -48,7 +48,7 @@ namespace app.exporters
 				i++;
 			}
 
-			var anims:Animation[] = [model.bindPose]; // TODO: TEMP
+			var anims:Animation[] = [model.getBindPose()]; // TODO: TEMP
 			var animFrameCount = [];
 			var animFps = [];
 			var animLoop = [];

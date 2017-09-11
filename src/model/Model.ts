@@ -27,7 +27,7 @@ namespace app.model
 
 		private _mode:EditMode = EditMode.EDIT;
 
-		private bindPose:app.anim.Animation = new app.anim.Animation('BindPose', this, true);
+		private bindPose:app.anim.Animation = new app.anim.Animation('None', this, true);
 		private animations:{[id:string]:app.anim.Animation} = {};
 		private activeAnimation:app.anim.Animation = null;
 
@@ -236,7 +236,7 @@ namespace app.model
 
 		public addNewAnimation(name:string, select:boolean=false)
 		{
-			if(name == null)
+			if(name == null || name == 'None')
 			{
 				name = 'Untitled Animation ' + (++this.nextAnimationId);
 			}
@@ -251,7 +251,7 @@ namespace app.model
 
 			var anim = new app.anim.Animation(newName, this);
 			this.animations[newName] = anim;
-			this.animationChange.dispatch(anim, new Event('new-animation'));
+			this.animationChange.dispatch(anim, new Event('newAnimation'));
 
 			if(select)
 			{
@@ -274,7 +274,7 @@ namespace app.model
 
 				anim.active = true;
 				this.activeAnimation = anim;
-				this.animationChange.dispatch(anim, new Event('set-animation'));
+				this.animationChange.dispatch(anim, new Event('setAnimation'));
 				this.activeAnimation.updateNodes();
 
 				this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;

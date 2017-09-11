@@ -47,7 +47,7 @@ var app;
                     }
                     i++;
                 }
-                var anims = [model.bindPose]; // TODO: TEMP
+                var anims = [model.getBindPose()]; // TODO: TEMP
                 var animFrameCount = [];
                 var animFps = [];
                 var animLoop = [];

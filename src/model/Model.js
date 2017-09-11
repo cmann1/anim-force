@@ -32,7 +32,7 @@ var app;
                 _this.highlightedNode = null;
                 _this.drawList = new model.DrawList();
                 _this._mode = EditMode.EDIT;
-                _this.bindPose = new app.anim.Animation('BindPose', _this, true);
+                _this.bindPose = new app.anim.Animation('None', _this, true);
                 _this.animations = {};
                 _this.activeAnimation = null;
                 _this.showControls = true;
@@ -185,7 +185,7 @@ var app;
             };
             Model.prototype.addNewAnimation = function (name, select) {
                 if (select === void 0) { select = false; }
-                if (name == null) {
+                if (name == null || name == 'None') {
                     name = 'Untitled Animation ' + (++this.nextAnimationId);
                 }
                 var newName = name;
@@ -196,7 +196,7 @@ var app;
                 }
                 var anim = new app.anim.Animation(newName, this);
                 this.animations[newName] = anim;
-                this.animationChange.dispatch(anim, new Event('new-animation'));
+                this.animationChange.dispatch(anim, new Event('newAnimation'));
                 if (select) {
                     this.setActiveAnimation(newName);
                 }
@@ -211,7 +211,7 @@ var app;
                     }
                     anim.active = true;
                     this.activeAnimation = anim;
-                    this.animationChange.dispatch(anim, new Event('set-animation'));
+                    this.animationChange.dispatch(anim, new Event('setAnimation'));
                     this.activeAnimation.updateNodes();
                     this.mode = anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE;
                 }
