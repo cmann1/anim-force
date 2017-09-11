@@ -102,10 +102,7 @@ namespace app.anim
 				console.error('Cannot create animation track for', target);
 			}
 
-			if(this.readOnly || copyFrom)
-			{
-				track.forceKeyframe(-1, copyFrom);
-			}
+			track.forceKeyframe(0, copyFrom);
 
 			track.setPosition(this.frameIndex);
 			return track;
@@ -306,7 +303,6 @@ namespace app.anim
 		{
 			if(this.readOnly) return;
 
-
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			if(node)
@@ -423,6 +419,22 @@ namespace app.anim
 
 
 			if(newLength > this.length)
+			{
+				this.length = newLength;
+				this.dispatchChange('length');
+			}
+		}
+
+		public trimLength()
+		{
+			var newLength = 1;
+
+			for(var trackId in this.tracks)
+			{
+				newLength = Math.max(newLength, this.tracks[trackId].trimLength());
+			}
+
+			if(newLength != this.length)
 			{
 				this.length = newLength;
 				this.dispatchChange('length');

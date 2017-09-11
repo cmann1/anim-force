@@ -1,12 +1,10 @@
 /*
 // TODO: Separate edit and animate modes
 // TODO: - Remove, and rename animations
-// TODO: - - Tooltip type popup with name and fps
-// TODO: When creating new nodes: Force a keyframe at 0 when in edit mode, otherwise don't create a keyframe
+// TODO: - - Tooltip type popup with name and fps, loop
 // TODO: Saving/Loading models
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
-// TODO: Manually change animation length
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated

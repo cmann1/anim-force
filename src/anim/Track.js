@@ -152,6 +152,13 @@ var app;
                     this.animation.extendLength(newLength);
                 }
             };
+            Track.prototype.trimLength = function () {
+                var newLength = 1;
+                for (var propertyName in this.properties) {
+                    newLength = Math.max(newLength, this.properties[propertyName].trimLength());
+                }
+                return this.length = newLength;
+            };
             return Track;
         }());
         anim.Track = Track;
@@ -274,6 +281,10 @@ var app;
                 if (this.frames == key)
                     this.frames = null;
                 return true;
+            };
+            TrackProperty.prototype.trimLength = function () {
+                this.length = this.last ? this.last.frameIndex + 1 : 1;
+                return this.length;
             };
             TrackProperty.prototype.copy = function (node, frameData, forceAll, frameIndex) {
                 if (forceAll === void 0) { forceAll = false; }

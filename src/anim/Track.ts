@@ -226,8 +226,19 @@ namespace app.anim
 			{
 				this.length = newLength;
 				this.animation.extendLength(newLength);
-
 			}
+		}
+
+		public trimLength():number
+		{
+			var newLength = 1;
+
+			for(var propertyName in this.properties)
+			{
+				newLength = Math.max(newLength, this.properties[propertyName].trimLength());
+			}
+
+			return this.length = newLength;
 		}
 	}
 
@@ -384,6 +395,12 @@ namespace app.anim
 			if(this.frames == key) this.frames = null;
 
 			return true;
+		}
+
+		public trimLength():number
+		{
+			this.length = this.last ? this.last.frameIndex + 1 : 1;
+			return this.length;
 		}
 
 		public copy(node:Node, frameData:any, forceAll = false, frameIndex = -1):boolean

@@ -731,6 +731,10 @@ namespace app.timeline
 				{
 					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
 				}
+				else if(type == 'trim-length')
+				{
+					this.animation.trimLength();
+				}
 			}
 
 			if(type == 'add-anim')
@@ -809,6 +813,7 @@ namespace app.timeline
 		public commonKey(event):boolean
 		{
 			const keyCode = event.keyCode;
+			const shiftKey = event.shiftKey;
 
 			if(this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK)
 			{
@@ -855,6 +860,11 @@ namespace app.timeline
 				else if(keyCode == Key.I)
 				{
 					this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+					return true;
+				}
+				else if(keyCode == Key.T && shiftKey)
+				{
+					this.animation.trimLength();
 					return true;
 				}
 			}

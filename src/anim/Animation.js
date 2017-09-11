@@ -99,9 +99,7 @@ var app;
                 if (!track) {
                     console.error('Cannot create animation track for', target);
                 }
-                if (this.readOnly || copyFrom) {
-                    track.forceKeyframe(-1, copyFrom);
-                }
+                track.forceKeyframe(0, copyFrom);
                 track.setPosition(this.frameIndex);
                 return track;
             };
@@ -323,6 +321,16 @@ var app;
                 if (this.readOnly)
                     return;
                 if (newLength > this.length) {
+                    this.length = newLength;
+                    this.dispatchChange('length');
+                }
+            };
+            Animation.prototype.trimLength = function () {
+                var newLength = 1;
+                for (var trackId in this.tracks) {
+                    newLength = Math.max(newLength, this.tracks[trackId].trimLength());
+                }
+                if (newLength != this.length) {
                     this.length = newLength;
                     this.dispatchChange('length');
                 }

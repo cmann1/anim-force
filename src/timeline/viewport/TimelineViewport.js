@@ -147,6 +147,9 @@ var app;
                         else if (type == 'delete-keyframe') {
                             _this.animation.deleteKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
                         }
+                        else if (type == 'trim-length') {
+                            _this.animation.trimLength();
+                        }
                     }
                     if (type == 'add-anim') {
                         _this.model.addNewAnimation(null, true);
@@ -574,6 +577,7 @@ var app;
             };
             TimelineViewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;
+                var shiftKey = event.shiftKey;
                 if (this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK) {
                     // Playback
                     if (keyCode == Key.ForwardSlash) {
@@ -606,6 +610,10 @@ var app;
                     }
                     else if (keyCode == Key.I) {
                         this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                        return true;
+                    }
+                    else if (keyCode == Key.T && shiftKey) {
+                        this.animation.trimLength();
                         return true;
                     }
                 }
