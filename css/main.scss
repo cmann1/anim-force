@@ -1,4 +1,5 @@
 @import "vars";
+@import 'gh-buttons';
 @import 'tooltip';
 @import 'forms';
 @import 'splitter';
@@ -90,7 +91,7 @@ div.disabled
 	color: $disabled-color !important;
 }
 
-.jBox-Modal .jBox-container{
+body .jBox-Modal .jBox-container{
 	box-shadow: 0 3px 15px rgba(0, 0, 0, .4);
 }
 

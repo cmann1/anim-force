@@ -50,23 +50,16 @@ var app;
                  */
                 _this.onModelAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'updateAnimationList') {
-                        _this.$animationSelect.empty();
-                        var animList = _this.model.getAnimationList();
-                        var i = 0;
-                        for (var _i = 0, animList_1 = animList; _i < animList_1.length; _i++) {
-                            var anim = animList_1[_i];
-                            _this.$animationSelect.append($("<option>" + (i > 0 ? anim.name : 'None') + "</option>"));
-                            i++;
+                    if (type == 'updateAnimationList' || type == 'newAnimation') {
+                        if (type == 'newAnimation') {
+                            animation.change.on(_this.onAnimationChange);
                         }
-                        animation.change.on(_this.onAnimationChange);
                     }
                     if (type == 'setAnimation' || type == 'updateAnimationList') {
                         _this.setSelectedFrame(null, -1);
                         _this.animation = animation;
                         _this.currentFrame = _this.animation.getPosition();
-                        _this.updateFrameLabel();
-                        _this.$animationSelect.val(animation.name);
+                        _this.toolbar.updateFrameLabel();
                         _this.requiresUpdate = true;
                     }
                 };
@@ -74,16 +67,11 @@ var app;
                     var type = event.type;
                     if (type == 'position' || type == 'clear') {
                         _this.setFrame(animation.getPosition());
-                        _this.updateFrameLabel();
                     }
                     else if (type == 'length') {
                         _this.setSelectedFrame(_this.selectedTrack, _this.selectedFrame);
-                        _this.updateFrameLabel();
                     }
                     _this.requiresUpdate = true;
-                };
-                _this.onAnimationSelect = function (event) {
-                    _this.model.setActiveAnimation(_this.$animationSelect.val());
                 };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
@@ -95,7 +83,7 @@ var app;
                 _this.onModelModeChange = function (model, event) {
                     _this.mode = model.mode;
                     _this.requiresUpdate = true;
-                    _this.updateToolbarButtons();
+                    _this.toolbar.updateToolbarButtons();
                 };
                 _this.onTreeNodeUpdate = function (node, event) {
                     var type = event.type;
@@ -107,55 +95,6 @@ var app;
                 _this.onTreeScroll = function (tree, event) {
                     _this.scrollY = event.scrollY;
                     _this.requiresUpdate = true;
-                };
-                _this.onDeleteConfirmDlgOpen = function (event) {
-                    _this.$deleteConfirmDlg.find('strong').html(_this.animation.name);
-                };
-                _this.onDeleteConfirmClick = function (event) {
-                    if (event.target.innerText == 'Yes') {
-                        _this.model.deleteAnimation();
-                    }
-                    _this.deleteConfirmDlg.close();
-                };
-                _this.onToolbarButtonClick = function (event) {
-                    _this.$canvas.focus();
-                    var $btn = $(event.target);
-                    if ($btn.hasClass('disabled'))
-                        return;
-                    var type = $btn.data('action');
-                    if (_this.mode != EditMode.EDIT) {
-                        if (type == 'play' || type == 'pause') {
-                            _this.togglePlayback();
-                        }
-                    }
-                    if (_this.mode == EditMode.ANIMATE) {
-                        if (type == 'prev-frame') {
-                            _this.prevFrame(event.shiftKey);
-                        }
-                        else if (type == 'next-frame') {
-                            _this.nextFrame(event.shiftKey);
-                        }
-                        else if (type == 'prev-keyframe') {
-                            _this.animation.gotoPrevKeyframe();
-                        }
-                        else if (type == 'next-keyframe') {
-                            _this.animation.gotoNextKeyframe();
-                        }
-                        else if (type == 'insert-keyframe') {
-                            _this.animation.forceKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
-                        }
-                        else if (type == 'delete-keyframe') {
-                            _this.animation.deleteKeyframe(event.shiftKey ? null : _this.model.getSelectedNode());
-                        }
-                        else if (type == 'trim-length') {
-                            _this.animation.trimLength();
-                        }
-                    }
-                    if (type == 'add-anim') {
-                        _this.model.addNewAnimation(null, true);
-                    }
-                    else if (type == 'delete-anim') {
-                    }
                 };
                 _this.model = model;
                 _this.tree = tree;
@@ -172,7 +111,7 @@ var app;
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$container.parent().parent().parent().on('resize', _this.onResize);
                 app.$window.on('resize', _this.onResize);
-                _this.setupToolbar();
+                _this.toolbar = new timeline.TimelineToolbar(model, _this, _this.$container.parent().find('#timeline-toolbar'));
                 _this.headerGrad = _this.ctx.createLinearGradient(0, 0, 0, app.Config.nodeHeight);
                 _this.headerGrad.addColorStop(0, app.Config.node);
                 _this.headerGrad.addColorStop(1, app.Config.nodeBottom);
@@ -363,63 +302,31 @@ var app;
                     x += frameWidth;
                 }
             };
-            TimelineViewport.prototype.setupToolbar = function () {
-                this.$toolbar = this.$container.parent().find('#timeline-toolbar');
-                this.$frameLabel = this.$toolbar.find('.frame-label .value');
-                this.$toolbarButtons = this.$toolbar.find('i');
-                this.$animControlButtons = this.$toolbarButtons.filter('.anim-controls');
-                this.$playButton = this.$toolbar.find('.btn-play');
-                this.$pauseButton = this.$toolbar.find('.btn-pause');
-                this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
-                this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
-                this.$animationSelect = this.$toolbar.find('select')
-                    .on('change', this.onAnimationSelect);
-                this.$toolbar
-                    .on('click', 'i', this.onToolbarButtonClick);
-                tippy(this.$toolbar.find('i').toArray());
-                this.$deleteConfirmDlg = $('#anim-delete-confirm');
-                this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
-                this.deleteConfirmDlg = new jBox('Modal', {
-                    title: 'Delete this animation?',
-                    attach: '#timeline-toolbar i.btn-delete-anim',
-                    overlay: false,
-                    position: { x: 'right', y: 'bottom' },
-                    offset: { y: 10 },
-                    outside: 'y',
-                    closeButton: false,
-                    closeOnEsc: true,
-                    closeOnClick: 'body',
-                    content: this.$deleteConfirmDlg,
-                    target: this.$deleteAnimButton[0],
-                    trigger: 'click',
-                    onOpen: this.onDeleteConfirmDlgOpen
-                });
-                this.updateFrameLabel();
-                this.updateToolbarButtons();
+            TimelineViewport.prototype.getMode = function () {
+                return this.mode;
             };
-            TimelineViewport.prototype.updateFrameLabel = function () {
-                this.$frameLabel.text((this.currentFrame + 1) + '/' + this.animation.getLength());
+            TimelineViewport.prototype.focus = function () {
+                this.$canvas.focus();
             };
-            TimelineViewport.prototype.updateToolbarButtons = function () {
-                if (this.mode == EditMode.PLAYBACK) {
-                    this.$playButton.hide();
-                    this.$pauseButton.show();
-                }
-                else {
-                    this.$playButton.show();
-                    this.$pauseButton.hide();
-                }
+            TimelineViewport.prototype.prevFrame = function (shiftKey) {
+                if (shiftKey)
+                    this.animation.setPosition(this.animation.getPosition() - 5);
+                else
+                    this.animation.gotoPrevFrame();
+            };
+            TimelineViewport.prototype.nextFrame = function (shiftKey) {
+                if (shiftKey)
+                    this.animation.setPosition(this.animation.getPosition() + 5);
+                else
+                    this.animation.gotoNextFrame();
+            };
+            TimelineViewport.prototype.togglePlayback = function () {
                 if (this.mode == EditMode.ANIMATE) {
-                    this.$animControlButtons.removeClass('disabled');
+                    this.model.mode = EditMode.PLAYBACK;
                 }
-                else {
-                    this.$animControlButtons.addClass('disabled');
+                else if (this.mode == EditMode.PLAYBACK) {
+                    this.model.mode = EditMode.ANIMATE;
                 }
-                this.$playButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-                this.$pauseButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-                this.$frameLabel.parent().toggleClass('disabled', this.mode == EditMode.EDIT);
-                this.$editAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-                this.$deleteAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
             };
             TimelineViewport.prototype.updateNodeList = function () {
                 var nodes = [];
@@ -442,28 +349,8 @@ var app;
                     return;
                 this.animation.setPosition(frame);
                 this.currentFrame = this.animation.getPosition();
-                this.updateFrameLabel();
+                this.toolbar.updateFrameLabel();
                 this.scrollIntoView(null, this.currentFrame);
-            };
-            TimelineViewport.prototype.togglePlayback = function () {
-                if (this.mode == EditMode.ANIMATE) {
-                    this.model.mode = EditMode.PLAYBACK;
-                }
-                else if (this.mode == EditMode.PLAYBACK) {
-                    this.model.mode = EditMode.ANIMATE;
-                }
-            };
-            TimelineViewport.prototype.prevFrame = function (shiftKey) {
-                if (shiftKey)
-                    this.animation.setPosition(this.animation.getPosition() - 5);
-                else
-                    this.animation.gotoPrevFrame();
-            };
-            TimelineViewport.prototype.nextFrame = function (shiftKey) {
-                if (shiftKey)
-                    this.animation.setPosition(this.animation.getPosition() + 5);
-                else
-                    this.animation.gotoNextFrame();
             };
             TimelineViewport.prototype.setSelectedFrame = function (node, frameIndex, toggle) {
                 if (frameIndex === void 0) { frameIndex = -1; }

@@ -27,18 +27,7 @@ namespace app.timeline
 
 		private nodeList:Node[] = [];
 
-		private $toolbar:JQuery;
-		private $toolbarButtons:JQuery;
-		private $animControlButtons:JQuery;
-
-		private $playButton:JQuery;
-		private $pauseButton:JQuery;
-		private $frameLabel:JQuery;
-		private $animationSelect:JQuery;
-		private $editAnimButton:JQuery;
-		private $deleteAnimButton:JQuery;
-		private $deleteConfirmDlg:JQuery;
-		private deleteConfirmDlg:jBox;
+		private toolbar:TimelineToolbar;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
@@ -94,7 +83,7 @@ namespace app.timeline
 			this.$container.parent().parent().parent().on('resize', this.onResize);
 			app.$window.on('resize', this.onResize);
 
-			this.setupToolbar();
+			this.toolbar = new TimelineToolbar(model, this, this.$container.parent().find('#timeline-toolbar'));
 
 			this.headerGrad = this.ctx.createLinearGradient(0, 0, 0, Config.nodeHeight);
 			this.headerGrad.addColorStop(0, Config.node);
@@ -352,82 +341,42 @@ namespace app.timeline
 			}
 		}
 
-		private setupToolbar()
+		public getMode()
 		{
-			this.$toolbar = this.$container.parent().find('#timeline-toolbar');
-			this.$frameLabel = this.$toolbar.find('.frame-label .value');
-
-			this.$toolbarButtons = this.$toolbar.find('i');
-			this.$animControlButtons = this.$toolbarButtons.filter('.anim-controls');
-			this.$playButton = this.$toolbar.find('.btn-play');
-			this.$pauseButton = this.$toolbar.find('.btn-pause');
-
-			this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
-			this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
-
-			this.$animationSelect = this.$toolbar.find('select')
-				.on('change', this.onAnimationSelect);
-
-			this.$toolbar
-				.on('click', 'i', this.onToolbarButtonClick);
-
-			tippy(this.$toolbar.find('i').toArray());
-
-			this.$deleteConfirmDlg = $('#anim-delete-confirm');
-			this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
-			this.deleteConfirmDlg = new jBox('Modal', {
-				title: 'Delete this animation?',
-				attach: '#timeline-toolbar i.btn-delete-anim',
-				overlay: false,
-				position: {x: 'right', y: 'bottom'},
-				offset: {y: 10},
-				outside: 'y',
-				closeButton: false,
-				closeOnEsc: true,
-				closeOnClick: 'body',
-				content: this.$deleteConfirmDlg,
-				target: this.$deleteAnimButton[0],
-				trigger: 'click',
-				onOpen: this.onDeleteConfirmDlgOpen
-			});
-
-			this.updateFrameLabel();
-			this.updateToolbarButtons();
+			return this.mode;
 		}
 
-		private updateFrameLabel()
+		public focus()
 		{
-			this.$frameLabel.text((this.currentFrame + 1) + '/' + this.animation.getLength());
+			this.$canvas.focus();
 		}
 
-		private updateToolbarButtons()
+		public prevFrame(shiftKey)
 		{
-			if(this.mode == EditMode.PLAYBACK)
-			{
-				this.$playButton.hide();
-				this.$pauseButton.show();
-			}
+			if(shiftKey)
+				this.animation.setPosition(this.animation.getPosition() - 5);
 			else
-			{
-				this.$playButton.show();
-				this.$pauseButton.hide();
-			}
+				this.animation.gotoPrevFrame();
+		}
 
+		public nextFrame(shiftKey)
+		{
+			if(shiftKey)
+				this.animation.setPosition(this.animation.getPosition() + 5);
+			else
+				this.animation.gotoNextFrame();
+		}
+
+		public togglePlayback()
+		{
 			if(this.mode == EditMode.ANIMATE)
 			{
-				this.$animControlButtons.removeClass('disabled');
+				this.model.mode = EditMode.PLAYBACK;
 			}
-			else
+			else if(this.mode == EditMode.PLAYBACK)
 			{
-				this.$animControlButtons.addClass('disabled');
+				this.model.mode = EditMode.ANIMATE;
 			}
-
-			this.$playButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-			this.$pauseButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-			this.$frameLabel.parent().toggleClass('disabled', this.mode == EditMode.EDIT);
-
-			this.$editAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
-			this.$deleteAnimButton.toggleClass('disabled', this.mode == EditMode.EDIT);
 		}
 
 		private updateNodeList()
@@ -458,36 +407,8 @@ namespace app.timeline
 
 			this.animation.setPosition(frame);
 			this.currentFrame = this.animation.getPosition();
-			this.updateFrameLabel();
+			this.toolbar.updateFrameLabel();
 			this.scrollIntoView(null, this.currentFrame);
-		}
-
-		private togglePlayback()
-		{
-			if(this.mode == EditMode.ANIMATE)
-			{
-				this.model.mode = EditMode.PLAYBACK;
-			}
-			else if(this.mode == EditMode.PLAYBACK)
-			{
-				this.model.mode = EditMode.ANIMATE;
-			}
-		}
-
-		private prevFrame(shiftKey)
-		{
-			if(shiftKey)
-				this.animation.setPosition(this.animation.getPosition() - 5);
-			else
-				this.animation.gotoPrevFrame();
-		}
-
-		private nextFrame(shiftKey)
-		{
-			if(shiftKey)
-				this.animation.setPosition(this.animation.getPosition() + 5);
-			else
-				this.animation.gotoNextFrame();
 		}
 
 		private setSelectedFrame(node:Node, frameIndex:number=-1, toggle=false):boolean
@@ -585,18 +506,12 @@ namespace app.timeline
 		{
 			const type = event.type;
 
-			if(type == 'updateAnimationList')
+			if(type == 'updateAnimationList' || type == 'newAnimation')
 			{
-				this.$animationSelect.empty();
-				var animList:Animation[] = this.model.getAnimationList();
-				var i = 0;
-				for(var anim of animList)
+				if(type == 'newAnimation')
 				{
-					this.$animationSelect.append($(`<option>${i > 0 ? anim.name : 'None'}</option>`));
-					i++;
+					animation.change.on(this.onAnimationChange);
 				}
-
-				animation.change.on(this.onAnimationChange);
 			}
 
 			if(type == 'setAnimation' || type == 'updateAnimationList')
@@ -605,8 +520,7 @@ namespace app.timeline
 
 				this.animation = animation;
 				this.currentFrame = this.animation.getPosition();
-				this.updateFrameLabel();
-				this.$animationSelect.val(animation.name);
+				this.toolbar.updateFrameLabel();
 
 				this.requiresUpdate = true;
 			}
@@ -619,20 +533,13 @@ namespace app.timeline
 			if(type == 'position' || type == 'clear')
 			{
 				this.setFrame(animation.getPosition());
-				this.updateFrameLabel();
 			}
 			else if(type == 'length')
 			{
 				this.setSelectedFrame(this.selectedTrack, this.selectedFrame);
-				this.updateFrameLabel();
 			}
 
 			this.requiresUpdate = true;
-		};
-
-		private onAnimationSelect = (event) =>
-		{
-			this.model.setActiveAnimation(this.$animationSelect.val());
 		};
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
@@ -650,7 +557,7 @@ namespace app.timeline
 		{
 			this.mode = model.mode;
 			this.requiresUpdate = true;
-			this.updateToolbarButtons();
+			this.toolbar.updateToolbarButtons();
 		};
 
 		protected onTreeNodeUpdate = (node:TreeNode, event:Event) =>
@@ -669,81 +576,6 @@ namespace app.timeline
 		{
 			this.scrollY = event.scrollY;
 			this.requiresUpdate = true;
-		};
-
-		private onDeleteConfirmDlgOpen = (event) =>
-		{
-			this.$deleteConfirmDlg.find('strong').html(this.animation.name);
-		};
-
-		private onDeleteConfirmClick = (event) =>
-		{
-			if(event.target.innerText == 'Yes')
-			{
-				this.model.deleteAnimation();
-			}
-
-			this.deleteConfirmDlg.close();
-		};
-
-		private onToolbarButtonClick = (event) =>
-		{
-			this.$canvas.focus();
-
-			var $btn = $(event.target);
-			if($btn.hasClass('disabled')) return;
-
-			const type = $btn.data('action');
-
-			if(this.mode != EditMode.EDIT)
-			{
-				if(type == 'play' || type == 'pause')
-				{
-					this.togglePlayback();
-				}
-			}
-
-			if(this.mode == EditMode.ANIMATE)
-			{
-				if(type == 'prev-frame')
-				{
-					this.prevFrame(event.shiftKey);
-				}
-				else if(type == 'next-frame')
-				{
-					this.nextFrame(event.shiftKey);
-				}
-
-				else if(type == 'prev-keyframe')
-				{
-					this.animation.gotoPrevKeyframe();
-				}
-				else if(type == 'next-keyframe')
-				{
-					this.animation.gotoNextKeyframe();
-				}
-
-				else if(type == 'insert-keyframe')
-				{
-					this.animation.forceKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-				}
-				else if(type == 'delete-keyframe')
-				{
-					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
-				}
-				else if(type == 'trim-length')
-				{
-					this.animation.trimLength();
-				}
-			}
-
-			if(type == 'add-anim')
-			{
-				this.model.addNewAnimation(null, true);
-			}
-			else if(type == 'delete-anim')
-			{
-			}
 		};
 
 		protected onKeyDown(event)

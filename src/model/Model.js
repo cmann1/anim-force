@@ -200,7 +200,7 @@ var app;
                 var anim = new app.anim.Animation(newName, this);
                 this.animations[newName] = anim;
                 this.animationList = null;
-                this.animationChange.dispatch(anim, new Event('updateAnimationList'));
+                this.animationChange.dispatch(anim, new Event('newAnimation'));
                 if (select) {
                     this.setActiveAnimation(newName);
                 }
