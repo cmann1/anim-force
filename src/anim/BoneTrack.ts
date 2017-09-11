@@ -14,7 +14,7 @@ namespace app.anim
 		{
 			super(animation, node);
 
-			this.addProperty('length', TrackPropertyType.NUMBER);
+			// this.addProperty('length', TrackPropertyType.NUMBER);
 			this.addProperty('stretchY', TrackPropertyType.NUMBER);
 		}
 

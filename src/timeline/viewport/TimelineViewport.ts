@@ -37,6 +37,8 @@ namespace app.timeline
 		private $animationSelect:JQuery;
 		private $editAnimButton:JQuery;
 		private $deleteAnimButton:JQuery;
+		private $deleteConfirmDlg:JQuery;
+		private deleteConfirmDlg:jBox;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
@@ -371,6 +373,24 @@ namespace app.timeline
 
 			tippy(this.$toolbar.find('i').toArray());
 
+			this.$deleteConfirmDlg = $('#anim-delete-confirm');
+			this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
+			this.deleteConfirmDlg = new jBox('Modal', {
+				title: 'Delete this animation?',
+				attach: '#timeline-toolbar i.btn-delete-anim',
+				overlay: false,
+				position: {x: 'right', y: 'bottom'},
+				offset: {y: 10},
+				outside: 'y',
+				closeButton: false,
+				closeOnEsc: true,
+				closeOnClick: 'body',
+				content: this.$deleteConfirmDlg,
+				target: this.$deleteAnimButton[0],
+				trigger: 'click',
+				onOpen: this.onDeleteConfirmDlgOpen
+			});
+
 			this.updateFrameLabel();
 			this.updateToolbarButtons();
 		}
@@ -651,6 +671,21 @@ namespace app.timeline
 			this.requiresUpdate = true;
 		};
 
+		private onDeleteConfirmDlgOpen = (event) =>
+		{
+			this.$deleteConfirmDlg.find('strong').html(this.animation.name);
+		};
+
+		private onDeleteConfirmClick = (event) =>
+		{
+			if(event.target.innerText == 'Yes')
+			{
+				this.model.deleteAnimation();
+			}
+
+			this.deleteConfirmDlg.close();
+		};
+
 		private onToolbarButtonClick = (event) =>
 		{
 			this.$canvas.focus();
@@ -701,6 +736,9 @@ namespace app.timeline
 			if(type == 'add-anim')
 			{
 				this.model.addNewAnimation(null, true);
+			}
+			else if(type == 'delete-anim')
+			{
 			}
 		};
 

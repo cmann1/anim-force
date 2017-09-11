@@ -359,7 +359,7 @@ namespace app.viewport
 		{
 			const type = event.type;
 
-			if(type == 'set-animation')
+			if(type == 'setAnimation')
 			{
 				animation.change.on(this.onAnimationChange);
 				this.requiresUpdate = true;

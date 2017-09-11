@@ -70,7 +70,7 @@ var app;
                 };
                 _this.onModelAnimationChange = function (animation, event) {
                     var type = event.type;
-                    if (type == 'set-animation') {
+                    if (type == 'setAnimation') {
                         animation.change.on(_this.onAnimationChange);
                         _this.requiresUpdate = true;
                     }

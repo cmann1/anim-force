@@ -108,6 +108,15 @@ var app;
                     _this.scrollY = event.scrollY;
                     _this.requiresUpdate = true;
                 };
+                _this.onDeleteConfirmDlgOpen = function (event) {
+                    _this.$deleteConfirmDlg.find('strong').html(_this.animation.name);
+                };
+                _this.onDeleteConfirmClick = function (event) {
+                    if (event.target.innerText == 'Yes') {
+                        _this.model.deleteAnimation();
+                    }
+                    _this.deleteConfirmDlg.close();
+                };
                 _this.onToolbarButtonClick = function (event) {
                     _this.$canvas.focus();
                     var $btn = $(event.target);
@@ -141,6 +150,8 @@ var app;
                     }
                     if (type == 'add-anim') {
                         _this.model.addNewAnimation(null, true);
+                    }
+                    else if (type == 'delete-anim') {
                     }
                 };
                 _this.model = model;
@@ -363,6 +374,23 @@ var app;
                 this.$toolbar
                     .on('click', 'i', this.onToolbarButtonClick);
                 tippy(this.$toolbar.find('i').toArray());
+                this.$deleteConfirmDlg = $('#anim-delete-confirm');
+                this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
+                this.deleteConfirmDlg = new jBox('Modal', {
+                    title: 'Delete this animation?',
+                    attach: '#timeline-toolbar i.btn-delete-anim',
+                    overlay: false,
+                    position: { x: 'right', y: 'bottom' },
+                    offset: { y: 10 },
+                    outside: 'y',
+                    closeButton: false,
+                    closeOnEsc: true,
+                    closeOnClick: 'body',
+                    content: this.$deleteConfirmDlg,
+                    target: this.$deleteAnimButton[0],
+                    trigger: 'click',
+                    onOpen: this.onDeleteConfirmDlgOpen
+                });
                 this.updateFrameLabel();
                 this.updateToolbarButtons();
             };

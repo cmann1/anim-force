@@ -90,9 +90,13 @@ div.disabled
 	color: $disabled-color !important;
 }
 
+.jBox-Modal .jBox-container{
+	box-shadow: 0 3px 15px rgba(0, 0, 0, .4);
+}
+
 .jBox-title{
-	font-size: 150%;
-	text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+	//font-size: 150%;
+	//text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
 }
 
 .jBox-Tooltip.jBox-TooltipDark .jBox-container,
@@ -104,4 +108,8 @@ div.disabled
 .jBox-Tooltip.jBox-TooltipDark .jBox-pointer:after,
 .jBox-Mouse.jBox-TooltipDark .jBox-pointer:after{
 	background: #333;
+}
+
+.dialog .button-bar{
+	margin-top: 10px;
 }

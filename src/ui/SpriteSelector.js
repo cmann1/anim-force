@@ -58,6 +58,7 @@ var app;
                 this.modal = new jBox('Modal', {
                     title: 'Sprite Selector',
                     content: this.$container,
+                    isolateScroll: true
                 });
             };
             return SpriteSelector;

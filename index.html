@@ -20,6 +20,8 @@
 	
 	<script src="lib/Key.enum.js"></script>
 	<script src="lib/tippy.js"></script>
+	<script src="lib/popper.js"></script>
+	<script src="lib/tooltip.js"></script>
 	
 	<script src="src/Utils.js"></script>
 	<script src="src/MathUtils.js"></script>
@@ -131,7 +133,6 @@
 				<div class="toolbar-separator"></div>
 				<i class="fa fa-plus btn-add-anim" data-action="add-anim" title="New Animation"></i>
 				<i class="fa fa-close btn-delete-anim" data-action="delete-anim" title="Delete Animation"></i>
-				
 			</div>
 		</div>
 		
@@ -143,6 +144,14 @@
 
 <div id="sprite_selector" style="display: none">
 	
+</div>
+
+<div id="anim-delete-confirm" class="dialog" style="display: none">
+	<strong>Animation Name</strong>
+	<div class="button-bar">
+		<button>Yes</button>
+		<button>No</button>
+	</div>
 </div>
 
 </body>

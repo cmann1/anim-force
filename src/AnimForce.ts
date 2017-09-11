@@ -22,6 +22,7 @@
 // TODO: - Add cancel button
 // TODO: Ghosts
 // TODO: Keyboard shortcuts from changing layer and sublayer
+// TODO: Export to sprite group
 
 // TODO: Timeline:
 // TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)

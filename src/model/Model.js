@@ -34,6 +34,7 @@ var app;
                 _this.bindPose = new app.anim.Animation('None', _this, true);
                 _this.animations = {};
                 _this.activeAnimation = null;
+                _this.animationList = null;
                 _this.showControls = true;
                 /// Events
                 _this.modeChange = new EventDispatcher();
@@ -152,6 +153,8 @@ var app;
                 return this.bindPose;
             };
             Model.prototype.getAnimationList = function () {
+                if (this.animationList)
+                    return this.animationList;
                 var animNames = [];
                 for (var animName in this.animations) {
                     animNames.push(animName);
@@ -162,6 +165,7 @@ var app;
                     var animName = animNames_1[_i];
                     anims.push(this.animations[animName]);
                 }
+                this.animationList = anims;
                 return anims;
             };
             Model.prototype.clear = function () {
@@ -195,6 +199,7 @@ var app;
                 }
                 var anim = new app.anim.Animation(newName, this);
                 this.animations[newName] = anim;
+                this.animationList = null;
                 this.animationChange.dispatch(anim, new Event('updateAnimationList'));
                 if (select) {
                     this.setActiveAnimation(newName);
@@ -214,6 +219,22 @@ var app;
                     this.activeAnimation.updateNodes();
                     this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
                 }
+            };
+            Model.prototype.deleteAnimation = function (anim) {
+                if (anim === void 0) { anim = null; }
+                if (!anim)
+                    anim = this.activeAnimation;
+                if (anim == this.bindPose)
+                    return;
+                var animList = this.getAnimationList();
+                var animIndex = animList.indexOf(anim);
+                delete this.animations[anim.name];
+                this.animationList = null;
+                this.animationChange.dispatch(anim, new Event('updateAnimationList'));
+                animList = this.getAnimationList();
+                if (animIndex >= animList.length)
+                    animIndex = animList.length - 1;
+                this.setActiveAnimation(animList[animIndex].name);
             };
             Object.defineProperty(Model.prototype, "mode", {
                 get: function () {

@@ -80,6 +80,7 @@ namespace app.ui
 			this.modal = new jBox('Modal', {
 				title: 'Sprite Selector',
 				content: this.$container,
+				isolateScroll: true
 			});
 		}
 

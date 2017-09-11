@@ -30,6 +30,7 @@ namespace app.model
 		private bindPose:app.anim.Animation = new app.anim.Animation('None', this, true);
 		private animations:{[id:string]:app.anim.Animation} = {};
 		private activeAnimation:app.anim.Animation = null;
+		private animationList:app.anim.Animation[] = null;
 
 		public showControls = true;
 
@@ -188,6 +189,8 @@ namespace app.model
 
 		public getAnimationList():app.anim.Animation[]
 		{
+			if(this.animationList) return this.animationList;
+
 			var animNames:string[] = [];
 
 			for(var animName in this.animations)
@@ -202,6 +205,7 @@ namespace app.model
 				anims.push(this.animations[animName]);
 			}
 
+			this.animationList = anims;
 			return anims;
 		}
 
@@ -251,6 +255,7 @@ namespace app.model
 
 			var anim = new app.anim.Animation(newName, this);
 			this.animations[newName] = anim;
+			this.animationList = null;
 			this.animationChange.dispatch(anim, new Event('updateAnimationList'));
 
 			if(select)
@@ -262,7 +267,6 @@ namespace app.model
 		public setActiveAnimation(name:string)
 		{
 			if(this._mode == EditMode.PLAYBACK) return;
-
 			var anim = name == 'None' ? this.bindPose : this.animations[name];
 
 			if(anim && anim != this.activeAnimation)
@@ -279,6 +283,24 @@ namespace app.model
 
 				this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
 			}
+		}
+
+		public deleteAnimation(anim:app.anim.Animation=null)
+		{
+			if(!anim) anim = this.activeAnimation;
+			if(anim == this.bindPose) return;
+
+			var animList = this.getAnimationList();
+			var animIndex = animList.indexOf(anim);
+
+			delete this.animations[anim.name];
+			this.animationList = null;
+			this.animationChange.dispatch(anim, new Event('updateAnimationList'));
+
+			animList = this.getAnimationList();
+			if(animIndex >= animList.length) animIndex = animList.length - 1;
+
+			this.setActiveAnimation(animList[animIndex].name);
 		}
 
 		public get mode():app.model.EditMode

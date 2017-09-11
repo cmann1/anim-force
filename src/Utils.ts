@@ -53,6 +53,7 @@ Math.lerpAngle = function (start:number, end:number, t:number):number
 
 namespace Utils
 {
+
 	export function naturalCompare(a, b)
 	{
 		var ax = [], bx = [];
@@ -69,4 +70,5 @@ namespace Utils
 
 		return ax.length - bx.length;
 	}
+
 }
