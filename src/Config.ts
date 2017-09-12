@@ -1,10 +1,13 @@
 namespace app
 {
 
+	import IBaseDoc = pouchDB.IBaseDoc;
+
 	export class Config
 	{
 
-		private static bgGradientTop = '';
+		private static settingsDb:pouchDB.IPouchDB;
+		// private static data:any = {};
 
 		static showFps = true;
 		static drawAABB = false;
@@ -39,6 +42,36 @@ namespace app
 
 		static nodeHeight = 29;
 		static frameWidth = 15;
+
+		static init(callback:() => void)
+		{
+			var db = Config.settingsDb = new PouchDB('app-settings');
+			db.allDocs({include_docs: true}).then(function(results){
+				for(var data of results.rows)
+				{
+					Config[data.id] = (<any> data.doc).value;
+				}
+			}).then(callback);
+		}
+
+		static set(name:string, value:any)
+		{
+			if(Config[name] == value) return;
+
+			Config.settingsDb.get(name).catch(function(err){
+				if(err.name === 'not_found')
+				{
+					return {_id: name, value: value};
+				} else { // hm, some other error
+					throw err;
+				}
+			}).then(function(doc:any){
+				doc.value = value;
+				Config.settingsDb.put(doc);
+			});
+
+			return (Config[name] = value);
+		}
 
 	}
 

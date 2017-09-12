@@ -122,7 +122,7 @@ var app;
                     .on('change', this.onAnimationSelect);
                 this.$toolbar
                     .on('click', 'i', this.onToolbarButtonClick);
-                tippy(this.$toolbar.find('i').toArray());
+                tippy(this.$toolbar.find('i, select').toArray());
                 this.$deleteConfirmDlg = $('#anim-delete-confirm-dlg');
                 this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
                 this.deleteConfirmDlg = new jBox('Modal', {

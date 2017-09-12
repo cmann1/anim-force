@@ -212,13 +212,15 @@ namespace app.model
 			this.selectedNode = null;
 			this.highlightedNode = null;
 
+			super.clear();
+
 			this.bindPose.clear();
 			this.animations = {};
+			this.animationList = null;
 			this.activeAnimation = this.bindPose;
+			this.setMode(EditMode.EDIT);
 
 			this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
-
-			super.clear();
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean

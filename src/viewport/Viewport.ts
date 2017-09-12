@@ -92,7 +92,7 @@ namespace app.viewport
 			{
 				this.fpsDisplay.hide();
 			}
-			
+
 			new SettingsDlg(this, this.$container);
 		}
 
@@ -324,7 +324,7 @@ namespace app.viewport
 
 		public toggleFps(show:boolean)
 		{
-			if(Config.showFps = show)
+			if(Config.set('showFps', show))
 			{
 				this.fpsDisplay.show();
 			}
@@ -432,7 +432,7 @@ namespace app.viewport
 			// Toggle AAB draw
 			else if(keyCode == Key.Zero)
 			{
-				Config.drawAABB = !Config.drawAABB;
+				Config.set('drawAABB', !Config.drawAABB);
 			}
 
 			// TODO: REMOVE

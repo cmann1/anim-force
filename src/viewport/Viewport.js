@@ -265,7 +265,7 @@ var app;
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
             };
             Viewport.prototype.toggleFps = function (show) {
-                if (app.Config.showFps = show) {
+                if (app.Config.set('showFps', show)) {
                     this.fpsDisplay.show();
                 }
                 else {
@@ -309,7 +309,7 @@ var app;
                     this.zoom(-1);
                 }
                 else if (keyCode == Key.Zero) {
-                    app.Config.drawAABB = !app.Config.drawAABB;
+                    app.Config.set('drawAABB', !app.Config.drawAABB);
                 }
                 else if (keyCode == Key.A) {
                     var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf

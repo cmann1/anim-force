@@ -138,9 +138,10 @@ namespace app
 				.on('blur', this.onWindowBlur)
 				.focus();
 
-			this.ticker.start();
-
-			this.initUI();
+			Config.init(() => {
+				this.ticker.start();
+				this.initUI();
+			});
 		};
 
 		protected onWindowResize = () =>

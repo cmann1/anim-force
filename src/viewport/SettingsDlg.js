@@ -16,10 +16,10 @@ var app;
                         _this.viewport.toggleFps(_this.$showFps.prop('checked'));
                     }
                     else if (type == 'show-controls') {
-                        app.Config.drawControls = _this.$showControls.prop('checked');
+                        app.Config.set('drawControls', _this.$showControls.prop('checked'));
                     }
                     else if (type == 'show-aabb') {
-                        app.Config.drawAABB = _this.$showAABB.prop('checked');
+                        app.Config.set('drawAABB', _this.$showAABB.prop('checked'));
                     }
                     _this.viewport.requiresUpdate = true;
                 };

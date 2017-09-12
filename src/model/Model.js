@@ -170,11 +170,13 @@ var app;
             Model.prototype.clear = function () {
                 this.selectedNode = null;
                 this.highlightedNode = null;
+                _super.prototype.clear.call(this);
                 this.bindPose.clear();
                 this.animations = {};
+                this.animationList = null;
                 this.activeAnimation = this.bindPose;
+                this.setMode(EditMode.EDIT);
                 this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
-                _super.prototype.clear.call(this);
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {

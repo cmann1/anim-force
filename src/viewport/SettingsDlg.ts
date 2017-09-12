@@ -55,11 +55,11 @@ namespace app.viewport
 			}
 			else if(type == 'show-controls')
 			{
-				Config.drawControls = this.$showControls.prop('checked');
+				Config.set('drawControls', this.$showControls.prop('checked'));
 			}
 			else if(type == 'show-aabb')
 			{
-				Config.drawAABB = this.$showAABB.prop('checked');
+				Config.set('drawAABB', this.$showAABB.prop('checked'));
 			}
 
 			this.viewport.requiresUpdate = true;

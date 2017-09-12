@@ -3,9 +3,34 @@ var app;
     var Config = (function () {
         function Config() {
         }
+        Config.init = function (callback) {
+            var db = Config.settingsDb = new PouchDB('app-settings');
+            db.allDocs({ include_docs: true }).then(function (results) {
+                for (var _i = 0, _a = results.rows; _i < _a.length; _i++) {
+                    var data = _a[_i];
+                    Config[data.id] = data.doc.value;
+                }
+            }).then(callback);
+        };
+        Config.set = function (name, value) {
+            if (Config[name] == value)
+                return;
+            Config.settingsDb.get(name).catch(function (err) {
+                if (err.name === 'not_found') {
+                    return { _id: name, value: value };
+                }
+                else {
+                    throw err;
+                }
+            }).then(function (doc) {
+                doc.value = value;
+                Config.settingsDb.put(doc);
+            });
+            return (Config[name] = value);
+        };
         return Config;
     }());
-    Config.bgGradientTop = '';
+    // private static data:any = {};
     Config.showFps = true;
     Config.drawAABB = false;
     Config.drawControls = true;

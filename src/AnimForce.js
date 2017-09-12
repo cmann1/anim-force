@@ -60,8 +60,10 @@ var app;
                     .on('focus', _this.onWindowFocus)
                     .on('blur', _this.onWindowBlur)
                     .focus();
-                _this.ticker.start();
-                _this.initUI();
+                app.Config.init(function () {
+                    _this.ticker.start();
+                    _this.initUI();
+                });
             };
             this.onWindowResize = function () {
                 _this.viewport.updateCanvasSize();
