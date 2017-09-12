@@ -93,7 +93,7 @@ var app;
                 }
                 ctx.restore();
                 ctx.save();
-                if (app.Config.drawControls) {
+                if (app.Config.showControls) {
                     for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
                         var child = _d[_c];
                         if (child != this.selectedNode && child.worldAABB.intersects(viewport)) {

@@ -697,7 +697,9 @@ namespace app.timeline
 				}
 				else if(keyCode == Key.T && shiftKey)
 				{
+					var length = this.animation.getLength();
 					this.animation.trimLength();
+					this.viewport.showMessage(`Trimmed ${length - this.animation.getLength()} frames`);
 					return true;
 				}
 			}

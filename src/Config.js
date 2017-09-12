@@ -1,10 +1,12 @@
 var app;
 (function (app) {
+    var EventDispatcher = app.events.EventDispatcher;
+    var Event = app.events.Event;
     var Config = (function () {
         function Config() {
         }
         Config.init = function (callback) {
-            var db = Config.settingsDb = new PouchDB('app-settings');
+            var db = Config.settingsDb = new PouchDB('app-settings', { adapter: 'idb', revs_limit: 1, auto_compaction: true });
             db.allDocs({ include_docs: true }).then(function (results) {
                 for (var _i = 0, _a = results.rows; _i < _a.length; _i++) {
                     var data = _a[_i];
@@ -14,7 +16,7 @@ var app;
         };
         Config.set = function (name, value) {
             if (Config[name] == value)
-                return;
+                return value;
             Config.settingsDb.get(name).catch(function (err) {
                 if (err.name === 'not_found') {
                     return { _id: name, value: value };
@@ -26,14 +28,17 @@ var app;
                 doc.value = value;
                 Config.settingsDb.put(doc);
             });
-            return (Config[name] = value);
+            Config[name] = value;
+            Config.change.dispatch(null, new Event(name));
+            return value;
         };
         return Config;
     }());
-    // private static data:any = {};
+    Config.change = new EventDispatcher();
     Config.showFps = true;
+    Config.showControls = true;
     Config.drawAABB = false;
-    Config.drawControls = true;
+    Config.drawGrid = true;
     Config.text = '#444';
     Config.font = 'monospace';
     Config.control = '#333';

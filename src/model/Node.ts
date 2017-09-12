@@ -98,7 +98,7 @@ namespace app.model
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(Config.drawControls)
+			if(Config.showControls)
 			{
 				// Do it in reverse order so that handles in front are checked first
 				for(var i = this.handles.length - 1; i >= 0; i--)

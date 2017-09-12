@@ -2,7 +2,6 @@
 // TODO: Ordered TODO:
 // ---------------------------------------------------------------
 // TODO: Saving/Loading models
-// TODO: - Implement as projects with one or more models in case the format needs to be expanded
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
 // TODO: Export to AngelScript
@@ -20,8 +19,11 @@
  // ---------------------------------------------------------------
 
 // TODO: Ghosts
+// TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
 // TODO: Keyboard shortcuts from changing layer and sublayer
+// TODO: Properties panel
 // TODO: Export to sprite_group
+// TODO: - copy to clipboard when exporting
 // TODO: Timeline:
 // TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
 // TODO: - ???
@@ -45,6 +47,7 @@ namespace app
 	import Sprite = app.model.Sprite;
 	import SpriteSelector = app.ui.SpriteSelector;
 	import SpriteSelectCallback = app.ui.SpriteSelectCallback;
+	import ProjectManager = app.projects.ProjectManager;
 
 	class App{
 		public readonly ticker:Ticker;
@@ -56,6 +59,7 @@ namespace app
 		protected model:Model = new Model();
 
 		protected spriteSelector:SpriteSelector = null;
+		protected projectManager:ProjectManager;
 
 		public runningTime:number = 0;
 
@@ -141,6 +145,7 @@ namespace app
 			Config.init(() => {
 				this.ticker.start();
 				this.initUI();
+				this.projectManager = new ProjectManager();
 			});
 		};
 

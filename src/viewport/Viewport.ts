@@ -94,6 +94,8 @@ namespace app.viewport
 			}
 
 			new SettingsDlg(this, this.$container);
+
+			Config.change.on(this.onConfigChange);
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -190,80 +192,83 @@ namespace app.viewport
 
 			ctx.lineWidth = this.gridLineWidth;
 
-			// Subdivisions
-			//
-
-			if(scale > this.gridSubMinScale)
+			if(Config.drawGrid)
 			{
+				// Subdivisions
+				//
 
-				ctx.setLineDash(this.gridSubDash);
-				ctx.strokeStyle = this.gridSubColour;
+				if(scale > this.gridSubMinScale)
+				{
 
-				ctx.lineDashOffset = cameraY * scale - this.centreY;
+					ctx.setLineDash(this.gridSubDash);
+					ctx.strokeStyle = this.gridSubColour;
+
+					ctx.lineDashOffset = cameraY * scale - this.centreY;
+					ctx.beginPath();
+
+					x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
+					while(x < viewRight)
+					{
+						if(x % gridSize)
+						{
+							const sx = Math.floor(this.stageXToScreen(x)) - 0.5;
+							ctx.moveTo(sx, 0);
+							ctx.lineTo(sx, height);
+						}
+						x += gridSubSize;
+					}
+
+					ctx.stroke();
+
+
+					ctx.lineDashOffset = cameraX * scale - this.centreX;
+					ctx.beginPath();
+
+					y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
+					while(y < viewBottom)
+					{
+						if(y % gridSize)
+						{
+							const sy = Math.floor(this.stageYToScreen(y)) - 0.5;
+							ctx.moveTo(0, sy);
+							ctx.lineTo(width, sy);
+						}
+
+						y += gridSubSize;
+					}
+					ctx.stroke();
+
+				}
+
+				// Grid
+				//
+
+				ctx.setLineDash(this.gridDash);
+				ctx.strokeStyle = this.gridColour;
 				ctx.beginPath();
 
-				x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
+				x = Math.floor(Math.ceil(viewLeft / gridSize) * gridSize);
 				while(x < viewRight)
 				{
-					if(x % gridSize)
-					{
-						const sx = Math.floor(this.stageXToScreen(x)) - 0.5;
-						ctx.moveTo(sx, 0);
-						ctx.lineTo(sx, height);
-					}
-					x += gridSubSize;
+					const sx = Math.floor(this.stageXToScreen(x)) - 0.5;
+					ctx.moveTo(sx, 0);
+					ctx.lineTo(sx, height);
+
+					x += gridSize;
 				}
 
-				ctx.stroke();
-
-
-				ctx.lineDashOffset = cameraX * scale - this.centreX;
-				ctx.beginPath();
-
-				y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
+				y = Math.floor(Math.ceil(viewTop / gridSize) * gridSize);
 				while(y < viewBottom)
 				{
-					if(y % gridSize)
-					{
-						const sy = Math.floor(this.stageYToScreen(y)) - 0.5;
-						ctx.moveTo(0, sy);
-						ctx.lineTo(width, sy);
-					}
+					const sy = Math.floor(this.stageYToScreen(y)) - 0.5;
+					ctx.moveTo(0, sy);
+					ctx.lineTo(width, sy);
 
-					y += gridSubSize;
+					y += gridSize;
 				}
+
 				ctx.stroke();
-
 			}
-
-			// Grid
-			//
-
-			ctx.setLineDash(this.gridDash);
-			ctx.strokeStyle = this.gridColour;
-			ctx.beginPath();
-
-			x = Math.floor(Math.ceil(viewLeft / gridSize) * gridSize);
-			while(x < viewRight)
-			{
-				const sx = Math.floor(this.stageXToScreen(x)) - 0.5;
-				ctx.moveTo(sx, 0);
-				ctx.lineTo(sx, height);
-
-				x += gridSize;
-			}
-
-			y = Math.floor(Math.ceil(viewTop / gridSize) * gridSize);
-			while(y < viewBottom)
-			{
-				const sy = Math.floor(this.stageYToScreen(y)) - 0.5;
-				ctx.moveTo(0, sy);
-				ctx.lineTo(width, sy);
-
-				y += gridSize;
-			}
-
-			ctx.stroke();
 
 			// Axes
 			//
@@ -324,7 +329,7 @@ namespace app.viewport
 
 		public toggleFps(show:boolean)
 		{
-			if(Config.set('showFps', show))
+			if(show)
 			{
 				this.fpsDisplay.show();
 			}
@@ -364,6 +369,16 @@ namespace app.viewport
 			// }
 
 			this.requiresUpdate = true;
+		};
+
+		private onConfigChange = (obj:any, event:Event) =>
+		{
+			const type = event.type;
+
+			if(type == 'showFps')
+			{
+				this.toggleFps(Config.showFps);
+			}
 		};
 
 		protected onModelSelectionChange = (model:Model, event:SelectionEvent) =>
@@ -427,6 +442,12 @@ namespace app.viewport
 			else if(keyCode == Key.Subtract || keyCode == Key.Dash)
 			{
 				this.zoom(-1);
+			}
+
+			// Toggle draw grid
+			else if(keyCode == Key.G)
+			{
+				Config.set('drawGrid', !Config.drawGrid);
 			}
 
 			// Toggle AAB draw
@@ -536,7 +557,7 @@ namespace app.viewport
 
 			if(keyCode == Key.H)
 			{
-				Config.drawControls = !Config.drawControls;
+				Config.showControls = !Config.showControls;
 			}
 
 			return false;

@@ -62,6 +62,12 @@ var app;
                     // }
                     _this.requiresUpdate = true;
                 };
+                _this.onConfigChange = function (obj, event) {
+                    var type = event.type;
+                    if (type == 'showFps') {
+                        _this.toggleFps(app.Config.showFps);
+                    }
+                };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
@@ -109,6 +115,7 @@ var app;
                     _this.fpsDisplay.hide();
                 }
                 new viewport.SettingsDlg(_this, _this.$container);
+                app.Config.change.on(_this.onConfigChange);
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
@@ -176,56 +183,58 @@ var app;
                 var y;
                 ctx.save();
                 ctx.lineWidth = this.gridLineWidth;
-                // Subdivisions
-                //
-                if (scale > this.gridSubMinScale) {
-                    ctx.setLineDash(this.gridSubDash);
-                    ctx.strokeStyle = this.gridSubColour;
-                    ctx.lineDashOffset = cameraY * scale - this.centreY;
+                if (app.Config.drawGrid) {
+                    // Subdivisions
+                    //
+                    if (scale > this.gridSubMinScale) {
+                        ctx.setLineDash(this.gridSubDash);
+                        ctx.strokeStyle = this.gridSubColour;
+                        ctx.lineDashOffset = cameraY * scale - this.centreY;
+                        ctx.beginPath();
+                        x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
+                        while (x < viewRight) {
+                            if (x % gridSize) {
+                                var sx = Math.floor(this.stageXToScreen(x)) - 0.5;
+                                ctx.moveTo(sx, 0);
+                                ctx.lineTo(sx, height);
+                            }
+                            x += gridSubSize;
+                        }
+                        ctx.stroke();
+                        ctx.lineDashOffset = cameraX * scale - this.centreX;
+                        ctx.beginPath();
+                        y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
+                        while (y < viewBottom) {
+                            if (y % gridSize) {
+                                var sy = Math.floor(this.stageYToScreen(y)) - 0.5;
+                                ctx.moveTo(0, sy);
+                                ctx.lineTo(width, sy);
+                            }
+                            y += gridSubSize;
+                        }
+                        ctx.stroke();
+                    }
+                    // Grid
+                    //
+                    ctx.setLineDash(this.gridDash);
+                    ctx.strokeStyle = this.gridColour;
                     ctx.beginPath();
-                    x = Math.floor(Math.ceil(viewLeft / gridSubSize) * gridSubSize);
+                    x = Math.floor(Math.ceil(viewLeft / gridSize) * gridSize);
                     while (x < viewRight) {
-                        if (x % gridSize) {
-                            var sx = Math.floor(this.stageXToScreen(x)) - 0.5;
-                            ctx.moveTo(sx, 0);
-                            ctx.lineTo(sx, height);
-                        }
-                        x += gridSubSize;
+                        var sx = Math.floor(this.stageXToScreen(x)) - 0.5;
+                        ctx.moveTo(sx, 0);
+                        ctx.lineTo(sx, height);
+                        x += gridSize;
                     }
-                    ctx.stroke();
-                    ctx.lineDashOffset = cameraX * scale - this.centreX;
-                    ctx.beginPath();
-                    y = Math.floor(Math.ceil(viewTop / gridSubSize) * gridSubSize);
+                    y = Math.floor(Math.ceil(viewTop / gridSize) * gridSize);
                     while (y < viewBottom) {
-                        if (y % gridSize) {
-                            var sy = Math.floor(this.stageYToScreen(y)) - 0.5;
-                            ctx.moveTo(0, sy);
-                            ctx.lineTo(width, sy);
-                        }
-                        y += gridSubSize;
+                        var sy = Math.floor(this.stageYToScreen(y)) - 0.5;
+                        ctx.moveTo(0, sy);
+                        ctx.lineTo(width, sy);
+                        y += gridSize;
                     }
                     ctx.stroke();
                 }
-                // Grid
-                //
-                ctx.setLineDash(this.gridDash);
-                ctx.strokeStyle = this.gridColour;
-                ctx.beginPath();
-                x = Math.floor(Math.ceil(viewLeft / gridSize) * gridSize);
-                while (x < viewRight) {
-                    var sx = Math.floor(this.stageXToScreen(x)) - 0.5;
-                    ctx.moveTo(sx, 0);
-                    ctx.lineTo(sx, height);
-                    x += gridSize;
-                }
-                y = Math.floor(Math.ceil(viewTop / gridSize) * gridSize);
-                while (y < viewBottom) {
-                    var sy = Math.floor(this.stageYToScreen(y)) - 0.5;
-                    ctx.moveTo(0, sy);
-                    ctx.lineTo(width, sy);
-                    y += gridSize;
-                }
-                ctx.stroke();
                 // Axes
                 //
                 if (viewLeft < 0 && viewRight > 0) {
@@ -265,7 +274,7 @@ var app;
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
             };
             Viewport.prototype.toggleFps = function (show) {
-                if (app.Config.set('showFps', show)) {
+                if (show) {
                     this.fpsDisplay.show();
                 }
                 else {
@@ -307,6 +316,9 @@ var app;
                 }
                 else if (keyCode == Key.Subtract || keyCode == Key.Dash) {
                     this.zoom(-1);
+                }
+                else if (keyCode == Key.G) {
+                    app.Config.set('drawGrid', !app.Config.drawGrid);
                 }
                 else if (keyCode == Key.Zero) {
                     app.Config.set('drawAABB', !app.Config.drawAABB);
@@ -379,7 +391,7 @@ var app;
                 var keyCode = event.keyCode;
                 // if(this.mode == EditMode.PLAYBACK) return false;
                 if (keyCode == Key.H) {
-                    app.Config.drawControls = !app.Config.drawControls;
+                    app.Config.showControls = !app.Config.showControls;
                 }
                 return false;
             };

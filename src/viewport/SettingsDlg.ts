@@ -8,7 +8,8 @@ namespace app.viewport
 		private dlg:jBox;
 		private $showFps:JQuery;
 		private $showControls:JQuery;
-		private $showAABB:JQuery;
+		private $drawAABB:JQuery;
+		private $drawGrid:JQuery;
 
 		constructor(viewport:Viewport, $viewportContainer)
 		{
@@ -17,9 +18,10 @@ namespace app.viewport
 			var $btn = $viewportContainer.find('i.settings-btn');
 
 			this.$dlg = $('#viewport-properties-dlg');
-			this.$showFps = this.$dlg.find('#view-prop-show-fps');
-			this.$showControls = this.$dlg.find('#view-prop-show-controls');
-			this.$showAABB = this.$dlg.find('#view-prop-show-aabb');
+			this.$showFps = this.$dlg.find('#view-prop-showFps');
+			this.$showControls = this.$dlg.find('#view-prop-showControls');
+			this.$drawAABB = this.$dlg.find('#view-prop-drawAABB');
+			this.$drawGrid = this.$dlg.find('#view-prop-drawGrid');
 			this.$dlg.find('input').on('change', this.onInputChange);
 			this.dlg = new jBox('Modal', {
 				title: 'Viewport Settings',
@@ -36,31 +38,26 @@ namespace app.viewport
 				trigger: 'click',
 				onOpen: this.onDlgOpen
 			});
+
+			new jBox('Tooltip', {
+				attach: this.$dlg.find('label[title]'),
+				theme: 'TooltipDark'
+			});
 		}
 
 		private onDlgOpen = (event) =>
 		{
 			this.$showFps.prop('checked', Config.showFps);
-			this.$showControls.prop('checked', Config.drawControls);
-			this.$showAABB.prop('checked', Config.drawAABB);
+			this.$showControls.prop('checked', Config.showControls);
+			this.$drawAABB.prop('checked', Config.drawAABB);
+			this.$drawGrid.prop('checked', Config.drawGrid);
 		};
 
 		private onInputChange = (event) =>
 		{
 			const type = event.target.id.replace('view-prop-', '');
 
-			if(type == 'show-fps')
-			{
-				this.viewport.toggleFps(this.$showFps.prop('checked'));
-			}
-			else if(type == 'show-controls')
-			{
-				Config.set('drawControls', this.$showControls.prop('checked'));
-			}
-			else if(type == 'show-aabb')
-			{
-				Config.set('drawAABB', this.$showAABB.prop('checked'));
-			}
+			Config.set(type, this[`$${type}`].prop('checked'));
 
 			this.viewport.requiresUpdate = true;
 		}

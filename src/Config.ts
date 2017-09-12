@@ -2,16 +2,20 @@ namespace app
 {
 
 	import IBaseDoc = pouchDB.IBaseDoc;
+	import EventDispatcher = app.events.EventDispatcher;
+	import Event = app.events.Event;
 
 	export class Config
 	{
 
 		private static settingsDb:pouchDB.IPouchDB;
-		// private static data:any = {};
+
+		static readonly change:EventDispatcher<any> = new EventDispatcher<any>();
 
 		static showFps = true;
+		static showControls = true;
 		static drawAABB = false;
-		static drawControls = true;
+		static drawGrid = true;
 
 		static text = '#444';
 		static font = 'monospace';
@@ -45,7 +49,7 @@ namespace app
 
 		static init(callback:() => void)
 		{
-			var db = Config.settingsDb = new PouchDB('app-settings');
+			var db = Config.settingsDb = new PouchDB('app-settings', {adapter: 'idb', revs_limit: 1, auto_compaction: true});
 			db.allDocs({include_docs: true}).then(function(results){
 				for(var data of results.rows)
 				{
@@ -56,7 +60,7 @@ namespace app
 
 		static set(name:string, value:any)
 		{
-			if(Config[name] == value) return;
+			if(Config[name] == value) return value;
 
 			Config.settingsDb.get(name).catch(function(err){
 				if(err.name === 'not_found')
@@ -70,7 +74,10 @@ namespace app
 				Config.settingsDb.put(doc);
 			});
 
-			return (Config[name] = value);
+			Config[name] = value;
+			Config.change.dispatch(null, new Event(name));
+
+			return value;
 		}
 
 	}

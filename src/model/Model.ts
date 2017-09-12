@@ -95,7 +95,7 @@ namespace app.model
 
 			ctx.save();
 
-			if(Config.drawControls)
+			if(Config.showControls)
 			{
 				for(var child of this.children)
 				{
