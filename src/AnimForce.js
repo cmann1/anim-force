@@ -60,7 +60,6 @@ var app;
                     .on('focus', _this.onWindowFocus)
                     .on('blur', _this.onWindowBlur)
                     .focus();
-                _this.ticker = new Ticker(_this.onTick);
                 _this.ticker.start();
                 _this.initUI();
             };
@@ -76,6 +75,7 @@ var app;
                 _this.ticker.start();
             };
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
+            this.ticker = new Ticker(this.onTick);
             this._spriteManager = new SpriteManager('assets/sprites/');
             window.addEventListener('DOMContentLoaded', this.onWindowLoad);
             window.addEventListener('resize', this.onWindowResize);
@@ -97,7 +97,6 @@ var app;
             this.viewport.focus();
             this.viewport.timeline = this.timeline.viewport;
             this.timeline.viewport.viewport = this.viewport;
-            this.fpsDisplay = new app.Fps.Display(this.ticker.getFps);
             new jBox('Tooltip', {
                 attach: '.tooltip',
                 theme: 'TooltipDark'

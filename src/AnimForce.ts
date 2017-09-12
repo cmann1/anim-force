@@ -47,8 +47,7 @@ namespace app
 	import SpriteSelectCallback = app.ui.SpriteSelectCallback;
 
 	class App{
-		protected ticker:Ticker;
-		protected fpsDisplay:Fps.Display;
+		public readonly ticker:Ticker;
 
 		protected _spriteManager:SpriteManager;
 		protected viewport:app.viewport.Viewport;
@@ -63,6 +62,7 @@ namespace app
 		constructor()
 		{
 			createjs.Ticker.timingMode = createjs.Ticker.RAF;
+			this.ticker = new Ticker(this.onTick);
 
 			this._spriteManager = new SpriteManager('assets/sprites/');
 
@@ -95,8 +95,6 @@ namespace app
 
 			this.viewport.timeline = this.timeline.viewport;
 			this.timeline.viewport.viewport = this.viewport;
-
-			this.fpsDisplay = new Fps.Display(this.ticker.getFps);
 
 			new jBox('Tooltip', {
 				attach: '.tooltip',
@@ -140,7 +138,6 @@ namespace app
 				.on('blur', this.onWindowBlur)
 				.focus();
 
-			this.ticker = new Ticker(this.onTick);
 			this.ticker.start();
 
 			this.initUI();

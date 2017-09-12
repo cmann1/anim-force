@@ -6,12 +6,16 @@ var app;
             function SettingsDlg(viewport, $viewportContainer) {
                 var _this = this;
                 this.onDlgOpen = function (event) {
+                    _this.$showFps.prop('checked', app.Config.showFps);
                     _this.$showControls.prop('checked', app.Config.drawControls);
                     _this.$showAABB.prop('checked', app.Config.drawAABB);
                 };
                 this.onInputChange = function (event) {
                     var type = event.target.id.replace('view-prop-', '');
-                    if (type == 'show-controls') {
+                    if (type == 'show-fps') {
+                        _this.viewport.toggleFps(_this.$showFps.prop('checked'));
+                    }
+                    else if (type == 'show-controls') {
                         app.Config.drawControls = _this.$showControls.prop('checked');
                     }
                     else if (type == 'show-aabb') {
@@ -22,6 +26,7 @@ var app;
                 this.viewport = viewport;
                 var $btn = $viewportContainer.find('i.settings-btn');
                 this.$dlg = $('#viewport-properties-dlg');
+                this.$showFps = this.$dlg.find('#view-prop-show-fps');
                 this.$showControls = this.$dlg.find('#view-prop-show-controls');
                 this.$showAABB = this.$dlg.find('#view-prop-show-aabb');
                 this.$dlg.find('input').on('change', this.onInputChange);

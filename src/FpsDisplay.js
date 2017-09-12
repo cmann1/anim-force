@@ -7,6 +7,10 @@ var app;
             function Display(fpsCallback) {
                 if (fpsCallback === void 0) { fpsCallback = null; }
                 var _this = this;
+                this.timerId = null;
+                /*
+                 * Events
+                 */
                 this.onTimer = function () {
                     if (_this.fpsCallback) {
                         _this.$fpsText.text(_this.fpsCallback().toFixed(1));
@@ -26,8 +30,27 @@ var app;
                     style.appendChild(document.createTextNode(CSS));
                 }
                 head.appendChild(style);
-                setInterval(this.onTimer, 500);
+                this.start();
             }
+            Display.prototype.hide = function () {
+                this.stop();
+                this.$fps.hide();
+            };
+            Display.prototype.show = function () {
+                this.start();
+                this.$fps.show();
+            };
+            Display.prototype.stop = function () {
+                if (this.timerId != null) {
+                    clearInterval(this.timerId);
+                    this.timerId = null;
+                }
+            };
+            Display.prototype.start = function () {
+                if (!this.timerId) {
+                    this.timerId = setInterval(this.onTimer, 500);
+                }
+            };
             return Display;
         }());
         Fps.Display = Display;

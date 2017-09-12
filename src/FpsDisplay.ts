@@ -22,6 +22,7 @@ namespace app.Fps
 	{
 		private $fps:JQuery;
 		private $fpsText:JQuery;
+		private timerId = null;
 
 		public fpsCallback:() => number;
 
@@ -47,8 +48,41 @@ namespace app.Fps
 
 			head.appendChild(style);
 
-			setInterval(this.onTimer, 500);
+			this.start();
 		}
+
+		public hide()
+		{
+			this.stop();
+			this.$fps.hide();
+		}
+
+		public show()
+		{
+			this.start();
+			this.$fps.show();
+		}
+
+		public stop()
+		{
+			if(this.timerId != null)
+			{
+				clearInterval(this.timerId);
+				this.timerId = null;
+			}
+		}
+
+		public start()
+		{
+			if(!this.timerId)
+			{
+				this.timerId = setInterval(this.onTimer, 500);
+			}
+		}
+
+		/*
+		 * Events
+		 */
 
 		onTimer = () =>
 		{

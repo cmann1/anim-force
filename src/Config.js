@@ -6,6 +6,7 @@ var app;
         return Config;
     }());
     Config.bgGradientTop = '';
+    Config.showFps = true;
     Config.drawAABB = false;
     Config.drawControls = true;
     Config.text = '#444';

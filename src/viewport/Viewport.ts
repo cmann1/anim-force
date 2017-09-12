@@ -59,6 +59,7 @@ namespace app.viewport
 		protected highlightInteraction:Interaction = new Interaction();
 
 		protected $container:JQuery;
+		protected fpsDisplay:Fps.Display;
 
 		protected $message:JQuery;
 
@@ -86,6 +87,12 @@ namespace app.viewport
 			this.$container.append(this.$message);
 			this.$message.hide();
 
+			this.fpsDisplay = new Fps.Display(app.main.ticker.getFps);
+			if(!Config.showFps)
+			{
+				this.fpsDisplay.hide();
+			}
+			
 			new SettingsDlg(this, this.$container);
 		}
 
@@ -313,6 +320,18 @@ namespace app.viewport
 		public showMessage(message:string, duration=1000)
 		{
 			this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
+		}
+
+		public toggleFps(show:boolean)
+		{
+			if(Config.showFps = show)
+			{
+				this.fpsDisplay.show();
+			}
+			else
+			{
+				this.fpsDisplay.hide();
+			}
 		}
 
 		protected zoom(direction:number=1)

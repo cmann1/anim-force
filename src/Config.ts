@@ -6,6 +6,7 @@ namespace app
 
 		private static bgGradientTop = '';
 
+		static showFps = true;
 		static drawAABB = false;
 		static drawControls = true;
 

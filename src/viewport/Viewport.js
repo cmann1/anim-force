@@ -104,6 +104,10 @@ var app;
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
+                _this.fpsDisplay = new app.Fps.Display(app.main.ticker.getFps);
+                if (!app.Config.showFps) {
+                    _this.fpsDisplay.hide();
+                }
                 new viewport.SettingsDlg(_this, _this.$container);
                 return _this;
             }
@@ -259,6 +263,14 @@ var app;
             Viewport.prototype.showMessage = function (message, duration) {
                 if (duration === void 0) { duration = 1000; }
                 this.$message.html(message).show().stop(true).fadeTo(duration, 1).fadeOut(250);
+            };
+            Viewport.prototype.toggleFps = function (show) {
+                if (app.Config.showFps = show) {
+                    this.fpsDisplay.show();
+                }
+                else {
+                    this.fpsDisplay.hide();
+                }
             };
             Viewport.prototype.zoom = function (direction) {
                 if (direction === void 0) { direction = 1; }
