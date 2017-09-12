@@ -7,6 +7,7 @@ namespace app
 		private static bgGradientTop = '';
 
 		static drawAABB = false;
+		static drawControls = true;
 
 		static text = '#444';
 		static font = 'monospace';

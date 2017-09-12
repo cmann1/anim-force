@@ -7,6 +7,7 @@ var app;
     }());
     Config.bgGradientTop = '';
     Config.drawAABB = false;
+    Config.drawControls = true;
     Config.text = '#444';
     Config.font = 'monospace';
     Config.control = '#333';

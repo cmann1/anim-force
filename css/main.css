@@ -224,8 +224,14 @@ fieldset {
   padding: 5px; }
 
 fieldset label {
-  width: 100px;
+  width: 60px;
   display: inline-block; }
+
+.dialog.label-med fieldset label {
+  width: 120px; }
+
+.dialog.label-wide fieldset label {
+  width: 200px; }
 
 fieldset label + input {
   display: inline-block;
@@ -476,6 +482,11 @@ html, body {
 
 div#viewport-container {
   position: absolute; }
+  div#viewport-container i.settings-btn {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    margin: 0; }
 
 canvas#viewport {
   width: 100%;

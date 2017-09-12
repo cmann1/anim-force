@@ -35,7 +35,6 @@ var app;
                 _this.animations = {};
                 _this.activeAnimation = null;
                 _this.animationList = null;
-                _this.showControls = true;
                 /// Events
                 _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
@@ -94,7 +93,7 @@ var app;
                 }
                 ctx.restore();
                 ctx.save();
-                if (this.showControls) {
+                if (app.Config.drawControls) {
                     for (var _c = 0, _d = this.children; _c < _d.length; _c++) {
                         var child = _d[_c];
                         if (child != this.selectedNode && child.worldAABB.intersects(viewport)) {

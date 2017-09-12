@@ -48,6 +48,13 @@ html, body{
 
 div#viewport-container{
 	position: absolute;
+
+	i.settings-btn{
+		position: absolute;
+		right: 2px;
+		bottom: 2px;
+		margin: 0;
+	}
 }
 canvas#viewport{
 	width: 100%;

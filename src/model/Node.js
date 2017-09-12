@@ -64,7 +64,7 @@ var app;
             };
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
-                if (this.model.showControls) {
+                if (app.Config.drawControls) {
                     // Do it in reverse order so that handles in front are checked first
                     for (var i = this.handles.length - 1; i >= 0; i--) {
                         var handle = this.handles[i];

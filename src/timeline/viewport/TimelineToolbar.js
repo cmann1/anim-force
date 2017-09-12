@@ -127,7 +127,7 @@ var app;
                 this.$deleteConfirmDlg.find('button').on('click', this.onDeleteConfirmClick);
                 this.deleteConfirmDlg = new jBox('Modal', {
                     title: 'Delete this animation?',
-                    attach: '#timeline-toolbar i.btn-delete-anim',
+                    attach: this.$deleteAnimButton,
                     overlay: false,
                     position: { x: 'right', y: 'bottom' },
                     offset: { y: 10 },
@@ -136,7 +136,7 @@ var app;
                     closeOnEsc: true,
                     closeOnClick: 'body',
                     content: this.$deleteConfirmDlg,
-                    target: this.$deleteAnimButton[0],
+                    target: this.$deleteAnimButton,
                     trigger: 'click',
                     onOpen: this.onDeleteConfirmDlgOpen
                 });
@@ -145,7 +145,7 @@ var app;
                 this.$animEditDlg.on('keypress', 'input', this.onAnimEditDlgInputKeyPress);
                 this.animEditDlg = new jBox('Modal', {
                     title: 'Animation Settings',
-                    attach: '#timeline-toolbar i.btn-edit-anim',
+                    attach: this.$editAnimButton,
                     overlay: false,
                     position: { x: 'right', y: 'bottom' },
                     offset: { y: 10 },
@@ -154,7 +154,7 @@ var app;
                     closeOnEsc: true,
                     closeOnClick: 'body',
                     content: this.$animEditDlg,
-                    target: this.$editAnimButton[0],
+                    target: this.$editAnimButton,
                     trigger: 'click',
                     onOpen: this.onAnimEditDlgOpen
                 });

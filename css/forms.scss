@@ -19,8 +19,16 @@ fieldset
 
 fieldset label
 {
-	width: 100px;
+	width: 60px;
 	display: inline-block;
+}
+.dialog.label-med fieldset label
+{
+	width: 120px;
+}
+.dialog.label-wide fieldset label
+{
+	width: 200px;
 }
 fieldset label + input
 {

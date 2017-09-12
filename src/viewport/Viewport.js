@@ -104,6 +104,7 @@ var app;
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
+                new viewport.SettingsDlg(_this, _this.$container);
                 return _this;
             }
             Viewport.prototype.step = function (deltaTime, timestamp) {
@@ -366,7 +367,7 @@ var app;
                 var keyCode = event.keyCode;
                 // if(this.mode == EditMode.PLAYBACK) return false;
                 if (keyCode == Key.H) {
-                    this.model.showControls = !this.model.showControls;
+                    app.Config.drawControls = !app.Config.drawControls;
                 }
                 return false;
             };

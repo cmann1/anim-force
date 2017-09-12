@@ -14,6 +14,7 @@
 	<script src="lib/jquery-3.1.1.min.js"></script>
 	<script src="lib/jquery.scrollintoview.min.js"></script>
 	<script src="lib/jBox.min.js"></script>
+	<script src="lib/pouchdb-6.3.4.js"></script>
 	
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
@@ -70,6 +71,7 @@
 	<script src="src/exporters/Exporter.js"></script>
 	<script src="src/exporters/AngelScriptExporter.js"></script>
 	
+	<script src="src/viewport/SettingsDlg.js"></script>
 	<script src="src/Canvas.js"></script>
 	<script src="src/viewport/Viewport.js"></script>
 	
@@ -91,6 +93,7 @@
 <div id="col-left">
 	<div id="viewport-container">
 		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
+		<i class="fa fa-gear settings-btn"></i>
 	</div>
 	<div id="timeline-panel">
 		
@@ -123,9 +126,9 @@
 				<div class="frame-label">
 					Frame: <span class="value">0</span>
 				</div>
-				<i class="fa fa-cut btn-trim-length anim-controls" data-action="trim-length" title="Trim Length • Shift+T"></i>
 				<i class="fa fa-tag btn-insert-keyframe anim-controls" data-action="insert-keyframe" title="Insert Keyframe • (Shift) I"></i>
 				<i class="fa fa-close btn-delete-keyframe anim-controls" data-action="delete-keyframe" title="Delete Keyframe • (Shift) X"></i>
+				<i class="fa fa-cut btn-trim-length anim-controls" data-action="trim-length" title="Trim Length • Shift+T"></i>
 				
 				<div class="flex-filler"></div>
 				<select>
@@ -174,6 +177,17 @@
 		<button class="button">Save</button>
 		<button class="button">Cancel</button>
 	</div>
+</div>
+
+<div id="viewport-properties-dlg" class="dialog label-med" style="display: none">
+	<fieldset>
+		<label for="view-prop-show-controls">Show controls:</label>
+		<input type="checkbox" id="view-prop-show-controls"/>
+	</fieldset>
+	<fieldset>
+		<label for="view-prop-show-aabb">Show AABBs:</label>
+		<input type="checkbox" id="view-prop-show-aabb"/>
+	</fieldset>
 </div>
 
 </body>

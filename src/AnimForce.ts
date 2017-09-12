@@ -1,24 +1,27 @@
 /*
+// TODO: Ordered TODO:
+// ---------------------------------------------------------------
 // TODO: Saving/Loading models
+// TODO: - Implement as projects with one or more models in case the format needs to be expanded
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
-// TODO: Animation events
-// TODO: Some sort of options window/popup:
-// TODO: - Show/Hide controls
+// TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
 // TODO: Sprite Selector:
-// TODO: - Use different modal script
+// TODO: - Remember state, scroll position, etc.
 // TODO: - Improve all-round
 // TODO: - Lazy load/create groups
 // TODO: - Auto show when adding a sprite
 // TODO: - - Auto set sprite node name to sprite name
 // TODO: - Add cancel button
+// TODO: Animation events
+ // ---------------------------------------------------------------
+
 // TODO: Ghosts
 // TODO: Keyboard shortcuts from changing layer and sublayer
-// TODO: Export to sprite group
-
+// TODO: Export to sprite_group
 // TODO: Timeline:
 // TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
 // TODO: - ???

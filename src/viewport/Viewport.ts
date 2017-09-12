@@ -85,6 +85,8 @@ namespace app.viewport
 			this.$message = $('<div class="viewport-message"></div>');
 			this.$container.append(this.$message);
 			this.$message.hide();
+
+			new SettingsDlg(this, this.$container);
 		}
 
 		public step(deltaTime:number, timestamp:number)
@@ -515,7 +517,7 @@ namespace app.viewport
 
 			if(keyCode == Key.H)
 			{
-				this.model.showControls = !this.model.showControls;
+				Config.drawControls = !Config.drawControls;
 			}
 
 			return false;

@@ -32,8 +32,6 @@ namespace app.model
 		private activeAnimation:app.anim.Animation = null;
 		private animationList:app.anim.Animation[] = null;
 
-		public showControls = true;
-
 		/// Events
 
 		public modeChange:EventDispatcher<Model> = new EventDispatcher<Model>();
@@ -97,7 +95,7 @@ namespace app.model
 
 			ctx.save();
 
-			if(this.showControls)
+			if(Config.drawControls)
 			{
 				for(var child of this.children)
 				{
