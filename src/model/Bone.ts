@@ -138,6 +138,15 @@ namespace app.model
 			ctx.restore();
 		}
 
+		public save():any
+		{
+			var data = super.save();
+
+			data.length = this.length;
+
+			return data;
+		}
+
 	}
 
 }

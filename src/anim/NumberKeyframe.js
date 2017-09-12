@@ -20,6 +20,11 @@ var app;
                 _this.next = null;
                 return _this;
             }
+            NumberKeyframe.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                data.value = this.value;
+                return data;
+            };
             return NumberKeyframe;
         }(anim.Keyframe));
         anim.NumberKeyframe = NumberKeyframe;

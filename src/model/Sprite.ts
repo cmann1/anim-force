@@ -237,6 +237,18 @@ namespace app.model
 			}
 		}
 
+		public save():any
+		{
+			var data = super.save();
+
+			data.palette = this.palette;
+			data.frame = this.frame; // TODO: Remove this if it becomes animatable
+			data.spriteSetName = this.asset ? this.asset.spriteSetName : '';
+			data.spriteName = this.asset ? this.asset.spriteName : '';
+
+			return data;
+		}
+
 	}
 
 }

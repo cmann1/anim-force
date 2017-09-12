@@ -25,7 +25,7 @@ var app;
         var Model = (function (_super) {
             __extends(Model, _super);
             function Model() {
-                var _this = _super.call(this, 'Unnamed Model') || this;
+                var _this = _super.call(this, 'Untitled Model') || this;
                 _this.nextAnimationId = 0;
                 _this.selectedNode = null;
                 _this.highlightedNode = null;
@@ -177,6 +177,18 @@ var app;
                 this.activeAnimation = this.bindPose;
                 this.setMode(EditMode.EDIT);
                 this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
+            };
+            Model.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                data.nextAnimationId = this.nextAnimationId;
+                data.mode = this.mode;
+                data.bindPose = this.bindPose.save();
+                data.animations = {};
+                data.activeAnimation = this.activeAnimation.name;
+                for (var animName in this.animations) {
+                    data.animations[animName] = this.animations[animName].save();
+                }
+                return data;
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {

@@ -4,6 +4,7 @@
 // TODO: Saving/Loading models
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
+// TODO: - Option to auto open last project
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
@@ -21,6 +22,7 @@
 // TODO: Ghosts
 // TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
 // TODO: Keyboard shortcuts from changing layer and sublayer
+// TODO: ActionManager to abstract keyboard shortcuts and actions
 // TODO: Properties panel
 // TODO: Export to sprite_group
 // TODO: - copy to clipboard when exporting
@@ -48,18 +50,22 @@ namespace app
 	import SpriteSelector = app.ui.SpriteSelector;
 	import SpriteSelectCallback = app.ui.SpriteSelectCallback;
 	import ProjectManager = app.projects.ProjectManager;
+	import Project = app.projects.Project;
 
-	class App{
+	export class App{
 		public readonly ticker:Ticker;
 
 		protected _spriteManager:SpriteManager;
 		protected viewport:app.viewport.Viewport;
 		protected timeline:app.timeline.TimelinePanel;
 
-		protected model:Model = new Model();
+		protected project:Project;
+		protected model:Model;
 
 		protected spriteSelector:SpriteSelector = null;
 		protected projectManager:ProjectManager;
+
+		protected loadCount = 0;
 
 		public runningTime:number = 0;
 
@@ -70,8 +76,22 @@ namespace app
 
 			this._spriteManager = new SpriteManager('assets/sprites/');
 
+			this.loadCount++;
+			Config.init(this.onLoadQueue);
+
+			this.loadCount++;
 			window.addEventListener('DOMContentLoaded', this.onWindowLoad);
 			window.addEventListener('resize', this.onWindowResize);
+		}
+
+		public static notice(content:string, colour:string='white')
+		{
+			new jBox('Notice', {
+				content: content,
+				color: colour,
+				autoClose: 1500,
+				attributes: {x: 'left', y: 'top'}
+			});
 		}
 
 		protected step(deltaTime:number, timestamp:number)
@@ -106,6 +126,30 @@ namespace app
 			});
 		}
 
+		protected onLoadQueue = () =>
+		{
+			if(!this.projectManager && Config.isLoaded && app.$body)
+			{
+				this.loadCount++;
+				this.projectManager = new ProjectManager();
+				this.projectManager.init(this.onProjectManagerReady);
+			}
+
+			// Loading complete
+			if(--this.loadCount == 0)
+			{
+				app.$window
+					.on('focus', this.onWindowFocus)
+					.on('blur', this.onWindowBlur)
+					.focus();
+
+				$('#app-loading-screen').remove();
+
+				this.ticker.start();
+				this.initUI();
+			}
+		};
+
 		get spriteManager():app.assets.SpriteManager
 		{
 			return this._spriteManager;
@@ -125,6 +169,14 @@ namespace app
 		* Events
 		*/
 
+		protected onProjectManagerReady = () =>
+		{
+			this.project = this.projectManager.getActiveProject();
+			this.model = this.project.activeModel;
+
+			this.onLoadQueue();
+		};
+
 		protected onTick = (deltaTime:number, timestamp:number) =>
 		{
 			this.runningTime++;
@@ -137,16 +189,7 @@ namespace app
 			app.$body = $(document.body);
 			app.$window = $(window);
 
-			app.$window
-				.on('focus', this.onWindowFocus)
-				.on('blur', this.onWindowBlur)
-				.focus();
-
-			Config.init(() => {
-				this.ticker.start();
-				this.initUI();
-				this.projectManager = new ProjectManager();
-			});
+			this.onLoadQueue();
 		};
 
 		protected onWindowResize = () =>

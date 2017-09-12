@@ -1,6 +1,7 @@
 namespace app
 {
 
+	import PouchDB = pouchDB.IPouchDB;
 	import IBaseDoc = pouchDB.IBaseDoc;
 	import EventDispatcher = app.events.EventDispatcher;
 	import Event = app.events.Event;
@@ -8,14 +9,24 @@ namespace app
 	export class Config
 	{
 
-		private static settingsDb:pouchDB.IPouchDB;
+		private static settingsDb:PouchDB;
 
 		static readonly change:EventDispatcher<any> = new EventDispatcher<any>();
+		static isLoaded = false;
+
+		// Misc
+
+		static activeProject:string = null;
+		static loadLastProjectOnStartUp = true;
+
+		// Viewport settings
 
 		static showFps = true;
 		static showControls = true;
 		static drawAABB = false;
 		static drawGrid = true;
+
+		// UI style
 
 		static text = '#444';
 		static font = 'monospace';
@@ -55,6 +66,7 @@ namespace app
 				{
 					Config[data.id] = (<any> data.doc).value;
 				}
+				Config.isLoaded = true;
 			}).then(callback);
 		}
 

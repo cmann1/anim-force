@@ -64,7 +64,6 @@ namespace app.timeline
 		constructor(elementId, model:Model, tree:TimelineTree)
 		{
 			super(elementId);
-			var db = new PouchDB('kittens');
 
 			this.model = model;
 			this.tree = tree;

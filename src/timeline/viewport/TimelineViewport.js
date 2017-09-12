@@ -96,7 +96,6 @@ var app;
                     _this.scrollY = event.scrollY;
                     _this.requiresUpdate = true;
                 };
-                var db = new PouchDB('kittens');
                 _this.model = model;
                 _this.tree = tree;
                 _this.mode = model.mode;

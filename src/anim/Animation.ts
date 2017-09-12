@@ -15,10 +15,10 @@ namespace app.anim
 	{
 
 		public name:string;
-		public tracks:{[id:string]:Track} = {};
 		public active:boolean = false;
 		public fps = 30;
 		public loop = true;
+		public tracks:{[id:string]:Track} = {};
 
 		protected readOnly = false;
 
@@ -116,6 +116,27 @@ namespace app.anim
 			this.tracks = {};
 
 			this.dispatchChange('clear');
+		}
+
+		public save():any
+		{
+			var data = {
+				name: this.name,
+				readOnly: this.readOnly,
+				active: this.active,
+				fps: this.fps,
+				loop: this.loop,
+				frameIndex: this.frameIndex,
+				length: this.length,
+				tracks: {},
+			};
+
+			for(var trackId in this.tracks)
+			{
+				data.tracks[trackId] = this.tracks[trackId].save();
+			}
+
+			return data;
 		}
 
 		public initForAnimation()

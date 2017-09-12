@@ -106,6 +106,11 @@ var app;
                 }
                 ctx.restore();
             };
+            Bone.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                data.length = this.length;
+                return data;
+            };
             return Bone;
         }(model.ContainerNode));
         model.Bone = Bone;

@@ -4,6 +4,7 @@
 // TODO: Saving/Loading models
 // TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
+// TODO: - Option to auto open last project
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
@@ -21,6 +22,7 @@
 // TODO: Ghosts
 // TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
 // TODO: Keyboard shortcuts from changing layer and sublayer
+// TODO: ActionManager to abstract keyboard shortcuts and actions
 // TODO: Properties panel
 // TODO: Export to sprite_group
 // TODO: - copy to clipboard when exporting
@@ -39,18 +41,39 @@ var app;
     var Ticker = app.ticker.Ticker;
     var Splitter = app.ui.Splitter;
     var SpriteManager = app.assets.SpriteManager;
-    var Model = app.model.Model;
     var SpriteSelector = app.ui.SpriteSelector;
     var ProjectManager = app.projects.ProjectManager;
     var App = (function () {
         function App() {
             var _this = this;
-            this.model = new Model();
             this.spriteSelector = null;
+            this.loadCount = 0;
             this.runningTime = 0;
+            this.onLoadQueue = function () {
+                if (!_this.projectManager && app.Config.isLoaded && app.$body) {
+                    _this.loadCount++;
+                    _this.projectManager = new ProjectManager();
+                    _this.projectManager.init(_this.onProjectManagerReady);
+                }
+                // Loading complete
+                if (--_this.loadCount == 0) {
+                    app.$window
+                        .on('focus', _this.onWindowFocus)
+                        .on('blur', _this.onWindowBlur)
+                        .focus();
+                    $('#app-loading-screen').remove();
+                    _this.ticker.start();
+                    _this.initUI();
+                }
+            };
             /*
             * Events
             */
+            this.onProjectManagerReady = function () {
+                _this.project = _this.projectManager.getActiveProject();
+                _this.model = _this.project.activeModel;
+                _this.onLoadQueue();
+            };
             this.onTick = function (deltaTime, timestamp) {
                 _this.runningTime++;
                 _this.step(deltaTime, timestamp);
@@ -59,15 +82,7 @@ var app;
             this.onWindowLoad = function () {
                 app.$body = $(document.body);
                 app.$window = $(window);
-                app.$window
-                    .on('focus', _this.onWindowFocus)
-                    .on('blur', _this.onWindowBlur)
-                    .focus();
-                app.Config.init(function () {
-                    _this.ticker.start();
-                    _this.initUI();
-                    _this.projectManager = new ProjectManager();
-                });
+                _this.onLoadQueue();
             };
             this.onWindowResize = function () {
                 _this.viewport.updateCanvasSize();
@@ -83,9 +98,21 @@ var app;
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
             this.ticker = new Ticker(this.onTick);
             this._spriteManager = new SpriteManager('assets/sprites/');
+            this.loadCount++;
+            app.Config.init(this.onLoadQueue);
+            this.loadCount++;
             window.addEventListener('DOMContentLoaded', this.onWindowLoad);
             window.addEventListener('resize', this.onWindowResize);
         }
+        App.notice = function (content, colour) {
+            if (colour === void 0) { colour = 'white'; }
+            new jBox('Notice', {
+                content: content,
+                color: colour,
+                autoClose: 1500,
+                attributes: { x: 'left', y: 'top' }
+            });
+        };
         App.prototype.step = function (deltaTime, timestamp) {
             this.viewport.step(deltaTime, timestamp);
             this.timeline.step(deltaTime, timestamp);
@@ -124,6 +151,7 @@ var app;
         };
         return App;
     }());
+    app.App = App;
     // Used for debugging
     //noinspection JSUnusedLocalSymbols
     app.main = new App();

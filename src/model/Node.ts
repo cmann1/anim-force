@@ -34,9 +34,6 @@ namespace app.model
 		public scaleX:number = 1;
 		public scaleY:number = 1;
 
-		public stretchX:number = 1;
-		public stretchY:number = 1;
-
 		public layer:number = 17;
 		public subLayer:number = 19;
 
@@ -50,10 +47,6 @@ namespace app.model
 
 		public selected:boolean = false;
 		public highlighted:boolean = false;
-
-		/// UI
-
-		public collapsed:boolean = false;
 
 		///
 
@@ -217,6 +210,15 @@ namespace app.model
 
 			this._name = value;
 			this.onPropertyChange('name');
+		}
+
+		public save():any
+		{
+			return {
+				id: this.id,
+				type: this.type,
+				name: this._name,
+			};
 		}
 
 		/*

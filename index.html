@@ -10,11 +10,14 @@
 	<link rel="stylesheet" href="css/lib/font-awesome.min.css">
 	<link rel="stylesheet" href="css/lib/tippy.css">
 	<link rel="stylesheet" href="css/lib/jBox.css">
+	<link rel="stylesheet" href="css/lib/jBox.Notice.css">
 	
 	<script src="lib/jquery-3.1.1.min.js"></script>
 	<script src="lib/jquery.scrollintoview.min.js"></script>
-	<script src="lib/jBox.min.js"></script>
+	<script src="lib/jBox.js"></script>
+	<script src="lib/jBox.Notice.min.js"></script>
 	<script src="lib/pouchdb-6.3.4.js"></script>
+	<script src="lib/pouchdb.find.js"></script>
 	
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
@@ -29,6 +32,8 @@
 	<script src="src/Ticker.js"></script>
 	<script src="src/FpsDisplay.js"></script>
 	<script src="src/ui/Splitter.js"></script>
+	<script src="src/ui/Dialog.js"></script>
+	<script src="src/ui/PromptDlg.js"></script>
 	<script src="src/Clipboard.js"></script>
 	
 	<script src="src/math/Rectangle.js"></script>
@@ -84,6 +89,7 @@
 	<script src="src/timeline/TimelinePanel.js"></script>
 	
 	<script src="src/ui/SpriteSelector.js"></script>
+	<script src="src/projects/Project.js"></script>
 	<script src="src/projects/ProjectManager.js"></script>
 	
 	<script src="src/AnimForce.js"></script>
@@ -94,7 +100,7 @@
 <div id="col-left">
 	<div id="viewport-container">
 		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
-		<i class="fa fa-gear settings-btn"></i>
+		<i class="fa fa-gear btn settings-btn"></i>
 	</div>
 	<div id="timeline-panel">
 		
@@ -102,14 +108,14 @@
 			<div id="timeline-tree-container"></div>
 			<div id="timeline-tree-toolbar">
 				<div>
-					<i class="fa fa-plus btn-add" title="Add"></i>
+					<i class="fa fa-plus btn btn-add" title="Add"></i>
 					<div class="add-menu">
-						<i class="fa fa-chain add-sub btn-add-bone" title="Add Bone"></i>
-						<i class="fa fa-image add-sub btn-add-sprite" title="Add Sprite"></i>
+						<i class="fa fa-chain btn add-sub btn-add-bone" title="Add Bone"></i>
+						<i class="fa fa-image btn add-sub btn-add-sprite" title="Add Sprite"></i>
 					</div>
 				</div>
 				<div class="flex-filler"></div>
-				<i class="fa fa-close btn-delete" title="Delete"></i>
+				<i class="fa fa-close btn btn-delete" title="Delete"></i>
 			</div>
 		</div>
 		
@@ -118,27 +124,27 @@
 				<canvas id="timeline" tabindex="2" class="no-select"></canvas>
 			</div>
 			<div id="timeline-toolbar">
-				<i class="fa fa-play btn-play anim-controls" data-action="play" title="Play • /"></i>
-				<i class="fa fa-pause btn-pause anim-controls" data-action="pause" title="Pause • /"></i>
-				<i class="fa fa-backward btn-prev anim-controls" data-action="prev-frame" title="Previous Frame • <"></i>
-				<i class="fa fa-forward btn-next anim-controls" data-action="next-frame" title="Next Frame • >"></i>
-				<i class="fa fa-step-backward btn-prev-keyframe anim-controls" data-action="prev-keyframe" title="Previous Keyframe • ["></i>
-				<i class="fa fa-step-forward btn-next-keyframe anim-controls" data-action="next-keyframe" title="Next Keyframe • ]"></i>
+				<i class="fa fa-play btn btn-play anim-controls" data-action="play" title="Play • /"></i>
+				<i class="fa fa-pause btn btn-pause anim-controls" data-action="pause" title="Pause • /"></i>
+				<i class="fa fa-backward btn btn-prev anim-controls" data-action="prev-frame" title="Previous Frame • <"></i>
+				<i class="fa fa-forward btn btn-next anim-controls" data-action="next-frame" title="Next Frame • >"></i>
+				<i class="fa fa-step-backward btn btn-prev-keyframe anim-controls" data-action="prev-keyframe" title="Previous Keyframe • ["></i>
+				<i class="fa fa-step-forward btn btn-next-keyframe anim-controls" data-action="next-keyframe" title="Next Keyframe • ]"></i>
 				<div class="frame-label">
 					Frame: <span class="value">0</span>
 				</div>
-				<i class="fa fa-tag btn-insert-keyframe anim-controls" data-action="insert-keyframe" title="Insert Keyframe • (Shift) I"></i>
-				<i class="fa fa-close btn-delete-keyframe anim-controls" data-action="delete-keyframe" title="Delete Keyframe • (Shift) X"></i>
-				<i class="fa fa-cut btn-trim-length anim-controls" data-action="trim-length" title="Trim Length • Shift+T"></i>
+				<i class="fa fa-tag btn btn-insert-keyframe anim-controls" data-action="insert-keyframe" title="Insert Keyframe • (Shift) I"></i>
+				<i class="fa fa-close btn btn-delete-keyframe anim-controls" data-action="delete-keyframe" title="Delete Keyframe • (Shift) X"></i>
+				<i class="fa fa-cut btn btn-trim-length anim-controls" data-action="trim-length" title="Trim Length • Shift+T"></i>
 				
 				<div class="flex-filler"></div>
 				<select title="Selected Animation">
 					<option value="-1">None</option>
 				</select>
-				<i class="fa fa-pencil btn-edit-anim" data-action="edit-anim" title="Edit Animation"></i>
+				<i class="fa fa-pencil btn btn-edit-anim" data-action="edit-anim" title="Edit Animation"></i>
 				<div class="toolbar-separator"></div>
-				<i class="fa fa-plus btn-add-anim" data-action="add-anim" title="New Animation"></i>
-				<i class="fa fa-close btn-delete-anim" data-action="delete-anim" title="Delete Animation"></i>
+				<i class="fa fa-plus btn btn-add-anim" data-action="add-anim" title="New Animation"></i>
+				<i class="fa fa-close btn btn-delete-anim" data-action="delete-anim" title="Delete Animation"></i>
 			</div>
 		</div>
 		
@@ -190,13 +196,19 @@
 		<input type="checkbox" id="view-prop-showControls"/>
 	</fieldset>
 	<fieldset>
-		<label for="view-prop-drawAABB" title="Shortcut • 0">Draw AABBs:</label>
-		<input type="checkbox" id="view-prop-drawAABB"/>
-	</fieldset>
-	<fieldset>
 		<label for="view-prop-drawGrid" title="Shortcut • G">Draw Grid:</label>
 		<input type="checkbox" id="view-prop-drawGrid"/>
 	</fieldset>
+	<fieldset>
+		<label for="view-prop-drawAABB" title="Shortcut • 0">Draw AABBs:</label>
+		<input type="checkbox" id="view-prop-drawAABB"/>
+	</fieldset>
+</div>
+
+<div id="app-loading-screen">
+	<div class="content">
+		<i class="fa fa-spinner fa-spin"></i> Loading...
+	</div>
 </div>
 
 </body>

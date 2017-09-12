@@ -240,6 +240,23 @@ namespace app.anim
 
 			return this.length = newLength;
 		}
+
+		public save():any
+		{
+			var data:any = {
+				nodeId: this.node.id,
+				length: this.length,
+				interpolation: this.interpolation,
+				properties: {}
+			};
+
+			for(var propertyName in this.properties)
+			{
+				data.properties[propertyName] = this.properties[propertyName].save();
+			}
+
+			return data;
+		}
 	}
 
 	export class TrackProperty
@@ -620,6 +637,31 @@ namespace app.anim
 			out.next = next;
 
 			return out;
+		}
+
+		public save():any
+		{
+			var data:any = {
+				type: this.type,
+				frameIndex: this.frameIndex,
+				length: this.length,
+				frames: [],
+				current: this.current ? this.current.frameIndex : -1,
+				prev: this.prev ? this.prev.frameIndex : -1,
+				next: this.next ? this.next.frameIndex : -1,
+				last: this.last ? this.last.frameIndex : -1,
+			};
+
+			var frame:Keyframe = this.frames;
+
+			while(frame)
+			{
+				data.frames.push(frame.save());
+
+				frame = frame.next;
+			}
+
+			return data;
 		}
 
 		protected insert(key:Keyframe)

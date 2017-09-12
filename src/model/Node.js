@@ -20,8 +20,6 @@ var app;
                 this.rotation = 0;
                 this.scaleX = 1;
                 this.scaleY = 1;
-                this.stretchX = 1;
-                this.stretchY = 1;
                 this.layer = 17;
                 this.subLayer = 19;
                 /// Rendering related
@@ -32,8 +30,6 @@ var app;
                 this.drawIndex = 0;
                 this.selected = false;
                 this.highlighted = false;
-                /// UI
-                this.collapsed = false;
                 this.id = Node.nextId++;
                 this._name = name;
             }
@@ -151,6 +147,13 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            Node.prototype.save = function () {
+                return {
+                    id: this.id,
+                    type: this.type,
+                    name: this._name,
+                };
+            };
             /*
              * Events
              */

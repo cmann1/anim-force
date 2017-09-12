@@ -159,6 +159,18 @@ var app;
                 }
                 return this.length = newLength;
             };
+            Track.prototype.save = function () {
+                var data = {
+                    nodeId: this.node.id,
+                    length: this.length,
+                    interpolation: this.interpolation,
+                    properties: {}
+                };
+                for (var propertyName in this.properties) {
+                    data.properties[propertyName] = this.properties[propertyName].save();
+                }
+                return data;
+            };
             return Track;
         }());
         anim.Track = Track;
@@ -453,6 +465,24 @@ var app;
                 out.prev = prev;
                 out.next = next;
                 return out;
+            };
+            TrackProperty.prototype.save = function () {
+                var data = {
+                    type: this.type,
+                    frameIndex: this.frameIndex,
+                    length: this.length,
+                    frames: [],
+                    current: this.current ? this.current.frameIndex : -1,
+                    prev: this.prev ? this.prev.frameIndex : -1,
+                    next: this.next ? this.next.frameIndex : -1,
+                    last: this.last ? this.last.frameIndex : -1,
+                };
+                var frame = this.frames;
+                while (frame) {
+                    data.frames.push(frame.save());
+                    frame = frame.next;
+                }
+                return data;
             };
             TrackProperty.prototype.insert = function (key) {
                 var frameIndex = key.frameIndex;

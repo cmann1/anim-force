@@ -173,6 +173,14 @@ var app;
                     this.worldAABB.draw(ctx, worldScale);
                 }
             };
+            Sprite.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                data.palette = this.palette;
+                data.frame = this.frame; // TODO: Remove this if it becomes animatable
+                data.spriteSetName = this.asset ? this.asset.spriteSetName : '';
+                data.spriteName = this.asset ? this.asset.spriteName : '';
+                return data;
+            };
             return Sprite;
         }(model.Node));
         model.Sprite = Sprite;

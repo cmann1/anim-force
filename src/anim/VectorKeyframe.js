@@ -20,6 +20,12 @@ var app;
                 _this.next = null;
                 return _this;
             }
+            VectorKeyframe.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                data.x = this.x;
+                data.y = this.y;
+                return data;
+            };
             return VectorKeyframe;
         }(anim.Keyframe));
         anim.VectorKeyframe = VectorKeyframe;

@@ -9,10 +9,17 @@ namespace app.model
 		public children:Node[] = [];
 		public childCount:number = 0;
 
+		public stretchX:number = 1;
+		public stretchY:number = 1;
+
 		public worldEndPointX:number = 0;
 		public worldEndPointY:number = 0;
 
 		public childrenWorldAABB:AABB = new AABB();
+
+		/// UI
+
+		public collapsed:boolean = false;
 
 		constructor(name:string=null)
 		{
@@ -217,6 +224,24 @@ namespace app.model
 			this.childCount = 0;
 
 			this.onStructureChange('clear', this, null, -1, null);
+		}
+
+		public save():any
+		{
+			var data = super.save();
+
+			if(!(this instanceof Model))
+			{
+				data.collapsed = this.collapsed;
+			}
+
+			data.children = [];
+			for(var child of this.children)
+			{
+				data.children.push(child.save());
+			}
+
+			return data;
 		}
 
 	}

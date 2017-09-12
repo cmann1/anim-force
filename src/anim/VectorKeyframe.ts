@@ -10,6 +10,16 @@ namespace app.anim
 		public prev:VectorKeyframe = null;
 		public next:VectorKeyframe = null;
 
+		public save():any
+		{
+			var data = super.save();
+
+			data.x = this.x;
+			data.y = this.y;
+
+			return data;
+		}
+
 	}
 
 }

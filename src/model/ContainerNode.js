@@ -20,9 +20,13 @@ var app;
                 var _this = _super.call(this, name) || this;
                 _this.children = [];
                 _this.childCount = 0;
+                _this.stretchX = 1;
+                _this.stretchY = 1;
                 _this.worldEndPointX = 0;
                 _this.worldEndPointY = 0;
                 _this.childrenWorldAABB = new AABB();
+                /// UI
+                _this.collapsed = false;
                 _this.canHaveChildren = true;
                 return _this;
             }
@@ -169,6 +173,18 @@ var app;
                 this.children = [];
                 this.childCount = 0;
                 this.onStructureChange('clear', this, null, -1, null);
+            };
+            ContainerNode.prototype.save = function () {
+                var data = _super.prototype.save.call(this);
+                if (!(this instanceof model_1.Model)) {
+                    data.collapsed = this.collapsed;
+                }
+                data.children = [];
+                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                    var child = _a[_i];
+                    data.children.push(child.save());
+                }
+                return data;
             };
             return ContainerNode;
         }(model_1.Node));

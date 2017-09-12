@@ -9,6 +9,15 @@ namespace app.anim
 		public prev:NumberKeyframe = null;
 		public next:NumberKeyframe = null;
 
+		public save():any
+		{
+			var data = super.save();
+
+			data.value = this.value;
+
+			return data;
+		}
+
 	}
 
 }

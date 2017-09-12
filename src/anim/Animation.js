@@ -11,10 +11,10 @@ var app;
             function Animation(name, model, readOnly) {
                 if (readOnly === void 0) { readOnly = false; }
                 var _this = this;
-                this.tracks = {};
                 this.active = false;
                 this.fps = 30;
                 this.loop = true;
+                this.tracks = {};
                 this.readOnly = false;
                 this.accumulatedTime = 0;
                 this.frameIndex = 0;
@@ -109,6 +109,22 @@ var app;
                 this.fps = 30;
                 this.tracks = {};
                 this.dispatchChange('clear');
+            };
+            Animation.prototype.save = function () {
+                var data = {
+                    name: this.name,
+                    readOnly: this.readOnly,
+                    active: this.active,
+                    fps: this.fps,
+                    loop: this.loop,
+                    frameIndex: this.frameIndex,
+                    length: this.length,
+                    tracks: {},
+                };
+                for (var trackId in this.tracks) {
+                    data.tracks[trackId] = this.tracks[trackId].save();
+                }
+                return data;
             };
             Animation.prototype.initForAnimation = function () {
                 this.fpsStep = 1 / this.fps;

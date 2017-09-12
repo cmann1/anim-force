@@ -13,6 +13,13 @@ namespace app.anim
 			this.frameIndex = frameIndex;
 		}
 
+		public save():any
+		{
+			return {
+				frameIndex: this.frameIndex
+			};
+		}
+
 	}
 
 }

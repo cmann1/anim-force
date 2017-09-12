@@ -208,6 +208,19 @@
   opacity: 1;
   bottom: -35px; }
 
+fieldset {
+  flex-direction: row;
+  border: none;
+  padding: 5px; }
+
+fieldset label {
+  width: 60px;
+  display: inline-block; }
+
+fieldset label + input {
+  display: inline-block;
+  flex-grow: 1; }
+
 input {
   outline: none;
   border: 1px solid #a9a9a9;
@@ -218,24 +231,14 @@ input {
   font-size: inherit;
   vertical-align: middle; }
 
-fieldset {
-  flex-direction: row;
-  border: none;
+.dialog input {
   padding: 5px; }
-
-fieldset label {
-  width: 60px;
-  display: inline-block; }
 
 .dialog.label-med fieldset label {
   width: 120px; }
 
 .dialog.label-wide fieldset label {
   width: 200px; }
-
-fieldset label + input {
-  display: inline-block;
-  flex-grow: 1; }
 
 .splitter-partition {
   position: absolute; }
@@ -467,6 +470,20 @@ html, body {
   font: 14px monospace;
   color: #444; }
 
+#app-loading-screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: #FAFAFA;
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center; }
+  #app-loading-screen .content {
+    margin: 0 auto; }
+
 .no-select {
   user-select: none; }
 
@@ -508,16 +525,16 @@ div#timeline-panel {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
   border-radius: 4px; }
 
-i.fa {
+i.btn.fa {
   padding: 4px;
   margin: 0 2px;
   border-radius: 2px; }
 
-i.fa:hover {
+i.btn.fa:hover {
   background: indianred;
   color: #FFF; }
 
-i.fa.disabled, i.fa.disabled:hover {
+i.btn.fa.disabled, i.fa.disabled:hover {
   pointer-events: none;
   background: inherit !important;
   color: #b5b5b5 !important; }
@@ -525,8 +542,29 @@ i.fa.disabled, i.fa.disabled:hover {
 div.disabled {
   color: #b5b5b5 !important; }
 
+.jBox-overlay.clear {
+  background: transparent !important;
+  opacity: 1 !important; }
+
 body .jBox-Modal .jBox-container {
   box-shadow: 0 3px 15px rgba(0, 0, 0, 0.4); }
+
+body .jBox-Modal .jBox-title {
+  border-bottom: 1px solid #e0e0e0; }
+  body .jBox-Modal .jBox-title i {
+    vertical-align: middle; }
+
+.jBox-Modal .jBox-title i {
+  margin-right: 10px; }
+
+.jBox-Modal.info .jBox-title i {
+  color: #599BDC; }
+
+.jBox-Modal.warning .jBox-title i {
+  color: darkorange; }
+
+.jBox-Modal.error .jBox-title i {
+  color: #BF4843; }
 
 .jBox-Tooltip.jBox-TooltipDark .jBox-container,
 .jBox-Mouse.jBox-TooltipDark .jBox-container {
@@ -536,6 +574,9 @@ body .jBox-Modal .jBox-container {
 .jBox-Tooltip.jBox-TooltipDark .jBox-pointer:after,
 .jBox-Mouse.jBox-TooltipDark .jBox-pointer:after {
   background: #333; }
+
+.jBox-Notice-white .jBox-container {
+  background: #FAFAFA; }
 
 .dialog .button-bar {
   margin-top: 10px;

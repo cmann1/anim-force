@@ -40,7 +40,7 @@ namespace app.model
 
 		constructor()
 		{
-			super('Unnamed Model');
+			super('Untitled Model');
 			this.model = this;
 			this.type = 'model';
 
@@ -221,6 +221,24 @@ namespace app.model
 			this.setMode(EditMode.EDIT);
 
 			this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
+		}
+
+		public save():any
+		{
+			var data = super.save();
+
+			data.nextAnimationId = this.nextAnimationId;
+			data.mode = this.mode;
+			data.bindPose = this.bindPose.save();
+			data.animations = {};
+			data.activeAnimation = this.activeAnimation.name;
+
+			for(var animName in this.animations)
+			{
+				data.animations[animName] = this.animations[animName].save();
+			}
+
+			return data;
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean

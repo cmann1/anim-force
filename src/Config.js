@@ -12,6 +12,7 @@ var app;
                     var data = _a[_i];
                     Config[data.id] = data.doc.value;
                 }
+                Config.isLoaded = true;
             }).then(callback);
         };
         Config.set = function (name, value) {
@@ -35,10 +36,16 @@ var app;
         return Config;
     }());
     Config.change = new EventDispatcher();
+    Config.isLoaded = false;
+    // Misc
+    Config.activeProject = null;
+    Config.loadLastProjectOnStartUp = true;
+    // Viewport settings
     Config.showFps = true;
     Config.showControls = true;
     Config.drawAABB = false;
     Config.drawGrid = true;
+    // UI style
     Config.text = '#444';
     Config.font = 'monospace';
     Config.control = '#333';

@@ -8,6 +8,11 @@ var app;
                 this.next = null;
                 this.frameIndex = frameIndex;
             }
+            Keyframe.prototype.save = function () {
+                return {
+                    frameIndex: this.frameIndex
+                };
+            };
             return Keyframe;
         }());
         anim.Keyframe = Keyframe;
