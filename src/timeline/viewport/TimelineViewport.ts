@@ -67,14 +67,8 @@ namespace app.timeline
 
 			this.model = model;
 			this.tree = tree;
+			this.setModel(model);
 
-			this.mode = model.mode;
-			this.animation = model.getActiveAnimation();
-			this.animation.change.on(this.onAnimationChange);
-			model.animationChange.on(this.onModelAnimationChange);
-			model.structureChange.on(this.onModelStructureChange);
-			model.selectionChange.on(this.onModelSelectionChange);
-			model.modeChange.on(this.onModelModeChange);
 			tree.scrollChange.on(this.onTreeScroll);
 			tree.treeNodeUpdate.on(this.onTreeNodeUpdate);
 
@@ -89,6 +83,8 @@ namespace app.timeline
 			this.headerGrad.addColorStop(0, Config.node);
 			this.headerGrad.addColorStop(1, Config.nodeBottom);
 		}
+
+		//
 
 		public step(deltaTime:number, timestamp:number)
 		{
@@ -341,14 +337,16 @@ namespace app.timeline
 			}
 		}
 
-		public getMode()
-		{
-			return this.mode;
-		}
+		//
 
 		public focus()
 		{
 			this.$canvas.focus();
+		}
+
+		public getMode()
+		{
+			return this.mode;
 		}
 
 		public prevFrame(shiftKey)
@@ -367,6 +365,31 @@ namespace app.timeline
 				this.animation.gotoNextFrame();
 		}
 
+		public reset()
+		{
+			this.scrollX = 0;
+			this.scrollY = 0;
+
+			this.requiresUpdate = true;
+		}
+
+		public setModel(model:Model)
+		{
+			this.nodeList = [];
+
+			this.model = model;
+			this.mode = model.mode;
+			this.animation = model.getActiveAnimation();
+
+			model.setAnimationListeners(this.onAnimationChange);
+			model.animationChange.on(this.onModelAnimationChange);
+			model.modeChange.on(this.onModelModeChange);
+			model.selectionChange.on(this.onModelSelectionChange);
+			model.structureChange.on(this.onModelStructureChange);
+
+			this.requiresUpdate = true;
+		}
+
 		public togglePlayback()
 		{
 			if(this.mode == EditMode.ANIMATE)
@@ -379,56 +402,7 @@ namespace app.timeline
 			}
 		}
 
-		private updateNodeList()
-		{
-			var nodes:Node[] = [];
-			var nodeQueue:Node[] = [];
-			var i = -1;
-			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[j];
-
-			while(i >= 0)
-			{
-				var node:Node = nodeQueue[i--];
-
-				if(node instanceof ContainerNode && !node.collapsed)
-				{
-					for(var j = node.childCount - 1; j >= 0; j--) nodeQueue[++i] = node.children[j];
-				}
-
-				nodes.push(node);
-			}
-
-			this.nodeList = nodes;
-		}
-
-		private setFrame(frame:number)
-		{
-			if(this.currentFrame == frame) return;
-
-			this.animation.setPosition(frame);
-			this.currentFrame = this.animation.getPosition();
-			this.toolbar.updateFrameLabel();
-			this.scrollIntoView(null, this.currentFrame);
-		}
-
-		private setSelectedFrame(node:Node, frameIndex:number=-1, toggle=false):boolean
-		{
-			if(frameIndex < 0) node = null;
-
-			if(node == this.selectedTrack && frameIndex == this.selectedFrame)
-			{
-				if(toggle && node)
-				{
-					this.selectedTrack = null;
-					this.selectedFrame = -1;
-				}
-				return false;
-			}
-
-			this.selectedTrack = node;
-			this.selectedFrame = node ? frameIndex : -1;
-			return true;
-		}
+		//
 
 		private getFrameIndexAt(x:number):number
 		{
@@ -474,6 +448,35 @@ namespace app.timeline
 			this.requiresUpdate = true;
 		}
 
+		private setFrame(frame:number)
+		{
+			if(this.currentFrame == frame) return;
+
+			this.animation.setPosition(frame);
+			this.currentFrame = this.animation.getPosition();
+			this.toolbar.updateFrameLabel();
+			this.scrollIntoView(null, this.currentFrame);
+		}
+
+		private setSelectedFrame(node:Node, frameIndex:number=-1, toggle=false):boolean
+		{
+			if(frameIndex < 0) node = null;
+
+			if(node == this.selectedTrack && frameIndex == this.selectedFrame)
+			{
+				if(toggle && node)
+				{
+					this.selectedTrack = null;
+					this.selectedFrame = -1;
+				}
+				return false;
+			}
+
+			this.selectedTrack = node;
+			this.selectedFrame = node ? frameIndex : -1;
+			return true;
+		}
+
 		private stopKeyframeDrag(move=false, cancel=true)
 		{
 			if(this.dragKeyframeNode)
@@ -498,9 +501,48 @@ namespace app.timeline
 			}
 		}
 
+		private updateNodeList()
+		{
+			var nodes:Node[] = [];
+			var nodeQueue:Node[] = [];
+			var i = -1;
+			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[j];
+
+			while(i >= 0)
+			{
+				var node:Node = nodeQueue[i--];
+
+				if(node instanceof ContainerNode && !node.collapsed)
+				{
+					for(var j = node.childCount - 1; j >= 0; j--) nodeQueue[++i] = node.children[j];
+				}
+
+				nodes.push(node);
+			}
+
+			this.nodeList = nodes;
+		}
+
 		/*
 		 * Events
 		 */
+
+
+		private onAnimationChange = (animation:Animation, event:Event) =>
+		{
+			const type = event.type;
+
+			if(type == 'position' || type == 'clear')
+			{
+				this.setFrame(animation.getPosition());
+			}
+			else if(type == 'length')
+			{
+				this.setSelectedFrame(this.selectedTrack, this.selectedFrame);
+			}
+
+			this.requiresUpdate = true;
+		};
 
 		private onModelAnimationChange = (animation:Animation, event:Event) =>
 		{
@@ -524,22 +566,6 @@ namespace app.timeline
 
 				this.requiresUpdate = true;
 			}
-		};
-
-		private onAnimationChange = (animation:Animation, event:Event) =>
-		{
-			const type = event.type;
-
-			if(type == 'position' || type == 'clear')
-			{
-				this.setFrame(animation.getPosition());
-			}
-			else if(type == 'length')
-			{
-				this.setSelectedFrame(this.selectedTrack, this.selectedFrame);
-			}
-
-			this.requiresUpdate = true;
 		};
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>

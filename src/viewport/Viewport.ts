@@ -72,13 +72,7 @@ namespace app.viewport
 		{
 			super(elementId);
 
-			this.model = model;
-			this.model.getActiveAnimation().change.on(this.onAnimationChange);
-
-			model.structureChange.on(this.onModelStructureChange);
-			model.selectionChange.on(this.onModelSelectionChange);
-			model.animationChange.on(this.onModelAnimationChange);
-			model.modeChange.on(this.onModelModeChange);
+			this.setModel(model);
 
 			this.$container.on('resize', this.onResize);
 			this.$container.parent().on('resize', this.onResize);
@@ -97,6 +91,8 @@ namespace app.viewport
 
 			Config.change.on(this.onConfigChange);
 		}
+
+		//
 
 		public step(deltaTime:number, timestamp:number)
 		{
@@ -300,10 +296,42 @@ namespace app.viewport
 			ctx.restore();
 		}
 
+		//
+
+		public anchorToScreen(screenX, screenY, stageX, stageY)
+		{
+			this.cameraX = stageX - (screenX - this.centreX) / this.scale;
+			this.cameraY = stageY - (screenY - this.centreY) / this.scale;
+		}
+
+		public reset()
+		{
+			this.cameraX = 0;
+			this.cameraY = 0;
+			this.scale = 1;
+			this.scaleIndex = this.scales.indexOf(this.scale);
+
+			this.requiresUpdate = true;
+		}
+
 		public screenToStage(x:number, y:number, out:{x:number, y:number})
 		{
 			out.x = this.cameraX + (x - this.centreX) / this.scale;
 			out.y = this.cameraY + (y - this.centreY) / this.scale;
+		}
+
+		public setModel(model:Model)
+		{
+			this.model = model;
+			this.mode = model.mode;
+
+			model.setAnimationListeners(this.onAnimationChange);
+			model.animationChange.on(this.onModelAnimationChange);
+			model.modeChange.on(this.onModelModeChange);
+			model.selectionChange.on(this.onModelSelectionChange);
+			model.structureChange.on(this.onModelStructureChange);
+
+			this.requiresUpdate = true;
 		}
 
 		public stageXToScreen(x:number)
@@ -314,12 +342,6 @@ namespace app.viewport
 		public stageYToScreen(y:number)
 		{
 			return (y - this.cameraY) * this.scale + this.centreY;
-		}
-
-		public anchorToScreen(screenX, screenY, stageX, stageY)
-		{
-			this.cameraX = stageX - (screenX - this.centreX) / this.scale;
-			this.cameraY = stageY - (screenY - this.centreY) / this.scale;
 		}
 
 		public showMessage(message:string, duration=1000)
@@ -338,6 +360,8 @@ namespace app.viewport
 				this.fpsDisplay.hide();
 			}
 		}
+
+		//
 
 		protected zoom(direction:number=1)
 		{
@@ -426,10 +450,7 @@ namespace app.viewport
 
 			if(keyCode == Key.Home)
 			{
-				this.cameraX = 0;
-				this.cameraY = 0;
-				this.scale = 1;
-				this.scaleIndex = 3;
+				this.reset();
 			}
 
 			// Zoom in

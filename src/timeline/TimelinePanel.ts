@@ -32,11 +32,6 @@ namespace app.timeline
 			new Splitter(this.tree.getContainer(), $('#timeline-container'), SplitterOrientation.HORIZONTAL, 350, SplitterAnchor.FIRST, 'timeline-tree');
 		}
 
-		public getContainer()
-		{
-			return this.$container;
-		}
-
 		public step(deltaTime:number, timestamp:number)
 		{
 			this.viewport.step(deltaTime, timestamp);
@@ -45,6 +40,26 @@ namespace app.timeline
 		public draw()
 		{
 			this.viewport.draw();
+		}
+
+		//
+
+		public getContainer()
+		{
+			return this.$container;
+		}
+
+		public reset()
+		{
+			this.tree.reset();
+			this.viewport.reset();
+		}
+
+		public setModel(model:Model)
+		{
+			this.model = model;
+			this.tree.setModel(model);
+			this.viewport.setModel(model);
 		}
 
 	}

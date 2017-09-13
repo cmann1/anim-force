@@ -48,19 +48,16 @@ namespace app.model
 			this.activeAnimation = this.bindPose;
 		}
 
+		//
+
+		public animateStep(deltaTime:number)
+		{
+			this.activeAnimation.animateStep(deltaTime);
+		}
+
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
 		{
 			console.error('Use drawModel instead');
-		}
-
-		public prepareChildren()
-		{
-			this.drawList.clear();
-
-			for(var child of this.children)
-			{
-				child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
-			}
 		}
 
 		public drawModel(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
@@ -120,6 +117,91 @@ namespace app.model
 			ctx.restore();
 		}
 
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			if(this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result))
+			{
+				return true;
+			}
+
+			return super.hitTest(x, y, worldScaleFactor, result);
+		}
+
+		public prepareChildren()
+		{
+			this.drawList.clear();
+
+			for(var child of this.children)
+			{
+				child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
+			}
+		}
+
+		//
+
+		public getActiveAnimation():app.anim.Animation
+		{
+			return this.activeAnimation;
+		}
+
+		public setActiveAnimation(name:string)
+		{
+			if(this._mode == EditMode.PLAYBACK) return;
+			var anim = name == 'None' ? this.bindPose : this.animations[name];
+
+			if(anim && anim != this.activeAnimation)
+			{
+				if(this.activeAnimation)
+				{
+					this.activeAnimation.active = false;
+				}
+
+				anim.active = true;
+				this.activeAnimation = anim;
+				this.animationChange.dispatch(anim, new Event('setAnimation'));
+				this.activeAnimation.updateNodes();
+
+				this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
+			}
+		}
+
+		public setAnimationListeners(callback:(animation:Animation, event:Event) => void)
+		{
+			this.bindPose.change.on(callback);
+
+			for(var animName in this.animations)
+			{
+				this.animations[animName].change.on(callback);
+			}
+		}
+
+		public getAnimationList():app.anim.Animation[]
+		{
+			if(this.animationList) return this.animationList;
+
+			var animNames:string[] = [];
+
+			for(var animName in this.animations)
+			{
+				animNames.push(animName);
+			}
+			animNames.sort(Utils.naturalCompare);
+
+			var anims:app.anim.Animation[] = [this.bindPose];
+			for(var animName of animNames)
+			{
+				anims.push(this.animations[animName]);
+			}
+
+			this.animationList = anims;
+			return anims;
+		}
+
+		public getBindPose():app.anim.Animation
+		{
+			return this.bindPose;
+		}
+
 		public setHighlighted(highlighted:boolean)
 		{
 			if(highlighted)
@@ -153,6 +235,11 @@ namespace app.model
 			}
 		}
 
+		public getSelectedNode():Node
+		{
+			return this.selectedNode;
+		}
+
 		public setSelectedNode(node:Node)
 		{
 			if(this.selectedNode == node) return;
@@ -170,42 +257,7 @@ namespace app.model
 			this.selectionChange.dispatch(this, new SelectionEvent('selection', <Node>node));
 		}
 
-		public getSelectedNode():Node
-		{
-			return this.selectedNode;
-		}
-
-		public getActiveAnimation():app.anim.Animation
-		{
-			return this.activeAnimation;
-		}
-
-		public getBindPose():app.anim.Animation
-		{
-			return this.bindPose;
-		}
-
-		public getAnimationList():app.anim.Animation[]
-		{
-			if(this.animationList) return this.animationList;
-
-			var animNames:string[] = [];
-
-			for(var animName in this.animations)
-			{
-				animNames.push(animName);
-			}
-			animNames.sort(Utils.naturalCompare);
-
-			var anims:app.anim.Animation[] = [this.bindPose];
-			for(var animName of animNames)
-			{
-				anims.push(this.animations[animName]);
-			}
-
-			this.animationList = anims;
-			return anims;
-		}
+		//
 
 		public clear():void
 		{
@@ -241,21 +293,6 @@ namespace app.model
 			return data;
 		}
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
-		{
-			if(this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result))
-			{
-				return true;
-			}
-
-			return super.hitTest(x, y, worldScaleFactor, result);
-		}
-
-		public animateStep(deltaTime:number)
-		{
-			this.activeAnimation.animateStep(deltaTime);
-		}
-
 		public addNewAnimation(name:string, select:boolean=false)
 		{
 			if(name == null || name == 'None')
@@ -279,27 +316,6 @@ namespace app.model
 			if(select)
 			{
 				this.setActiveAnimation(newName);
-			}
-		}
-
-		public setActiveAnimation(name:string)
-		{
-			if(this._mode == EditMode.PLAYBACK) return;
-			var anim = name == 'None' ? this.bindPose : this.animations[name];
-
-			if(anim && anim != this.activeAnimation)
-			{
-				if(this.activeAnimation)
-				{
-					this.activeAnimation.active = false;
-				}
-
-				anim.active = true;
-				this.activeAnimation = anim;
-				this.animationChange.dispatch(anim, new Event('setAnimation'));
-				this.activeAnimation.updateNodes();
-
-				this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
 			}
 		}
 
@@ -347,6 +363,8 @@ namespace app.model
 
 			this.setMode(value);
 		}
+
+		//
 
 		protected setMode(value:EditMode)
 		{

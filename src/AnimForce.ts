@@ -2,9 +2,9 @@
 // TODO: Ordered TODO:
 // ---------------------------------------------------------------
 // TODO: Saving/Loading models
-// TODO: - Save to localdata/db and option to export/import from file
 // TODO: - Manage saved models
 // TODO: - Option to auto open last project
+// TODO: - Delete, rename, export to file, import from file, ?clear
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
@@ -21,9 +21,7 @@
 
 // TODO: Ghosts
 // TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
-// TODO: Keyboard shortcuts from changing layer and sublayer
-// TODO: ActionManager to abstract keyboard shortcuts and actions
-// TODO: Properties panel
+// TODO: Keyboard shortcuts for changing layer and sublayer
 // TODO: Export to sprite_group
 // TODO: - copy to clipboard when exporting
 // TODO: Timeline:
@@ -150,12 +148,26 @@ namespace app
 			}
 		};
 
-		get spriteManager():app.assets.SpriteManager
+		public setProject(newProject:Project)
+		{
+			this.project = this.projectManager.getActiveProject();
+			this.model = this.project.activeModel;
+
+			this.viewport.setModel(newProject.activeModel);
+			this.timeline.setModel(newProject.activeModel);
+
+			this.viewport.focus();
+			this.viewport.reset();
+			this.timeline.reset();
+		}
+
+		public get spriteManager():app.assets.SpriteManager
 		{
 			return this._spriteManager;
 		}
 
-		showSpriteSelector(callback:SpriteSelectCallback=null)
+		// TODO: remove
+		public showSpriteSelector(callback:SpriteSelectCallback=null)
 		{
 			if(this.spriteSelector == null)
 			{

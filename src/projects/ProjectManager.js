@@ -14,17 +14,22 @@ var app;
                 /*
                  * Events
                  */
-                this.onOverwriteConfirm = function (value) {
+                this.onConfirm = function (name, value) {
+                    if (name == 'NewProject') {
+                        _this.newProject();
+                        app.main.setProject(_this.activeProject);
+                    }
+                };
+                this.onOverwriteConfirm = function (name, value) {
                     _this.activeProjectRev = _this.overwriteProjectRev;
                     _this.overwriteProjectRev = null;
                     _this.saveActiveProject();
                 };
-                this.onSaveAsConfirm = function (value) {
+                this.onSaveAsConfirm = function (name, value) {
                     value = $.trim(value);
                     _this.projectsDb.get(value).then(function (doc) {
                         _this.overwriteProjectRev = doc._rev;
-                        _this.$confirmOverwriteName.html(value);
-                        _this.confirmOverwriteDlg.show();
+                        _this.showConfirmOverwriteDlg(value);
                     }).catch(function () {
                         _this.activeProject.name = value;
                         _this.saveActiveProject();
@@ -44,9 +49,13 @@ var app;
                             consume = true;
                         }
                         else if (keyCode == Key.O) {
+                            // TODO: implement project manager dialog/open
                             consume = true;
                         }
-                        else if (keyCode == Key.N) {
+                    }
+                    else if (shiftKey) {
+                        if (keyCode == Key.N) {
+                            _this.showConfirmDlg('Confirm New Project', 'Any unsaved changes will be lost<br>Are you sure you want to continue?', 'NewProject');
                             consume = true;
                         }
                     }
@@ -73,20 +82,9 @@ var app;
                     // }).then(callback);
                 }
                 else {
-                    this.activeProject = new projects.Project('New Project');
-                    this.activeProject.addModel(new Model());
+                    this.newProject();
                     callback();
                 }
-                this.confirmOverwriteDlg = new Dialog('Confirm Overwrite', {
-                    type: 'warning',
-                    content: '<strong>XXX</strong> already exists.<br>Do you want to overwrite it?',
-                    buttons: [
-                        { label: 'Yes', confirm: true, focus: true },
-                        { label: 'No', cancel: true }
-                    ],
-                    confirm: this.onOverwriteConfirm
-                });
-                this.$confirmOverwriteName = this.confirmOverwriteDlg.getContent().find('strong');
             };
             ProjectManager.prototype.getActiveProject = function () {
                 return this.activeProject;
@@ -104,6 +102,10 @@ var app;
                 }
                 this.promptDlg.show(this.activeProject.name);
             };
+            ProjectManager.prototype.newProject = function () {
+                this.activeProject = new projects.Project('New Project');
+                this.activeProject.addModel(new Model());
+            };
             ProjectManager.prototype.saveActiveProject = function () {
                 var _this = this;
                 var data = this.activeProject.save();
@@ -117,6 +119,44 @@ var app;
                 }).catch(function () {
                     app.App.notice('Error saving project', 'red');
                 });
+            };
+            ProjectManager.prototype.showConfirmDlg = function (title, content, name) {
+                if (!this.confirmDlg) {
+                    this.confirmDlg = new Dialog('Confirm', {
+                        type: 'warning',
+                        content: 'Are you sure?',
+                        buttons: [
+                            { label: 'Yes', confirm: true, focus: true },
+                            { label: 'No', cancel: true }
+                        ],
+                        confirm: this.onConfirm
+                    });
+                }
+                if (title != null)
+                    this.confirmDlg.setTitle(title);
+                if (content != null)
+                    this.confirmDlg.setContent(content);
+                if (name != null)
+                    this.confirmDlg.setName(name);
+                this.confirmDlg.show();
+            };
+            ProjectManager.prototype.showConfirmOverwriteDlg = function (name) {
+                if (!this.confirmOverwriteDlg) {
+                    this.confirmOverwriteDlg = new Dialog('Confirm Overwrite', {
+                        type: 'warning',
+                        content: '<strong>XXX</strong> already exists.<br>Do you want to overwrite it?',
+                        buttons: [
+                            { label: 'Yes', confirm: true, focus: true },
+                            { label: 'No', cancel: true }
+                        ],
+                        confirm: this.onOverwriteConfirm
+                    });
+                    this.$confirmOverwriteName = this.confirmOverwriteDlg.getContent().find('strong');
+                }
+                if (name != null) {
+                    this.$confirmOverwriteName.html(name);
+                }
+                this.confirmOverwriteDlg.show();
             };
             return ProjectManager;
         }());

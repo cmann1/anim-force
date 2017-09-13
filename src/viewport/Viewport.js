@@ -99,12 +99,7 @@ var app;
                     _this.stageAnchorX = NaN;
                     _this.stageAnchorY = NaN;
                 };
-                _this.model = model;
-                _this.model.getActiveAnimation().change.on(_this.onAnimationChange);
-                model.structureChange.on(_this.onModelStructureChange);
-                model.selectionChange.on(_this.onModelSelectionChange);
-                model.animationChange.on(_this.onModelAnimationChange);
-                model.modeChange.on(_this.onModelModeChange);
+                _this.setModel(model);
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$message = $('<div class="viewport-message"></div>');
@@ -118,6 +113,7 @@ var app;
                 app.Config.change.on(_this.onConfigChange);
                 return _this;
             }
+            //
             Viewport.prototype.step = function (deltaTime, timestamp) {
                 if (this.mode == EditMode.PLAYBACK) {
                     this.model.animateStep(deltaTime);
@@ -255,19 +251,37 @@ var app;
                 }
                 ctx.restore();
             };
+            //
+            Viewport.prototype.anchorToScreen = function (screenX, screenY, stageX, stageY) {
+                this.cameraX = stageX - (screenX - this.centreX) / this.scale;
+                this.cameraY = stageY - (screenY - this.centreY) / this.scale;
+            };
+            Viewport.prototype.reset = function () {
+                this.cameraX = 0;
+                this.cameraY = 0;
+                this.scale = 1;
+                this.scaleIndex = this.scales.indexOf(this.scale);
+                this.requiresUpdate = true;
+            };
             Viewport.prototype.screenToStage = function (x, y, out) {
                 out.x = this.cameraX + (x - this.centreX) / this.scale;
                 out.y = this.cameraY + (y - this.centreY) / this.scale;
+            };
+            Viewport.prototype.setModel = function (model) {
+                this.model = model;
+                this.mode = model.mode;
+                model.setAnimationListeners(this.onAnimationChange);
+                model.animationChange.on(this.onModelAnimationChange);
+                model.modeChange.on(this.onModelModeChange);
+                model.selectionChange.on(this.onModelSelectionChange);
+                model.structureChange.on(this.onModelStructureChange);
+                this.requiresUpdate = true;
             };
             Viewport.prototype.stageXToScreen = function (x) {
                 return (x - this.cameraX) * this.scale + this.centreX;
             };
             Viewport.prototype.stageYToScreen = function (y) {
                 return (y - this.cameraY) * this.scale + this.centreY;
-            };
-            Viewport.prototype.anchorToScreen = function (screenX, screenY, stageX, stageY) {
-                this.cameraX = stageX - (screenX - this.centreX) / this.scale;
-                this.cameraY = stageY - (screenY - this.centreY) / this.scale;
             };
             Viewport.prototype.showMessage = function (message, duration) {
                 if (duration === void 0) { duration = 1000; }
@@ -281,6 +295,7 @@ var app;
                     this.fpsDisplay.hide();
                 }
             };
+            //
             Viewport.prototype.zoom = function (direction) {
                 if (direction === void 0) { direction = 1; }
                 this.scaleIndex += direction;
@@ -306,10 +321,7 @@ var app;
                 var keyCode = event.keyCode;
                 // console.log(keyCode);
                 if (keyCode == Key.Home) {
-                    this.cameraX = 0;
-                    this.cameraY = 0;
-                    this.scale = 1;
-                    this.scaleIndex = 3;
+                    this.reset();
                 }
                 else if (keyCode == Key.Add || keyCode == Key.Equals) {
                     this.zoom(1);

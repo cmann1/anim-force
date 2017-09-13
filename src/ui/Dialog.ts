@@ -5,14 +5,19 @@ namespace app.ui
 
 	export class Dialog
 	{
+		protected static nextId = 0;
+
 		protected dlg:jBox;
 		protected $contentPane:JQuery;
 		protected $dlg:JQuery;
 
+		protected name:string;
+		protected title:string = '';
+		protected icon:string = '';
 		protected isOpen = false;
 
-		protected confirmCallback:(value?:any)=>void;
-		protected cancelCallback:(value?:any)=>void;
+		protected confirmCallback:(name:string, value?:any)=>void;
+		protected cancelCallback:(name:string, value?:any)=>void;
 		protected buttonCallback:(button:string)=>void;
 
 		protected buttonData:any = {};
@@ -21,7 +26,10 @@ namespace app.ui
 
 		constructor(title:string, options?:any)
 		{
+			this.title = title;
+
 			var defaults = {
+				name: 'Dlg' + (++Dialog.nextId),
 				overlay: true,
 				overlayClass: 'clear',
 				closeButton: true,
@@ -32,6 +40,8 @@ namespace app.ui
 			};
 			Object['assign'](defaults, options || {});
 			options = defaults;
+
+			this.name = options.name;
 
 			this.$dlg = $(
 				`<div class="dialog ${options.type}">
@@ -93,14 +103,13 @@ namespace app.ui
 					options.icon = 'warning';
 			}
 
-			var icon = '';
 			if(options.icon)
 			{
-				icon = `<i class="fa fa-${options.icon} fa-2x"></i> `;
+				this.icon = `<i class="fa fa-${options.icon} fa-2x"></i> `;
 			}
 
 			this.dlg = new jBox('Modal', {
-				title: icon + title,
+				title: this.icon + this.title,
 				addClass: options.type,
 				overlay: options.overlay,
 				overlayClass: options.overlayClass,
@@ -130,7 +139,7 @@ namespace app.ui
 
 			if(this.confirmCallback)
 			{
-				this.confirmCallback(value || this.getConfirmValue());
+				this.confirmCallback(this.name, value != undefined ? value : this.getConfirmValue());
 			}
 		}
 
@@ -141,7 +150,7 @@ namespace app.ui
 
 			if(this.cancelCallback)
 			{
-				this.cancelCallback(value || this.getCancelValue());
+				this.cancelCallback(this.name, value != undefined ? value : this.getCancelValue());
 			}
 		}
 
@@ -153,6 +162,29 @@ namespace app.ui
 		public getContent():JQuery
 		{
 			return this.$contentPane;
+		}
+
+		public setTitle(title:string)
+		{
+			if(title == this.title) return;
+
+			this.title = title;
+			this.dlg.setTitle(this.icon + this.title);
+		}
+
+		public setConfirmCallback(callback:(value?:any)=>void)
+		{
+			this.confirmCallback = callback;
+		}
+
+		public setCancelCallback(callback:(value?:any)=>void)
+		{
+			this.cancelCallback = callback;
+		}
+
+		public setName(name:string)
+		{
+			this.name = name;
 		}
 
 		protected getConfirmValue():any

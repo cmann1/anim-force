@@ -69,7 +69,6 @@ namespace app.timeline.tree
 
 		set selected(value:boolean)
 		{
-
 			this.$item.toggleClass('selected', value);
 		}
 

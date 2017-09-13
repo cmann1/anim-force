@@ -49,115 +49,27 @@ namespace app.timeline.tree
 
 		constructor(elementId, model:Model)
 		{
-			this.model = model;
 			this.$element = $('#' + elementId);
 			this.$container = this.$element.find('#timeline-tree-container');
-
-			this.setupToolbar();
-
-			this.$container.append((this.rootNode = <RootTreeNode> this.fromNode(this.model)).$element);
-			model.structureChange.on(this.onModelStructureChange);
-			model.selectionChange.on(this.onModelSelectionChange);
-
-			this.rootNode.$children.on('scroll', this.onTreeScroll);
-
-			this.nodeMap[this.model.id] = this.rootNode;
 
 			this.$element
 				.keyup(this.onKeyDown)
 				.keyup(this.onKeyUp);
 			this.$container.on('click', this.onTreeClick);
 
-			this.selectedNode = this.rootNode;
-			this.selectedNode.selected = true;
+			this.setupToolbar();
 
-			this.updateToolbar();
-		}
-
-		public getContainer()
-		{
-			return this.$element;
-		}
-
-		private setupToolbar()
-		{
-			this.$toolbar = this.$element.find('#timeline-tree-toolbar');
-			this.$toolbar
-				.on('click', 'i', this.onToolbarButtonClick)
-				.on('mousewheel', this.onToolbarMouseWheel);
-			this.$toolbar.find('.fa-plus').parent()
-				.on('mouseenter', this.onToolbarAddHover)
-				.on('mouseleave', this.onToolbarAddLeave);
-			this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
-
-			this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
-			this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
-			this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
-			this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
-
-			tippy(this.$toolbar.find('i').toArray());
-
-			this.$toolbarAddMenu.hide();
-		}
-
-		private updateToolbar()
-		{
-			const isRoot = this.selectedNode == this.rootNode;
-			const allowChildren = this.selectedNode.node.canHaveChildren;
-			this.$toolbarAddBtn.toggleClass('disabled', false);
-			this.$toolbarAddBoneBtn.toggleClass('disabled', false);
-			this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
-			this.$toolbarAddDeleteBtn.toggleClass('disabled', isRoot);
-
-			// if(!allowChildren)
-			// {
-			// 	this.showAddMenu(false);
-			// }
-		}
-		
-		private showAddMenu(show:boolean)
-		{
-			// show = show && this.selectedNode.node.canHaveChildren;
-			this.$toolbarAddMenu.stop(true).animate({width:show  ? 'show' : 'hide'}, 250);
-		}
-
-		private updateHighlight(target:Node)
-		{
-			var targetNode = target ? this.nodeMap[target.id] : this.rootNode;
-			if(targetNode == this.rootNode)
-			{
-				target = null;
-				targetNode = null;
-			}
-			if(targetNode == this.highlightedNode) return;
-
-			if(this.highlightedNode) this.highlightedNode.highlighted = false;
-			if((this.highlightedNode = targetNode)) this.highlightedNode.highlighted = true;
-		}
-
-		private updateSelection(target:Node)
-		{
-			const targetNode = target ? this.nodeMap[target.id] : this.rootNode;
-			if(targetNode == this.selectedNode) return;
-
-			if(this.selectedNode) this.selectedNode.selected = false;
-			if((this.selectedNode = targetNode)) this.selectedNode.selected = true;
-
-			this.scrollTo(this.selectedNode);
-
-			this.updateToolbar();
-		}
-
-		private scrollTo(treeNode:TreeNode)
-		{
-			if(!treeNode) return;
-
-			treeNode.$element.scrollintoview({duration: 50});
+			this.setModel(model);
 		}
 
 		public focus()
 		{
 			this.$element.focus();
+		}
+
+		public getContainer()
+		{
+			return this.$element;
 		}
 
 		public initiateRenameForNode(node:Node)
@@ -170,22 +82,42 @@ namespace app.timeline.tree
 			}
 		}
 
-		public waitForDrag(node:TreeNode, event)
+		public reset()
 		{
-			if(node == this.rootNode) return;
+			this.rootNode.$children.scrollLeft(0);
+			this.rootNode.$children.scrollTop(0);
 
-			const offset = node.$element.offset();
+			this.updateSelection(null);
 
-			this.dragNode = node;
-			this.dragWait = true;
-			this.dragX = (event.clientX - offset.left) - node.$element.width();
-			this.dragY = (event.clientY - offset.top) - node.$element.height() / 2;
-			this.dragInitX = event.pageX;
-			this.dragInitY = event.pageY;
+			if(this.highlightedNode)
+			{
+				this.highlightedNode.highlighted = false;
+				this.highlightedNode = null;
+			}
+		}
 
-			app.$window
-				.on('mousemove', this.onDragWindowMouseMove)
-				.on('mouseup', this.onDragWindowMouseUp);
+		public setModel(model:Model)
+		{
+			this.model = model;
+			model.structureChange.on(this.onModelStructureChange);
+			model.selectionChange.on(this.onModelSelectionChange);
+
+			this.$container.empty();
+			this.$container.append((this.rootNode = <RootTreeNode> this.fromNode(model)).$element);
+			this.rootNode.$children.on('scroll', this.onTreeScroll);
+			this.selectedNode = this.rootNode;
+			this.selectedNode.selected = true;
+
+			this.nodeMap = {};
+			this.nodeMap[this.model.id] = this.rootNode;
+
+			this.updateToolbar();
+		}
+
+		public setScroll(scrollY)
+		{
+			this.rootNode.$children.scrollTop(scrollY);
+			this.onTreeScroll(null);
 		}
 
 		public startDrag()
@@ -242,11 +174,25 @@ namespace app.timeline.tree
 			this.onTreeScroll(event);
 		}
 
-		public setScroll(scrollY)
+		public waitForDrag(node:TreeNode, event)
 		{
-			this.rootNode.$children.scrollTop(scrollY);
-			this.onTreeScroll(null);
+			if(node == this.rootNode) return;
+
+			const offset = node.$element.offset();
+
+			this.dragNode = node;
+			this.dragWait = true;
+			this.dragX = (event.clientX - offset.left) - node.$element.width();
+			this.dragY = (event.clientY - offset.top) - node.$element.height() / 2;
+			this.dragInitX = event.pageX;
+			this.dragInitY = event.pageY;
+
+			app.$window
+				.on('mousemove', this.onDragWindowMouseMove)
+				.on('mouseup', this.onDragWindowMouseUp);
 		}
+
+		//
 
 		private fromNode(node:Node):TreeNode
 		{
@@ -263,6 +209,82 @@ namespace app.timeline.tree
 			return new TreeNode(this, node.type, node);
 		}
 
+		private scrollTo(treeNode:TreeNode)
+		{
+			if(!treeNode) return;
+
+			treeNode.$element.scrollintoview({duration: 50});
+		}
+
+		private setupToolbar()
+		{
+			this.$toolbar = this.$element.find('#timeline-tree-toolbar');
+			this.$toolbar
+				.on('click', 'i', this.onToolbarButtonClick)
+				.on('mousewheel', this.onToolbarMouseWheel);
+			this.$toolbar.find('.fa-plus').parent()
+				.on('mouseenter', this.onToolbarAddHover)
+				.on('mouseleave', this.onToolbarAddLeave);
+			this.$toolbarAddMenu = this.$toolbar.find('.add-menu');
+
+			this.$toolbarAddBtn = this.$toolbar.find('i.btn-add');
+			this.$toolbarAddBoneBtn = this.$toolbar.find('i.btn-add-bone');
+			this.$toolbarAddSpriteBtn = this.$toolbar.find('i.btn-add-sprite');
+			this.$toolbarAddDeleteBtn = this.$toolbar.find('i.btn-delete');
+
+			tippy(this.$toolbar.find('i').toArray());
+
+			this.$toolbarAddMenu.hide();
+		}
+
+		private showAddMenu(show:boolean)
+		{
+			// show = show && this.selectedNode.node.canHaveChildren;
+			this.$toolbarAddMenu.stop(true).animate({width:show  ? 'show' : 'hide'}, 250);
+		}
+
+		private updateToolbar()
+		{
+			const isRoot = this.selectedNode == this.rootNode;
+			const allowChildren = this.selectedNode.node.canHaveChildren;
+			this.$toolbarAddBtn.toggleClass('disabled', false);
+			this.$toolbarAddBoneBtn.toggleClass('disabled', false);
+			this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
+			this.$toolbarAddDeleteBtn.toggleClass('disabled', isRoot);
+
+			// if(!allowChildren)
+			// {
+			// 	this.showAddMenu(false);
+			// }
+		}
+
+		private updateHighlight(target:Node)
+		{
+			var targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+			if(targetNode == this.rootNode)
+			{
+				target = null;
+				targetNode = null;
+			}
+			if(targetNode == this.highlightedNode) return;
+
+			if(this.highlightedNode) this.highlightedNode.highlighted = false;
+			if((this.highlightedNode = targetNode)) this.highlightedNode.highlighted = true;
+		}
+
+		private updateSelection(target:Node)
+		{
+			const targetNode = target ? this.nodeMap[target.id] : this.rootNode;
+			if(targetNode == this.selectedNode) return;
+
+			if(this.selectedNode) this.selectedNode.selected = false;
+			if((this.selectedNode = targetNode)) this.selectedNode.selected = true;
+
+			this.scrollTo(this.selectedNode);
+
+			this.updateToolbar();
+		}
+
 		/*
 		 * Events
 		 */
@@ -271,11 +293,6 @@ namespace app.timeline.tree
 		{
 			this.treeNodeUpdate.dispatch(node, new Event('nodeCollapse', null));
 		}
-
-		private onTreeScroll = (event) =>
-		{
-			this.scrollChange.dispatch(this, new ScrollEvent(this.rootNode.$children.scrollLeft(), this.rootNode.$children.scrollTop(), event))
-		};
 
 		private onDragWindowMouseMove = (event) =>
 		{
@@ -323,84 +340,6 @@ namespace app.timeline.tree
 			app.$window
 				.off('mousemove', this.onDragWindowMouseMove)
 				.off('mouseup', this.onDragWindowMouseUp)
-		};
-
-		private onTreeClick = (event) =>
-		{
-			if(event.target == this.$container[0])
-			{
-				this.model.setSelected(true);
-			}
-		};
-
-		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
-		{
-			if(event.type == 'highlight')
-			{
-				// this.updateHighlight(event.target);
-			}
-
-			else if(event.type == 'selection')
-			{
-				this.updateSelection(event.target);
-			}
-		};
-
-		private onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
-		{
-			const type = event.type;
-			const parent = event.parent;
-			const target = event.target;
-			const other = event.other;
-			const parentTree:ContainerTreeNode = (parent ? this.nodeMap[parent.id] : null) as ContainerTreeNode;
-			const targetTree:TreeNode = target ? this.nodeMap[target.id] : null;
-
-			if(type == 'clear')
-			{
-				parentTree.clear();
-			}
-			else if(type == 'addChild')
-			{
-				// Reparent an existing node
-				if(targetTree)
-				{
-					if(other)
-					{
-						parentTree.addChildBefore(targetTree, this.nodeMap[other.id]);
-					}
-					else
-					{
-						parentTree.addChild(targetTree);
-					}
-				}
-				// Add a new node
-				else
-				{
-					var newTree = this.nodeMap[target.id] = this.fromNode(target);
-
-					if(other)
-					{
-						parentTree.addChildBefore(newTree, this.nodeMap[other.id]);
-					}
-					else
-					{
-						parentTree.addChild(newTree);
-					}
-				}
-			}
-			else if(type == 'removeChild')
-			{
-				let node:TreeNode = this.nodeMap[target.id];
-
-				if(targetTree == this.selectedNode)
-				{
-					// Select the sibling or parent node
-					(event.parent.getChildAt(event.index) || event.parent).setSelected(true);
-				}
-
-				parentTree.removeChild(node);
-				delete this.nodeMap[target.id];
-			}
 		};
 
 		private onKeyDown = (event) =>
@@ -451,6 +390,90 @@ namespace app.timeline.tree
 			}
 		};
 
+		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
+		{
+			if(event.type == 'highlight')
+			{
+				// this.updateHighlight(event.target);
+			}
+
+			else if(event.type == 'selection')
+			{
+				this.updateSelection(event.target);
+			}
+		};
+
+		private onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
+		{
+			const type = event.type;
+			const parent = event.parent;
+			const target = event.target;
+			const other = event.other;
+			const parentTree:ContainerTreeNode = (parent ? this.nodeMap[parent.id] : null) as ContainerTreeNode;
+			const targetTree:TreeNode = target ? this.nodeMap[target.id] : null;
+
+			if(type == 'clear')
+			{
+				this.reset();
+				parentTree.clear();
+			}
+			else if(type == 'addChild')
+			{
+				// Reparent an existing node
+				if(targetTree)
+				{
+					if(other)
+					{
+						parentTree.addChildBefore(targetTree, this.nodeMap[other.id]);
+					}
+					else
+					{
+						parentTree.addChild(targetTree);
+					}
+				}
+				// Add a new node
+				else
+				{
+					var newTree = this.nodeMap[target.id] = this.fromNode(target);
+
+					if(other)
+					{
+						parentTree.addChildBefore(newTree, this.nodeMap[other.id]);
+					}
+					else
+					{
+						parentTree.addChild(newTree);
+					}
+				}
+			}
+			else if(type == 'removeChild')
+			{
+				let node:TreeNode = this.nodeMap[target.id];
+
+				if(targetTree == this.selectedNode)
+				{
+					// Select the sibling or parent node
+					(event.parent.getChildAt(event.index) || event.parent).setSelected(true);
+				}
+
+				parentTree.removeChild(node);
+				delete this.nodeMap[target.id];
+			}
+		};
+
+		private onTreeClick = (event) =>
+		{
+			if(event.target == this.$container[0])
+			{
+				this.model.setSelected(true);
+			}
+		};
+
+		private onTreeScroll = (event) =>
+		{
+			this.scrollChange.dispatch(this, new ScrollEvent(this.rootNode.$children.scrollLeft(), this.rootNode.$children.scrollTop(), event))
+		};
+
 		/*
 		 * Toolbar Events
 		 */
@@ -486,7 +509,10 @@ namespace app.timeline.tree
 			}
 			else if(type == 'Delete')
 			{
-				this.selectedNode.deleteNode();
+				if(this.selectedNode != this.rootNode)
+				{
+					this.selectedNode.deleteNode();
+				}
 			}
 		};
 

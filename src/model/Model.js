@@ -60,15 +60,12 @@ var app;
                 _this.activeAnimation = _this.bindPose;
                 return _this;
             }
+            //
+            Model.prototype.animateStep = function (deltaTime) {
+                this.activeAnimation.animateStep(deltaTime);
+            };
             Model.prototype.draw = function (ctx, worldScale) {
                 console.error('Use drawModel instead');
-            };
-            Model.prototype.prepareChildren = function () {
-                this.drawList.clear();
-                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
-                    var child = _a[_i];
-                    child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
-                }
             };
             Model.prototype.drawModel = function (ctx, worldScale, viewport) {
                 this.drawList.clear();
@@ -110,6 +107,63 @@ var app;
                 }
                 ctx.restore();
             };
+            Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {
+                    return true;
+                }
+                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
+            };
+            Model.prototype.prepareChildren = function () {
+                this.drawList.clear();
+                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                    var child = _a[_i];
+                    child.prepareForDrawing(0, 0, 1, 1, 1, 0, null, null);
+                }
+            };
+            //
+            Model.prototype.getActiveAnimation = function () {
+                return this.activeAnimation;
+            };
+            Model.prototype.setActiveAnimation = function (name) {
+                if (this._mode == EditMode.PLAYBACK)
+                    return;
+                var anim = name == 'None' ? this.bindPose : this.animations[name];
+                if (anim && anim != this.activeAnimation) {
+                    if (this.activeAnimation) {
+                        this.activeAnimation.active = false;
+                    }
+                    anim.active = true;
+                    this.activeAnimation = anim;
+                    this.animationChange.dispatch(anim, new Event('setAnimation'));
+                    this.activeAnimation.updateNodes();
+                    this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
+                }
+            };
+            Model.prototype.setAnimationListeners = function (callback) {
+                this.bindPose.change.on(callback);
+                for (var animName in this.animations) {
+                    this.animations[animName].change.on(callback);
+                }
+            };
+            Model.prototype.getAnimationList = function () {
+                if (this.animationList)
+                    return this.animationList;
+                var animNames = [];
+                for (var animName in this.animations) {
+                    animNames.push(animName);
+                }
+                animNames.sort(Utils.naturalCompare);
+                var anims = [this.bindPose];
+                for (var _i = 0, animNames_1 = animNames; _i < animNames_1.length; _i++) {
+                    var animName = animNames_1[_i];
+                    anims.push(this.animations[animName]);
+                }
+                this.animationList = anims;
+                return anims;
+            };
+            Model.prototype.getBindPose = function () {
+                return this.bindPose;
+            };
             Model.prototype.setHighlighted = function (highlighted) {
                 if (highlighted) {
                     this.setHighlightedNode(null);
@@ -131,6 +185,9 @@ var app;
                     this.setSelectedNode(null);
                 }
             };
+            Model.prototype.getSelectedNode = function () {
+                return this.selectedNode;
+            };
             Model.prototype.setSelectedNode = function (node) {
                 if (this.selectedNode == node)
                     return;
@@ -142,31 +199,7 @@ var app;
                 }
                 this.selectionChange.dispatch(this, new SelectionEvent('selection', node));
             };
-            Model.prototype.getSelectedNode = function () {
-                return this.selectedNode;
-            };
-            Model.prototype.getActiveAnimation = function () {
-                return this.activeAnimation;
-            };
-            Model.prototype.getBindPose = function () {
-                return this.bindPose;
-            };
-            Model.prototype.getAnimationList = function () {
-                if (this.animationList)
-                    return this.animationList;
-                var animNames = [];
-                for (var animName in this.animations) {
-                    animNames.push(animName);
-                }
-                animNames.sort(Utils.naturalCompare);
-                var anims = [this.bindPose];
-                for (var _i = 0, animNames_1 = animNames; _i < animNames_1.length; _i++) {
-                    var animName = animNames_1[_i];
-                    anims.push(this.animations[animName]);
-                }
-                this.animationList = anims;
-                return anims;
-            };
+            //
             Model.prototype.clear = function () {
                 this.selectedNode = null;
                 this.highlightedNode = null;
@@ -190,15 +223,6 @@ var app;
                 }
                 return data;
             };
-            Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {
-                    return true;
-                }
-                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
-            };
-            Model.prototype.animateStep = function (deltaTime) {
-                this.activeAnimation.animateStep(deltaTime);
-            };
             Model.prototype.addNewAnimation = function (name, select) {
                 if (select === void 0) { select = false; }
                 if (name == null || name == 'None') {
@@ -216,21 +240,6 @@ var app;
                 this.animationChange.dispatch(anim, new Event('newAnimation'));
                 if (select) {
                     this.setActiveAnimation(newName);
-                }
-            };
-            Model.prototype.setActiveAnimation = function (name) {
-                if (this._mode == EditMode.PLAYBACK)
-                    return;
-                var anim = name == 'None' ? this.bindPose : this.animations[name];
-                if (anim && anim != this.activeAnimation) {
-                    if (this.activeAnimation) {
-                        this.activeAnimation.active = false;
-                    }
-                    anim.active = true;
-                    this.activeAnimation = anim;
-                    this.animationChange.dispatch(anim, new Event('setAnimation'));
-                    this.activeAnimation.updateNodes();
-                    this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
                 }
             };
             Model.prototype.deleteAnimation = function (anim) {
@@ -272,6 +281,7 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            //
             Model.prototype.setMode = function (value) {
                 if (this._mode == value)
                     return;

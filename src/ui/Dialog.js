@@ -5,6 +5,8 @@ var app;
         var Dialog = (function () {
             function Dialog(title, options) {
                 var _this = this;
+                this.title = '';
+                this.icon = '';
                 this.isOpen = false;
                 this.buttonData = {};
                 this.confirmButton = null;
@@ -29,7 +31,9 @@ var app;
                         _this.cancel();
                     }
                 };
+                this.title = title;
                 var defaults = {
+                    name: 'Dlg' + (++Dialog.nextId),
                     overlay: true,
                     overlayClass: 'clear',
                     closeButton: true,
@@ -40,6 +44,7 @@ var app;
                 };
                 Object['assign'](defaults, options || {});
                 options = defaults;
+                this.name = options.name;
                 this.$dlg = $("<div class=\"dialog " + options.type + "\">\n\t\t\t\t\t<div class=\"content-pane\">\n\t\t\t\t\t\n\t\t\t\t\t</div>\n\t\t\t\t</div>");
                 if (options.buttons) {
                     var $buttonBar = $("<div class=\"button-bar\"></div>");
@@ -80,12 +85,11 @@ var app;
                     else if (options.type == 'warning' || options.type == 'error')
                         options.icon = 'warning';
                 }
-                var icon = '';
                 if (options.icon) {
-                    icon = "<i class=\"fa fa-" + options.icon + " fa-2x\"></i> ";
+                    this.icon = "<i class=\"fa fa-" + options.icon + " fa-2x\"></i> ";
                 }
                 this.dlg = new jBox('Modal', {
-                    title: icon + title,
+                    title: this.icon + this.title,
                     addClass: options.type,
                     overlay: options.overlay,
                     overlayClass: options.overlayClass,
@@ -107,14 +111,14 @@ var app;
                 this.isOpen = false;
                 this.dlg.close();
                 if (this.confirmCallback) {
-                    this.confirmCallback(value || this.getConfirmValue());
+                    this.confirmCallback(this.name, value != undefined ? value : this.getConfirmValue());
                 }
             };
             Dialog.prototype.cancel = function (value) {
                 this.isOpen = false;
                 this.dlg.close();
                 if (this.cancelCallback) {
-                    this.cancelCallback(value || this.getCancelValue());
+                    this.cancelCallback(this.name, value != undefined ? value : this.getCancelValue());
                 }
             };
             Dialog.prototype.setContent = function (content) {
@@ -122,6 +126,21 @@ var app;
             };
             Dialog.prototype.getContent = function () {
                 return this.$contentPane;
+            };
+            Dialog.prototype.setTitle = function (title) {
+                if (title == this.title)
+                    return;
+                this.title = title;
+                this.dlg.setTitle(this.icon + this.title);
+            };
+            Dialog.prototype.setConfirmCallback = function (callback) {
+                this.confirmCallback = callback;
+            };
+            Dialog.prototype.setCancelCallback = function (callback) {
+                this.cancelCallback = callback;
+            };
+            Dialog.prototype.setName = function (name) {
+                this.name = name;
             };
             Dialog.prototype.getConfirmValue = function () {
                 return null;
@@ -131,6 +150,7 @@ var app;
             };
             return Dialog;
         }());
+        Dialog.nextId = 0;
         ui.Dialog = Dialog;
     })(ui = app.ui || (app.ui = {}));
 })(app || (app = {}));
