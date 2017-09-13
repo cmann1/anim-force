@@ -1,0 +1,43 @@
+@import 'vars';
+
+#project-manager{
+	width: 600px;
+	height: 100%;
+	overflow: auto;
+	outline: none;
+
+	.loading-message
+	{
+
+	}
+
+	.item-list{
+
+		&.loading{
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 50px;
+		}
+	}
+
+	.project-item{
+		padding: 9px;
+		display: flex;
+		align-items: center;
+
+		&.selected, &.selected:hover{
+			background: $selected-bg;
+			color: $selected-color;
+
+			i.fa.btn.fa:hover {
+				/* box-shadow: 0 0 4px rgba(0,0,0,0.5); */
+				background: #a23333;
+			}
+		}
+
+		&:hover{
+			background: $highlighted-soft-bg;
+		}
+	}
+}

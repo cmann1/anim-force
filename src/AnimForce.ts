@@ -3,8 +3,9 @@
 // ---------------------------------------------------------------
 // TODO: Saving/Loading models
 // TODO: - Manage saved models
+// TODO: - Enter to open selected project
 // TODO: - Option to auto open last project
-// TODO: - Delete, rename, export to file, import from file, ?clear
+// TODO: - rename, export to file, import from file, ?clear
 // TODO: Export to AngelScript
 // TODO: - Multiple animations
 // TODO: Allow sprite frames to be animated
@@ -20,6 +21,7 @@
  // ---------------------------------------------------------------
 
 // TODO: Ghosts
+// TODO: Add icon to sprite selector window
 // TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
 // TODO: Keyboard shortcuts for changing layer and sublayer
 // TODO: Export to sprite_group
@@ -82,12 +84,12 @@ namespace app
 			window.addEventListener('resize', this.onWindowResize);
 		}
 
-		public static notice(content:string, colour:string='white')
+		public static notice(content:string, colour:string='white', time=3500)
 		{
 			new jBox('Notice', {
 				content: content,
 				color: colour,
-				autoClose: 1500,
+				autoClose: time,
 				attributes: {x: 'left', y: 'top'}
 			});
 		}

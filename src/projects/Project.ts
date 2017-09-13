@@ -30,7 +30,8 @@ namespace app.projects
 			var data = {
 				name: this.name,
 				models: [],
-				activeModel: -1
+				activeModel: -1,
+				date: new Date().toJSON()
 			};
 
 			if(this.activeModel)
@@ -44,6 +45,23 @@ namespace app.projects
 			}
 
 			return data;
+		}
+
+		public static load(data:LoadData):Project
+		{
+			var project:Project = new Project(data.get('name'));
+
+			for(var modelData of data.models)
+			{
+				project.addModel(Model.load(data.asLoadData(modelData)));
+			}
+
+			if(!project.models.length)
+			{
+				project.addModel(new Model());
+			}
+
+			return project;
 		}
 
 	}

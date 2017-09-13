@@ -150,7 +150,7 @@ var app;
                     position: { x: 'right', y: 'bottom' },
                     offset: { y: 10 },
                     outside: 'y',
-                    closeButton: false,
+                    closeButton: true,
                     closeOnEsc: true,
                     closeOnClick: 'body',
                     content: this.$animEditDlg,

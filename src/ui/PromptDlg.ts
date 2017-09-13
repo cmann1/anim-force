@@ -18,6 +18,8 @@ namespace app.ui
 
 		public show(value:string=null)
 		{
+			this.isOpen = true;
+
 			this.$input.val(value === null ? '' : value);
 			this.dlg.open();
 			this.$input.focus();

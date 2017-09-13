@@ -181,6 +181,10 @@ var app;
                 data.spriteName = this.asset ? this.asset.spriteName : '';
                 return data;
             };
+            Sprite.load = function (data) {
+                console.log('Sprite.load', data); // TODO: REMOVE
+                return new Sprite(null);
+            };
             return Sprite;
         }(model.Node));
         model.Sprite = Sprite;

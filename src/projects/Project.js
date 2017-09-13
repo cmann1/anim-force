@@ -2,6 +2,7 @@ var app;
 (function (app) {
     var projects;
     (function (projects) {
+        var Model = app.model.Model;
         var Project = (function () {
             function Project(name) {
                 this.activeModel = null;
@@ -18,7 +19,8 @@ var app;
                 var data = {
                     name: this.name,
                     models: [],
-                    activeModel: -1
+                    activeModel: -1,
+                    date: new Date().toJSON()
                 };
                 if (this.activeModel) {
                     data.activeModel = this.models.indexOf(this.activeModel);
@@ -28,6 +30,17 @@ var app;
                     data.models.push(model.save());
                 }
                 return data;
+            };
+            Project.load = function (data) {
+                var project = new Project(data.get('name'));
+                for (var _i = 0, _a = data.models; _i < _a.length; _i++) {
+                    var modelData = _a[_i];
+                    project.addModel(Model.load(data.asLoadData(modelData)));
+                }
+                if (!project.models.length) {
+                    project.addModel(new Model());
+                }
+                return project;
             };
             return Project;
         }());

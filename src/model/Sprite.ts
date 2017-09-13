@@ -5,6 +5,7 @@ namespace app.model
 	import SpriteAsset = app.assets.SpriteAsset;
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import LoadData = app.projects.LoadData;
 
 	export class Sprite extends Node
 	{
@@ -247,6 +248,13 @@ namespace app.model
 			data.spriteName = this.asset ? this.asset.spriteName : '';
 
 			return data;
+		}
+
+		public static load(data:LoadData):Sprite
+		{
+			console.log('Sprite.load', data); // TODO: REMOVE
+
+			return new Sprite(null);
 		}
 
 	}

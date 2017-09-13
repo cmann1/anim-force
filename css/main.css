@@ -11,22 +11,22 @@
   overflow: visible;
   display: inline-block;
   padding: 0.5em 1em;
-  border: 1px solid #d4d4d4;
+  border: 1px solid #D4D4D4;
   margin: 0;
   text-decoration: none;
   text-align: center;
-  text-shadow: 1px 1px 0 #fff;
+  text-shadow: 1px 1px 0 #FFF;
   font: 11px/normal sans-serif;
   color: #333;
   white-space: nowrap;
   cursor: pointer;
   outline: none;
-  background-color: #ececec;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f4f4f4), to(#ececec));
-  background-image: -moz-linear-gradient(#f4f4f4, #ececec);
-  background-image: -ms-linear-gradient(#f4f4f4, #ececec);
-  background-image: -o-linear-gradient(#f4f4f4, #ececec);
-  background-image: linear-gradient(#f4f4f4, #ececec);
+  background-color: #ECECEC;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#F4F4F4), to(#ECECEC));
+  background-image: -moz-linear-gradient(#F4F4F4, #ECECEC);
+  background-image: -ms-linear-gradient(#F4F4F4, #ECECEC);
+  background-image: -o-linear-gradient(#F4F4F4, #ECECEC);
+  background-image: linear-gradient(#F4F4F4, #ECECEC);
   -moz-background-clip: padding;
   /* for Firefox 3.6 */
   background-clip: padding-box;
@@ -39,27 +39,27 @@
 .button:focus,
 .button:active,
 .button.active {
-  border-color: #3072b3;
-  border-bottom-color: #2a65a0;
+  border-color: #3072B3;
+  border-bottom-color: #2A65A0;
   text-decoration: none;
   text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
-  color: #fff;
-  background-color: #3c8dde;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#599bdc), to(#3072b3));
-  background-image: -moz-linear-gradient(#599bdc, #3072b3);
-  background-image: -o-linear-gradient(#599bdc, #3072b3);
-  background-image: linear-gradient(#599bdc, #3072b3); }
+  color: #FFF;
+  background-color: #3C8DDE;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#599BDC), to(#3072B3));
+  background-image: -moz-linear-gradient(#599BDC, #3072B3);
+  background-image: -o-linear-gradient(#599BDC, #3072B3);
+  background-image: linear-gradient(#599BDC, #3072B3); }
 
 .button:active,
 .button.active {
-  border-color: #2a65a0;
-  border-bottom-color: #3884cd;
-  background-color: #3072b3;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#3072b3), to(#599bdc));
-  background-image: -moz-linear-gradient(#3072b3, #599bdc);
-  background-image: -ms-linear-gradient(#3072b3, #599bdc);
-  background-image: -o-linear-gradient(#3072b3, #599bdc);
-  background-image: linear-gradient(#3072b3, #599bdc); }
+  border-color: #2A65A0;
+  border-bottom-color: #3884CD;
+  background-color: #3072B3;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#3072B3), to(#599BDC));
+  background-image: -moz-linear-gradient(#3072B3, #599BDC);
+  background-image: -ms-linear-gradient(#3072B3, #599BDC);
+  background-image: -o-linear-gradient(#3072B3, #599BDC);
+  background-image: linear-gradient(#3072B3, #599BDC); }
 
 /* overrides extra padding on button elements in Firefox */
 .button::-moz-focus-inner {
@@ -82,26 +82,26 @@
 .button.danger:hover,
 .button.danger:focus,
 .button.danger:active {
-  border-color: #b53f3a;
-  border-bottom-color: #a0302a;
-  color: #fff;
-  background-color: #dc5f59;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#dc5f59), to(#b33630));
-  background-image: -moz-linear-gradient(#dc5f59, #b33630);
-  background-image: -ms-linear-gradient(#dc5f59, #b33630);
-  background-image: -o-linear-gradient(#dc5f59, #b33630);
-  background-image: linear-gradient(#dc5f59, #b33630); }
+  border-color: #B53F3A;
+  border-bottom-color: #A0302A;
+  color: #FFF;
+  background-color: #DC5F59;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#DC5F59), to(#B33630));
+  background-image: -moz-linear-gradient(#DC5F59, #B33630);
+  background-image: -ms-linear-gradient(#DC5F59, #B33630);
+  background-image: -o-linear-gradient(#DC5F59, #B33630);
+  background-image: linear-gradient(#DC5F59, #B33630); }
 
 .button.danger:active,
 .button.danger.active {
-  border-color: #a0302a;
-  border-bottom-color: #bf4843;
-  background-color: #b33630;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#b33630), to(#dc5f59));
-  background-image: -moz-linear-gradient(#b33630, #dc5f59);
-  background-image: -ms-linear-gradient(#b33630, #dc5f59);
-  background-image: -o-linear-gradient(#b33630, #dc5f59);
-  background-image: linear-gradient(#b33630, #dc5f59); }
+  border-color: #A0302A;
+  border-bottom-color: #BF4843;
+  background-color: #B33630;
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#B33630), to(#DC5F59));
+  background-image: -moz-linear-gradient(#B33630, #DC5F59);
+  background-image: -ms-linear-gradient(#B33630, #DC5F59);
+  background-image: -o-linear-gradient(#B33630, #DC5F59);
+  background-image: linear-gradient(#B33630, #DC5F59); }
 
 /* Pill button
    ========================================================================== */
@@ -111,7 +111,9 @@
 /* Disabled button
    ========================================================================== */
 .button.disable {
-  opacity: 0.5; }
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none; }
 
 /* Big button
    ========================================================================== */
@@ -162,18 +164,18 @@
 /* Minor group
    ========================================================================== */
 .button-group.minor-group .button {
-  border: 1px solid #d4d4d4;
+  border: 1px solid #D4D4D4;
   text-shadow: none;
   background-image: none;
-  background-color: #fff; }
+  background-color: #FFF; }
 
 .button-group.minor-group .button:hover,
 .button-group.minor-group .button:focus {
-  background-color: #599bdc; }
+  background-color: #599BDC; }
 
 .button-group.minor-group .button:active,
 .button-group.minor-group .button.active {
-  background-color: #3072b3; }
+  background-color: #3072B3; }
 
 .button-group.minor-group .button.icon:before {
   opacity: 0.8; }
@@ -450,6 +452,29 @@ canvas#timeline {
     width: 42px;
     height: 42px; }
 
+#project-manager {
+  width: 600px;
+  height: 100%;
+  overflow: auto;
+  outline: none; }
+  #project-manager .item-list.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px; }
+  #project-manager .project-item {
+    padding: 9px;
+    display: flex;
+    align-items: center; }
+    #project-manager .project-item.selected, #project-manager .project-item.selected:hover {
+      background: indianred;
+      color: #FFF; }
+      #project-manager .project-item.selected i.fa.btn.fa:hover, #project-manager .project-item.selected:hover i.fa.btn.fa:hover {
+        /* box-shadow: 0 0 4px rgba(0,0,0,0.5); */
+        background: #a23333; }
+    #project-manager .project-item:hover {
+      background: #ffe3e3; }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px; }
@@ -491,6 +516,10 @@ html, body {
   flex-grow: 1;
   min-width: 10px;
   min-height: 10px; }
+
+.flex-filler.wide {
+  min-width: 20px;
+  min-height: 20px; }
 
 .toolbar-separator {
   width: 1px;
@@ -566,6 +595,9 @@ body .jBox-Modal .jBox-title {
 .jBox-Modal.error .jBox-title i {
   color: #BF4843; }
 
+.jBox-wrapper.jBox-Tooltip {
+  pointer-events: none; }
+
 .jBox-Tooltip.jBox-TooltipDark .jBox-container,
 .jBox-Mouse.jBox-TooltipDark .jBox-container {
   color: #fff;
@@ -578,9 +610,28 @@ body .jBox-Modal .jBox-title {
 .jBox-Notice-white .jBox-container {
   background: #FAFAFA; }
 
+.jBox-wrapper.jbox-dialog-wrapper .jBox-content {
+  overflow: visible; }
+
+.dialog.button-layout {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%; }
+  .dialog.button-layout .content-pane {
+    flex-shrink: 1;
+    flex-grow: 1;
+    height: 100%;
+    overflow: hidden;
+    align-self: flex-start; }
+
 .dialog .button-bar {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #C1C1C1; }
+  border-top: 1px solid #C1C1C1;
+  display: flex;
+  flex-shrink: 0; }
+
+.dialog .button-bar button + button {
+  margin-left: 5px; }
 
 /*# sourceMappingURL=main.css.map */

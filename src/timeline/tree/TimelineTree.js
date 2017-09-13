@@ -213,6 +213,8 @@ var app;
                     }
                 };
                 TimelineTree.prototype.setModel = function (model) {
+                    // TODO: A model may already have children when set here.
+                    // TODO: Create the tree from existing model nodes
                     this.model = model;
                     model.structureChange.on(this.onModelStructureChange);
                     model.selectionChange.on(this.onModelSelectionChange);

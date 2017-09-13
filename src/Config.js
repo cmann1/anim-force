@@ -13,7 +13,7 @@ var app;
                     Config[data.id] = data.doc.value;
                 }
                 Config.isLoaded = true;
-            }).then(callback);
+            }).then(callback).catch(callback);
         };
         Config.set = function (name, value) {
             if (Config[name] == value)

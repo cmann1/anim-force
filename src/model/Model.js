@@ -11,17 +11,17 @@ var __extends = (this && this.__extends) || (function () {
 var app;
 (function (app) {
     var model;
-    (function (model) {
+    (function (model_1) {
         var EventDispatcher = app.events.EventDispatcher;
-        var StructureChangeEvent = model.events.StructureChangeEvent;
-        var SelectionEvent = model.events.SelectionEvent;
+        var StructureChangeEvent = model_1.events.StructureChangeEvent;
+        var SelectionEvent = model_1.events.SelectionEvent;
         var Event = app.events.Event;
         var EditMode;
         (function (EditMode) {
             EditMode[EditMode["EDIT"] = 0] = "EDIT";
             EditMode[EditMode["ANIMATE"] = 1] = "ANIMATE";
             EditMode[EditMode["PLAYBACK"] = 2] = "PLAYBACK";
-        })(EditMode = model.EditMode || (model.EditMode = {}));
+        })(EditMode = model_1.EditMode || (model_1.EditMode = {}));
         var Model = (function (_super) {
             __extends(Model, _super);
             function Model() {
@@ -29,7 +29,7 @@ var app;
                 _this.nextAnimationId = 0;
                 _this.selectedNode = null;
                 _this.highlightedNode = null;
-                _this.drawList = new model.DrawList();
+                _this.drawList = new model_1.DrawList();
                 _this._mode = EditMode.EDIT;
                 _this.bindPose = new app.anim.Animation('None', _this, true);
                 _this.animations = {};
@@ -281,6 +281,21 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            Model.load = function (data) {
+                var model = new Model();
+                console.log(data);
+                model.nextAnimationId = data.get('nextAnimationId');
+                model.id = data.get('id');
+                model.name = data.get('name');
+                model._mode = data.get('mode');
+                var children = data.get('children');
+                for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
+                    var childData = children_1[_i];
+                    // Node.load(data.asLoadData(childData));
+                    model.addChild(model_1.Node.load(data.asLoadData(childData)));
+                }
+                return model;
+            };
             //
             Model.prototype.setMode = function (value) {
                 if (this._mode == value)
@@ -298,8 +313,8 @@ var app;
                 this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
             };
             return Model;
-        }(model.ContainerNode));
-        model.Model = Model;
+        }(model_1.ContainerNode));
+        model_1.Model = Model;
     })(model = app.model || (app.model = {}));
 })(app || (app = {}));
 //# sourceMappingURL=Model.js.map

@@ -30,7 +30,7 @@ namespace app.viewport
 				position: {x: 'right', y: 'top'},
 				offset: {y: -10},
 				outside: 'y',
-				closeButton: false,
+				closeButton: true,
 				closeOnEsc: true,
 				closeOnClick: 'body',
 				content: this.$dlg,

@@ -31,6 +31,7 @@ var app;
             }
             PromptDlg.prototype.show = function (value) {
                 if (value === void 0) { value = null; }
+                this.isOpen = true;
                 this.$input.val(value === null ? '' : value);
                 this.dlg.open();
                 this.$input.focus();

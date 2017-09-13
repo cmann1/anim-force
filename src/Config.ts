@@ -67,7 +67,7 @@ namespace app
 					Config[data.id] = (<any> data.doc).value;
 				}
 				Config.isLoaded = true;
-			}).then(callback);
+			}).then(callback).catch(callback);
 		}
 
 		static set(name:string, value:any)

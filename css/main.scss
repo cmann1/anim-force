@@ -6,6 +6,7 @@
 @import 'timeline-tree';
 @import 'timeline';
 @import 'sprite-selector';
+@import 'project-manager';
 
 ::-webkit-scrollbar{
 	width: 8px;
@@ -56,6 +57,10 @@ html, body{
 	flex-grow: 1;
 	min-width: 10px;
 	min-height: 10px;
+}
+.flex-filler.wide{
+	min-width: 20px;
+	min-height: 20px;
 }
 .toolbar-separator{
 	width: 1px;
@@ -146,6 +151,10 @@ body .jBox-Modal .jBox-title {
 	color: #BF4843;
 }
 
+.jBox-wrapper.jBox-Tooltip
+{
+	pointer-events: none;
+}
 .jBox-Tooltip.jBox-TooltipDark .jBox-container,
 .jBox-Mouse.jBox-TooltipDark .jBox-container{
 	color: #fff;
@@ -161,8 +170,30 @@ body .jBox-Modal .jBox-title {
 	background: #FAFAFA;
 }
 
+.jBox-wrapper.jbox-dialog-wrapper .jBox-content{
+	overflow: visible;
+}
+.dialog.button-layout
+{
+	display: flex !important;
+	flex-direction: column;
+	height: 100%;
+
+	.content-pane{
+		flex-shrink: 1;
+		flex-grow: 1;
+		height: 100%;
+		overflow: hidden;
+		align-self: flex-start;
+	}
+}
 .dialog .button-bar{
 	margin-top: 10px;
 	padding-top: 10px;
 	border-top: 1px solid $border-colour;
+	display: flex;
+	flex-shrink: 0;
+}
+.dialog .button-bar button + button{
+	margin-left: 5px;
 }

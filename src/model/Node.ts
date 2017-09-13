@@ -6,6 +6,7 @@ namespace app.model
 	import PropertyChangeEvent = events.PropertyChangeEvent;
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import LoadData = app.projects.LoadData;
 
 	export class Node
 	{
@@ -219,6 +220,30 @@ namespace app.model
 				type: this.type,
 				name: this._name,
 			};
+		}
+
+		public static load(data:LoadData):Node
+		{
+			const type = data.get('type');
+			var node:Node;
+
+			if(type == 'bone')
+			{
+				node = Bone.load(data);
+			}
+			else if(type == 'sprite')
+			{
+				node = Sprite.load(data);
+			}
+			else
+			{
+				throw new Error('Unexpected node type');
+			}
+
+			node.id = data.get('id');
+			node.name = data.get('name');
+
+			return node;
 		}
 
 		/*

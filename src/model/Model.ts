@@ -8,6 +8,7 @@ namespace app.model
 	import Interaction = app.viewport.Interaction;
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
+	import LoadData = app.projects.LoadData;
 
 	export enum EditMode
 	{
@@ -362,6 +363,27 @@ namespace app.model
 			if(value == EditMode.EDIT) return;
 
 			this.setMode(value);
+		}
+
+		public static load(data:LoadData):Model
+		{
+			var model:Model = new Model();
+			console.log(data);
+
+			model.nextAnimationId = data.get('nextAnimationId');
+			model.id = data.get('id');
+			model.name = data.get('name');
+			model._mode = data.get('mode');
+
+			var children = data.get('children');
+
+			for(var childData of children)
+			{
+				// Node.load(data.asLoadData(childData));
+				model.addChild(Node.load(data.asLoadData(childData)));
+			}
+
+			return model;
 		}
 
 		//

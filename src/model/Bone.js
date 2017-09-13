@@ -111,6 +111,10 @@ var app;
                 data.length = this.length;
                 return data;
             };
+            Bone.load = function (data) {
+                console.log('Bone.load', data); // TODO: REMOVE
+                return new Bone();
+            };
             return Bone;
         }(model.ContainerNode));
         model.Bone = Bone;

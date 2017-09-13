@@ -20,6 +20,11 @@ declare module pouchDB {
         new (name: string, options: Options.IBase): IPouchDB;
 
         createIndex(index:any, callback?:() => void);
+        createIndex(requestDef:any, callback?:() => void);
+        find(requestDef:any, callback?:() => void);
+        explain(requestDef:any, callback?:() => void);
+        getIndexes(callback?:() => void);
+        deleteIndex(indexDef:any, callback?:() => void);
 
         /** Delete the database. Note that this has no impact on other replicated databases.*/
         destroy(): Promise<any>;

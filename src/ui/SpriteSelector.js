@@ -56,9 +56,9 @@ var app;
                     theme: 'TooltipDark'
                 });
                 this.modal = new jBox('Modal', {
-                    title: 'Sprite Selector',
+                    title: '<i class="fa fa-image fa-2x"></i> Sprite Selector',
                     content: this.$container,
-                    isolateScroll: true
+                    isolateScroll: false
                 });
             };
             return SpriteSelector;

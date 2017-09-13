@@ -3,6 +3,7 @@ namespace app.model
 
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import LoadData = app.projects.LoadData;
 
 	export class Bone extends ContainerNode
 	{
@@ -145,6 +146,13 @@ namespace app.model
 			data.length = this.length;
 
 			return data;
+		}
+
+		public static load(data:LoadData):Bone
+		{
+			console.log('Bone.load', data); // TODO: REMOVE
+
+			return new Bone();
 		}
 
 	}

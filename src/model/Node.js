@@ -154,6 +154,22 @@ var app;
                     name: this._name,
                 };
             };
+            Node.load = function (data) {
+                var type = data.get('type');
+                var node;
+                if (type == 'bone') {
+                    node = model_1.Bone.load(data);
+                }
+                else if (type == 'sprite') {
+                    node = model_1.Sprite.load(data);
+                }
+                else {
+                    throw new Error('Unexpected node type');
+                }
+                node.id = data.get('id');
+                node.name = data.get('name');
+                return node;
+            };
             /*
              * Events
              */
