@@ -21,8 +21,13 @@ namespace app.projects
 		return this[key];
 	}
 
-	function LoadData_asLoadData(obj:any):LoadData
+	function LoadData_asLoadData(obj:string|any):LoadData
 	{
+		if(typeof(obj) == 'string')
+		{
+			obj = this.get(obj);
+		}
+
 		obj.get = this.get;
 		obj.asLoadData = this.asLoadData;
 
@@ -145,7 +150,6 @@ namespace app.projects
 
 		private openProject(projectId)
 		{
-			// TODO: Implement opening
 			this.projectManagerDlg.close();
 
 			this.projectsDb.get(String(projectId)).then((doc:any) => {
@@ -162,6 +166,7 @@ namespace app.projects
 				{
 					App.notice('  > ' + error.toString(), 'red');
 					App.notice(`Error loading project data: <strong>${projectId}</strong>`, 'red');
+					console.error(error);
 				}
 			}).catch(() => {
 				App.notice(`ERROR: Unable to open project: <strong>${projectId}</strong>`, 'red');

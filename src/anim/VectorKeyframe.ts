@@ -1,6 +1,8 @@
 namespace app.anim
 {
 
+	import LoadData = app.projects.LoadData;
+
 	export class VectorKeyframe extends Keyframe
 	{
 
@@ -18,6 +20,14 @@ namespace app.anim
 			data.y = this.y;
 
 			return data;
+		}
+
+		public load(data:LoadData):VectorKeyframe
+		{
+			this.x = data.get('x');
+			this.y = data.get('y');
+
+			return this;
 		}
 
 	}

@@ -47,14 +47,7 @@ var app;
                 this.onModelAnimationChange = function (animation, event) {
                     var type = event.type;
                     if (type == 'updateAnimationList' || type == 'newAnimation') {
-                        _this.$animationSelect.empty();
-                        var animList = _this.model.getAnimationList();
-                        var i = 0;
-                        for (var _i = 0, animList_1 = animList; _i < animList_1.length; _i++) {
-                            var anim = animList_1[_i];
-                            _this.$animationSelect.append($("<option>" + (i > 0 ? anim.name : 'None') + "</option>"));
-                            i++;
-                        }
+                        _this.updateAnimationList();
                         if (type == 'newAnimation') {
                             animation.change.on(_this.onAnimationChange);
                         }
@@ -105,11 +98,7 @@ var app;
                     else if (type == 'delete-anim') {
                     }
                 };
-                this.model = model;
                 this.timeline = timeline;
-                this.model.animationChange.on(this.onModelAnimationChange);
-                this.animation = model.getActiveAnimation();
-                this.animation.change.on(this.onAnimationChange);
                 this.$toolbar = $toolbar;
                 this.$frameLabel = this.$toolbar.find('.frame-label .value');
                 this.$toolbarButtons = this.$toolbar.find('i');
@@ -161,9 +150,17 @@ var app;
                 this.$animEditName = this.$animEditDlg.find('#anim-prop-name');
                 this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
                 this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
+                this.setModel(model);
+            }
+            TimelineToolbar.prototype.setModel = function (model) {
+                this.model = model;
+                this.model.animationChange.on(this.onModelAnimationChange);
+                this.animation = model.getActiveAnimation();
+                model.setAnimationListeners(this.onAnimationChange);
                 this.updateFrameLabel();
                 this.updateToolbarButtons();
-            }
+                this.updateAnimationList();
+            };
             TimelineToolbar.prototype.updateFrameLabel = function () {
                 this.$frameLabel.text((this.animation.getPosition() + 1) + '/' + this.animation.getLength());
             };
@@ -200,6 +197,17 @@ var app;
                     this.animation.loop = this.$animEditLoop.prop('checked');
                 }
                 this.animEditDlg.close();
+            };
+            TimelineToolbar.prototype.updateAnimationList = function () {
+                this.$animationSelect.empty();
+                var animList = this.model.getAnimationList();
+                var i = 0;
+                for (var _i = 0, animList_1 = animList; _i < animList_1.length; _i++) {
+                    var anim = animList_1[_i];
+                    this.$animationSelect.append($("<option>" + (i > 0 ? anim.name : 'None') + "</option>"));
+                    i++;
+                }
+                this.$animationSelect.val(this.animation.name);
             };
             return TimelineToolbar;
         }());

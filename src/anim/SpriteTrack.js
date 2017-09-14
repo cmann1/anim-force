@@ -15,7 +15,7 @@ var app;
         var SpriteTrack = (function (_super) {
             __extends(SpriteTrack, _super);
             function SpriteTrack(animation, node) {
-                var _this = _super.call(this, animation, node) || this;
+                var _this = _super.call(this, 'sprite', animation, node) || this;
                 _this.addProperty('scaleX', anim.TrackPropertyType.NUMBER);
                 _this.addProperty('scaleY', anim.TrackPropertyType.NUMBER);
                 return _this;

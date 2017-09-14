@@ -13,6 +13,10 @@ var app;
                     frameIndex: this.frameIndex
                 };
             };
+            Keyframe.prototype.load = function (data) {
+                // frameIndex must be set when the keyframe is created.
+                throw new Error('Keyframe.load not implemented');
+            };
             return Keyframe;
         }());
         anim.Keyframe = Keyframe;

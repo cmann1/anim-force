@@ -28,6 +28,11 @@ namespace app.timeline.tree
 						.on('click', this.onToggleChildren)
 				);
 			}
+
+			for(var child of this.node.children)
+			{
+				this.addChild(tree.addTreeNode(TimelineTree.fromNode(tree, child)));
+			}
 		}
 
 		public setOpen(open:boolean=true)
@@ -89,7 +94,7 @@ namespace app.timeline.tree
 
 		public addNode(node:Node):Node
 		{
-			(<ContainerNode> this.node).addChild(node);
+			this.node.addChild(node);
 
 			return node;
 		}

@@ -26,6 +26,11 @@ var app;
                 data.y = this.y;
                 return data;
             };
+            VectorKeyframe.prototype.load = function (data) {
+                this.x = data.get('x');
+                this.y = data.get('y');
+                return this;
+            };
             return VectorKeyframe;
         }(anim.Keyframe));
         anim.VectorKeyframe = VectorKeyframe;

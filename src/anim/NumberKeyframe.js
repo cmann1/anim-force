@@ -25,6 +25,10 @@ var app;
                 data.value = this.value;
                 return data;
             };
+            NumberKeyframe.prototype.load = function (data) {
+                this.value = data.get('value');
+                return this;
+            };
             return NumberKeyframe;
         }(anim.Keyframe));
         anim.NumberKeyframe = NumberKeyframe;

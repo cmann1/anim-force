@@ -21,6 +21,7 @@ namespace app.model
 	{
 		private nextAnimationId:number = 0;
 
+		private nodeMap:any = {};
 		private selectedNode:Node = null;
 		private highlightedNode:Node = null;
 
@@ -148,9 +149,9 @@ namespace app.model
 		public setActiveAnimation(name:string)
 		{
 			if(this._mode == EditMode.PLAYBACK) return;
-			var anim = name == 'None' ? this.bindPose : this.animations[name];
+			var anim = (name == 'None' ? this.bindPose : this.animations[name]) || this.bindPose;
 
-			if(anim && anim != this.activeAnimation)
+			if(anim != this.activeAnimation)
 			{
 				if(this.activeAnimation)
 				{
@@ -262,6 +263,7 @@ namespace app.model
 
 		public clear():void
 		{
+			this.nodeMap = {};
 			this.selectedNode = null;
 			this.highlightedNode = null;
 
@@ -276,22 +278,19 @@ namespace app.model
 			this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
 		}
 
-		public save():any
+		public addNode(node:Node)
 		{
-			var data = super.save();
+			this.nodeMap[node.id] = node;
+		}
 
-			data.nextAnimationId = this.nextAnimationId;
-			data.mode = this.mode;
-			data.bindPose = this.bindPose.save();
-			data.animations = {};
-			data.activeAnimation = this.activeAnimation.name;
+		public removeNode(node:Node)
+		{
+			delete this.nodeMap[node.id];
+		}
 
-			for(var animName in this.animations)
-			{
-				data.animations[animName] = this.animations[animName].save();
-			}
-
-			return data;
+		public getNode(id):Node
+		{
+			return this.nodeMap[id];
 		}
 
 		public addNewAnimation(name:string, select:boolean=false)
@@ -365,25 +364,55 @@ namespace app.model
 			this.setMode(value);
 		}
 
-		public static load(data:LoadData):Model
+		//
+
+		public save():any
 		{
-			var model:Model = new Model();
-			console.log(data);
+			// TODO: Save and load selected node?
+			var data = super.save();
 
-			model.nextAnimationId = data.get('nextAnimationId');
-			model.id = data.get('id');
-			model.name = data.get('name');
-			model._mode = data.get('mode');
+			data.nextAnimationId = this.nextAnimationId;
+			data.nextNodeId = Node.nextId;
+			data.mode = this.mode;
+			data.bindPose = this.bindPose.save();
+			data.animations = {};
+			data.activeAnimation = this.activeAnimation.name;
 
-			var children = data.get('children');
-
-			for(var childData of children)
+			for(var animName in this.animations)
 			{
-				// Node.load(data.asLoadData(childData));
-				model.addChild(Node.load(data.asLoadData(childData)));
+				data.animations[animName] = this.animations[animName].save();
 			}
 
-			return model;
+			return data;
+		}
+
+		public load(data:LoadData):Model
+		{
+			// console.log(data);
+
+			super.load(data);
+
+			this.nextAnimationId = data.get('nextAnimationId');
+			Node.nextId = data.get('nextNodeId');
+			this._mode = data.get('mode');
+
+			this.bindPose.initTracksFromModel(false);
+			this.bindPose.load(data.asLoadData('bindPose'));
+
+			var animations = data.get('animations');
+
+			for(var animName in animations)
+			{
+				if(!animations.hasOwnProperty(animName)) continue;
+
+				var animData = data.asLoadData(animations[animName]);
+				animData = data.asLoadData(animData);
+				this.animations[animName] = new app.anim.Animation(null, this, false, false).load(animData);
+			}
+
+			this.setActiveAnimation(data.get('activeAnimation'));
+
+			return this;
 		}
 
 		//

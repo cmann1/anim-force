@@ -11,7 +11,7 @@ namespace app.anim
 
 		constructor(animation:Animation, node:Node)
 		{
-			super(animation, node);
+			super('sprite', animation, node);
 
 			this.addProperty('scaleX', TrackPropertyType.NUMBER);
 			this.addProperty('scaleY', TrackPropertyType.NUMBER);

@@ -186,6 +186,18 @@ var app;
                 }
                 return data;
             };
+            ContainerNode.prototype.load = function (data) {
+                _super.prototype.load.call(this, data);
+                if (!(this instanceof model_1.Model)) {
+                    this.collapsed = data.get('collapsed');
+                }
+                var children = data.get('children');
+                for (var _i = 0, children_1 = children; _i < children_1.length; _i++) {
+                    var childData = children_1[_i];
+                    this.addChild(model_1.Node.load(data.asLoadData(childData)), false);
+                }
+                return this;
+            };
             return ContainerNode;
         }(model_1.Node));
         model_1.ContainerNode = ContainerNode;

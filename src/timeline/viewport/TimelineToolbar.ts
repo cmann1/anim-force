@@ -35,12 +35,7 @@ namespace app.timeline
 
 		constructor(model:Model, timeline:TimelineViewport, $toolbar:JQuery)
 		{
-			this.model = model;
 			this.timeline = timeline;
-
-			this.model.animationChange.on(this.onModelAnimationChange);
-			this.animation = model.getActiveAnimation();
-			this.animation.change.on(this.onAnimationChange);
 
 			this.$toolbar = $toolbar;
 			this.$frameLabel = this.$toolbar.find('.frame-label .value');
@@ -101,8 +96,20 @@ namespace app.timeline
 			this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
 			this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
 
+			this.setModel(model);
+		}
+
+		public setModel(model:Model)
+		{
+			this.model = model;
+
+			this.model.animationChange.on(this.onModelAnimationChange);
+			this.animation = model.getActiveAnimation();
+			model.setAnimationListeners(this.onAnimationChange);
+
 			this.updateFrameLabel();
 			this.updateToolbarButtons();
+			this.updateAnimationList();
 		}
 
 		public updateFrameLabel()
@@ -156,6 +163,20 @@ namespace app.timeline
 			}
 
 			this.animEditDlg.close();
+		}
+
+		private updateAnimationList()
+		{
+			this.$animationSelect.empty();
+			var animList:Animation[] = this.model.getAnimationList();
+			var i = 0;
+			for(var anim of animList)
+			{
+				this.$animationSelect.append($(`<option>${i > 0 ? anim.name : 'None'}</option>`));
+				i++;
+			}
+
+			this.$animationSelect.val(this.animation.name);
 		}
 
 		/*
@@ -222,14 +243,7 @@ namespace app.timeline
 
 			if(type == 'updateAnimationList' || type == 'newAnimation')
 			{
-				this.$animationSelect.empty();
-				var animList:Animation[] = this.model.getAnimationList();
-				var i = 0;
-				for(var anim of animList)
-				{
-					this.$animationSelect.append($(`<option>${i > 0 ? anim.name : 'None'}</option>`));
-					i++;
-				}
+				this.updateAnimationList();
 
 				if(type == 'newAnimation')
 				{

@@ -34,7 +34,14 @@ var app;
                 this._name = name;
             }
             Node.prototype.setModel = function (model) {
-                this.model = model;
+                if (model == this.model)
+                    return;
+                if (this.model) {
+                    this.model.removeNode(this);
+                }
+                if ((this.model = model)) {
+                    this.model.addNode(this);
+                }
             };
             Node.prototype.setSelected = function (selected) {
                 this.model.setSelectedNode(selected ? this : null);
@@ -154,20 +161,23 @@ var app;
                     name: this._name,
                 };
             };
+            Node.prototype.load = function (data) {
+                this.id = data.get('id');
+                this.name = data.get('name');
+                return this;
+            };
             Node.load = function (data) {
                 var type = data.get('type');
                 var node;
                 if (type == 'bone') {
-                    node = model_1.Bone.load(data);
+                    node = new model_1.Bone().load(data);
                 }
                 else if (type == 'sprite') {
-                    node = model_1.Sprite.load(data);
+                    node = new model_1.Sprite(null).load(data);
                 }
                 else {
                     throw new Error('Unexpected node type');
                 }
-                node.id = data.get('id');
-                node.name = data.get('name');
                 return node;
             };
             /*

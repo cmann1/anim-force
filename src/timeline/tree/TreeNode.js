@@ -56,9 +56,6 @@ var app;
                         .on('mouseenter', this.onMouseEnter)
                         .on('mouseleave', this.onMouseExit);
                 }
-                TreeNode.prototype.deleteNode = function () {
-                    this.node.parent.removeChild(this.node);
-                };
                 Object.defineProperty(TreeNode.prototype, "highlighted", {
                     get: function () {
                         return this.$item.hasClass('highlighted');
@@ -79,6 +76,10 @@ var app;
                     enumerable: true,
                     configurable: true
                 });
+                //
+                TreeNode.prototype.deleteNode = function () {
+                    this.node.parent.removeChild(this.node);
+                };
                 TreeNode.prototype.startRename = function () {
                     if (TreeNode.renameNode == this)
                         return;

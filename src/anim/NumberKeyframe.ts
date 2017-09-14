@@ -1,6 +1,8 @@
 namespace app.anim
 {
 
+	import LoadData = app.projects.LoadData;
+
 	export class NumberKeyframe extends Keyframe
 	{
 
@@ -16,6 +18,13 @@ namespace app.anim
 			data.value = this.value;
 
 			return data;
+		}
+
+		public load(data:LoadData):NumberKeyframe
+		{
+			this.value = data.get('value');
+
+			return this;
 		}
 
 	}

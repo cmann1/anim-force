@@ -35,7 +35,7 @@ var app;
                 var project = new Project(data.get('name'));
                 for (var _i = 0, _a = data.models; _i < _a.length; _i++) {
                     var modelData = _a[_i];
-                    project.addModel(Model.load(data.asLoadData(modelData)));
+                    project.addModel(new Model().load(data.asLoadData(modelData)));
                 }
                 if (!project.models.length) {
                     project.addModel(new Model());

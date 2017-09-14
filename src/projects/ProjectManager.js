@@ -12,6 +12,9 @@ var app;
             return this[key];
         }
         function LoadData_asLoadData(obj) {
+            if (typeof (obj) == 'string') {
+                obj = this.get(obj);
+            }
             obj.get = this.get;
             obj.asLoadData = this.asLoadData;
             return obj;
@@ -230,7 +233,6 @@ var app;
             };
             ProjectManager.prototype.openProject = function (projectId) {
                 var _this = this;
-                // TODO: Implement opening
                 this.projectManagerDlg.close();
                 this.projectsDb.get(String(projectId)).then(function (doc) {
                     try {
@@ -243,6 +245,7 @@ var app;
                     catch (error) {
                         app.App.notice('  > ' + error.toString(), 'red');
                         app.App.notice("Error loading project data: <strong>" + projectId + "</strong>", 'red');
+                        console.error(error);
                     }
                 }).catch(function () {
                     app.App.notice("ERROR: Unable to open project: <strong>" + projectId + "</strong>", 'red');

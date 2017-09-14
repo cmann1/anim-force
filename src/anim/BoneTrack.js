@@ -15,7 +15,7 @@ var app;
         var BoneTrack = (function (_super) {
             __extends(BoneTrack, _super);
             function BoneTrack(animation, node) {
-                var _this = _super.call(this, animation, node) || this;
+                var _this = _super.call(this, 'bone', animation, node) || this;
                 // this.addProperty('length', TrackPropertyType.NUMBER);
                 _this.addProperty('stretchY', anim.TrackPropertyType.NUMBER);
                 return _this;

@@ -111,9 +111,10 @@ var app;
                 data.length = this.length;
                 return data;
             };
-            Bone.load = function (data) {
-                console.log('Bone.load', data); // TODO: REMOVE
-                return new Bone();
+            Bone.prototype.load = function (data) {
+                _super.prototype.load.call(this, data);
+                this.length = data.get('length');
+                return this;
             };
             return Bone;
         }(model.ContainerNode));

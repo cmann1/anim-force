@@ -12,7 +12,7 @@ namespace app.anim
 
 		constructor(animation:Animation, node:Node)
 		{
-			super(animation, node);
+			super('bone', animation, node);
 
 			// this.addProperty('length', TrackPropertyType.NUMBER);
 			this.addProperty('stretchY', TrackPropertyType.NUMBER);

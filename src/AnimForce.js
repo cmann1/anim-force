@@ -1,40 +1,39 @@
 /*
-// TODO: Ordered TODO:
-// ---------------------------------------------------------------
-// TODO: Saving/Loading models
-// TODO: - Manage saved models
-// TODO: - Enter to open selected project
-// TODO: - Option to auto open last project
-// TODO: - rename, export to file, import from file, ?clear
-// TODO: Export to AngelScript
-// TODO: - Multiple animations
-// TODO: Allow sprite frames to be animated
-// TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
-// TODO: Sprite Selector:
-// TODO: - Remember state, scroll position, etc.
-// TODO: - Improve all-round
-// TODO: - Lazy load/create groups
-// TODO: - Auto show when adding a sprite
-// TODO: - - Auto set sprite node name to sprite name
-// TODO: - Add cancel button
-// TODO: Animation events
- // ---------------------------------------------------------------
+ TODO: Ordered TODO:
+ ---------------------------------------------------------------
+ TODO: Saving/Loading models
+ TODO: - Option to auto open last project
+ TODO: - rename, export to file, import from file, ?clear
+ TODO: Export to AngelScript
+ TODO: - Multiple animations
+ TODO: Allow sprite frames to be animated
+ TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
+ TODO: Sprite Selector:
+ TODO: - Remember state, scroll position, etc.
+ TODO: - Improve all-round
+ TODO: - Lazy load/create groups
+ TODO: - Auto show when adding a sprite
+ TODO: - - Auto set sprite node name to sprite name
+ TODO: - Add cancel button
+ TODO: Animation events
+ TODO: Anchor nodes
+ ---------------------------------------------------------------
 
-// TODO: Ghosts
-// TODO: Add icon to sprite selector window
-// TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
-// TODO: Keyboard shortcuts for changing layer and sublayer
-// TODO: Export to sprite_group
-// TODO: - copy to clipboard when exporting
-// TODO: Timeline:
-// TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
-// TODO: - ???
-// TODO: Viewport:
-// TODO: - ???
-// TODO: Property panel:
-// TODO: - ????
-// TODO: Help?
-// TODO: - List of shortcut keys
+ TODO: Ghosts
+ TODO: Add icon to sprite selector window
+ TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
+ TODO: Keyboard shortcuts for changing layer and sublayer
+ TODO: Export to sprite_group
+ TODO: - copy to clipboard when exporting
+ TODO: Timeline:
+ TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
+ TODO: - ???
+ TODO: Viewport:
+ TODO: - ???
+ TODO: Property panel:
+ TODO: - ????
+ TODO: Help?
+ TODO: - List of shortcut keys
  */
 var app;
 (function (app) {

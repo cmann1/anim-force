@@ -96,9 +96,7 @@ var app;
                     _this.scrollY = event.scrollY;
                     _this.requiresUpdate = true;
                 };
-                _this.model = model;
                 _this.tree = tree;
-                _this.setModel(model);
                 tree.scrollChange.on(_this.onTreeScroll);
                 tree.treeNodeUpdate.on(_this.onTreeNodeUpdate);
                 _this.$container.on('resize', _this.onResize);
@@ -109,6 +107,7 @@ var app;
                 _this.headerGrad = _this.ctx.createLinearGradient(0, 0, 0, app.Config.nodeHeight);
                 _this.headerGrad.addColorStop(0, app.Config.node);
                 _this.headerGrad.addColorStop(1, app.Config.nodeBottom);
+                _this.setModel(model);
                 return _this;
             }
             //
@@ -322,15 +321,17 @@ var app;
                 this.requiresUpdate = true;
             };
             TimelineViewport.prototype.setModel = function (model) {
-                this.nodeList = [];
                 this.model = model;
                 this.mode = model.mode;
                 this.animation = model.getActiveAnimation();
+                this.updateNodeList();
                 model.setAnimationListeners(this.onAnimationChange);
                 model.animationChange.on(this.onModelAnimationChange);
                 model.modeChange.on(this.onModelModeChange);
                 model.selectionChange.on(this.onModelSelectionChange);
                 model.structureChange.on(this.onModelStructureChange);
+                this.currentFrame = this.animation.getPosition();
+                this.toolbar.setModel(model);
                 this.requiresUpdate = true;
             };
             TimelineViewport.prototype.togglePlayback = function () {

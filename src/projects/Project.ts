@@ -53,7 +53,7 @@ namespace app.projects
 
 			for(var modelData of data.models)
 			{
-				project.addModel(Model.load(data.asLoadData(modelData)));
+				project.addModel(new Model().load(data.asLoadData(modelData)));
 			}
 
 			if(!project.models.length)

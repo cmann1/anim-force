@@ -52,6 +52,11 @@ namespace app.model
 		{
 			this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
 			this.asset.setSpriteSource(this);
+
+			if(this._name == null)
+			{
+				this._name = this.asset.spriteName;
+			}
 		}
 
 		public setSrc(newSrc:HTMLImageElement)
@@ -250,11 +255,22 @@ namespace app.model
 			return data;
 		}
 
-		public static load(data:LoadData):Sprite
+		public load(data:LoadData):Sprite
 		{
-			console.log('Sprite.load', data); // TODO: REMOVE
+			super.load(data);
 
-			return new Sprite(null);
+			this.palette = data.get('palette');
+			this.frame = data.get('frame'); // TODO: Remove this if it becomes animatable
+
+			var spriteSetName = data.get('spriteSetName');
+			var spriteName = data.get('spriteName');
+
+			if(spriteSetName != '')
+			{
+				this.loadSprite(spriteSetName, spriteName);
+			}
+
+			return this;
 		}
 
 	}

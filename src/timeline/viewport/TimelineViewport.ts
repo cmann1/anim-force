@@ -65,9 +65,7 @@ namespace app.timeline
 		{
 			super(elementId);
 
-			this.model = model;
 			this.tree = tree;
-			this.setModel(model);
 
 			tree.scrollChange.on(this.onTreeScroll);
 			tree.treeNodeUpdate.on(this.onTreeNodeUpdate);
@@ -82,6 +80,8 @@ namespace app.timeline
 			this.headerGrad = this.ctx.createLinearGradient(0, 0, 0, Config.nodeHeight);
 			this.headerGrad.addColorStop(0, Config.node);
 			this.headerGrad.addColorStop(1, Config.nodeBottom);
+
+			this.setModel(model);
 		}
 
 		//
@@ -375,17 +375,19 @@ namespace app.timeline
 
 		public setModel(model:Model)
 		{
-			this.nodeList = [];
-
 			this.model = model;
 			this.mode = model.mode;
 			this.animation = model.getActiveAnimation();
+			this.updateNodeList();
 
 			model.setAnimationListeners(this.onAnimationChange);
 			model.animationChange.on(this.onModelAnimationChange);
 			model.modeChange.on(this.onModelModeChange);
 			model.selectionChange.on(this.onModelSelectionChange);
 			model.structureChange.on(this.onModelStructureChange);
+
+			this.currentFrame = this.animation.getPosition();
+			this.toolbar.setModel(model);
 
 			this.requiresUpdate = true;
 		}

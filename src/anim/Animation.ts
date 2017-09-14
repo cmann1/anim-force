@@ -10,6 +10,7 @@ namespace app.anim
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 	import EventDispatcher = app.events.EventDispatcher;
 	import Event = app.events.Event;
+	import LoadData = app.projects.LoadData;
 
 	export class Animation
 	{
@@ -36,25 +37,30 @@ namespace app.anim
 
 		public change:EventDispatcher<Animation> = new EventDispatcher<Animation>();
 
-		constructor(name:string, model:app.model.Model, readOnly=false)
+		constructor(name:string, model:app.model.Model, readOnly=false, forceKeyframe=true)
 		{
 			this.name = name;
 			this.model = model;
 			this.readOnly = readOnly;
 
 			model.structureChange.on(this.onModelStructureChange);
-			this.initNodes(model.children, model.getBindPose());
+			this.initTracksFromModel(forceKeyframe);
 		}
 
-		private initNodes(nodes:Node[], copyFrom:Animation=null)
+		public initTracksFromModel(forceKeyframe=true)
+		{
+			this.initNodes(this.model.children, this.model.getBindPose(), forceKeyframe);
+		}
+
+		private initNodes(nodes:Node[], copyFrom:Animation=null, forceKeyframe=true)
 		{
 			for(var node of nodes)
 			{
-				this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null);
+				this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null, forceKeyframe);
 
 				if(node instanceof ContainerNode)
 				{
-					this.initNodes((<ContainerNode> node).children, copyFrom);
+					this.initNodes((<ContainerNode> node).children, copyFrom, forceKeyframe);
 				}
 			}
 		}
@@ -81,7 +87,7 @@ namespace app.anim
 			}
 		}
 
-		private createTrack(target:Node, copyFrom:Track=null):Track
+		private createTrack(target:Node, copyFrom:Track=null, forceKeyframe=true):Track
 		{
 			var track:Track = null;
 
@@ -102,7 +108,10 @@ namespace app.anim
 				console.error('Cannot create animation track for', target);
 			}
 
-			track.forceKeyframe(0, copyFrom);
+			if(forceKeyframe)
+			{
+				track.forceKeyframe(0, copyFrom);
+			}
 
 			track.setPosition(this.frameIndex);
 			return track;
@@ -116,27 +125,6 @@ namespace app.anim
 			this.tracks = {};
 
 			this.dispatchChange('clear');
-		}
-
-		public save():any
-		{
-			var data = {
-				name: this.name,
-				readOnly: this.readOnly,
-				active: this.active,
-				fps: this.fps,
-				loop: this.loop,
-				frameIndex: this.frameIndex,
-				length: this.length,
-				tracks: {},
-			};
-
-			for(var trackId in this.tracks)
-			{
-				data.tracks[trackId] = this.tracks[trackId].save();
-			}
-
-			return data;
 		}
 
 		public initForAnimation()
@@ -462,6 +450,59 @@ namespace app.anim
 			}
 		}
 
+		//
+
+		public save():any
+		{
+			var data = {
+				name: this.name,
+				readOnly: this.readOnly,
+				fps: this.fps,
+				loop: this.loop,
+				frameIndex: this.frameIndex,
+				length: this.length,
+				tracks: {},
+			};
+
+			for(var trackId in this.tracks)
+			{
+				data.tracks[trackId] = this.tracks[trackId].save();
+			}
+
+			return data;
+		}
+
+		public load(data:LoadData):Animation
+		{
+			this.name = data.get('name');
+			this.readOnly = data.get('readOnly');
+			this.fps = data.get('fps');
+			this.loop = data.get('loop');
+			this.frameIndex = data.get('frameIndex');
+			this.length = data.get('length');
+
+			var tracks = data.get('tracks');
+			for(var trackId in tracks)
+			{
+				if(!tracks.hasOwnProperty(trackId)) continue;
+
+				var node = this.model.getNode(trackId);
+				var track = this.tracks[trackId];
+
+				if(!node || !track)
+				{
+					throw new Error('Invalid node id: ' + trackId);
+				}
+
+				node.propertyChange.on(this.onNodePropertyChange);
+				track.load(data.asLoadData(tracks[trackId]));
+			}
+
+			return this;
+		}
+
+		//
+
 		protected dispatchChange(type:string)
 		{
 			if(!this.suppressEvents)
@@ -480,9 +521,8 @@ namespace app.anim
 
 			const track = this.tracks[node.id];
 
-			if(track)
+			if(track && track.onNodePropertyChange(node, event.type))
 			{
-				track.onNodePropertyChange(node, event.type);
 				this.dispatchChange('keyframe');
 			}
 		};

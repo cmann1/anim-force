@@ -148,11 +148,12 @@ namespace app.model
 			return data;
 		}
 
-		public static load(data:LoadData):Bone
+		public load(data:LoadData):Bone
 		{
-			console.log('Bone.load', data); // TODO: REMOVE
+			super.load(data);
+			this.length = data.get('length');
 
-			return new Bone();
+			return this;
 		}
 
 	}

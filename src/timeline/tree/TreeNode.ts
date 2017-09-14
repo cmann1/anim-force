@@ -46,11 +46,6 @@ namespace app.timeline.tree
 				.on('mouseleave', this.onMouseExit);
 		}
 
-		public deleteNode()
-		{
-			this.node.parent.removeChild(this.node);
-		}
-
 		get highlighted():boolean
 		{
 			return this.$item.hasClass('highlighted');
@@ -70,6 +65,13 @@ namespace app.timeline.tree
 		set selected(value:boolean)
 		{
 			this.$item.toggleClass('selected', value);
+		}
+
+		//
+
+		public deleteNode()
+		{
+			this.node.parent.removeChild(this.node);
 		}
 
 		public startRename()

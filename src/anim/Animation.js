@@ -8,8 +8,9 @@ var app;
         var EventDispatcher = app.events.EventDispatcher;
         var Event = app.events.Event;
         var Animation = (function () {
-            function Animation(name, model, readOnly) {
+            function Animation(name, model, readOnly, forceKeyframe) {
                 if (readOnly === void 0) { readOnly = false; }
+                if (forceKeyframe === void 0) { forceKeyframe = true; }
                 var _this = this;
                 this.active = false;
                 this.fps = 30;
@@ -29,8 +30,7 @@ var app;
                     if (!_this.active)
                         return;
                     var track = _this.tracks[node.id];
-                    if (track) {
-                        track.onNodePropertyChange(node, event.type);
+                    if (track && track.onNodePropertyChange(node, event.type)) {
                         _this.dispatchChange('keyframe');
                     }
                 };
@@ -57,15 +57,20 @@ var app;
                 this.model = model;
                 this.readOnly = readOnly;
                 model.structureChange.on(this.onModelStructureChange);
-                this.initNodes(model.children, model.getBindPose());
+                this.initTracksFromModel(forceKeyframe);
             }
-            Animation.prototype.initNodes = function (nodes, copyFrom) {
+            Animation.prototype.initTracksFromModel = function (forceKeyframe) {
+                if (forceKeyframe === void 0) { forceKeyframe = true; }
+                this.initNodes(this.model.children, this.model.getBindPose(), forceKeyframe);
+            };
+            Animation.prototype.initNodes = function (nodes, copyFrom, forceKeyframe) {
                 if (copyFrom === void 0) { copyFrom = null; }
+                if (forceKeyframe === void 0) { forceKeyframe = true; }
                 for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
                     var node = nodes_1[_i];
-                    this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null);
+                    this.tracks[node.id] = this.createTrack(node, copyFrom ? copyFrom.tracks[node.id] : null, forceKeyframe);
                     if (node instanceof ContainerNode) {
-                        this.initNodes(node.children, copyFrom);
+                        this.initNodes(node.children, copyFrom, forceKeyframe);
                     }
                 }
             };
@@ -86,8 +91,9 @@ var app;
                     }
                 }
             };
-            Animation.prototype.createTrack = function (target, copyFrom) {
+            Animation.prototype.createTrack = function (target, copyFrom, forceKeyframe) {
                 if (copyFrom === void 0) { copyFrom = null; }
+                if (forceKeyframe === void 0) { forceKeyframe = true; }
                 var track = null;
                 if (target instanceof Bone) {
                     track = new anim.BoneTrack(this, target);
@@ -99,7 +105,9 @@ var app;
                 if (!track) {
                     console.error('Cannot create animation track for', target);
                 }
-                track.forceKeyframe(0, copyFrom);
+                if (forceKeyframe) {
+                    track.forceKeyframe(0, copyFrom);
+                }
                 track.setPosition(this.frameIndex);
                 return track;
             };
@@ -109,22 +117,6 @@ var app;
                 this.fps = 30;
                 this.tracks = {};
                 this.dispatchChange('clear');
-            };
-            Animation.prototype.save = function () {
-                var data = {
-                    name: this.name,
-                    readOnly: this.readOnly,
-                    active: this.active,
-                    fps: this.fps,
-                    loop: this.loop,
-                    frameIndex: this.frameIndex,
-                    length: this.length,
-                    tracks: {},
-                };
-                for (var trackId in this.tracks) {
-                    data.tracks[trackId] = this.tracks[trackId].save();
-                }
-                return data;
             };
             Animation.prototype.initForAnimation = function () {
                 this.fpsStep = 1 / this.fps;
@@ -351,6 +343,44 @@ var app;
                     this.dispatchChange('length');
                 }
             };
+            //
+            Animation.prototype.save = function () {
+                var data = {
+                    name: this.name,
+                    readOnly: this.readOnly,
+                    fps: this.fps,
+                    loop: this.loop,
+                    frameIndex: this.frameIndex,
+                    length: this.length,
+                    tracks: {},
+                };
+                for (var trackId in this.tracks) {
+                    data.tracks[trackId] = this.tracks[trackId].save();
+                }
+                return data;
+            };
+            Animation.prototype.load = function (data) {
+                this.name = data.get('name');
+                this.readOnly = data.get('readOnly');
+                this.fps = data.get('fps');
+                this.loop = data.get('loop');
+                this.frameIndex = data.get('frameIndex');
+                this.length = data.get('length');
+                var tracks = data.get('tracks');
+                for (var trackId in tracks) {
+                    if (!tracks.hasOwnProperty(trackId))
+                        continue;
+                    var node = this.model.getNode(trackId);
+                    var track = this.tracks[trackId];
+                    if (!node || !track) {
+                        throw new Error('Invalid node id: ' + trackId);
+                    }
+                    node.propertyChange.on(this.onNodePropertyChange);
+                    track.load(data.asLoadData(tracks[trackId]));
+                }
+                return this;
+            };
+            //
             Animation.prototype.dispatchChange = function (type) {
                 if (!this.suppressEvents) {
                     this.change.dispatch(this, new Event(type));

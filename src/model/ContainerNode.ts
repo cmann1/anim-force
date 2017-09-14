@@ -3,6 +3,7 @@ namespace app.model
 
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
+	import LoadData = app.projects.LoadData;
 
 	export class ContainerNode extends Node
 	{
@@ -242,6 +243,25 @@ namespace app.model
 			}
 
 			return data;
+		}
+
+		public load(data:LoadData):ContainerNode
+		{
+			super.load(data);
+
+			if(!(this instanceof Model))
+			{
+				this.collapsed = data.get('collapsed');
+			}
+
+			var children = data.get('children');
+
+			for(var childData of children)
+			{
+				this.addChild(Node.load(data.asLoadData(childData)), false);
+			}
+
+			return this;
 		}
 
 	}

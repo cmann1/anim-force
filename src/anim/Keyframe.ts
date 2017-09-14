@@ -1,6 +1,8 @@
 namespace app.anim
 {
 
+	import LoadData = app.projects.LoadData;
+
 	export class Keyframe
 	{
 
@@ -18,6 +20,12 @@ namespace app.anim
 			return {
 				frameIndex: this.frameIndex
 			};
+		}
+
+		public load(data:LoadData):Keyframe
+		{
+			// frameIndex must be set when the keyframe is created.
+			throw new Error('Keyframe.load not implemented');
 		}
 
 	}

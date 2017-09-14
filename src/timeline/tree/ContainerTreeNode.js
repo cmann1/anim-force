@@ -43,6 +43,10 @@ var app;
                             .on('mousedown', _this.onFoldIconMouseDown)
                             .on('click', _this.onToggleChildren));
                     }
+                    for (var _i = 0, _a = _this.node.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        _this.addChild(tree.addTreeNode(tree_1.TimelineTree.fromNode(tree, child)));
+                    }
                     return _this;
                 }
                 ContainerTreeNode.prototype.setOpen = function (open) {

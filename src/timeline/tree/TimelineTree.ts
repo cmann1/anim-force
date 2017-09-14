@@ -62,6 +62,13 @@ namespace app.timeline.tree
 			this.setModel(model);
 		}
 
+		public addTreeNode(treeNode:TreeNode):TreeNode
+		{
+			this.nodeMap[treeNode.node.id] = treeNode;
+
+			return treeNode;
+		}
+
 		public focus()
 		{
 			this.$element.focus();
@@ -98,21 +105,17 @@ namespace app.timeline.tree
 
 		public setModel(model:Model)
 		{
-			// TODO: A model may already have children when set here.
-			// TODO: Create the tree from existing model nodes
-
 			this.model = model;
 			model.structureChange.on(this.onModelStructureChange);
 			model.selectionChange.on(this.onModelSelectionChange);
 
+			this.nodeMap = {};
+
 			this.$container.empty();
-			this.$container.append((this.rootNode = <RootTreeNode> this.fromNode(model)).$element);
+			this.$container.append((this.rootNode = <RootTreeNode> this.addTreeNode(TimelineTree.fromNode(this, model))).$element);
 			this.rootNode.$children.on('scroll', this.onTreeScroll);
 			this.selectedNode = this.rootNode;
 			this.selectedNode.selected = true;
-
-			this.nodeMap = {};
-			this.nodeMap[this.model.id] = this.rootNode;
 
 			this.updateToolbar();
 		}
@@ -195,22 +198,22 @@ namespace app.timeline.tree
 				.on('mouseup', this.onDragWindowMouseUp);
 		}
 
-		//
-
-		private fromNode(node:Node):TreeNode
+		public static fromNode(tree:TimelineTree, node:Node):TreeNode
 		{
 			if(node instanceof Model)
 			{
-				return new RootTreeNode(this, node.type, node);
+				return new RootTreeNode(tree, node.type, node);
 			}
 
 			if(node instanceof Bone)
 			{
-				return new ContainerTreeNode(this, node.type, node);
+				return new ContainerTreeNode(tree, node.type, node);
 			}
 
-			return new TreeNode(this, node.type, node);
+			return new TreeNode(tree, node.type, node);
 		}
+
+		//
 
 		private scrollTo(treeNode:TreeNode)
 		{
@@ -249,7 +252,7 @@ namespace app.timeline.tree
 		private updateToolbar()
 		{
 			const isRoot = this.selectedNode == this.rootNode;
-			const allowChildren = this.selectedNode.node.canHaveChildren;
+			// const allowChildren = this.selectedNode.node.canHaveChildren;
 			this.$toolbarAddBtn.toggleClass('disabled', false);
 			this.$toolbarAddBoneBtn.toggleClass('disabled', false);
 			this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
@@ -437,7 +440,7 @@ namespace app.timeline.tree
 				// Add a new node
 				else
 				{
-					var newTree = this.nodeMap[target.id] = this.fromNode(target);
+					var newTree = this.addTreeNode(TimelineTree.fromNode(this, target));
 
 					if(other)
 					{

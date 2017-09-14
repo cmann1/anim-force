@@ -3,7 +3,7 @@ var app;
     var timeline;
     (function (timeline) {
         var tree;
-        (function (tree) {
+        (function (tree_1) {
             var Model = app.model.Model;
             var Bone = app.model.Bone;
             var Sprite = app.model.Sprite;
@@ -115,7 +115,7 @@ var app;
                                 }
                             }
                             else {
-                                var newTree = _this.nodeMap[target.id] = _this.fromNode(target);
+                                var newTree = _this.addTreeNode(TimelineTree.fromNode(_this, target));
                                 if (other) {
                                     parentTree.addChildBefore(newTree, _this.nodeMap[other.id]);
                                 }
@@ -157,7 +157,7 @@ var app;
                             else if (type == 'Add Sprite')
                                 newNode = new Sprite(null);
                             if (newNode) {
-                                if (_this.selectedNode instanceof tree.ContainerTreeNode && (!event.ctrlKey || _this.selectedNode == _this.rootNode))
+                                if (_this.selectedNode instanceof tree_1.ContainerTreeNode && (!event.ctrlKey || _this.selectedNode == _this.rootNode))
                                     _this.selectedNode.addNode(newNode);
                                 else
                                     _this.selectedNode.parent.addNodeAfter(newNode, _this.selectedNode);
@@ -190,6 +190,10 @@ var app;
                     this.setupToolbar();
                     this.setModel(model);
                 }
+                TimelineTree.prototype.addTreeNode = function (treeNode) {
+                    this.nodeMap[treeNode.node.id] = treeNode;
+                    return treeNode;
+                };
                 TimelineTree.prototype.focus = function () {
                     this.$element.focus();
                 };
@@ -213,18 +217,15 @@ var app;
                     }
                 };
                 TimelineTree.prototype.setModel = function (model) {
-                    // TODO: A model may already have children when set here.
-                    // TODO: Create the tree from existing model nodes
                     this.model = model;
                     model.structureChange.on(this.onModelStructureChange);
                     model.selectionChange.on(this.onModelSelectionChange);
+                    this.nodeMap = {};
                     this.$container.empty();
-                    this.$container.append((this.rootNode = this.fromNode(model)).$element);
+                    this.$container.append((this.rootNode = this.addTreeNode(TimelineTree.fromNode(this, model))).$element);
                     this.rootNode.$children.on('scroll', this.onTreeScroll);
                     this.selectedNode = this.rootNode;
                     this.selectedNode.selected = true;
-                    this.nodeMap = {};
-                    this.nodeMap[this.model.id] = this.rootNode;
                     this.updateToolbar();
                 };
                 TimelineTree.prototype.setScroll = function (scrollY) {
@@ -284,16 +285,16 @@ var app;
                         .on('mousemove', this.onDragWindowMouseMove)
                         .on('mouseup', this.onDragWindowMouseUp);
                 };
-                //
-                TimelineTree.prototype.fromNode = function (node) {
+                TimelineTree.fromNode = function (tree, node) {
                     if (node instanceof Model) {
-                        return new tree.RootTreeNode(this, node.type, node);
+                        return new tree_1.RootTreeNode(tree, node.type, node);
                     }
                     if (node instanceof Bone) {
-                        return new tree.ContainerTreeNode(this, node.type, node);
+                        return new tree_1.ContainerTreeNode(tree, node.type, node);
                     }
-                    return new tree.TreeNode(this, node.type, node);
+                    return new tree_1.TreeNode(tree, node.type, node);
                 };
+                //
                 TimelineTree.prototype.scrollTo = function (treeNode) {
                     if (!treeNode)
                         return;
@@ -321,7 +322,7 @@ var app;
                 };
                 TimelineTree.prototype.updateToolbar = function () {
                     var isRoot = this.selectedNode == this.rootNode;
-                    var allowChildren = this.selectedNode.node.canHaveChildren;
+                    // const allowChildren = this.selectedNode.node.canHaveChildren;
                     this.$toolbarAddBtn.toggleClass('disabled', false);
                     this.$toolbarAddBoneBtn.toggleClass('disabled', false);
                     this.$toolbarAddSpriteBtn.toggleClass('disabled', false);
@@ -363,7 +364,7 @@ var app;
                 };
                 return TimelineTree;
             }());
-            tree.TimelineTree = TimelineTree;
+            tree_1.TimelineTree = TimelineTree;
         })(tree = timeline.tree || (timeline.tree = {}));
     })(timeline = app.timeline || (app.timeline = {}));
 })(app || (app = {}));

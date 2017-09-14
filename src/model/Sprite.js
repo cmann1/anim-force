@@ -43,6 +43,9 @@ var app;
             Sprite.prototype.loadSprite = function (spriteGroup, spriteName) {
                 this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
                 this.asset.setSpriteSource(this);
+                if (this._name == null) {
+                    this._name = this.asset.spriteName;
+                }
             };
             Sprite.prototype.setSrc = function (newSrc) {
                 this.src = newSrc;
@@ -181,9 +184,16 @@ var app;
                 data.spriteName = this.asset ? this.asset.spriteName : '';
                 return data;
             };
-            Sprite.load = function (data) {
-                console.log('Sprite.load', data); // TODO: REMOVE
-                return new Sprite(null);
+            Sprite.prototype.load = function (data) {
+                _super.prototype.load.call(this, data);
+                this.palette = data.get('palette');
+                this.frame = data.get('frame'); // TODO: Remove this if it becomes animatable
+                var spriteSetName = data.get('spriteSetName');
+                var spriteName = data.get('spriteName');
+                if (spriteSetName != '') {
+                    this.loadSprite(spriteSetName, spriteName);
+                }
+                return this;
             };
             return Sprite;
         }(model.Node));
