@@ -163,13 +163,6 @@ namespace app.timeline
 							}
 						}
 
-						var prev:Keyframe = null;
-						var next:Keyframe = null;
-						var arrowCount = 0;
-						var cx = x + frameCX;
-						var cy = y + frameCY;
-
-
 						if(j < animationLength)
 						{
 							ctx.fillStyle = Config.nodeBorder;

@@ -159,6 +159,7 @@ namespace app.timeline.tree
 
 					if(parent)
 					{
+						console.log('Dropping ' + this.dragNode.node.name + ' > ' + (parent.node.name) + '.' + (next ? next.node : null));
 						parent.node.addChildBefore(this.dragNode.node, next ? next.node : null);
 					}
 					else

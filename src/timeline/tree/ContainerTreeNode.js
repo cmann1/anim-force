@@ -69,8 +69,6 @@ var app;
                     this.children = [];
                 };
                 ContainerTreeNode.prototype.addChild = function (node) {
-                    if (node.parent == this)
-                        return;
                     if (node.parent)
                         node.parent.removeChild(node);
                     node.parent = this;
@@ -78,6 +76,8 @@ var app;
                     this.$children.append(node.$element);
                 };
                 ContainerTreeNode.prototype.addChildBefore = function (node, sibling) {
+                    if (!sibling)
+                        this.addChild(node);
                     if (sibling.parent != this)
                         return;
                     if (node.parent)

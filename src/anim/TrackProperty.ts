@@ -534,34 +534,16 @@ namespace app.anim
 				this.prev = key.prev;
 				this.next = key.next;
 			}
-			else if(this.current)
+			else
 			{
-				if(this.prev && frameIndex > this.prev.frameIndex && frameIndex < this.current.frameIndex)
-					this.prev = key;
-				else if(this.next && frameIndex > this.current.frameIndex && frameIndex < this.next.frameIndex)
-					this.next = key;
-			}
-			else if(this.prev && this.next)
-			{
-				if(frameIndex > this.prev.frameIndex && frameIndex < this.next.frameIndex)
+				if(prev == this.prev && (next == this.current || next == this.next))
 				{
-					if(frameIndex > this.frameIndex)
-					{
-						this.next = key;
-					}
-					else
-					{
-						this.prev = key;
-					}
+					this.prev = key;
 				}
-			}
-			else if(this.prev)
-			{
-				this.next = key;
-			}
-			else if(this.next)
-			{
-				this.prev = key;
+				else if(next == this.next && (prev == this.current || prev == this.prev))
+				{
+					this.next = key;
+				}
 			}
 
 			if(frameIndex >= this.length)

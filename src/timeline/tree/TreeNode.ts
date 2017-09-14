@@ -137,7 +137,7 @@ namespace app.timeline.tree
 		{
 			const property:string = event.type;
 
-			if(property == 'name')
+			if(property == 'name' || property == 'src')
 			{
 				this.$label.text(this.node.name);
 			}

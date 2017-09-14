@@ -15,7 +15,7 @@ var app;
                      */
                     this.onNodePropertyChange = function (sender, event) {
                         var property = event.type;
-                        if (property == 'name') {
+                        if (property == 'name' || property == 'src') {
                             _this.$label.text(_this.node.name);
                         }
                     };

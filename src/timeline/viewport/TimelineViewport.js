@@ -169,11 +169,6 @@ var app;
                                     ctx.fillRect(x + 1, y + nodeHeight - 2, frameWidth - 3, 1);
                                 }
                             }
-                            var prev = null;
-                            var next = null;
-                            var arrowCount = 0;
-                            var cx = x + frameCX;
-                            var cy = y + frameCY;
                             if (j < animationLength) {
                                 ctx.fillStyle = app.Config.nodeBorder;
                                 ctx.fillRect(x + frameWidth - 1, y, 1, nodeHeight);

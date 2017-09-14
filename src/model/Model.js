@@ -125,10 +125,12 @@ var app;
             Model.prototype.getActiveAnimation = function () {
                 return this.activeAnimation;
             };
-            Model.prototype.setActiveAnimation = function (name) {
+            Model.prototype.setActiveAnimation = function (name, forceUpdate) {
+                if (forceUpdate === void 0) { forceUpdate = false; }
                 if (this._mode == EditMode.PLAYBACK)
                     return;
                 var anim = (name == 'None' ? this.bindPose : this.animations[name]) || this.bindPose;
+                var requiresUpdate = false;
                 if (anim != this.activeAnimation) {
                     if (this.activeAnimation) {
                         this.activeAnimation.active = false;
@@ -136,8 +138,11 @@ var app;
                     anim.active = true;
                     this.activeAnimation = anim;
                     this.animationChange.dispatch(anim, new Event('setAnimation'));
-                    this.activeAnimation.updateNodes();
+                    requiresUpdate = true;
                     this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
+                }
+                if (forceUpdate || requiresUpdate) {
+                    this.activeAnimation.updateNodes();
                 }
             };
             Model.prototype.setAnimationListeners = function (callback) {
@@ -282,7 +287,6 @@ var app;
             });
             //
             Model.prototype.save = function () {
-                // TODO: Save and load selected node?
                 var data = _super.prototype.save.call(this);
                 data.nextAnimationId = this.nextAnimationId;
                 data.nextNodeId = model.Node.nextId;
@@ -311,7 +315,7 @@ var app;
                     animData = data.asLoadData(animData);
                     this.animations[animName] = new app.anim.Animation(null, this, false, false).load(animData);
                 }
-                this.setActiveAnimation(data.get('activeAnimation'));
+                this.setActiveAnimation(data.get('activeAnimation'), true);
                 return this;
             };
             //

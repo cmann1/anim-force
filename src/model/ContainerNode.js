@@ -42,19 +42,22 @@ var app;
             ContainerNode.prototype.addChild = function (child, triggerEvent) {
                 if (triggerEvent === void 0) { triggerEvent = true; }
                 if (child.parent == this) {
-                    return child;
+                    this.children.splice(this.children.indexOf(child), 1);
+                    this.children.push(child);
                 }
-                if (child.parent) {
-                    child.parent.removeChild(child, false);
-                    child.rotation = child.worldRotation - this.worldRotation;
-                    var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-                    child.offsetX = local.x / this.stretchX;
-                    child.offsetY = local.y / this.stretchY;
+                else {
+                    if (child.parent) {
+                        child.parent.removeChild(child, false);
+                        child.rotation = child.worldRotation - this.worldRotation;
+                        var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+                        child.offsetX = local.x / this.stretchX;
+                        child.offsetY = local.y / this.stretchY;
+                    }
+                    child.setModel(this.model);
+                    child.parent = this;
+                    this.children.push(child);
+                    this.childCount++;
                 }
-                child.setModel(this.model);
-                child.parent = this;
-                this.children.push(child);
-                this.childCount++;
                 if (triggerEvent) {
                     this.onStructureChange('addChild', this, child, this.childCount - 1, null);
                 }
@@ -64,7 +67,7 @@ var app;
                 if (!sibling)
                     return this.addChild(child);
                 if (sibling.parent != this)
-                    return child;
+                    throw new Error('ContainerNode.addChildBefore: sibling not child of parent');
                 if (child.parent == this && this.children.indexOf(child) == this.children.indexOf(sibling) - 1)
                     return;
                 if (child.parent) {

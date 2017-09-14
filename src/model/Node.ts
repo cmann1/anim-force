@@ -235,7 +235,7 @@ namespace app.model
 		public load(data:LoadData):Node
 		{
 			this.id = data.get('id');
-			this.name = data.get('name');
+			this._name = data.get('name');
 
 			return this;
 		}

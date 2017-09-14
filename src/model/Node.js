@@ -163,7 +163,7 @@ var app;
             };
             Node.prototype.load = function (data) {
                 this.id = data.get('id');
-                this.name = data.get('name');
+                this._name = data.get('name');
                 return this;
             };
             Node.load = function (data) {

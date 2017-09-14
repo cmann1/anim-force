@@ -43,23 +43,26 @@ namespace app.model
 		{
 			if(child.parent == this)
 			{
-				return child
+				this.children.splice(this.children.indexOf(child), 1);
+				this.children.push(child);
 			}
-
-			if(child.parent)
+			else
 			{
-				child.parent.removeChild(child, false);
+				if(child.parent)
+				{
+					child.parent.removeChild(child, false);
 
-				child.rotation = child.worldRotation - this.worldRotation;
-				var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
-				child.offsetX = local.x / this.stretchX;
-				child.offsetY = local.y / this.stretchY;
+					child.rotation = child.worldRotation - this.worldRotation;
+					var local = this.globalToLocal(child.worldX - this.worldEndPointX + this.worldX, child.worldY - this.worldEndPointY + this.worldY);
+					child.offsetX = local.x / this.stretchX;
+					child.offsetY = local.y / this.stretchY;
+				}
+
+				child.setModel(this.model);
+				child.parent = this;
+				this.children.push(child);
+				this.childCount++;
 			}
-
-			child.setModel(this.model);
-			child.parent = this;
-			this.children.push(child);
-			this.childCount++;
 
 			if(triggerEvent)
 			{
@@ -72,7 +75,7 @@ namespace app.model
 		public addChildBefore(child:Node, sibling:Node):Node
 		{
 			if(!sibling) return this.addChild(child);
-			if(sibling.parent != this) return child;
+			if(sibling.parent != this) throw new Error('ContainerNode.addChildBefore: sibling not child of parent');
 
 			if(child.parent == this && this.children.indexOf(child) == this.children.indexOf(sibling) - 1) return;
 

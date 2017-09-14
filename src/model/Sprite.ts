@@ -48,15 +48,15 @@ namespace app.model
 			this.handles.push(this.scaleYHandle);
 		}
 
+		get name():string
+		{
+			return this._name || (this.asset && this.asset.spriteName) || 'Untitled Sprite ' + this.id;
+		}
+
 		public loadSprite(spriteGroup:string, spriteName:string)
 		{
 			this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
 			this.asset.setSpriteSource(this);
-
-			if(this._name == null)
-			{
-				this._name = this.asset.spriteName;
-			}
 		}
 
 		public setSrc(newSrc:HTMLImageElement)

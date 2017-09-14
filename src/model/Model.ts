@@ -146,10 +146,12 @@ namespace app.model
 			return this.activeAnimation;
 		}
 
-		public setActiveAnimation(name:string)
+		public setActiveAnimation(name:string, forceUpdate=false)
 		{
 			if(this._mode == EditMode.PLAYBACK) return;
 			var anim = (name == 'None' ? this.bindPose : this.animations[name]) || this.bindPose;
+
+			var requiresUpdate = false;
 
 			if(anim != this.activeAnimation)
 			{
@@ -161,9 +163,14 @@ namespace app.model
 				anim.active = true;
 				this.activeAnimation = anim;
 				this.animationChange.dispatch(anim, new Event('setAnimation'));
-				this.activeAnimation.updateNodes();
+				requiresUpdate = true;
 
 				this.setMode(anim == this.bindPose ? EditMode.EDIT : EditMode.ANIMATE);
+			}
+
+			if(forceUpdate || requiresUpdate)
+			{
+				this.activeAnimation.updateNodes();
 			}
 		}
 
@@ -368,7 +375,6 @@ namespace app.model
 
 		public save():any
 		{
-			// TODO: Save and load selected node?
 			var data = super.save();
 
 			data.nextAnimationId = this.nextAnimationId;
@@ -410,7 +416,7 @@ namespace app.model
 				this.animations[animName] = new app.anim.Animation(null, this, false, false).load(animData);
 			}
 
-			this.setActiveAnimation(data.get('activeAnimation'));
+			this.setActiveAnimation(data.get('activeAnimation'), true);
 
 			return this;
 		}

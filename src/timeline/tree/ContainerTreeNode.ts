@@ -63,8 +63,6 @@ namespace app.timeline.tree
 
 		public addChild(node:TreeNode)
 		{
-			if(node.parent == this) return;
-
 			if(node.parent) node.parent.removeChild(node);
 
 			node.parent = this;
@@ -74,6 +72,7 @@ namespace app.timeline.tree
 
 		public addChildBefore(node:TreeNode, sibling:TreeNode)
 		{
+			if(!sibling) this.addChild(node);
 			if(sibling.parent != this) return;
 
 			if(node.parent) node.parent.removeChild(node);
