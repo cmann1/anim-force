@@ -12,6 +12,7 @@ namespace app.viewport
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
 	import EditMode = app.model.EditMode;
+	import LoadData = app.projects.LoadData;
 
 	export class Viewport extends app.Canvas
 	{
@@ -359,6 +360,35 @@ namespace app.viewport
 			{
 				this.fpsDisplay.hide();
 			}
+		}
+
+		//
+
+		public save():any
+		{
+			return {
+				scale: this.scale,
+				cameraX: this.cameraX,
+				cameraY: this.cameraY
+			};
+		}
+
+		public load(data:LoadData)
+		{
+			this.cameraVelX = 0;
+			this.cameraVelY = 0;
+
+			this.scale = data.get('scale');
+			this.scaleIndex = this.scales.indexOf(this.scale);
+			if(this.scaleIndex == -1)
+			{
+				this.scaleIndex = this.scales.indexOf(this.scale = 1);
+			}
+
+			this.cameraX = this.prevCameraX = data.get('cameraX');
+			this.cameraY = this.prevCameraY = data.get('cameraY');
+
+			this.requiresUpdate = true;
 		}
 
 		//

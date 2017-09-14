@@ -70,6 +70,7 @@ var app;
                         _this.animation = animation;
                         _this.currentFrame = _this.animation.getPosition();
                         _this.toolbar.updateFrameLabel();
+                        _this.scrollX = animation.scrollX;
                         _this.requiresUpdate = true;
                     }
                 };
@@ -311,7 +312,7 @@ var app;
                     this.animation.gotoNextFrame();
             };
             TimelineViewport.prototype.reset = function () {
-                this.scrollX = 0;
+                this.scrollX = this.animation.scrollX = 0;
                 this.scrollY = 0;
                 this.requiresUpdate = true;
             };
@@ -361,10 +362,10 @@ var app;
                 if (!isNaN(frame)) {
                     var frameX = frame * app.Config.frameWidth;
                     if (frameX + app.Config.frameWidth > this.scrollX + this.width) {
-                        this.scrollX = Math.floor(Math.max(0, frameX - this.width + app.Config.frameWidth));
+                        this.scrollX = this.animation.scrollX = Math.floor(Math.max(0, frameX - this.width + app.Config.frameWidth));
                     }
                     else if (frameX < this.scrollX) {
-                        this.scrollX = Math.floor(Math.max(0, frameX));
+                        this.scrollX = this.animation.scrollX = Math.floor(Math.max(0, frameX));
                     }
                 }
                 this.requiresUpdate = true;
@@ -552,7 +553,10 @@ var app;
             };
             TimelineViewport.prototype.onMouseUp = function (event) {
                 this.dragFrameIndicator = false;
-                this.dragView = false;
+                if (this.dragView) {
+                    this.dragView = false;
+                    this.animation.scrollX = this.scrollX;
+                }
                 if (this.deselectKeyframe) {
                     this.setSelectedFrame(null);
                     this.deselectKeyframe = false;

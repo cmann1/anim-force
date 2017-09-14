@@ -360,7 +360,7 @@ namespace app.timeline
 
 		public reset()
 		{
-			this.scrollX = 0;
+			this.scrollX = this.animation.scrollX = 0;
 			this.scrollY = 0;
 
 			this.requiresUpdate = true;
@@ -432,11 +432,11 @@ namespace app.timeline
 				var frameX = frame * Config.frameWidth;
 				if(frameX + Config.frameWidth > this.scrollX + this.width)
 				{
-					this.scrollX = Math.floor(Math.max(0, frameX - this.width + Config.frameWidth));
+					this.scrollX = this.animation.scrollX = Math.floor(Math.max(0, frameX - this.width + Config.frameWidth));
 				}
 				else if(frameX < this.scrollX)
 				{
-					this.scrollX = Math.floor(Math.max(0, frameX));
+					this.scrollX = this.animation.scrollX = Math.floor(Math.max(0, frameX));
 				}
 			}
 
@@ -558,6 +558,7 @@ namespace app.timeline
 				this.animation = animation;
 				this.currentFrame = this.animation.getPosition();
 				this.toolbar.updateFrameLabel();
+				this.scrollX = animation.scrollX;
 
 				this.requiresUpdate = true;
 			}
@@ -778,7 +779,12 @@ namespace app.timeline
 		protected onMouseUp(event)
 		{
 			this.dragFrameIndicator = false;
-			this.dragView = false;
+
+			if(this.dragView)
+			{
+				this.dragView = false;
+				this.animation.scrollX = this.scrollX;
+			}
 
 			if(this.deselectKeyframe)
 			{

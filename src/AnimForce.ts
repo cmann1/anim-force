@@ -2,9 +2,6 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Saving/Loading:
- TODO: - Test out saving and loading a bit
- TODO: - Save and load selected node
- TODO: - Save and load view
  TODO: - Option to auto open last project
  TODO: - rename, export to file, import from file, ?clear
  TODO: Export to AngelScript
@@ -55,8 +52,11 @@ namespace app
 	import SpriteSelectCallback = app.ui.SpriteSelectCallback;
 	import ProjectManager = app.projects.ProjectManager;
 	import Project = app.projects.Project;
+	import Viewport = app.viewport.Viewport;
 
 	export class App{
+		protected static instance:App;
+
 		public readonly ticker:Ticker;
 
 		protected _spriteManager:SpriteManager;
@@ -75,6 +75,8 @@ namespace app
 
 		constructor()
 		{
+			App.instance = this;
+
 			createjs.Ticker.timingMode = createjs.Ticker.RAF;
 			this.ticker = new Ticker(this.onTick);
 
@@ -88,6 +90,13 @@ namespace app
 			window.addEventListener('resize', this.onWindowResize);
 		}
 
+		//
+
+		public static getViewport():Viewport
+		{
+			return App.instance.viewport;
+		}
+
 		public static notice(content:string, colour:string='white', time=3500)
 		{
 			new jBox('Notice', {
@@ -97,6 +106,8 @@ namespace app
 				attributes: {x: 'left', y: 'top'}
 			});
 		}
+
+		//
 
 		protected step(deltaTime:number, timestamp:number)
 		{
@@ -154,17 +165,23 @@ namespace app
 			}
 		};
 
-		public setProject(newProject:Project)
+		//
+
+		public setProject(project:Project)
 		{
 			this.project = this.projectManager.getActiveProject();
 			this.model = this.project.activeModel;
 
-			this.viewport.setModel(newProject.activeModel);
-			this.timeline.setModel(newProject.activeModel);
+			if(project.isNew)
+			{
+				this.viewport.reset();
+				this.timeline.reset();
+			}
+
+			this.viewport.setModel(project.activeModel);
+			this.timeline.setModel(project.activeModel);
 
 			this.viewport.focus();
-			this.viewport.reset();
-			this.timeline.reset();
 		}
 
 		public get spriteManager():app.assets.SpriteManager

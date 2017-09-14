@@ -21,6 +21,8 @@ var app;
                 this.frameIndex = 0;
                 this.length = 1;
                 this.suppressEvents = false;
+                // UI
+                this.scrollX = 0;
                 /// Events
                 this.change = new EventDispatcher();
                 /*
@@ -353,6 +355,7 @@ var app;
                     frameIndex: this.frameIndex,
                     length: this.length,
                     tracks: {},
+                    scrollX: this.scrollX
                 };
                 for (var trackId in this.tracks) {
                     data.tracks[trackId] = this.tracks[trackId].save();
@@ -366,6 +369,7 @@ var app;
                 this.loop = data.get('loop');
                 this.frameIndex = data.get('frameIndex');
                 this.length = data.get('length');
+                this.scrollX = data.get('scrollX');
                 var tracks = data.get('tracks');
                 for (var trackId in tracks) {
                     if (!tracks.hasOwnProperty(trackId))

@@ -2,9 +2,6 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Saving/Loading:
- TODO: - Test out saving and loading a bit
- TODO: - Save and load selected node
- TODO: - Save and load view
  TODO: - Option to auto open last project
  TODO: - rename, export to file, import from file, ?clear
  TODO: Export to AngelScript
@@ -99,6 +96,7 @@ var app;
             this.onWindowFocus = function () {
                 _this.ticker.start();
             };
+            App.instance = this;
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
             this.ticker = new Ticker(this.onTick);
             this._spriteManager = new SpriteManager('assets/sprites/');
@@ -108,6 +106,10 @@ var app;
             window.addEventListener('DOMContentLoaded', this.onWindowLoad);
             window.addEventListener('resize', this.onWindowResize);
         }
+        //
+        App.getViewport = function () {
+            return App.instance.viewport;
+        };
         App.notice = function (content, colour, time) {
             if (colour === void 0) { colour = 'white'; }
             if (time === void 0) { time = 3500; }
@@ -118,6 +120,7 @@ var app;
                 attributes: { x: 'left', y: 'top' }
             });
         };
+        //
         App.prototype.step = function (deltaTime, timestamp) {
             this.viewport.step(deltaTime, timestamp);
             this.timeline.step(deltaTime, timestamp);
@@ -140,14 +143,17 @@ var app;
                 theme: 'TooltipDark'
             });
         };
-        App.prototype.setProject = function (newProject) {
+        //
+        App.prototype.setProject = function (project) {
             this.project = this.projectManager.getActiveProject();
             this.model = this.project.activeModel;
-            this.viewport.setModel(newProject.activeModel);
-            this.timeline.setModel(newProject.activeModel);
+            if (project.isNew) {
+                this.viewport.reset();
+                this.timeline.reset();
+            }
+            this.viewport.setModel(project.activeModel);
+            this.timeline.setModel(project.activeModel);
             this.viewport.focus();
-            this.viewport.reset();
-            this.timeline.reset();
         };
         Object.defineProperty(App.prototype, "spriteManager", {
             get: function () {

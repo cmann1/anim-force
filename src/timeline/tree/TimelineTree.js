@@ -226,6 +226,7 @@ var app;
                     this.rootNode.$children.on('scroll', this.onTreeScroll);
                     this.selectedNode = this.rootNode;
                     this.selectedNode.selected = true;
+                    this.updateSelection(model.getSelectedNode());
                     this.updateToolbar();
                 };
                 TimelineTree.prototype.setScroll = function (scrollY) {
@@ -255,7 +256,6 @@ var app;
                             var next = this.dragNode.$element.next().data('tree-node');
                             var parent_1 = this.dragNode.$element.parent().closest('.model-node').data('tree-node');
                             if (parent_1) {
-                                console.log('Dropping ' + this.dragNode.node.name + ' > ' + (parent_1.node.name) + '.' + (next ? next.node : null));
                                 parent_1.node.addChildBefore(this.dragNode.node, next ? next.node : null);
                             }
                             else {

@@ -383,6 +383,7 @@ namespace app.model
 			data.bindPose = this.bindPose.save();
 			data.animations = {};
 			data.activeAnimation = this.activeAnimation.name;
+			data.selectedNode = this.selectedNode ? this.selectedNode.id : -1;
 
 			for(var animName in this.animations)
 			{
@@ -417,6 +418,20 @@ namespace app.model
 			}
 
 			this.setActiveAnimation(data.get('activeAnimation'), true);
+
+			const selectedNodeId = data.get('selectedNode');
+			if(selectedNodeId != -1)
+			{
+				const node = this.nodeMap[selectedNodeId];
+				if(node)
+				{
+					this.setSelectedNode(node);
+				}
+				else
+				{
+					console.log('Invalid node id for selected node');
+				}
+			}
 
 			return this;
 		}

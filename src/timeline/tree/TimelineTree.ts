@@ -117,6 +117,8 @@ namespace app.timeline.tree
 			this.selectedNode = this.rootNode;
 			this.selectedNode.selected = true;
 
+			this.updateSelection(model.getSelectedNode());
+
 			this.updateToolbar();
 		}
 
@@ -159,7 +161,6 @@ namespace app.timeline.tree
 
 					if(parent)
 					{
-						console.log('Dropping ' + this.dragNode.node.name + ' > ' + (parent.node.name) + '.' + (next ? next.node : null));
 						parent.node.addChildBefore(this.dragNode.node, next ? next.node : null);
 					}
 					else

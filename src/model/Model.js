@@ -294,6 +294,7 @@ var app;
                 data.bindPose = this.bindPose.save();
                 data.animations = {};
                 data.activeAnimation = this.activeAnimation.name;
+                data.selectedNode = this.selectedNode ? this.selectedNode.id : -1;
                 for (var animName in this.animations) {
                     data.animations[animName] = this.animations[animName].save();
                 }
@@ -316,6 +317,16 @@ var app;
                     this.animations[animName] = new app.anim.Animation(null, this, false, false).load(animData);
                 }
                 this.setActiveAnimation(data.get('activeAnimation'), true);
+                var selectedNodeId = data.get('selectedNode');
+                if (selectedNodeId != -1) {
+                    var node = this.nodeMap[selectedNodeId];
+                    if (node) {
+                        this.setSelectedNode(node);
+                    }
+                    else {
+                        console.log('Invalid node id for selected node');
+                    }
+                }
                 return this;
             };
             //

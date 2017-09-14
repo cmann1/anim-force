@@ -5,6 +5,7 @@ var app;
         var Model = app.model.Model;
         var Project = (function () {
             function Project(name) {
+                this.isNew = true;
                 this.activeModel = null;
                 this.models = [];
                 this.name = name;
@@ -20,7 +21,8 @@ var app;
                     name: this.name,
                     models: [],
                     activeModel: -1,
-                    date: new Date().toJSON()
+                    date: new Date().toJSON(),
+                    viewport: app.App.getViewport().save()
                 };
                 if (this.activeModel) {
                     data.activeModel = this.models.indexOf(this.activeModel);
@@ -40,6 +42,9 @@ var app;
                 if (!project.models.length) {
                     project.addModel(new Model());
                 }
+                var viewportData = data.asLoadData('viewport');
+                app.App.getViewport().load(viewportData);
+                project.isNew = false;
                 return project;
             };
             return Project;

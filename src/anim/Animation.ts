@@ -33,6 +33,10 @@ namespace app.anim
 
 		public suppressEvents:boolean = false;
 
+		// UI
+
+		public scrollX:number = 0;
+
 		/// Events
 
 		public change:EventDispatcher<Animation> = new EventDispatcher<Animation>();
@@ -462,6 +466,7 @@ namespace app.anim
 				frameIndex: this.frameIndex,
 				length: this.length,
 				tracks: {},
+				scrollX: this.scrollX
 			};
 
 			for(var trackId in this.tracks)
@@ -480,6 +485,7 @@ namespace app.anim
 			this.loop = data.get('loop');
 			this.frameIndex = data.get('frameIndex');
 			this.length = data.get('length');
+			this.scrollX = data.get('scrollX');
 
 			var tracks = data.get('tracks');
 			for(var trackId in tracks)

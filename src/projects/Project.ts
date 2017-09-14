@@ -6,6 +6,8 @@ namespace app.projects
 	export class Project
 	{
 
+		public isNew:boolean = true;
+
 		public name:string;
 		public activeModel:Model = null;
 		public models:Model[] = [];
@@ -31,7 +33,8 @@ namespace app.projects
 				name: this.name,
 				models: [],
 				activeModel: -1,
-				date: new Date().toJSON()
+				date: new Date().toJSON(),
+				viewport: App.getViewport().save()
 			};
 
 			if(this.activeModel)
@@ -61,6 +64,10 @@ namespace app.projects
 				project.addModel(new Model());
 			}
 
+			var viewportData = data.asLoadData('viewport');
+			App.getViewport().load(viewportData);
+
+			project.isNew = false;
 			return project;
 		}
 
