@@ -63,9 +63,11 @@ namespace app.projects
 		private $buttons:JQuery;
 		private $openBtn:JQuery;
 		private $importBtn:JQuery;
+		private $loadLastInput:JQuery;
 
 		constructor() { }
 
+		// TODO: Update Config.activeProject when renaming active project
 		public init(callback:() => void)
 		{
 			app.$window.on('keydown', this.onWindowKeyDown);
@@ -88,14 +90,20 @@ namespace app.projects
 			// 	}
 			// });
 
+
 			if(Config.loadLastProjectOnStartUp && Config.activeProject)
 			{
-				// TODO: Implement loadLastProjectOnStartUp
+				this.openProject(Config.activeProject, () => {
+					if(!this.activeProject)
+						this.newProject();
+					callback();
+				});
+
+				return;
 			}
-			else{
-				this.newProject();
-				callback();
-			}
+
+			this.newProject();
+			callback();
 		}
 
 		public getActiveProject():Project
@@ -134,6 +142,7 @@ namespace app.projects
 			if(this.activeProject.name == projectId)
 			{
 				this.activeProjectRev = null;
+				Config.set('activeProject', null);
 			}
 
 			if(this.projectCount < 1)
@@ -146,11 +155,13 @@ namespace app.projects
 		{
 			this.activeProject = new Project('New Project');
 			this.activeProject.addModel(new Model());
+			this.activeProjectRev = null;
+			Config.set('activeProject', null);
 		}
 
-		private openProject(projectId)
+		private openProject(projectId, callback=null)
 		{
-			this.projectManagerDlg.close();
+			this.projectManagerDlg && this.projectManagerDlg.close();
 
 			this.projectsDb.get(String(projectId)).then((doc:any) => {
 				try
@@ -160,16 +171,20 @@ namespace app.projects
 
 					this.activeProject = Project.load(doc);
 					this.activeProjectRev = doc._rev;
+					Config.set('activeProject', this.activeProject.name);
 					app.main.setProject(this.activeProject);
+					callback && callback();
 				}
 				catch(error)
 				{
 					App.notice('  > ' + error.toString(), 'red');
 					App.notice(`Error loading project data: <strong>${projectId}</strong>`, 'red');
 					console.error(error);
+					callback && callback();
 				}
 			}).catch(() => {
 				App.notice(`ERROR: Unable to open project: <strong>${projectId}</strong>`, 'red');
+				callback && callback();
 			});
 		}
 
@@ -202,6 +217,7 @@ namespace app.projects
 			this.projectsDb.put(data).then((response:any) => {
 				App.notice('Project saved', 'blue');
 				this.activeProjectRev = response.rev;
+				Config.set('activeProject', this.activeProject.name);
 			}).catch((err) => {
 				App.notice('Error saving project', 'red');
 				console.error(err);
@@ -367,13 +383,21 @@ namespace app.projects
 					.on('click', 'div.project-item', this.onProjectListItemSelect)
 					.on('dblclick', 'div.project-item', this.onProjectListItemDoubleClick);
 
+				var $options = $(`<div class="options">
+					<label>Load on startup <input type="checkbox"></label>
+				</div>`);
+				this.$loadLastInput = $options.find('input')
+					.on('change', this.onLoadLastInputChange);
+
 				this.projectManagerDlg = new Dialog('ProjectManager', {
 					name: 'ProjectManager',
+					dlgClass: 'project-manager-dlg',
 					icon: 'tasks',
 					content: this.$contentPane,
 					buttons: [
 						{label: 'Open', confirm: true},
 						{label: 'Cancel', cancel: true},
+						{content: $options, rightAlign: true},
 						{label: 'Import', rightAlign: true}
 					],
 					position: {x: 'center', y: 'top'},
@@ -396,6 +420,7 @@ namespace app.projects
 
 			this.disableButton(this.$openBtn);
 			this.disableButton(this.$importBtn);
+			this.$loadLastInput.prop('checked', Config.loadLastProjectOnStartUp);
 
 			this.projectsDb.find({
 				selector: {
@@ -493,6 +518,11 @@ namespace app.projects
 		private onDlgClose = (dlg:Dialog) =>
 		{
 			this.dlgStack.splice(this.dlgStack.indexOf(dlg), 1);
+		};
+
+		private onLoadLastInputChange = (event) =>
+		{
+			Config.set('loadLastProjectOnStartUp', this.$loadLastInput.prop('checked'));
 		};
 
 		private onOverwriteConfirm = (name:string, value:any) =>

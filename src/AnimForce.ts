@@ -2,7 +2,6 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Saving/Loading:
- TODO: - Option to auto open last project
  TODO: - rename, export to file, import from file, ?clear
  TODO: Export to AngelScript
  TODO: - Multiple animations
@@ -64,7 +63,7 @@ namespace app
 		protected timeline:app.timeline.TimelinePanel;
 
 		protected project:Project;
-		protected model:Model;
+		protected model:Model = new Model(); // A blank model so things work before a project is loaded
 
 		protected spriteSelector:SpriteSelector = null;
 		protected projectManager:ProjectManager;
@@ -161,7 +160,6 @@ namespace app
 				$('#app-loading-screen').remove();
 
 				this.ticker.start();
-				this.initUI();
 			}
 		};
 
@@ -223,6 +221,8 @@ namespace app
 		{
 			app.$body = $(document.body);
 			app.$window = $(window);
+
+			this.initUI();
 
 			this.onLoadQueue();
 		};

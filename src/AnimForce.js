@@ -2,7 +2,6 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Saving/Loading:
- TODO: - Option to auto open last project
  TODO: - rename, export to file, import from file, ?clear
  TODO: Export to AngelScript
  TODO: - Multiple animations
@@ -42,11 +41,13 @@ var app;
     var Ticker = app.ticker.Ticker;
     var Splitter = app.ui.Splitter;
     var SpriteManager = app.assets.SpriteManager;
+    var Model = app.model.Model;
     var SpriteSelector = app.ui.SpriteSelector;
     var ProjectManager = app.projects.ProjectManager;
     var App = (function () {
         function App() {
             var _this = this;
+            this.model = new Model(); // A blank model so things work before a project is loaded
             this.spriteSelector = null;
             this.loadCount = 0;
             this.runningTime = 0;
@@ -64,7 +65,6 @@ var app;
                         .focus();
                     $('#app-loading-screen').remove();
                     _this.ticker.start();
-                    _this.initUI();
                 }
             };
             /*
@@ -83,6 +83,7 @@ var app;
             this.onWindowLoad = function () {
                 app.$body = $(document.body);
                 app.$window = $(window);
+                _this.initUI();
                 _this.onLoadQueue();
             };
             this.onWindowResize = function () {

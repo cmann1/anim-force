@@ -70,6 +70,9 @@ var app;
                 this.onDlgClose = function (dlg) {
                     _this.dlgStack.splice(_this.dlgStack.indexOf(dlg), 1);
                 };
+                this.onLoadLastInputChange = function (event) {
+                    app.Config.set('loadLastProjectOnStartUp', _this.$loadLastInput.prop('checked'));
+                };
                 this.onOverwriteConfirm = function (name, value) {
                     _this.activeProjectRev = _this.overwriteProjectRev;
                     _this.overwriteProjectRev = null;
@@ -170,6 +173,7 @@ var app;
                     }
                 };
             }
+            // TODO: Update Config.activeProject when renaming active project
             ProjectManager.prototype.init = function (callback) {
                 var _this = this;
                 app.$window.on('keydown', this.onWindowKeyDown);
@@ -190,12 +194,15 @@ var app;
                 // 	}
                 // });
                 if (app.Config.loadLastProjectOnStartUp && app.Config.activeProject) {
-                    // TODO: Implement loadLastProjectOnStartUp
+                    this.openProject(app.Config.activeProject, function () {
+                        if (!_this.activeProject)
+                            _this.newProject();
+                        callback();
+                    });
+                    return;
                 }
-                else {
-                    this.newProject();
-                    callback();
-                }
+                this.newProject();
+                callback();
             };
             ProjectManager.prototype.getActiveProject = function () {
                 return this.activeProject;
@@ -222,6 +229,7 @@ var app;
                 this.projectCount--;
                 if (this.activeProject.name == projectId) {
                     this.activeProjectRev = null;
+                    app.Config.set('activeProject', null);
                 }
                 if (this.projectCount < 1) {
                     this.setLoadingMessage('No projects found');
@@ -230,25 +238,32 @@ var app;
             ProjectManager.prototype.newProject = function () {
                 this.activeProject = new projects.Project('New Project');
                 this.activeProject.addModel(new Model());
+                this.activeProjectRev = null;
+                app.Config.set('activeProject', null);
             };
-            ProjectManager.prototype.openProject = function (projectId) {
+            ProjectManager.prototype.openProject = function (projectId, callback) {
                 var _this = this;
-                this.projectManagerDlg.close();
+                if (callback === void 0) { callback = null; }
+                this.projectManagerDlg && this.projectManagerDlg.close();
                 this.projectsDb.get(String(projectId)).then(function (doc) {
                     try {
                         doc.get = LoadData_get;
                         doc.asLoadData = LoadData_asLoadData;
                         _this.activeProject = projects.Project.load(doc);
                         _this.activeProjectRev = doc._rev;
+                        app.Config.set('activeProject', _this.activeProject.name);
                         app.main.setProject(_this.activeProject);
+                        callback && callback();
                     }
                     catch (error) {
                         app.App.notice('  > ' + error.toString(), 'red');
                         app.App.notice("Error loading project data: <strong>" + projectId + "</strong>", 'red');
                         console.error(error);
+                        callback && callback();
                     }
                 }).catch(function () {
                     app.App.notice("ERROR: Unable to open project: <strong>" + projectId + "</strong>", 'red');
+                    callback && callback();
                 });
             };
             ProjectManager.prototype.save = function () {
@@ -271,6 +286,7 @@ var app;
                 this.projectsDb.put(data).then(function (response) {
                     app.App.notice('Project saved', 'blue');
                     _this.activeProjectRev = response.rev;
+                    app.Config.set('activeProject', _this.activeProject.name);
                 }).catch(function (err) {
                     app.App.notice('Error saving project', 'red');
                     console.error(err);
@@ -387,13 +403,18 @@ var app;
                         .on('click', 'i', this.onProjectListAction)
                         .on('click', 'div.project-item', this.onProjectListItemSelect)
                         .on('dblclick', 'div.project-item', this.onProjectListItemDoubleClick);
+                    var $options = $("<div class=\"options\">\n\t\t\t\t\t<label>Load on startup <input type=\"checkbox\"></label>\n\t\t\t\t</div>");
+                    this.$loadLastInput = $options.find('input')
+                        .on('change', this.onLoadLastInputChange);
                     this.projectManagerDlg = new Dialog('ProjectManager', {
                         name: 'ProjectManager',
+                        dlgClass: 'project-manager-dlg',
                         icon: 'tasks',
                         content: this.$contentPane,
                         buttons: [
                             { label: 'Open', confirm: true },
                             { label: 'Cancel', cancel: true },
+                            { content: $options, rightAlign: true },
                             { label: 'Import', rightAlign: true }
                         ],
                         position: { x: 'center', y: 'top' },
@@ -412,6 +433,7 @@ var app;
                 this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
                 this.disableButton(this.$openBtn);
                 this.disableButton(this.$importBtn);
+                this.$loadLastInput.prop('checked', app.Config.loadLastProjectOnStartUp);
                 this.projectsDb.find({
                     selector: {
                         name: { $gte: null },

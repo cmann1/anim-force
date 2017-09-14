@@ -41,6 +41,7 @@ var app;
                 this.title = title;
                 var defaults = {
                     name: 'Dlg' + (++Dialog.nextId),
+                    dlgClass: '',
                     overlay: true,
                     overlayClass: 'clear',
                     closeButton: 'title',
@@ -70,18 +71,24 @@ var app;
                         }
                         if (i++ > 0)
                             $buttonBar.append(' ');
-                        var $button = $("<button class=\"button\">" + buttonData.label + "</button>");
+                        var $element = void 0;
+                        if (buttonData.content) {
+                            $element = typeof (buttonData.content) == 'string' ? $(buttonData.content) : buttonData.content;
+                        }
+                        else {
+                            $element = $("<button class=\"button\">" + buttonData.label + "</button>");
+                            if (buttonData.confirm)
+                                this.confirmButton = buttonData.label;
+                        }
                         if (buttonData.rightAlign)
-                            rightButtons.push($button);
+                            rightButtons.push($element);
                         else
-                            $buttonBar.append($button);
+                            $buttonBar.append($element);
                         if (buttonData.className)
-                            $button.addClass(buttonData.className);
-                        if (buttonData.confirm)
-                            this.confirmButton = buttonData.label;
+                            $element.addClass(buttonData.className);
                         if (buttonData.focus)
-                            this.$focusButton = $button;
-                        buttonData.$element = $button;
+                            this.$focusButton = $element;
+                        buttonData.$element = $element;
                         this.buttonData[buttonData.label] = buttonData;
                     }
                     if (rightButtons.length) {
@@ -113,7 +120,7 @@ var app;
                 }
                 this.dlg = new jBox('Modal', {
                     title: this.icon + this.title,
-                    addClass: 'jbox-dialog-wrapper ' + options.type,
+                    addClass: 'jbox-dialog-wrapper ' + options.type + ' ' + options.dlgClass,
                     overlay: options.overlay,
                     overlayClass: options.overlayClass,
                     closeButton: options.closeButton,

@@ -193,6 +193,7 @@ body .jBox-Modal .jBox-title {
 	border-top: 1px solid $border-colour;
 	display: flex;
 	flex-shrink: 0;
+	align-items: center;
 }
 .dialog .button-bar button + button{
 	margin-left: 5px;

@@ -475,6 +475,9 @@ canvas#timeline {
     #project-manager .project-item:hover {
       background: #ffe3e3; }
 
+.project-manager-dlg .options {
+  margin-right: 10px; }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px; }
@@ -629,7 +632,8 @@ body .jBox-Modal .jBox-title {
   padding-top: 10px;
   border-top: 1px solid #C1C1C1;
   display: flex;
-  flex-shrink: 0; }
+  flex-shrink: 0;
+  align-items: center; }
 
 .dialog .button-bar button + button {
   margin-left: 5px; }
