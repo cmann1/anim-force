@@ -9,6 +9,8 @@
 declare class jBox
 {
 
+	options:any;
+
 	constructor(type:string, options?:any);
 
 	// Attach jBox to elements
@@ -34,7 +36,6 @@ declare class jBox
 	// Position jBox
 	position(options?:any);
 
-
 	// Open jBox
 	open(options?:any);
 
@@ -43,7 +44,6 @@ declare class jBox
 
 	// Open or close jBox
 	toggle(options?:any);
-
 
 	// Block opening and closing
 	disable();

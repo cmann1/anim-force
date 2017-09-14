@@ -8,6 +8,8 @@ var app;
                 this.isNew = true;
                 this.activeModel = null;
                 this.models = [];
+                this.id = null;
+                this.rev = null;
                 this.name = name;
             }
             Project.prototype.addModel = function (model) {
@@ -24,6 +26,10 @@ var app;
                     date: new Date().toJSON(),
                     viewport: app.App.getViewport().save()
                 };
+                if (this.id)
+                    data._id = this.id;
+                if (this.rev)
+                    data._rev = this.rev;
                 if (this.activeModel) {
                     data.activeModel = this.models.indexOf(this.activeModel);
                 }
@@ -35,6 +41,10 @@ var app;
             };
             Project.load = function (data) {
                 var project = new Project(data.get('name'));
+                if (data._id) {
+                    project.id = data._id;
+                    project.rev = data._rev;
+                }
                 for (var _i = 0, _a = data.models; _i < _a.length; _i++) {
                     var modelData = _a[_i];
                     project.addModel(new Model().load(data.asLoadData(modelData)));

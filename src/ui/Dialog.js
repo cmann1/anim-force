@@ -151,6 +151,12 @@ var app;
                     this.$focusButton.focus();
                 }
             };
+            Dialog.prototype.disable = function () {
+                this.dlg.disable();
+            };
+            Dialog.prototype.enable = function () {
+                this.dlg.enable();
+            };
             Dialog.prototype.getButtons = function () {
                 return this.$buttons;
             };

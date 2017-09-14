@@ -1,39 +1,40 @@
 /*
  TODO: Ordered TODO:
  ---------------------------------------------------------------
- TODO: Saving/Loading:
- TODO: - rename, export to file, import from file, ?clear
+ TODO: Project Manager:
+ TODO: - Rename
+ TODO: - Export to file
+ TODO: - Import from file
  TODO: Export to AngelScript
  TODO: - Multiple animations
  TODO: Allow sprite frames to be animated
  TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
+ TODO: Animation events
+ TODO: Anchor nodes
  TODO: Sprite Selector:
+ TODO: - Improve all-round / Completely redo
  TODO: - Remember state, scroll position, etc.
- TODO: - Improve all-round
  TODO: - Lazy load/create groups
  TODO: - Auto show when adding a sprite
  TODO: - - Auto set sprite node name to sprite name
  TODO: - Add cancel button
- TODO: Animation events
- TODO: Anchor nodes
+ TODO: Export to sprite_group
+ TODO: - copy to clipboard when exporting
+ TODO: Property panel:
+ TODO: - ????
  ---------------------------------------------------------------
 
  TODO: Ghosts
- TODO: Copy/paste nodes (with and with animation tracks)
- TODO: Add icon to sprite selector window
+ TODO: Copy/paste nodes (with and without animation tracks)
  TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
  TODO: Keyboard shortcuts for changing layer and sublayer
  TODO: ? Keyframe easing
- TODO: Export to sprite_group
- TODO: - copy to clipboard when exporting
  TODO: Timeline:
  TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
  TODO: - ???
  TODO: Viewport:
  TODO: - ???
- TODO: Property panel:
- TODO: - ????
- TODO: Help?
+ TODO: Help
  TODO: - List of shortcut keys
  */
 var app;
@@ -71,8 +72,6 @@ var app;
             * Events
             */
             this.onProjectManagerReady = function () {
-                _this.project = _this.projectManager.getActiveProject();
-                _this.model = _this.project.activeModel;
                 _this.onLoadQueue();
             };
             this.onTick = function (deltaTime, timestamp) {

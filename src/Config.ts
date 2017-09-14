@@ -17,6 +17,7 @@ namespace app
 		// Misc
 
 		static activeProject:string = null;
+		static activeProjectName:string = null;
 		static loadLastProjectOnStartUp = true;
 
 		// Viewport settings

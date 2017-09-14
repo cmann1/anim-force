@@ -12,6 +12,9 @@ namespace app.projects
 		public activeModel:Model = null;
 		public models:Model[] = [];
 
+		public id = null;
+		public rev = null;
+
 		constructor(name:string)
 		{
 			this.name = name;
@@ -29,13 +32,18 @@ namespace app.projects
 
 		public save():any
 		{
-			var data = {
+			var data:any = {
 				name: this.name,
 				models: [],
 				activeModel: -1,
 				date: new Date().toJSON(),
 				viewport: App.getViewport().save()
 			};
+
+			if(this.id)
+				data._id = this.id;
+			if(this.rev)
+				data._rev = this.rev;
 
 			if(this.activeModel)
 			{
@@ -53,6 +61,12 @@ namespace app.projects
 		public static load(data:LoadData):Project
 		{
 			var project:Project = new Project(data.get('name'));
+
+			if(data._id)
+			{
+				project.id = data._id;
+				project.rev = data._rev;
+			}
 
 			for(var modelData of data.models)
 			{

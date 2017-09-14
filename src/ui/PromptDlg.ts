@@ -27,6 +27,7 @@ namespace app.ui
 
 		public setContent(content:string|HTMLElement|JQuery) { console.log('Set content not allowed on PromptDlg'); }
 
+
 		protected static getOptions(options:any)
 		{
 			if(!options.buttons)

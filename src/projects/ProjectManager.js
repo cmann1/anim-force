@@ -22,8 +22,9 @@ var app;
         var ProjectManager = (function () {
             function ProjectManager() {
                 var _this = this;
-                this.activeProjectRev = null;
+                this.overwriteProjectId = null;
                 this.overwriteProjectRev = null;
+                this.renameProjectId = null;
                 this.dlgStack = [];
                 this.$selectedProjectItem = null;
                 this.$projectItems = {};
@@ -38,9 +39,9 @@ var app;
                     }
                     for (var _i = 0, _a = results.docs; _i < _a.length; _i++) {
                         var doc = _a[_i];
-                        var $item = $("\n\t\t\t\t<div class=\"project-item\" data-project-id=\"" + doc.name + "\">\n\t\t\t\t\t<label for=\"\">" + doc.name + "</label>\n\t\t\t\t\t<div class=\"flex-filler\"></div>\n\t\t\t\t\t<i class=\"fa fa-i-cursor btn\" title=\"Rename\" data-action=\"rename\"></i>\n\t\t\t\t\t<i class=\"fa fa-download btn\" title=\"Export to file\" data-action=\"export\"></i>\n\t\t\t\t\t<i class=\"fa fa-close btn\" title=\"Delete\" data-action=\"delete\"></i>\n\t\t\t\t</div>\n\t\t\t\t");
+                        var $item = $("\n\t\t\t\t<div class=\"project-item\" data-project-id=\"" + doc._id + "\" data-project-name=\"" + doc.name + "\">\n\t\t\t\t\t<label for=\"\">" + doc.name + "</label>\n\t\t\t\t\t<div class=\"flex-filler\"></div>\n\t\t\t\t\t<i class=\"fa fa-i-cursor btn\" title=\"Rename\" data-action=\"rename\"></i>\n\t\t\t\t\t<i class=\"fa fa-download btn\" title=\"Export to file\" data-action=\"export\"></i>\n\t\t\t\t\t<i class=\"fa fa-close btn\" title=\"Delete\" data-action=\"delete\"></i>\n\t\t\t\t</div>\n\t\t\t\t");
                         _this.$itemList.append($item);
-                        _this.$projectItems[doc.name] = $item;
+                        _this.$projectItems[doc._id] = $item;
                     }
                     _this.projectListTooltips.attach(_this.$itemList.find('i'));
                     _this.$contentPane.focus();
@@ -54,45 +55,55 @@ var app;
                  * Events
                  */
                 this.onConfirm = function (name, value) {
+                    console.log('onConfirm', name, value);
                     if (name == 'NewProject') {
                         _this.newProject();
-                        app.main.setProject(_this.activeProject);
                     }
                     else if (name == 'ProjectManager') {
                         if (_this.$selectedProjectItem) {
-                            _this.openProject(_this.$selectedProjectItem.data('project-id'));
+                            _this.openProject(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
                         }
                     }
                     else if (name == 'DeleteProject') {
                         _this.deleteProject(value);
                     }
+                    else if (name == 'RenameProject') {
+                        _this.renameProject(_this.renameProjectId, value);
+                    }
                 };
                 this.onDlgClose = function (dlg) {
-                    _this.dlgStack.splice(_this.dlgStack.indexOf(dlg), 1);
+                    _this.popDialog(dlg);
                 };
                 this.onLoadLastInputChange = function (event) {
                     app.Config.set('loadLastProjectOnStartUp', _this.$loadLastInput.prop('checked'));
                 };
                 this.onOverwriteConfirm = function (name, value) {
-                    _this.activeProjectRev = _this.overwriteProjectRev;
+                    _this.activeProject.id = _this.overwriteProjectId;
+                    _this.activeProject.rev = _this.overwriteProjectRev;
+                    _this.overwriteProjectId = null;
                     _this.overwriteProjectRev = null;
                     _this.saveActiveProject();
                 };
                 this.onProjectListAction = function (event) {
                     var $button = $(event.target);
                     var action = $button.data('action');
-                    var projectId = $button.closest('.project-item').data('project-id');
+                    var $projectItem = $button.closest('.project-item');
+                    var projectId = $projectItem.data('project-id');
+                    var projectName = $projectItem.data('project-name');
                     console.log('onProjectListAction', action, projectId);
-                    if (action == 'export') {
+                    if (action == 'rename') {
+                        _this.rename(projectId, projectName);
+                    }
+                    else if (action == 'export') {
                         // TODO: Implement exporting
                     }
                     else if (action == 'delete') {
-                        _this.askDeleteProject(projectId);
+                        _this.askDeleteProject(projectId, projectName);
                     }
                 };
                 this.onProjectListItemDoubleClick = function (event) {
                     if (_this.$selectedProjectItem) {
-                        _this.openProject(_this.$selectedProjectItem.data('project-id'));
+                        _this.openProject(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
                     }
                 };
                 this.onProjectListItemSelect = function (event) {
@@ -102,12 +113,12 @@ var app;
                     var key = event.keyCode;
                     if (key == Key.Enter) {
                         if (_this.$selectedProjectItem) {
-                            _this.openProject(_this.$selectedProjectItem.data('project-id'));
+                            _this.openProject(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
                         }
                     }
                     else if (key == Key.Delete) {
                         if (_this.$selectedProjectItem) {
-                            _this.askDeleteProject(_this.$selectedProjectItem.data('project-id'));
+                            _this.askDeleteProject(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
                         }
                     }
                     else if (key == Key.UpArrow) {
@@ -133,12 +144,26 @@ var app;
                         return;
                     }
                     _this.activeProject.name = value;
-                    _this.projectsDb.get(value).then(function (doc) {
-                        _this.overwriteProjectRev = doc._rev;
-                        _this.showConfirmOverwriteDlg(value);
-                    }).catch(function () {
-                        _this.activeProjectRev = null;
-                        _this.saveActiveProject();
+                    _this.projectsDb.find({
+                        selector: {
+                            name: { $eq: value }
+                        },
+                        fields: ['_id', '_rev'],
+                        limit: 1
+                    }).then(function (results) {
+                        if (results.docs.length) {
+                            _this.overwriteProjectId = results.docs[0]._id;
+                            _this.overwriteProjectRev = results.docs[0]._rev;
+                            _this.showConfirmOverwriteDlg(value);
+                        }
+                        else {
+                            _this.activeProject.id = null;
+                            _this.activeProject.rev = null;
+                            _this.saveActiveProject();
+                        }
+                    }).catch(function (error) {
+                        app.App.notice('There was an error reading from the database');
+                        console.error(error);
                     });
                 };
                 this.onWindowKeyDown = function (event) {
@@ -148,6 +173,7 @@ var app;
                     var shiftKey = event.shiftKey;
                     var ctrlKey = event.ctrlKey;
                     var consume = false;
+                    // TODO: F2 rename selected
                     if (ctrlKey) {
                         if (keyCode == Key.S) {
                             if (shiftKey)
@@ -194,7 +220,7 @@ var app;
                 // 	}
                 // });
                 if (app.Config.loadLastProjectOnStartUp && app.Config.activeProject) {
-                    this.openProject(app.Config.activeProject, function () {
+                    this.openProject(app.Config.activeProject, app.Config.activeProjectName, function () {
                         if (!_this.activeProject)
                             _this.newProject();
                         callback();
@@ -227,9 +253,11 @@ var app;
                 });
                 delete this.$projectItems[projectId];
                 this.projectCount--;
-                if (this.activeProject.name == projectId) {
-                    this.activeProjectRev = null;
+                if (this.activeProject.id == projectId) {
+                    this.activeProject.id = null;
+                    this.activeProject.rev = null;
                     app.Config.set('activeProject', null);
+                    app.Config.set('activeProjectName', null);
                 }
                 if (this.projectCount < 1) {
                     this.setLoadingMessage('No projects found');
@@ -238,10 +266,13 @@ var app;
             ProjectManager.prototype.newProject = function () {
                 this.activeProject = new projects.Project('New Project');
                 this.activeProject.addModel(new Model());
-                this.activeProjectRev = null;
+                this.activeProject.id = null;
+                this.activeProject.rev = null;
                 app.Config.set('activeProject', null);
+                app.Config.set('activeProjectName', null);
+                app.main.setProject(this.activeProject);
             };
-            ProjectManager.prototype.openProject = function (projectId, callback) {
+            ProjectManager.prototype.openProject = function (projectId, projectName, callback) {
                 var _this = this;
                 if (callback === void 0) { callback = null; }
                 this.projectManagerDlg && this.projectManagerDlg.close();
@@ -250,56 +281,100 @@ var app;
                         doc.get = LoadData_get;
                         doc.asLoadData = LoadData_asLoadData;
                         _this.activeProject = projects.Project.load(doc);
-                        _this.activeProjectRev = doc._rev;
-                        app.Config.set('activeProject', _this.activeProject.name);
+                        app.Config.set('activeProject', _this.activeProject.id);
+                        app.Config.set('activeProjectName', _this.activeProject.name);
                         app.main.setProject(_this.activeProject);
                         callback && callback();
                     }
                     catch (error) {
                         app.App.notice('  > ' + error.toString(), 'red');
-                        app.App.notice("Error loading project data: <strong>" + projectId + "</strong>", 'red');
+                        app.App.notice("Error loading project data: <strong>" + projectName + "</strong>", 'red');
                         console.error(error);
                         callback && callback();
                     }
-                }).catch(function () {
-                    app.App.notice("ERROR: Unable to open project: <strong>" + projectId + "</strong>", 'red');
+                }).catch(function (error) {
+                    app.App.notice("ERROR: Unable to open project: <strong>" + projectName + "</strong>", 'red');
+                    console.error(error);
                     callback && callback();
                 });
             };
-            ProjectManager.prototype.save = function () {
-                if (this.activeProjectRev == null) {
-                    this.saveAs();
+            ProjectManager.prototype.renameProject = function (projectId, newName) {
+                newName = $.trim(newName);
+                if (newName == projectId)
                     return;
-                }
-                this.saveActiveProject();
-            };
-            ProjectManager.prototype.saveAs = function () {
-                this.showPromptDlg();
+                console.log('renameProject', projectId, newName);
+                // var projectDoc:any;
+                // this.projectsDb.get(String(newName)).then((doc:any) => {
+                // 	App.notice('Unable to rename.<br> - A project with that name already exist.', 'red');
+                // }).catch(() => {
+                // 	this.projectsDb.get(String(projectId)).then((doc:any) => {
+                // 		doc.name = doc._id = newName;
+                // 		return this.projectsDb.put(doc);
+                // 		// projectDoc = doc;
+                // 		// return this.projectsDb.remove(doc);
+                // 	}).then(() => {
+                // 		return this.projectsDb.remove(projectDoc);
+                // 		// console.log(projectDoc);
+                // 		// projectDoc.name = projectDoc._id = newName;
+                // 	}).then(() => {
+                // 		App.notice('Project renamed');
+                // 		// console.log(projectDoc);
+                // 		// projectDoc.name = projectDoc._id = newName;
+                // 	}).catch(() => {
+                // 		App.notice('There was a problem renaming the project.', 'red');
+                // 	});
+                // });
             };
             ProjectManager.prototype.saveActiveProject = function () {
                 var _this = this;
                 var data = this.activeProject.save();
-                data._id = data.name;
-                if (this.activeProjectRev != null) {
-                    data._rev = this.activeProjectRev;
-                }
-                this.projectsDb.put(data).then(function (response) {
+                (data._id ? this.projectsDb.put(data) : this.projectsDb.post(data)).then(function (response) {
                     app.App.notice('Project saved', 'blue');
-                    _this.activeProjectRev = response.rev;
-                    app.Config.set('activeProject', _this.activeProject.name);
+                    _this.activeProject.id = response.id;
+                    _this.activeProject.rev = response.rev;
+                    app.Config.set('activeProject', _this.activeProject.id);
+                    app.Config.set('activeProjectName', _this.activeProject.name);
                 }).catch(function (err) {
                     app.App.notice('Error saving project', 'red');
                     console.error(err);
                 });
             };
             //
-            ProjectManager.prototype.askDeleteProject = function (projectId) {
-                this.showConfirmDlg('Confirm Delete', "<strong>" + projectId + "</strong><br><br>\n\t\t\t\tAre you sure you want to delete this project?<br>\n\t\t\t\tThis action cannot be undone.", 'DeleteProject', projectId);
+            ProjectManager.prototype.askDeleteProject = function (projectId, projectName) {
+                this.showConfirmDlg('Confirm Delete', "<strong>" + projectName + "</strong><br><br>\n\t\t\t\tAre you sure you want to delete this project?<br>\n\t\t\t\tThis action cannot be undone.", 'DeleteProject', projectId);
             };
+            ProjectManager.prototype.rename = function (projectId, projectName) {
+                this.renameProjectId = projectId;
+                this.showPromptDlg('RenameProject', 'Rename', projectName, this.onConfirm);
+            };
+            ProjectManager.prototype.save = function () {
+                if (this.activeProject.rev == null) {
+                    this.saveAs();
+                    return;
+                }
+                this.saveActiveProject();
+            };
+            ProjectManager.prototype.saveAs = function () {
+                this.showPromptDlg('SaveAs', 'Save As', this.activeProject.name, this.onSaveAsConfirm);
+            };
+            //
             //noinspection JSMethodCanBeStatic
             ProjectManager.prototype.disableButton = function ($button, disabled) {
                 if (disabled === void 0) { disabled = true; }
                 $button.prop('disabled', disabled).toggleClass('disable', disabled);
+            };
+            ProjectManager.prototype.pushDlg = function (dlg) {
+                if (this.dlgStack.indexOf(dlg) != -1)
+                    return false;
+                if (this.dlgStack.length)
+                    this.dlgStack[this.dlgStack.length - 1].disable();
+                this.dlgStack.push(dlg);
+                return true;
+            };
+            ProjectManager.prototype.popDialog = function (dlg) {
+                this.dlgStack.splice(this.dlgStack.indexOf(dlg), 1);
+                if (this.dlgStack.length)
+                    this.dlgStack[this.dlgStack.length - 1].enable();
             };
             ProjectManager.prototype.selectProjectItem = function ($item) {
                 if (this.$selectedProjectItem) {
@@ -359,7 +434,7 @@ var app;
                         zIndex: 20000
                     });
                 }
-                if (this.dlgStack.indexOf(this.confirmDlg) != -1)
+                if (!this.pushDlg(this.confirmDlg))
                     return;
                 if (title != null)
                     this.confirmDlg.setTitle(title);
@@ -367,7 +442,6 @@ var app;
                     this.confirmDlg.setContent(content);
                 if (name != null)
                     this.confirmDlg.setName(name);
-                this.dlgStack.push(this.confirmDlg);
                 this.confirmDlg.confirmValue = confirmValue;
                 this.confirmDlg.cancelValue = cancelValue;
                 this.confirmDlg.show();
@@ -387,12 +461,11 @@ var app;
                     });
                     this.$confirmOverwriteName = this.confirmOverwriteDlg.getContent().find('strong');
                 }
-                if (this.dlgStack.indexOf(this.confirmOverwriteDlg) != -1)
+                if (!this.pushDlg(this.confirmOverwriteDlg))
                     return;
                 if (name != null) {
                     this.$confirmOverwriteName.html(name);
                 }
-                this.dlgStack.push(this.confirmOverwriteDlg);
                 this.confirmOverwriteDlg.show();
             };
             ProjectManager.prototype.showProjectManager = function () {
@@ -428,7 +501,7 @@ var app;
                     this.$importBtn = this.projectManagerDlg.getButton('Import');
                     this.projectListTooltips = new jBox('Tooltip', { theme: 'TooltipDark' });
                 }
-                if (this.dlgStack.indexOf(this.projectManagerDlg) != -1)
+                if (!this.pushDlg(this.projectManagerDlg))
                     return;
                 this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
                 this.disableButton(this.$openBtn);
@@ -442,20 +515,27 @@ var app;
                     fields: ['_id', 'name'],
                     sort: [{ 'date': 'desc' }]
                 }).then(this.updateProjectsList);
-                this.dlgStack.push(this.projectManagerDlg);
                 this.projectManagerDlg.show();
             };
-            ProjectManager.prototype.showPromptDlg = function () {
+            ProjectManager.prototype.showPromptDlg = function (name, title, value, confirm) {
+                if (confirm === void 0) { confirm = null; }
                 if (!this.promptDlg) {
-                    this.promptDlg = new PromptDlg('Save As', {
-                        confirm: this.onSaveAsConfirm,
-                        close: this.onDlgClose
+                    this.promptDlg = new PromptDlg('Confirm', {
+                        buttons: [
+                            { label: 'Accept', confirm: true },
+                            { label: 'Cancel', cancel: true }
+                        ],
+                        confirm: null,
+                        close: this.onDlgClose,
+                        zIndex: 15000
                     });
                 }
-                if (this.dlgStack.indexOf(this.promptDlg) != -1)
+                if (!this.pushDlg(this.promptDlg))
                     return;
-                this.dlgStack.push(this.promptDlg);
-                this.promptDlg.show(this.activeProject.name);
+                this.promptDlg.confirmCallback = confirm;
+                this.promptDlg.name = name;
+                this.promptDlg.setTitle(title);
+                this.promptDlg.show(value);
             };
             return ProjectManager;
         }());

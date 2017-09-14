@@ -11,20 +11,20 @@ namespace app.ui
 		protected $contentPane:JQuery;
 		protected $dlg:JQuery;
 
-		protected name:string;
+		public name:string;
 		protected title:string = '';
 		protected icon:string = '';
 		protected isOpen = false;
-
-		protected confirmCallback:(name:string, value?:any)=>void;
-		protected cancelCallback:(name:string, value?:any)=>void;
-		protected buttonCallback:(buttonId:string)=>void;
-		protected closeCallback:(dlg:Dialog)=>void;
 
 		protected $buttons:JQuery;
 		protected buttonData:any = {};
 		protected confirmButton:string = null;
 		protected $focusButton:JQuery = null;
+
+		public confirmCallback:(name:string, value?:any)=>void;
+		public cancelCallback:(name:string, value?:any)=>void;
+		public buttonCallback:(buttonId:string)=>void;
+		public closeCallback:(dlg:Dialog)=>void;
 
 		public confirmValue:any = null;
 		public cancelValue:any = null;
@@ -188,6 +188,16 @@ namespace app.ui
 			{
 				this.$focusButton.focus();
 			}
+		}
+
+		public disable()
+		{
+			this.dlg.disable();
+		}
+
+		public enable()
+		{
+			this.dlg.enable();
 		}
 
 		public getButtons():JQuery

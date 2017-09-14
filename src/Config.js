@@ -39,6 +39,7 @@ var app;
     Config.isLoaded = false;
     // Misc
     Config.activeProject = null;
+    Config.activeProjectName = null;
     Config.loadLastProjectOnStartUp = true;
     // Viewport settings
     Config.showFps = true;
