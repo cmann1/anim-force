@@ -56,6 +56,7 @@ namespace app.ui
 			if(event.keyCode == Key.Enter)
 			{
 				this.confirm(this.$input.val());
+				this.dlg.close();
 			}
 		};
 

@@ -239,7 +239,7 @@ var app;
                         doc.get = LoadData_get;
                         doc.asLoadData = LoadData_asLoadData;
                         _this.activeProject = projects.Project.load(doc);
-                        _this.activeProjectRev = doc.rev;
+                        _this.activeProjectRev = doc._rev;
                         app.main.setProject(_this.activeProject);
                     }
                     catch (error) {

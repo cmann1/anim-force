@@ -159,7 +159,7 @@ namespace app.projects
 					doc.asLoadData = LoadData_asLoadData;
 
 					this.activeProject = Project.load(doc);
-					this.activeProjectRev = doc.rev;
+					this.activeProjectRev = doc._rev;
 					app.main.setProject(this.activeProject);
 				}
 				catch(error)

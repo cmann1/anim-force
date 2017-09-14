@@ -2,6 +2,8 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Saving/Loading models
+ TODO: - Test out saving and loading a bit
+ TODO: - Save and load selected node?
  TODO: - Option to auto open last project
  TODO: - rename, export to file, import from file, ?clear
  TODO: Export to AngelScript
@@ -20,6 +22,7 @@
  ---------------------------------------------------------------
 
  TODO: Ghosts
+ TODO: Copy/paste nodes (with and with animation tracks)
  TODO: Add icon to sprite selector window
  TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
  TODO: Keyboard shortcuts for changing layer and sublayer

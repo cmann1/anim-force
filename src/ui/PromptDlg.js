@@ -23,6 +23,7 @@ var app;
                 _this.onInputKeyPress = function (event) {
                     if (event.keyCode == Key.Enter) {
                         _this.confirm(_this.$input.val());
+                        _this.dlg.close();
                     }
                 };
                 _this.$input = $('<input type="text"/>').on('keypress', _this.onInputKeyPress);
