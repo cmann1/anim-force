@@ -24,6 +24,7 @@ var app;
                 var _this = this;
                 this.overwriteProjectId = null;
                 this.overwriteProjectRev = null;
+                this.overwriteProjectName = null;
                 this.renameProjectId = null;
                 this.dlgStack = [];
                 this.$selectedProjectItem = null;
@@ -80,8 +81,10 @@ var app;
                 this.onOverwriteConfirm = function (name, value) {
                     _this.activeProject.id = _this.overwriteProjectId;
                     _this.activeProject.rev = _this.overwriteProjectRev;
+                    _this.activeProject.name = _this.overwriteProjectName;
                     _this.overwriteProjectId = null;
                     _this.overwriteProjectRev = null;
+                    _this.overwriteProjectName = null;
                     _this.saveActiveProject();
                 };
                 this.onProjectListAction = function (event) {
@@ -143,28 +146,7 @@ var app;
                         }, 50);
                         return;
                     }
-                    _this.activeProject.name = value;
-                    _this.projectsDb.find({
-                        selector: {
-                            name: { $eq: value }
-                        },
-                        fields: ['_id', '_rev'],
-                        limit: 1
-                    }).then(function (results) {
-                        if (results.docs.length) {
-                            _this.overwriteProjectId = results.docs[0]._id;
-                            _this.overwriteProjectRev = results.docs[0]._rev;
-                            _this.showConfirmOverwriteDlg(value);
-                        }
-                        else {
-                            _this.activeProject.id = null;
-                            _this.activeProject.rev = null;
-                            _this.saveActiveProject();
-                        }
-                    }).catch(function (error) {
-                        app.App.notice('There was an error reading from the database');
-                        console.error(error);
-                    });
+                    _this.saveProjectAs(value);
                 };
                 this.onWindowKeyDown = function (event) {
                     if (_this.dlgStack.length)
@@ -173,7 +155,6 @@ var app;
                     var shiftKey = event.shiftKey;
                     var ctrlKey = event.ctrlKey;
                     var consume = false;
-                    // TODO: F2 rename selected
                     if (ctrlKey) {
                         if (keyCode == Key.S) {
                             if (shiftKey)
@@ -199,7 +180,6 @@ var app;
                     }
                 };
             }
-            // TODO: Update Config.activeProject when renaming active project
             ProjectManager.prototype.init = function (callback) {
                 var _this = this;
                 app.$window.on('keydown', this.onWindowKeyDown);
@@ -299,31 +279,40 @@ var app;
                 });
             };
             ProjectManager.prototype.renameProject = function (projectId, newName) {
+                var _this = this;
                 newName = $.trim(newName);
                 if (newName == projectId)
                     return;
-                console.log('renameProject', projectId, newName);
-                // var projectDoc:any;
-                // this.projectsDb.get(String(newName)).then((doc:any) => {
-                // 	App.notice('Unable to rename.<br> - A project with that name already exist.', 'red');
-                // }).catch(() => {
-                // 	this.projectsDb.get(String(projectId)).then((doc:any) => {
-                // 		doc.name = doc._id = newName;
-                // 		return this.projectsDb.put(doc);
-                // 		// projectDoc = doc;
-                // 		// return this.projectsDb.remove(doc);
-                // 	}).then(() => {
-                // 		return this.projectsDb.remove(projectDoc);
-                // 		// console.log(projectDoc);
-                // 		// projectDoc.name = projectDoc._id = newName;
-                // 	}).then(() => {
-                // 		App.notice('Project renamed');
-                // 		// console.log(projectDoc);
-                // 		// projectDoc.name = projectDoc._id = newName;
-                // 	}).catch(() => {
-                // 		App.notice('There was a problem renaming the project.', 'red');
-                // 	});
-                // });
+                this.projectsDb.find({
+                    selector: {
+                        name: { $eq: newName }
+                    },
+                    fields: ['_id', '_rev'],
+                    limit: 1
+                }).then(function (results) {
+                    if (results.docs.length) {
+                        app.App.notice('Unable to rename.<br> - A project with that name already exist.', 'red');
+                    }
+                    else {
+                        _this.projectsDb.get(String(projectId)).then(function (doc) {
+                            doc.name = newName;
+                            return _this.projectsDb.put(doc);
+                        }).then(function () {
+                            if (projectId == _this.activeProject.id) {
+                                _this.activeProject.name = newName;
+                                app.Config.set('activeProject', _this.activeProject.id);
+                                app.Config.set('activeProjectName', _this.activeProject.name);
+                            }
+                            _this.$projectItems[projectId].find('label').html(newName);
+                            app.App.notice('Project renamed');
+                        }).catch(function () {
+                            app.App.notice('There was a problem renaming the project.', 'red');
+                        });
+                    }
+                }).catch(function (error) {
+                    app.App.notice('There was an error reading from the database');
+                    console.error(error);
+                });
             };
             ProjectManager.prototype.saveActiveProject = function () {
                 var _this = this;
@@ -337,6 +326,32 @@ var app;
                 }).catch(function (err) {
                     app.App.notice('Error saving project', 'red');
                     console.error(err);
+                });
+            };
+            ProjectManager.prototype.saveProjectAs = function (name) {
+                var _this = this;
+                this.projectsDb.find({
+                    selector: {
+                        name: { $eq: name }
+                    },
+                    fields: ['_id', '_rev'],
+                    limit: 1
+                }).then(function (results) {
+                    if (results.docs.length) {
+                        _this.overwriteProjectId = results.docs[0]._id;
+                        _this.overwriteProjectRev = results.docs[0]._rev;
+                        _this.overwriteProjectName = name;
+                        _this.showConfirmOverwriteDlg(name);
+                    }
+                    else {
+                        _this.activeProject.id = null;
+                        _this.activeProject.rev = null;
+                        _this.activeProject.name = name;
+                        _this.saveActiveProject();
+                    }
+                }).catch(function (error) {
+                    app.App.notice('There was an error reading from the database');
+                    console.error(error);
                 });
             };
             //

@@ -42,6 +42,7 @@ namespace app.projects
 		private activeProject:Project;
 		private overwriteProjectId:string = null;
 		private overwriteProjectRev:string = null;
+		private overwriteProjectName:string = null;
 		private renameProjectId = null;
 
 		private dlgStack:Dialog[] = [];
@@ -68,7 +69,6 @@ namespace app.projects
 
 		constructor() { }
 
-		// TODO: Update Config.activeProject when renaming active project
 		public init(callback:() => void)
 		{
 			app.$window.on('keydown', this.onWindowKeyDown);
@@ -201,29 +201,39 @@ namespace app.projects
 			newName = $.trim(newName);
 			if(newName == projectId) return;
 
-			console.log('renameProject', projectId, newName);
-
-			// var projectDoc:any;
-			// this.projectsDb.get(String(newName)).then((doc:any) => {
-			// 	App.notice('Unable to rename.<br> - A project with that name already exist.', 'red');
-			// }).catch(() => {
-			// 	this.projectsDb.get(String(projectId)).then((doc:any) => {
-			// 		doc.name = doc._id = newName;
-			// 		return this.projectsDb.put(doc);
-			// 		// projectDoc = doc;
-			// 		// return this.projectsDb.remove(doc);
-			// 	}).then(() => {
-			// 		return this.projectsDb.remove(projectDoc);
-			// 		// console.log(projectDoc);
-			// 		// projectDoc.name = projectDoc._id = newName;
-			// 	}).then(() => {
-			// 		App.notice('Project renamed');
-			// 		// console.log(projectDoc);
-			// 		// projectDoc.name = projectDoc._id = newName;
-			// 	}).catch(() => {
-			// 		App.notice('There was a problem renaming the project.', 'red');
-			// 	});
-			// });
+			this.projectsDb.find({
+				selector: {
+					name: {$eq: newName}
+				},
+				fields: ['_id', '_rev'],
+				limit: 1
+			}).then((results:any) => {
+				if(results.docs.length)
+				{
+					App.notice('Unable to rename.<br> - A project with that name already exist.', 'red');
+				}
+				else
+				{
+					this.projectsDb.get(String(projectId)).then((doc:any) => {
+						doc.name = newName;
+						return this.projectsDb.put(doc);
+					}).then(() => {
+						if(projectId == this.activeProject.id)
+						{
+							this.activeProject.name = newName;
+							Config.set('activeProject', this.activeProject.id);
+							Config.set('activeProjectName', this.activeProject.name);
+						}
+						this.$projectItems[projectId].find('label').html(newName);
+						App.notice('Project renamed');
+					}).catch(() => {
+						App.notice('There was a problem renaming the project.', 'red');
+					});
+				}
+			}).catch((error) => {
+				App.notice('There was an error reading from the database');
+				console.error(error);
+			});
 		}
 
 		private saveActiveProject()
@@ -239,6 +249,35 @@ namespace app.projects
 			}).catch((err) => {
 				App.notice('Error saving project', 'red');
 				console.error(err);
+			});
+		}
+
+		private saveProjectAs(name:string)
+		{
+			this.projectsDb.find({
+				selector: {
+					name: {$eq: name}
+				},
+				fields: ['_id', '_rev'],
+				limit: 1
+			}).then((results:any) => {
+				if(results.docs.length)
+				{
+					this.overwriteProjectId = results.docs[0]._id;
+					this.overwriteProjectRev = results.docs[0]._rev;
+					this.overwriteProjectName = name;
+					this.showConfirmOverwriteDlg(name);
+				}
+				else
+				{
+					this.activeProject.id = null;
+					this.activeProject.rev = null;
+					this.activeProject.name = name;
+					this.saveActiveProject();
+				}
+			}).catch((error) => {
+				App.notice('There was an error reading from the database');
+				console.error(error);
 			});
 		}
 
@@ -603,8 +642,10 @@ namespace app.projects
 		{
 			this.activeProject.id = this.overwriteProjectId;
 			this.activeProject.rev = this.overwriteProjectRev;
+			this.activeProject.name = this.overwriteProjectName;
 			this.overwriteProjectId = null;
 			this.overwriteProjectRev = null;
+			this.overwriteProjectName = null;
 
 			this.saveActiveProject();
 		};
@@ -673,6 +714,7 @@ namespace app.projects
 					);
 				}
 			}
+			// TODO: F2 rename selected
 
 			else if(key == Key.UpArrow)
 			{
@@ -706,31 +748,7 @@ namespace app.projects
 				return;
 			}
 
-			this.activeProject.name = value;
-
-			this.projectsDb.find({
-				selector: {
-					name: {$eq: value}
-				},
-				fields: ['_id', '_rev'],
-				limit: 1
-			}).then((results:any) => {
-				if(results.docs.length)
-				{
-					this.overwriteProjectId = results.docs[0]._id;
-					this.overwriteProjectRev = results.docs[0]._rev;
-					this.showConfirmOverwriteDlg(value);
-				}
-				else
-				{
-					this.activeProject.id = null;
-					this.activeProject.rev = null;
-					this.saveActiveProject();
-				}
-			}).catch((error) => {
-				App.notice('There was an error reading from the database');
-				console.error(error);
-			});
+			this.saveProjectAs(value);
 		};
 
 		private onWindowKeyDown = (event) =>
@@ -742,8 +760,6 @@ namespace app.projects
 			const ctrlKey = event.ctrlKey;
 
 			var consume = false;
-
-			// TODO: F2 rename selected
 
 			if(ctrlKey)
 			{

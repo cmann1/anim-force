@@ -151,8 +151,7 @@ body .jBox-Modal .jBox-title {
 	color: #BF4843;
 }
 
-.jBox-wrapper.jBox-Tooltip
-{
+.jBox-wrapper.jBox-Tooltip{
 	pointer-events: none;
 }
 .jBox-Tooltip.jBox-TooltipDark .jBox-container,
@@ -166,6 +165,9 @@ body .jBox-Modal .jBox-title {
 	background: #333;
 }
 
+.jBox-Notice .jBox-content {
+	box-shadow: 0 0 8px rgba(0,0,0,0.25);
+}
 .jBox-Notice-white .jBox-container {
 	background: #FAFAFA;
 }

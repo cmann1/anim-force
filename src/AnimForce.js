@@ -2,7 +2,6 @@
  TODO: Ordered TODO:
  ---------------------------------------------------------------
  TODO: Project Manager:
- TODO: - Rename
  TODO: - Export to file
  TODO: - Import from file
  TODO: Export to AngelScript
