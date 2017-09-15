@@ -19,6 +19,7 @@ namespace app.anim
 		public active:boolean = false;
 		public fps = 30;
 		public loop = true;
+		public skipLastFrame = false;
 		public tracks:{[id:string]:Track} = {};
 
 		protected readOnly = false;
@@ -146,7 +147,7 @@ namespace app.anim
 				this.gotoNextFrame();
 				this.accumulatedTime -= this.fpsStep;
 
-				if(this.frameIndex >= this.length)
+				if(this.frameIndex >= this.length - (this.skipLastFrame ? 1 : 0))
 				{
 					this.setPosition(this.frameIndex - this.length);
 				}
@@ -463,6 +464,7 @@ namespace app.anim
 				readOnly: this.readOnly,
 				fps: this.fps,
 				loop: this.loop,
+				skipLastFrame: this.skipLastFrame,
 				frameIndex: this.frameIndex,
 				length: this.length,
 				tracks: {},
@@ -483,6 +485,7 @@ namespace app.anim
 			this.readOnly = data.get('readOnly');
 			this.fps = data.get('fps');
 			this.loop = data.get('loop');
+			this.skipLastFrame = data.get('skipLastFrame');
 			this.frameIndex = data.get('frameIndex');
 			this.length = data.get('length');
 			this.scrollX = data.get('scrollX');

@@ -55,7 +55,7 @@ var app;
                     var anim = anims_1[_a];
                     anim.suppressEvents = true;
                     var currentFrame = anim.getPosition();
-                    var frameCount = anim.getLength();
+                    var frameCount = Math.max(1, anim.getLength() - (anim.skipLastFrame ? 1 : 0));
                     anim.setPosition(0);
                     model.prepareChildren();
                     animFrameCount.push(frameCount);

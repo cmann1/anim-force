@@ -31,6 +31,7 @@ var app;
                     _this.$animEditName.val(_this.animation.name);
                     _this.$animEditFps.val(_this.animation.fps);
                     _this.$animEditLoop.prop('checked', _this.animation.loop);
+                    _this.$animEditSkipLast.prop('checked', _this.animation.skipLastFrame);
                 };
                 this.onAnimationSelect = function (event) {
                     _this.model.setActiveAnimation(_this.$animationSelect.val());
@@ -95,8 +96,6 @@ var app;
                     if (type == 'add-anim') {
                         _this.model.addNewAnimation(null, true);
                     }
-                    else if (type == 'delete-anim') {
-                    }
                 };
                 this.timeline = timeline;
                 this.$toolbar = $toolbar;
@@ -105,6 +104,7 @@ var app;
                 this.$animControlButtons = this.$toolbarButtons.filter('.anim-controls');
                 this.$playButton = this.$toolbar.find('.btn-play');
                 this.$pauseButton = this.$toolbar.find('.btn-pause');
+                this.$addAnimButton = this.$toolbar.find('.btn-add-anim');
                 this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
                 this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
                 this.$animationSelect = this.$toolbar.find('select')
@@ -150,6 +150,7 @@ var app;
                 this.$animEditName = this.$animEditDlg.find('#anim-prop-name');
                 this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
                 this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
+                this.$animEditSkipLast = this.$animEditDlg.find('#anim-prop-skip-last');
                 this.setModel(model);
             }
             TimelineToolbar.prototype.setModel = function (model) {
@@ -167,7 +168,8 @@ var app;
             TimelineToolbar.prototype.updateToolbarButtons = function () {
                 var mode = this.timeline.getMode();
                 var inEditMode = (mode == EditMode.EDIT);
-                if (mode == EditMode.PLAYBACK) {
+                var inPlaybackMode = (mode == EditMode.PLAYBACK);
+                if (inPlaybackMode) {
                     this.$playButton.hide();
                     this.$pauseButton.show();
                 }
@@ -186,6 +188,10 @@ var app;
                 this.$frameLabel.parent().toggleClass('disabled', inEditMode);
                 this.$editAnimButton.toggleClass('disabled', inEditMode);
                 this.$deleteAnimButton.toggleClass('disabled', inEditMode);
+                this.$addAnimButton.toggleClass('disabled', inPlaybackMode);
+                this.$editAnimButton.toggleClass('disabled', inPlaybackMode);
+                this.$deleteAnimButton.toggleClass('disabled', inPlaybackMode);
+                this.$animationSelect.toggleClass('disabled', inPlaybackMode).prop('disabled', inPlaybackMode);
             };
             TimelineToolbar.prototype.acceptAnimEdit = function (accept) {
                 if (accept === void 0) { accept = true; }
@@ -195,6 +201,7 @@ var app;
                     if (isNaN(this.animation.fps) || this.animation.fps <= 0)
                         this.animation.fps = 30;
                     this.animation.loop = this.$animEditLoop.prop('checked');
+                    this.animation.skipLastFrame = this.$animEditSkipLast.prop('checked');
                 }
                 this.animEditDlg.close();
             };

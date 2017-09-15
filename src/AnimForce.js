@@ -1,9 +1,8 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Per animation option to loop on second last frame
- TODO: - This must also affect output/export
  TODO: Keyboard shortcuts for changing layer and sublayer
+ TODO: - Display viewport message
  TODO: Export to sprite_group
  TODO: - Two buttons: export to clipboard, export to file
  TODO: Allow sprite frames to be animated

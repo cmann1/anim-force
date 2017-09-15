@@ -22,6 +22,7 @@ namespace app.timeline
 		private $pauseButton:JQuery;
 		private $frameLabel:JQuery;
 		private $animationSelect:JQuery;
+		private $addAnimButton:JQuery;
 		private $editAnimButton:JQuery;
 		private $deleteAnimButton:JQuery;
 		private $deleteConfirmDlg:JQuery;
@@ -32,6 +33,7 @@ namespace app.timeline
 		private $animEditName:JQuery;
 		private $animEditFps:JQuery;
 		private $animEditLoop:JQuery;
+		private $animEditSkipLast:JQuery;
 
 		constructor(model:Model, timeline:TimelineViewport, $toolbar:JQuery)
 		{
@@ -45,6 +47,7 @@ namespace app.timeline
 			this.$playButton = this.$toolbar.find('.btn-play');
 			this.$pauseButton = this.$toolbar.find('.btn-pause');
 
+			this.$addAnimButton = this.$toolbar.find('.btn-add-anim');
 			this.$editAnimButton = this.$toolbar.find('.btn-edit-anim');
 			this.$deleteAnimButton = this.$toolbar.find('.btn-delete-anim');
 
@@ -95,6 +98,7 @@ namespace app.timeline
 			this.$animEditName = this.$animEditDlg.find('#anim-prop-name');
 			this.$animEditFps = this.$animEditDlg.find('#anim-prop-fps');
 			this.$animEditLoop = this.$animEditDlg.find('#anim-prop-loop');
+			this.$animEditSkipLast = this.$animEditDlg.find('#anim-prop-skip-last');
 
 			this.setModel(model);
 		}
@@ -121,8 +125,9 @@ namespace app.timeline
 		{
 			const mode = this.timeline.getMode();
 			const inEditMode = (mode == EditMode.EDIT);
+			const inPlaybackMode = (mode == EditMode.PLAYBACK);
 
-			if(mode == EditMode.PLAYBACK)
+			if(inPlaybackMode)
 			{
 				this.$playButton.hide();
 				this.$pauseButton.show();
@@ -148,6 +153,11 @@ namespace app.timeline
 
 			this.$editAnimButton.toggleClass('disabled', inEditMode);
 			this.$deleteAnimButton.toggleClass('disabled', inEditMode);
+
+			this.$addAnimButton.toggleClass('disabled', inPlaybackMode);
+			this.$editAnimButton.toggleClass('disabled', inPlaybackMode);
+			this.$deleteAnimButton.toggleClass('disabled', inPlaybackMode);
+			this.$animationSelect.toggleClass('disabled', inPlaybackMode).prop('disabled', inPlaybackMode);
 		}
 
 		private acceptAnimEdit(accept=true)
@@ -160,6 +170,7 @@ namespace app.timeline
 					this.animation.fps = 30;
 
 				this.animation.loop = this.$animEditLoop.prop('checked');
+				this.animation.skipLastFrame = this.$animEditSkipLast.prop('checked');
 			}
 
 			this.animEditDlg.close();
@@ -215,6 +226,7 @@ namespace app.timeline
 			this.$animEditName.val(this.animation.name);
 			this.$animEditFps.val(this.animation.fps);
 			this.$animEditLoop.prop('checked', this.animation.loop);
+			this.$animEditSkipLast.prop('checked', this.animation.skipLastFrame);
 		};
 
 		private onAnimationSelect = (event) =>
@@ -313,9 +325,6 @@ namespace app.timeline
 			if(type == 'add-anim')
 			{
 				this.model.addNewAnimation(null, true);
-			}
-			else if(type == 'delete-anim')
-			{
 			}
 		};
 

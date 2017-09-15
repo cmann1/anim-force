@@ -591,15 +591,6 @@ namespace app.viewport
 				{
 					app.main.showSpriteSelector(this.onSpritesSelect);
 				}
-				// TODO: REMOVE
-				else if(keyCode == Key.E)
-				{
-					var out = (new AngelScriptExporter()).exportModel(this.model);
-					Utils.copyToClipboard(out);
-					App.notice('Output copied to clipboard');
-					event.preventDefault();
-					return false;
-				}
 			// }
 
 		}

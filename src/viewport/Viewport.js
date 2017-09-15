@@ -15,7 +15,6 @@ var app;
         var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
         var Bone = app.model.Bone;
-        var AngelScriptExporter = app.exporters.AngelScriptExporter;
         var EditMode = app.model.EditMode;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
@@ -413,13 +412,6 @@ var app;
                 }
                 else if (keyCode == Key.Enter) {
                     app.main.showSpriteSelector(this.onSpritesSelect);
-                }
-                else if (keyCode == Key.E) {
-                    var out = (new AngelScriptExporter()).exportModel(this.model);
-                    Utils.copyToClipboard(out);
-                    app.App.notice('Output copied to clipboard');
-                    event.preventDefault();
-                    return false;
                 }
                 // }
             };

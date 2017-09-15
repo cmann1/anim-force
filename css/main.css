@@ -210,16 +210,16 @@
   opacity: 1;
   bottom: -35px; }
 
-fieldset {
+div.fieldset {
   flex-direction: row;
   border: none;
   padding: 5px; }
 
-fieldset label {
+div.fieldset label {
   width: 60px;
   display: inline-block; }
 
-fieldset label + input {
+div.fieldset label + input {
   display: inline-block;
   flex-grow: 1; }
 
@@ -236,10 +236,10 @@ input {
 .dialog input {
   padding: 5px; }
 
-.dialog.label-med fieldset label {
+.dialog.label-med div.fieldset label {
   width: 120px; }
 
-.dialog.label-wide fieldset label {
+.dialog.label-wide div.fieldset label {
   width: 200px; }
 
 .splitter-partition {

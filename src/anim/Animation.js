@@ -15,6 +15,7 @@ var app;
                 this.active = false;
                 this.fps = 30;
                 this.loop = true;
+                this.skipLastFrame = false;
                 this.tracks = {};
                 this.readOnly = false;
                 this.accumulatedTime = 0;
@@ -129,7 +130,7 @@ var app;
                 while (this.accumulatedTime > this.fpsStep) {
                     this.gotoNextFrame();
                     this.accumulatedTime -= this.fpsStep;
-                    if (this.frameIndex >= this.length) {
+                    if (this.frameIndex >= this.length - (this.skipLastFrame ? 1 : 0)) {
                         this.setPosition(this.frameIndex - this.length);
                     }
                 }
@@ -352,6 +353,7 @@ var app;
                     readOnly: this.readOnly,
                     fps: this.fps,
                     loop: this.loop,
+                    skipLastFrame: this.skipLastFrame,
                     frameIndex: this.frameIndex,
                     length: this.length,
                     tracks: {},
@@ -367,6 +369,7 @@ var app;
                 this.readOnly = data.get('readOnly');
                 this.fps = data.get('fps');
                 this.loop = data.get('loop');
+                this.skipLastFrame = data.get('skipLastFrame');
                 this.frameIndex = data.get('frameIndex');
                 this.length = data.get('length');
                 this.scrollX = data.get('scrollX');

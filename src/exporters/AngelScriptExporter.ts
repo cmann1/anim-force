@@ -54,7 +54,7 @@ namespace app.exporters
 			{
 				anim.suppressEvents = true;
 				const currentFrame = anim.getPosition();
-				const frameCount = anim.getLength();
+				const frameCount = Math.max(1, anim.getLength() - (anim.skipLastFrame ? 1 : 0));
 
 				anim.setPosition(0);
 				model.prepareChildren();
