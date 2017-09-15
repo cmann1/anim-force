@@ -93,16 +93,17 @@ var app;
                     var $projectItem = $button.closest('.project-item');
                     var projectId = $projectItem.data('project-id');
                     var projectName = $projectItem.data('project-name');
-                    console.log('onProjectListAction', action, projectId);
                     if (action == 'rename') {
                         _this.rename(projectId, projectName);
                     }
                     else if (action == 'export') {
-                        // TODO: Implement exporting
+                        _this.export(projectId, projectName);
                     }
                     else if (action == 'delete') {
                         _this.askDeleteProject(projectId, projectName);
                     }
+                    event.preventDefault();
+                    return false;
                 };
                 this.onProjectListItemDoubleClick = function (event) {
                     if (_this.$selectedProjectItem) {
@@ -122,6 +123,11 @@ var app;
                     else if (key == Key.Delete) {
                         if (_this.$selectedProjectItem) {
                             _this.askDeleteProject(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
+                        }
+                    }
+                    else if (key == Key.F2) {
+                        if (_this.$selectedProjectItem) {
+                            _this.rename(_this.$selectedProjectItem.data('project-id'), _this.$selectedProjectItem.data('project-name'));
                         }
                     }
                     else if (key == Key.UpArrow) {
@@ -243,6 +249,17 @@ var app;
                     this.setLoadingMessage('No projects found');
                 }
             };
+            ProjectManager.prototype.export = function (projectId, projectName) {
+                this.projectsDb.get(String(projectId)).then(function (doc) {
+                    delete doc._id;
+                    delete doc._rev;
+                    var blob = new Blob([JSON.stringify(doc)], { type: 'text/json;charset=utf-8' });
+                    saveAs(blob, projectName + '.json');
+                }).catch(function (error) {
+                    app.App.notice("ERROR: Unable to read project for export: <strong>" + projectName + "</strong>", 'red');
+                    console.error(error);
+                });
+            };
             ProjectManager.prototype.newProject = function () {
                 this.activeProject = new projects.Project('New Project');
                 this.activeProject.addModel(new Model());
@@ -303,7 +320,9 @@ var app;
                                 app.Config.set('activeProject', _this.activeProject.id);
                                 app.Config.set('activeProjectName', _this.activeProject.name);
                             }
-                            _this.$projectItems[projectId].find('label').html(newName);
+                            _this.$projectItems[projectId]
+                                .data('project-name', newName)
+                                .find('label').html(newName);
                             app.App.notice('Project renamed');
                         }).catch(function () {
                             app.App.notice('There was a problem renaming the project.', 'red');

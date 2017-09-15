@@ -154,6 +154,21 @@ namespace app.projects
 			}
 		}
 
+		private export(projectId, projectName)
+		{
+			this.projectsDb.get(String(projectId)).then((doc:any) => {
+				delete doc._id;
+				delete doc._rev;
+
+				var blob = new Blob([JSON.stringify(doc)], {type: 'text/json;charset=utf-8'});
+				saveAs(blob, projectName + '.json');
+
+			}).catch((error) => {
+				App.notice(`ERROR: Unable to read project for export: <strong>${projectName}</strong>`, 'red');
+				console.error(error);
+			});
+		}
+
 		private newProject()
 		{
 			this.activeProject = new Project('New Project');
@@ -224,7 +239,11 @@ namespace app.projects
 							Config.set('activeProject', this.activeProject.id);
 							Config.set('activeProjectName', this.activeProject.name);
 						}
-						this.$projectItems[projectId].find('label').html(newName);
+
+						this.$projectItems[projectId]
+							.data('project-name', newName)
+							.find('label').html(newName);
+
 						App.notice('Project renamed');
 					}).catch(() => {
 						App.notice('There was a problem renaming the project.', 'red');
@@ -658,20 +677,21 @@ namespace app.projects
 			const projectId = $projectItem.data('project-id');
 			const projectName = $projectItem.data('project-name');
 
-			console.log('onProjectListAction', action, projectId);
-
 			if(action == 'rename')
 			{
 				this.rename(projectId, projectName);
 			}
 			else if(action == 'export')
 			{
-				// TODO: Implement exporting
+				this.export(projectId, projectName);
 			}
 			else if(action == 'delete')
 			{
 				this.askDeleteProject(projectId, projectName);
 			}
+
+			event.preventDefault();
+			return false;
 		};
 
 		private onProjectListItemDoubleClick = (event) =>
@@ -714,7 +734,16 @@ namespace app.projects
 					);
 				}
 			}
-			// TODO: F2 rename selected
+			else if(key == Key.F2)
+			{
+				if(this.$selectedProjectItem)
+				{
+					this.rename(
+						this.$selectedProjectItem.data('project-id'),
+						this.$selectedProjectItem.data('project-name')
+					);
+				}
+			}
 
 			else if(key == Key.UpArrow)
 			{
