@@ -1,11 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Export to AngelScript
- TODO: - Multiple animations
- TODO: - Changing animation
- TODO: - Setting position/frame
- TODO: - Next/prev frame
  TODO: Per animation option to loop on second last frame
  TODO: - This must also affect output/export
  TODO: Keyboard shortcuts for changing layer and sublayer

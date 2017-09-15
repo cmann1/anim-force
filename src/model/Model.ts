@@ -174,6 +174,18 @@ namespace app.model
 			}
 		}
 
+		public getAllAnimations():app.anim.Animation[]
+		{
+			var anims = [this.bindPose];
+
+			for(var animName in this.animations)
+			{
+				anims.push(this.animations[animName]);
+			}
+
+			return anims;
+		}
+
 		public setAnimationListeners(callback:(animation:Animation, event:Event) => void)
 		{
 			this.bindPose.change.on(callback);
@@ -234,6 +246,28 @@ namespace app.model
 			}
 
 			this.selectionChange.dispatch(this, new SelectionEvent('highlight', node));
+		}
+
+		public getNodeList(skipCollapsedNodes=false):Node[]
+		{
+			var nodes:Node[] = [];
+			var nodeQueue:Node[] = [];
+			var i = -1;
+			for(var j = this.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.children[j];
+
+			while(i >= 0)
+			{
+				var node:Node = nodeQueue[i--];
+
+				if(node instanceof ContainerNode && (!node.collapsed || !skipCollapsedNodes))
+				{
+					for(var j = node.childCount - 1; j >= 0; j--) nodeQueue[++i] = node.children[j];
+				}
+
+				nodes.push(node);
+			}
+
+			return nodes;
 		}
 
 		public setSelected(selected:boolean)

@@ -145,6 +145,13 @@ var app;
                     this.activeAnimation.updateNodes();
                 }
             };
+            Model.prototype.getAllAnimations = function () {
+                var anims = [this.bindPose];
+                for (var animName in this.animations) {
+                    anims.push(this.animations[animName]);
+                }
+                return anims;
+            };
             Model.prototype.setAnimationListeners = function (callback) {
                 this.bindPose.change.on(callback);
                 for (var animName in this.animations) {
@@ -185,6 +192,23 @@ var app;
                     this.highlightedNode.highlighted = true;
                 }
                 this.selectionChange.dispatch(this, new SelectionEvent('highlight', node));
+            };
+            Model.prototype.getNodeList = function (skipCollapsedNodes) {
+                if (skipCollapsedNodes === void 0) { skipCollapsedNodes = false; }
+                var nodes = [];
+                var nodeQueue = [];
+                var i = -1;
+                for (var j = this.childCount - 1; j >= 0; j--)
+                    nodeQueue[++i] = this.children[j];
+                while (i >= 0) {
+                    var node = nodeQueue[i--];
+                    if (node instanceof model.ContainerNode && (!node.collapsed || !skipCollapsedNodes)) {
+                        for (var j = node.childCount - 1; j >= 0; j--)
+                            nodeQueue[++i] = node.children[j];
+                    }
+                    nodes.push(node);
+                }
+                return nodes;
             };
             Model.prototype.setSelected = function (selected) {
                 if (selected) {

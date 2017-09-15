@@ -12,7 +12,6 @@ var app;
 (function (app) {
     var timeline;
     (function (timeline) {
-        var ContainerNode = app.model.ContainerNode;
         var Key = KeyCodes.Key;
         var EditMode = app.model.EditMode;
         var TimelineViewport = (function (_super) {
@@ -412,20 +411,7 @@ var app;
                 }
             };
             TimelineViewport.prototype.updateNodeList = function () {
-                var nodes = [];
-                var nodeQueue = [];
-                var i = -1;
-                for (var j = this.model.childCount - 1; j >= 0; j--)
-                    nodeQueue[++i] = this.model.children[j];
-                while (i >= 0) {
-                    var node = nodeQueue[i--];
-                    if (node instanceof ContainerNode && !node.collapsed) {
-                        for (var j = node.childCount - 1; j >= 0; j--)
-                            nodeQueue[++i] = node.children[j];
-                    }
-                    nodes.push(node);
-                }
-                this.nodeList = nodes;
+                this.nodeList = this.model.getNodeList(true);
             };
             TimelineViewport.prototype.onKeyDown = function (event) {
                 if (this.viewport.commonKey(event))

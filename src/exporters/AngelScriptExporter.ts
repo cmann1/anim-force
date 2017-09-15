@@ -21,14 +21,10 @@ namespace app.exporters
 			var spriteSubLayers:number[] = [];
 			var spritePalettes:number[] = [];
 
-			var nodes:Node[] = model.children.slice();
-			var nodeCount = nodes.length;
-			var i = 0;
+			var nodes:Node[] = model.getNodeList();
 
-			while(i < nodeCount)
+			for(var node of nodes)
 			{
-				var node:Node = nodes[i];
-
 				if(node instanceof Sprite)
 				{
 					var sprite:Sprite = <Sprite> node;
@@ -39,19 +35,14 @@ namespace app.exporters
 					spriteSubLayers.push(sprite.subLayer);
 					spritePalettes.push(sprite.palette);
 				}
-				else if(node instanceof ContainerNode)
-				{
-					nodes = nodes.concat(node.children);
-					nodeCount += node.childCount;
-				}
-
-				i++;
 			}
 
-			var anims:Animation[] = [model.getBindPose()]; // TODO: TEMP
+			var animIndex = 0;
+			var anims:Animation[] = model.getAllAnimations();
 			var animFrameCount = [];
 			var animFps = [];
 			var animLoop = [];
+			var animNames = [];
 			var outFrames = [];
 			var outX = [];
 			var outY = [];
@@ -107,16 +98,21 @@ namespace app.exporters
 				outRotation.push(animRotation.join(','));
 				outScaleX.push(animScaleX.join(','));
 				outScaleY.push(animScaleY.join(','));
+				animNames.push(`'${anim.name}',${animIndex}`);
 
 				anim.setPosition(currentFrame);
 				anim.suppressEvents = false;
+				animIndex++;
 			}
 
 
-			return `class ${className} : trigger_base{
+			return `class ${className} : trigger_base
+{
 	scene@ g;
 	script@ script;
 	scripttrigger@ self;
+	
+	[text] bool is_playing = true;
 
 	int sprites_count = ${spriteGroupList.length};
 	array<string> sprites_sets = {'${spriteGroupList.join("','")}'};
@@ -136,9 +132,10 @@ namespace app.exporters
 	array<array<float>> anims_rotation = {{${outRotation.join('},{')}}};
 	array<array<float>> anims_scale_x = {{${outScaleX.join('},{')}}};
 	array<array<float>> anims_scale_y = {{${outScaleY.join('},{')}}};
-	dictionary anims_name = {{'__bind__', 0}};
+	dictionary anims_name = {{${animNames.join('},{')}}};
 	
 	// Current animation
+	[text] string current_anim = "None";
 	[hidden] float current_frame = 0;
 	[hidden] int current_frame_count = 0;
 	[hidden] float current_fps_step = 0;
@@ -150,7 +147,8 @@ namespace app.exporters
 	[hidden] array<float>@ current_scale_x = @null;
 	[hidden] array<float>@ current_scale_y = @null;
 	
-	${className}(){
+	${className}()
+	{
 		@g = get_scene();
 		
 		for(int i = 0; i < sprites_count; i++){
@@ -164,27 +162,81 @@ namespace app.exporters
 		@this.script = @script;
 		@this.self = @self;
 		
-		current_frame = 0;
-		current_frame_count = anims_frame_count[0];
-		current_fps_step = anims_fps_step[0];
-		current_loop = anims_loop[0];
-		@current_sprite_frame = @anims_sprite_frame[0];
-		@current_x = @anims_x[0];
-		@current_y = @anims_y[0];
-		@current_rotation = @anims_rotation[0];
-		@current_scale_x = @anims_scale_x[0];
-		@current_scale_y = @anims_scale_y[0];
+		set_animation(current_anim);
 	}
 	
-	void step(){
-		current_frame += current_fps_step;
+	void play()
+	{
+		is_playing = true;
+	}
+	
+	void pause()
+	{
+		is_playing = true;
+	}
+	
+	void goto_next_frame()
+	{
+		current_frame++;
 		
 		if(current_frame > current_frame_count - 1){
 			current_frame = current_loop ? 0 : current_frame_count - 1;
 		}
 	}
 	
-	void draw(float sub_frame){
+	void goto_prev_frame()
+	{
+		current_frame--;
+		
+		if(current_frame < 0){
+			current_frame = current_loop ? current_frame_count - 1 : 0;
+		}
+	}
+	
+	void set_animation(string name)
+	{
+		if(!anims_name.exists(name))
+		{
+			name = "None";
+		}
+	
+		const int anim_index = int(anims_name[name]);
+		
+		current_anim = name;
+		current_frame = 0;
+		current_frame_count = anims_frame_count[anim_index];
+		current_fps_step = anims_fps_step[anim_index];
+		current_loop = anims_loop[anim_index];
+		@current_sprite_frame = @anims_sprite_frame[anim_index];
+		@current_x = @anims_x[anim_index];
+		@current_y = @anims_y[anim_index];
+		@current_rotation = @anims_rotation[anim_index];
+		@current_scale_x = @anims_scale_x[anim_index];
+		@current_scale_y = @anims_scale_y[anim_index];
+	}
+	
+	void set_position(int frame)
+	{
+		if(frame < 0) frame = 0;
+		else if(frame >= current_frame_count) frame = current_frame_count - 1;
+		
+		current_frame = frame;
+	}
+	
+	void step()
+	{
+		if(is_playing)
+		{
+			current_frame += current_fps_step;
+		}
+		
+		if(current_frame > current_frame_count - 1){
+			current_frame = current_loop ? 0 : current_frame_count - 1;
+		}
+	}
+	
+	void draw(float sub_frame)
+	{
 		const float x = self.x();
 		const float y = self.y();
 		
@@ -204,7 +256,8 @@ namespace app.exporters
 		//g.draw_rectangle_world(22, 20, x-4, y-4, x+4, y+4, 0, 0xFFFF0000);
 	}
 	
-	void editor_draw(float sub_frame){
+	void editor_draw(float sub_frame)
+	{
 		draw(sub_frame);
 	}
 }`;

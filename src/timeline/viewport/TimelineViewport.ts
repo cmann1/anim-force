@@ -498,24 +498,7 @@ namespace app.timeline
 
 		private updateNodeList()
 		{
-			var nodes:Node[] = [];
-			var nodeQueue:Node[] = [];
-			var i = -1;
-			for(var j = this.model.childCount - 1; j >= 0; j--) nodeQueue[++i] = this.model.children[j];
-
-			while(i >= 0)
-			{
-				var node:Node = nodeQueue[i--];
-
-				if(node instanceof ContainerNode && !node.collapsed)
-				{
-					for(var j = node.childCount - 1; j >= 0; j--) nodeQueue[++i] = node.children[j];
-				}
-
-				nodes.push(node);
-			}
-
-			this.nodeList = nodes;
+			this.nodeList = this.model.getNodeList(true);
 		}
 
 		/*
