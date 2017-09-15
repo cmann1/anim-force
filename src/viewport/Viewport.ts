@@ -476,6 +476,7 @@ namespace app.viewport
 			if(this.commonKey(event)) return;
 
 			const keyCode = event.keyCode;
+			const altKey = event.altKey;
 			// console.log(keyCode);
 
 			if(keyCode == Key.Home)
@@ -561,9 +562,9 @@ namespace app.viewport
 			}
 
 			// TODO: Move keyboard actions to appropriate model mode
-			// else if(this.mode == EditMode.EDIT)
-			// {
-				else if(keyCode == Key.Delete)
+			else if(this.mode != EditMode.PLAYBACK)
+			{
+				if(keyCode == Key.Delete)
 				{
 					if(!this.interaction.success)
 					{
@@ -573,6 +574,20 @@ namespace app.viewport
 							selectedNode.parent.removeChild(selectedNode);
 						}
 					}
+				}
+
+				else if(keyCode == Key.PageDown || keyCode == Key.PageUp)
+				{
+					const selectedNode = this.model.getSelectedNode();
+					if(selectedNode)
+					{
+						this.model.increaseSelectedNodeLayer(
+							keyCode == Key.PageDown ? -1 : 1,
+							altKey
+						);
+						this.showMessage(`Layer: ${selectedNode.layer}.${selectedNode.subLayer}`);
+					}
+
 				}
 
 				// TODO: REMOVE
@@ -591,7 +606,7 @@ namespace app.viewport
 				{
 					app.main.showSpriteSelector(this.onSpritesSelect);
 				}
-			// }
+			}
 
 		}
 

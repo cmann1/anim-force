@@ -338,6 +338,7 @@ var app;
                 if (this.commonKey(event))
                     return;
                 var keyCode = event.keyCode;
+                var altKey = event.altKey;
                 // console.log(keyCode);
                 if (keyCode == Key.Home) {
                     this.reset();
@@ -395,25 +396,33 @@ var app;
                     bone.addChild(sprite3);
                     // this.model.bindPose.forceKeyframe();
                 }
-                else if (keyCode == Key.Delete) {
-                    if (!this.interaction.success) {
-                        var selectedNode = this.model.getSelectedNode();
-                        if (selectedNode) {
-                            selectedNode.parent.removeChild(selectedNode);
+                else if (this.mode != EditMode.PLAYBACK) {
+                    if (keyCode == Key.Delete) {
+                        if (!this.interaction.success) {
+                            var selectedNode = this.model.getSelectedNode();
+                            if (selectedNode) {
+                                selectedNode.parent.removeChild(selectedNode);
+                            }
                         }
                     }
-                }
-                else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
-                    var node = this.model.getSelectedNode();
-                    if (node instanceof Sprite) {
-                        node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
-                        this.showMessage('Frame: ' + node.frame);
+                    else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
+                        var selectedNode = this.model.getSelectedNode();
+                        if (selectedNode) {
+                            this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey);
+                            this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
+                        }
+                    }
+                    else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
+                        var node = this.model.getSelectedNode();
+                        if (node instanceof Sprite) {
+                            node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
+                            this.showMessage('Frame: ' + node.frame);
+                        }
+                    }
+                    else if (keyCode == Key.Enter) {
+                        app.main.showSpriteSelector(this.onSpritesSelect);
                     }
                 }
-                else if (keyCode == Key.Enter) {
-                    app.main.showSpriteSelector(this.onSpritesSelect);
-                }
-                // }
             };
             Viewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;

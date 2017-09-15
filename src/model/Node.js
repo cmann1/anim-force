@@ -6,6 +6,8 @@ var app;
         var StructureChangeEvent = model_1.events.StructureChangeEvent;
         var PropertyChangeEvent = model_1.events.PropertyChangeEvent;
         var AABB = app.viewport.AABB;
+        var MAX_LAYER = 22;
+        var MAX_SUB_LAYER = 24;
         var Node = (function () {
             ///
             function Node(name) {
@@ -65,7 +67,27 @@ var app;
                     return this;
                 return this.parent.next(this);
             };
-            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) { return false; };
+            Node.prototype.increaseLayer = function (amount, subLayer) {
+                if (subLayer === void 0) { subLayer = false; }
+                if (subLayer) {
+                    this.subLayer += amount;
+                    if (this.subLayer < 0)
+                        this.subLayer = 0;
+                    else if (this.subLayer > MAX_SUB_LAYER)
+                        this.subLayer = MAX_SUB_LAYER;
+                }
+                else {
+                    this.layer += amount;
+                    if (this.layer < 0)
+                        this.layer = 0;
+                    else if (this.layer > MAX_LAYER)
+                        this.layer = MAX_LAYER;
+                }
+            };
+            //
+            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                return false;
+            };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
                 if (app.Config.showControls) {
                     // Do it in reverse order so that handles in front are checked first
@@ -154,6 +176,7 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            //
             Node.prototype.save = function () {
                 return {
                     id: this.id,

@@ -8,6 +8,9 @@ namespace app.model
 	import Interaction = app.viewport.Interaction;
 	import LoadData = app.projects.LoadData;
 
+	const MAX_LAYER = 22;
+	const MAX_SUB_LAYER = 24;
+
 	export class Node
 	{
 		static nextId:number = 0;
@@ -98,7 +101,28 @@ namespace app.model
 			return this.parent.next(this);
 		}
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean { return false }
+		public increaseLayer(amount:number, subLayer=false)
+		{
+			if(subLayer)
+			{
+				this.subLayer += amount;
+				if(this.subLayer < 0) this.subLayer = 0;
+				else if(this.subLayer > MAX_SUB_LAYER) this.subLayer = MAX_SUB_LAYER;
+			}
+			else
+			{
+				this.layer += amount;
+				if(this.layer < 0) this.layer = 0;
+				else if(this.layer > MAX_LAYER) this.layer = MAX_LAYER;
+			}
+		}
+
+		//
+
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		{
+			return false;
+		}
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
@@ -222,6 +246,8 @@ namespace app.model
 			this._name = value;
 			this.onPropertyChange('name');
 		}
+
+		//
 
 		public save():any
 		{

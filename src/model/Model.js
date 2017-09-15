@@ -297,6 +297,12 @@ var app;
                 this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
                 this.animationChange.dispatch(anim, new Event('setAnimation'));
             };
+            Model.prototype.increaseSelectedNodeLayer = function (amount, subLayer) {
+                if (subLayer === void 0) { subLayer = false; }
+                if (!this.selectedNode)
+                    return;
+                this.selectedNode.increaseLayer(amount, subLayer);
+            };
             Object.defineProperty(Model.prototype, "mode", {
                 get: function () {
                     return this._mode;
