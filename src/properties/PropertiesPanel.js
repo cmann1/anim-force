@@ -3,14 +3,21 @@ var app;
     var properties;
     (function (properties) {
         var AngelScriptExporter = app.exporters.AngelScriptExporter;
+        var SpriteGroupExporter = app.exporters.SpriteGroupExporter;
         var PropertiesPanel = (function () {
             function PropertiesPanel(model) {
                 var _this = this;
                 this.setModel(model);
                 this.$panel = $('#properties-panel');
                 // TODO: Remove
-                this.$panel.find('button.btn-export').on('click', function () {
+                this.$panel.find('button.btn-export-as').on('click', function () {
                     var out = (new AngelScriptExporter()).exportModel(_this.model);
+                    Utils.copyToClipboard(out);
+                    app.App.notice('Output copied to clipboard');
+                });
+                // TODO: Remove
+                this.$panel.find('button.btn-export-spr').on('click', function () {
+                    var out = (new SpriteGroupExporter()).exportModel(_this.model);
                     Utils.copyToClipboard(out);
                     app.App.notice('Output copied to clipboard');
                 });

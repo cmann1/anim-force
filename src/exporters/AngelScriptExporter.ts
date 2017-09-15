@@ -28,12 +28,15 @@ namespace app.exporters
 				if(node instanceof Sprite)
 				{
 					var sprite:Sprite = <Sprite> node;
-					spriteNodes.push(node);
-					spriteGroupList.push(sprite.asset.spriteSetName);
-					spriteNameList.push(sprite.asset.spriteName);
-					spriteLayers.push(sprite.layer);
-					spriteSubLayers.push(sprite.subLayer);
-					spritePalettes.push(sprite.palette);
+					if(sprite.asset)
+					{
+						spriteNodes.push(node);
+						spriteGroupList.push(sprite.asset.spriteSetName);
+						spriteNameList.push(sprite.asset.spriteName);
+						spriteLayers.push(sprite.layer);
+						spriteSubLayers.push(sprite.subLayer);
+						spritePalettes.push(sprite.palette);
+					}
 				}
 			}
 

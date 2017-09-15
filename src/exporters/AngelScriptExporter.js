@@ -31,12 +31,14 @@ var app;
                     var node = nodes_1[_i];
                     if (node instanceof Sprite) {
                         var sprite = node;
-                        spriteNodes.push(node);
-                        spriteGroupList.push(sprite.asset.spriteSetName);
-                        spriteNameList.push(sprite.asset.spriteName);
-                        spriteLayers.push(sprite.layer);
-                        spriteSubLayers.push(sprite.subLayer);
-                        spritePalettes.push(sprite.palette);
+                        if (sprite.asset) {
+                            spriteNodes.push(node);
+                            spriteGroupList.push(sprite.asset.spriteSetName);
+                            spriteNameList.push(sprite.asset.spriteName);
+                            spriteLayers.push(sprite.layer);
+                            spriteSubLayers.push(sprite.subLayer);
+                            spritePalettes.push(sprite.palette);
+                        }
                     }
                 }
                 var animIndex = 0;

@@ -1,8 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Export to sprite_group
- TODO: - Two buttons: export to clipboard, export to file
  TODO: Allow sprite frames to be animated
  TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
  TODO: Animation events
@@ -23,6 +21,9 @@
  TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
  TODO: ? Sprite colour
  TODO: ? Keyframe easing
+ TODO: Export options:
+ TODO: - sprite_group: Option to not use sprite layers and sublayers
+ TODO: - AngelScript: Selected animation only
  TODO: Timeline:
  TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
  TODO: - ???

@@ -3,6 +3,7 @@ namespace app.properties
 
 	import Model = app.model.Model;
 	import AngelScriptExporter = app.exporters.AngelScriptExporter;
+	import SpriteGroupExporter = app.exporters.SpriteGroupExporter;
 
 	export class PropertiesPanel
 	{
@@ -18,8 +19,14 @@ namespace app.properties
 			this.$panel = $('#properties-panel');
 
 			// TODO: Remove
-			this.$panel.find('button.btn-export').on('click', () => {
+			this.$panel.find('button.btn-export-as').on('click', () => {
 				var out = (new AngelScriptExporter()).exportModel(this.model);
+				Utils.copyToClipboard(out);
+				App.notice('Output copied to clipboard');
+			});
+			// TODO: Remove
+			this.$panel.find('button.btn-export-spr').on('click', () => {
+				var out = (new SpriteGroupExporter()).exportModel(this.model);
 				Utils.copyToClipboard(out);
 				App.notice('Output copied to clipboard');
 			});
