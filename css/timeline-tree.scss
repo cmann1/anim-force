@@ -25,17 +25,8 @@ div#timeline-tree-container{
 	overflow: auto;
 }
 div#timeline-tree-toolbar{
-	background-color: $ui-bg;
-	border-top: $border-size solid $border-colour;
-
-	padding: $ui-padding;
 	white-space: nowrap;
-	overflow: hidden;
-	display: flex;
-	flex-shrink: 0;
 	align-items: stretch;
-
-	user-select: none;
 
 	div{
 		white-space: nowrap;

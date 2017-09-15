@@ -35,7 +35,7 @@ var app;
                 this.isOpen = true;
                 this.$input.val(value === null ? '' : value);
                 this.dlg.open();
-                this.$input.focus();
+                this.$input.select();
             };
             PromptDlg.prototype.setContent = function (content) { console.log('Set content not allowed on PromptDlg'); };
             PromptDlg.getOptions = function (options) {

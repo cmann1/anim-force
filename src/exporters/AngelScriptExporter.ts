@@ -113,49 +113,49 @@ namespace app.exporters
 			}
 
 
-return `class ${className} : trigger_base{
+			return `class ${className} : trigger_base{
 	scene@ g;
 	script@ script;
 	scripttrigger@ self;
 
-	[hidden] int _sprite_count = ${spriteGroupList.length};
-	[hidden] array<string> _sprite_sets = {'${spriteGroupList.join("','")}'};
-	[hidden] array<string> _sprite_names = {'${spriteNameList.join("','")}'};
-	[hidden] array<sprites@> _sprite_list(_sprite_count);
-	[hidden] array<int> _layers = {${spriteLayers.join(',')}};
-	[hidden] array<int> _sub_layers = {${spriteSubLayers.join(',')}};
-	[hidden] array<int> _palettes = {${spritePalettes.join(',')}};
+	int sprites_count = ${spriteGroupList.length};
+	array<string> sprites_sets = {'${spriteGroupList.join("','")}'};
+	array<string> sprites_names = {'${spriteNameList.join("','")}'};
+	array<sprites@> sprites_list(sprites_count);
+	array<int> sprites_layers = {${spriteLayers.join(',')}};
+	array<int> sprites_sublayers = {${spriteSubLayers.join(',')}};
+	array<int> sprites_palettes = {${spritePalettes.join(',')}};
 	
 	// Animations
-	[hidden] array<int> _frame_count = {${animFrameCount.join(',')}};
-	[hidden] array<float> _fps_step = {${animFps.join(',')}};
-	[hidden] array<bool> _loop = {${animLoop.join(',')}};
-	[hidden] array<array<int>> _frames = {{${outFrames.join('},{')}}};
-	[hidden] array<array<float>> _x = {{${outX.join('},{')}}};
-	[hidden] array<array<float>> _y = {{${outY.join('},{')}}};
-	[hidden] array<array<float>> _rotation = {{${outRotation.join('},{')}}};
-	[hidden] array<array<float>> _scale_x = {{${outScaleX.join('},{')}}};
-	[hidden] array<array<float>> _scale_y = {{${outScaleY.join('},{')}}};
-	[hidden] dictionary _names = {{'__bind__', 0}};
+	array<int> anims_frame_count = {${animFrameCount.join(',')}};
+	array<float> anims_fps_step = {${animFps.join(',')}};
+	array<bool> anims_loop = {${animLoop.join(',')}};
+	array<array<int>> anims_sprite_frame = {{${outFrames.join('},{')}}};
+	array<array<float>> anims_x = {{${outX.join('},{')}}};
+	array<array<float>> anims_y = {{${outY.join('},{')}}};
+	array<array<float>> anims_rotation = {{${outRotation.join('},{')}}};
+	array<array<float>> anims_scale_x = {{${outScaleX.join('},{')}}};
+	array<array<float>> anims_scale_y = {{${outScaleY.join('},{')}}};
+	dictionary anims_name = {{'__bind__', 0}};
 	
 	// Current animation
-	[hidden] float _anim_frame = 0;
-	[hidden] int _anim_frame_count = _frame_count[0];
-	[hidden] float _anim_fps_step = _fps_step[0];
-	[hidden] bool _anim_loop = _loop[0];
-	[hidden] array<int>@ _anim_frames = @_frames[0];
-	[hidden] array<float>@ _anim_x = @_x[0];
-	[hidden] array<float>@ _anim_y = @_y[0];
-	[hidden] array<float>@ _anim_rotation = @_rotation[0];
-	[hidden] array<float>@ _anim_scale_x = @_scale_x[0];
-	[hidden] array<float>@ _anim_scale_y = @_scale_y[0];
+	[hidden] float current_frame = 0;
+	[hidden] int current_frame_count = 0;
+	[hidden] float current_fps_step = 0;
+	[hidden] bool current_loop = false;
+	[hidden] array<int>@ current_sprite_frame = @null;
+	[hidden] array<float>@ current_x = @null;
+	[hidden] array<float>@ current_y = @null;
+	[hidden] array<float>@ current_rotation = @null;
+	[hidden] array<float>@ current_scale_x = @null;
+	[hidden] array<float>@ current_scale_y = @null;
 	
 	${className}(){
 		@g = get_scene();
 		
-		for(int i = 0; i < _sprite_count; i++){
-			sprites@ spr = @_sprite_list[i] = create_sprites();
-			spr.add_sprite_set(_sprite_sets[i]);
+		for(int i = 0; i < sprites_count; i++){
+			sprites@ spr = @sprites_list[i] = create_sprites();
+			spr.add_sprite_set(sprites_sets[i]);
 		}
 	}
 	
@@ -163,13 +163,24 @@ return `class ${className} : trigger_base{
 	{
 		@this.script = @script;
 		@this.self = @self;
+		
+		current_frame = 0;
+		current_frame_count = anims_frame_count[0];
+		current_fps_step = anims_fps_step[0];
+		current_loop = anims_loop[0];
+		@current_sprite_frame = @anims_sprite_frame[0];
+		@current_x = @anims_x[0];
+		@current_y = @anims_y[0];
+		@current_rotation = @anims_rotation[0];
+		@current_scale_x = @anims_scale_x[0];
+		@current_scale_y = @anims_scale_y[0];
 	}
 	
 	void step(){
-		_anim_frame += _anim_fps_step;
+		current_frame += current_fps_step;
 		
-		if(_anim_frame > _anim_frame_count - 1){
-			_anim_frame = _anim_loop ? 0 : _anim_frame_count - 1;
+		if(current_frame > current_frame_count - 1){
+			current_frame = current_loop ? 0 : current_frame_count - 1;
 		}
 	}
 	
@@ -179,18 +190,18 @@ return `class ${className} : trigger_base{
 		
 		const uint colour = 0xFFFFFFFF;
 		
-		const int fi = int(_anim_frame) * _sprite_count;
+		const int fi = int(current_frame) * sprites_count;
 		
-		for(int i = 0; i < _sprite_count; i++){
-			_sprite_list[i].draw_world(
-				_layers[i], _sub_layers[i], _sprite_names[i],
-				_anim_frames[fi + i], _palettes[i],
-				x + _anim_x[fi + i], y + _anim_y[fi + i], _anim_rotation[fi + i],
-				_anim_scale_x[fi + i], _anim_scale_y[fi + i], colour);
-			g.draw_rectangle_world(22, 20, x + _anim_x[fi + i]-4, y + _anim_y[fi + i]-4, x + _anim_x[fi + i]+4, y + _anim_y[fi + i]+4, 0, i >= 2 ? 0xFF0000FF : (i == 1 ? 0xFF00FF00 : 0xFFFF0000));
+		for(int i = 0; i < sprites_count; i++){
+			sprites_list[i].draw_world(
+				sprites_layers[i], sprites_sublayers[i], sprites_names[i],
+				current_sprite_frame[fi + i], sprites_palettes[i],
+				x + current_x[fi + i], y + current_y[fi + i], current_rotation[fi + i],
+				current_scale_x[fi + i], current_scale_y[fi + i], colour);
+			//g.draw_rectangle_world(22, 20, x + current_x[fi + i]-4, y + current_y[fi + i]-4, x + current_x[fi + i]+4, y + current_y[fi + i]+4, 0, i >= 2 ? 0xFF0000FF : (i == 1 ? 0xFF00FF00 : 0xFFFF0000));
 		}
 		
-		g.draw_rectangle_world(22, 20, x-4, y-4, x+4, y+4, 0, 0xFFFF0000);
+		//g.draw_rectangle_world(22, 20, x-4, y-4, x+4, y+4, 0, 0xFFFF0000);
 	}
 	
 	void editor_draw(float sub_frame){

@@ -415,7 +415,11 @@ var app;
                     app.main.showSpriteSelector(this.onSpritesSelect);
                 }
                 else if (keyCode == Key.E) {
-                    console.log((new AngelScriptExporter()).exportModel(this.model));
+                    var out = (new AngelScriptExporter()).exportModel(this.model);
+                    Utils.copyToClipboard(out);
+                    app.App.notice('Output copied to clipboard');
+                    event.preventDefault();
+                    return false;
                 }
                 // }
             };

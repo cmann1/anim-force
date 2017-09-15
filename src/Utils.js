@@ -44,5 +44,11 @@ var Utils;
         return ax.length - bx.length;
     }
     Utils.naturalCompare = naturalCompare;
+    function copyToClipboard(text) {
+        var $input = $('<textarea>').val(text).appendTo(app.$body).select();
+        document.execCommand('copy');
+        $input.remove();
+    }
+    Utils.copyToClipboard = copyToClipboard;
 })(Utils || (Utils = {}));
 //# sourceMappingURL=Utils.js.map

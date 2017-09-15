@@ -15,13 +15,6 @@ canvas#timeline{
 }
 
 #timeline-toolbar{
-	background-color: $ui-bg;
-	border-top: $border-size solid $border-colour;
-
-	display: flex;
-	padding: $ui-padding;
-	user-select: none;
-
 	select{
 		width: 160px;
 		margin: 0 2px;

@@ -71,4 +71,11 @@ namespace Utils
 		return ax.length - bx.length;
 	}
 
+	export function copyToClipboard(text)
+	{
+		var $input = $('<textarea>').val(text).appendTo(app.$body).select();
+		document.execCommand('copy');
+		$input.remove();
+	}
+
 }

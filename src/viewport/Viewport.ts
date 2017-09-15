@@ -594,7 +594,11 @@ namespace app.viewport
 				// TODO: REMOVE
 				else if(keyCode == Key.E)
 				{
-					console.log((new AngelScriptExporter()).exportModel(this.model));
+					var out = (new AngelScriptExporter()).exportModel(this.model);
+					Utils.copyToClipboard(out);
+					App.notice('Output copied to clipboard');
+					event.preventDefault();
+					return false;
 				}
 			// }
 

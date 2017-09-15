@@ -94,6 +94,8 @@
 	<script src="src/projects/Project.js"></script>
 	<script src="src/projects/ProjectManager.js"></script>
 	
+	<script src="src/properties/PropertiesPanel.js"></script>
+	
 	<script src="src/AnimForce.js"></script>
 
 </head>
@@ -104,11 +106,11 @@
 		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
 		<i class="fa fa-gear btn settings-btn"></i>
 	</div>
+	
 	<div id="timeline-panel">
-		
 		<div id="timeline-tree" tabindex="1">
 			<div id="timeline-tree-container"></div>
-			<div id="timeline-tree-toolbar">
+			<div id="timeline-tree-toolbar" class="toolbar bottom">
 				<div>
 					<i class="fa fa-plus btn btn-add" title="Add"></i>
 					<div class="add-menu">
@@ -119,13 +121,13 @@
 				<div class="flex-filler"></div>
 				<i class="fa fa-close btn btn-delete" title="Delete"></i>
 			</div>
-		</div>
+		</div><!-- timeline-tree -->
 		
 		<div id="timeline-container">
 			<div id="time-canvas-container">
 				<canvas id="timeline" tabindex="2" class="no-select"></canvas>
 			</div>
-			<div id="timeline-toolbar">
+			<div id="timeline-toolbar" class="toolbar bottom">
 				<i class="fa fa-play btn btn-play anim-controls" data-action="play" title="Play • /"></i>
 				<i class="fa fa-pause btn btn-pause anim-controls" data-action="pause" title="Pause • /"></i>
 				<i class="fa fa-backward btn btn-prev anim-controls" data-action="prev-frame" title="Previous Frame • <"></i>
@@ -148,13 +150,18 @@
 				<i class="fa fa-plus btn btn-add-anim" data-action="add-anim" title="New Animation"></i>
 				<i class="fa fa-close btn btn-delete-anim" data-action="delete-anim" title="Delete Animation"></i>
 			</div>
-		</div>
+		</div> <!-- timeline-container -->
+	</div> <!-- timeline-panel -->
+</div>
+
+<div id="properties-panel">
+	<div class="top">
+		<button class="button btn-export">Export</button>
+	</div>
+	<div class="toolbar bottom">
 		
 	</div>
-</div>
-<div id="properties-panel">
-	
-</div>
+</div><!-- properties-panel -->
 
 <div id="sprite_selector" style="display: none">
 	

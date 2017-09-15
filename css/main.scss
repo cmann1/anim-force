@@ -7,6 +7,7 @@
 @import 'timeline';
 @import 'sprite-selector';
 @import 'project-manager';
+@import 'properties-panel';
 
 ::-webkit-scrollbar{
 	width: 8px;
@@ -20,6 +21,10 @@
 ::-webkit-scrollbar-thumb{
 	background: #909090;
 }
+
+/* ------------------------------------------------------------------ */
+/* LAYOUT */
+/* ------------------------------------------------------------------ */
 
 html, body{
 	overflow: hidden;
@@ -50,24 +55,6 @@ html, body{
 	}
 }
 
-.no-select {
-	user-select: none;
-}
-.flex-filler{
-	flex-grow: 1;
-	min-width: 10px;
-	min-height: 10px;
-}
-.flex-filler.wide{
-	min-width: 20px;
-	min-height: 20px;
-}
-.toolbar-separator{
-	width: 1px;
-	background: $border-colour;
-	margin: 0 5px;
-}
-
 div#viewport-container{
 	position: absolute;
 
@@ -83,9 +70,6 @@ canvas#viewport{
 	height: 100%;
 	outline: 0;
 }
-div#properties-panel{
-	background: indianred;
-}
 div#timeline-panel{
 	position: absolute;
 }
@@ -100,6 +84,10 @@ div#timeline-panel{
 	box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
 	border-radius: 4px;
 }
+
+/* ------------------------------------------------------------------ */
+/* COMMON */
+/* ------------------------------------------------------------------ */
 
 i.btn.fa{
 	padding: 4px;
@@ -119,6 +107,68 @@ div.disabled
 {
 	color: $disabled-color !important;
 }
+
+.no-select {
+	user-select: none;
+}
+.flex-filler{
+	flex-grow: 1;
+	min-width: 10px;
+	min-height: 10px;
+}
+.flex-filler.wide{
+	min-width: 20px;
+	min-height: 20px;
+}
+.toolbar-separator{
+	width: 1px;
+	background: $border-colour;
+	margin: 0 5px;
+}
+
+.dialog.button-layout{
+	display: flex !important;
+	flex-direction: column;
+	height: 100%;
+
+	.content-pane{
+		flex-shrink: 1;
+		flex-grow: 1;
+		height: 100%;
+		overflow: hidden;
+		align-self: flex-start;
+	}
+}
+.dialog .button-bar{
+	margin-top: 10px;
+	padding-top: 10px;
+	border-top: 1px solid $border-colour;
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+}
+.dialog .button-bar button + button{
+	margin-left: 5px;
+}
+
+.toolbar{
+	display: flex;
+	flex-shrink: 0;
+	overflow: hidden;
+	padding: $ui-padding;
+
+	background-color: $ui-bg;
+
+	user-select: none;
+
+	&.bottom{
+		border-top: $border-size solid $border-colour;
+	}
+}
+
+/* ------------------------------------------------------------------ */
+/* JBOX */
+/* ------------------------------------------------------------------ */
 
 .jBox-overlay.clear{
 	background: transparent !important;
@@ -140,7 +190,6 @@ body .jBox-Modal .jBox-title {
 .jBox-Modal .jBox-title i{
 	margin-right: 10px;
 }
-
 .jBox-Modal.info .jBox-title i{
 	color: #599BDC;
 }
@@ -165,6 +214,10 @@ body .jBox-Modal .jBox-title {
 	background: #333;
 }
 
+.jBox-Notice{
+	user-select: none;
+	pointer-events: none;
+}
 .jBox-Notice .jBox-content {
 	box-shadow: 0 0 8px rgba(0,0,0,0.25);
 }
@@ -174,29 +227,4 @@ body .jBox-Modal .jBox-title {
 
 .jBox-wrapper.jbox-dialog-wrapper .jBox-content{
 	overflow: visible;
-}
-.dialog.button-layout
-{
-	display: flex !important;
-	flex-direction: column;
-	height: 100%;
-
-	.content-pane{
-		flex-shrink: 1;
-		flex-grow: 1;
-		height: 100%;
-		overflow: hidden;
-		align-self: flex-start;
-	}
-}
-.dialog .button-bar{
-	margin-top: 10px;
-	padding-top: 10px;
-	border-top: 1px solid $border-colour;
-	display: flex;
-	flex-shrink: 0;
-	align-items: center;
-}
-.dialog .button-bar button + button{
-	margin-left: 5px;
 }

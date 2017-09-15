@@ -22,7 +22,7 @@ namespace app.ui
 
 			this.$input.val(value === null ? '' : value);
 			this.dlg.open();
-			this.$input.focus();
+			this.$input.select();
 		}
 
 		public setContent(content:string|HTMLElement|JQuery) { console.log('Set content not allowed on PromptDlg'); }

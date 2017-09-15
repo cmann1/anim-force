@@ -278,15 +278,8 @@ div#timeline-tree-container {
   overflow: auto; }
 
 div#timeline-tree-toolbar {
-  background-color: #ECECEC;
-  border-top: 1px solid #C1C1C1;
-  padding: 5px;
   white-space: nowrap;
-  overflow: hidden;
-  display: flex;
-  flex-shrink: 0;
-  align-items: stretch;
-  user-select: none; }
+  align-items: stretch; }
   div#timeline-tree-toolbar div {
     white-space: nowrap;
     overflow: hidden;
@@ -389,22 +382,16 @@ canvas#timeline {
   position: absolute;
   outline: 0; }
 
-#timeline-toolbar {
-  background-color: #ECECEC;
-  border-top: 1px solid #C1C1C1;
-  display: flex;
-  padding: 5px;
-  user-select: none; }
-  #timeline-toolbar select {
-    width: 160px;
-    margin: 0 2px; }
-  #timeline-toolbar .frame-label {
-    vertical-align: middle;
-    padding-top: 3px;
-    margin: 0 10px;
-    white-space: nowrap; }
-  #timeline-toolbar .btn-play, #timeline-toolbar .btn-pause {
-    width: 12px; }
+#timeline-toolbar select {
+  width: 160px;
+  margin: 0 2px; }
+#timeline-toolbar .frame-label {
+  vertical-align: middle;
+  padding-top: 3px;
+  margin: 0 10px;
+  white-space: nowrap; }
+#timeline-toolbar .btn-play, #timeline-toolbar .btn-pause {
+  width: 12px; }
 
 #sprite_selector {
   width: 900px; }
@@ -478,6 +465,14 @@ canvas#timeline {
 .project-manager-dlg .options {
   margin-right: 10px; }
 
+#properties-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column; }
+  #properties-panel .top {
+    padding: 10px;
+    flex-grow: 1; }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px; }
@@ -488,6 +483,9 @@ canvas#timeline {
 ::-webkit-scrollbar-thumb {
   background: #909090; }
 
+/* ------------------------------------------------------------------ */
+/* LAYOUT */
+/* ------------------------------------------------------------------ */
 html, body {
   overflow: hidden;
   width: 100%;
@@ -512,23 +510,6 @@ html, body {
   #app-loading-screen .content {
     margin: 0 auto; }
 
-.no-select {
-  user-select: none; }
-
-.flex-filler {
-  flex-grow: 1;
-  min-width: 10px;
-  min-height: 10px; }
-
-.flex-filler.wide {
-  min-width: 20px;
-  min-height: 20px; }
-
-.toolbar-separator {
-  width: 1px;
-  background: #C1C1C1;
-  margin: 0 5px; }
-
 div#viewport-container {
   position: absolute; }
   div#viewport-container i.settings-btn {
@@ -542,9 +523,6 @@ canvas#viewport {
   height: 100%;
   outline: 0; }
 
-div#properties-panel {
-  background: indianred; }
-
 div#timeline-panel {
   position: absolute; }
 
@@ -557,6 +535,9 @@ div#timeline-panel {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
   border-radius: 4px; }
 
+/* ------------------------------------------------------------------ */
+/* COMMON */
+/* ------------------------------------------------------------------ */
 i.btn.fa {
   padding: 4px;
   margin: 0 2px;
@@ -574,6 +555,58 @@ i.btn.fa.disabled, i.fa.disabled:hover {
 div.disabled {
   color: #b5b5b5 !important; }
 
+.no-select {
+  user-select: none; }
+
+.flex-filler {
+  flex-grow: 1;
+  min-width: 10px;
+  min-height: 10px; }
+
+.flex-filler.wide {
+  min-width: 20px;
+  min-height: 20px; }
+
+.toolbar-separator {
+  width: 1px;
+  background: #C1C1C1;
+  margin: 0 5px; }
+
+.dialog.button-layout {
+  display: flex !important;
+  flex-direction: column;
+  height: 100%; }
+  .dialog.button-layout .content-pane {
+    flex-shrink: 1;
+    flex-grow: 1;
+    height: 100%;
+    overflow: hidden;
+    align-self: flex-start; }
+
+.dialog .button-bar {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #C1C1C1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center; }
+
+.dialog .button-bar button + button {
+  margin-left: 5px; }
+
+.toolbar {
+  display: flex;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding: 5px;
+  background-color: #ECECEC;
+  user-select: none; }
+  .toolbar.bottom {
+    border-top: 1px solid #C1C1C1; }
+
+/* ------------------------------------------------------------------ */
+/* JBOX */
+/* ------------------------------------------------------------------ */
 .jBox-overlay.clear {
   background: transparent !important;
   opacity: 1 !important; }
@@ -610,6 +643,10 @@ body .jBox-Modal .jBox-title {
 .jBox-Mouse.jBox-TooltipDark .jBox-pointer:after {
   background: #333; }
 
+.jBox-Notice {
+  user-select: none;
+  pointer-events: none; }
+
 .jBox-Notice .jBox-content {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.25); }
 
@@ -618,27 +655,5 @@ body .jBox-Modal .jBox-title {
 
 .jBox-wrapper.jbox-dialog-wrapper .jBox-content {
   overflow: visible; }
-
-.dialog.button-layout {
-  display: flex !important;
-  flex-direction: column;
-  height: 100%; }
-  .dialog.button-layout .content-pane {
-    flex-shrink: 1;
-    flex-grow: 1;
-    height: 100%;
-    overflow: hidden;
-    align-self: flex-start; }
-
-.dialog .button-bar {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #C1C1C1;
-  display: flex;
-  flex-shrink: 0;
-  align-items: center; }
-
-.dialog .button-bar button + button {
-  margin-left: 5px; }
 
 /*# sourceMappingURL=main.css.map */

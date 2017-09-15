@@ -1,10 +1,16 @@
 /*
- TODO: Ordered TODO:
+ Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Project Manager:
- TODO: - Import from file
  TODO: Export to AngelScript
  TODO: - Multiple animations
+ TODO: - Changing animation
+ TODO: - Setting position/frame
+ TODO: - Next/prev frame
+ TODO: Per animation option to loop on second last frame
+ TODO: - This must also affect output/export
+ TODO: Keyboard shortcuts for changing layer and sublayer
+ TODO: Export to sprite_group
+ TODO: - Two buttons: export to clipboard, export to file
  TODO: Allow sprite frames to be animated
  TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
  TODO: Animation events
@@ -16,16 +22,14 @@
  TODO: - Auto show when adding a sprite
  TODO: - - Auto set sprite node name to sprite name
  TODO: - Add cancel button
- TODO: Export to sprite_group
- TODO: - copy to clipboard when exporting
  TODO: Property panel:
  TODO: - ????
  ---------------------------------------------------------------
 
- TODO: Ghosts
+ TODO: ? Ghosts
  TODO: Copy/paste nodes (with and without animation tracks)
  TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
- TODO: Keyboard shortcuts for changing layer and sublayer
+ TODO: ? Sprite colour
  TODO: ? Keyframe easing
  TODO: Timeline:
  TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
@@ -60,6 +64,7 @@ namespace app
 		protected _spriteManager:SpriteManager;
 		protected viewport:app.viewport.Viewport;
 		protected timeline:app.timeline.TimelinePanel;
+		protected propertiesPanel:app.properties.PropertiesPanel;
 
 		protected project:Project;
 		protected model:Model = new Model(); // A blank model so things work before a project is loaded
@@ -123,6 +128,7 @@ namespace app
 		{
 			this.viewport = new app.viewport.Viewport('viewport', this.model);
 			this.timeline = new app.timeline.TimelinePanel(this.model);
+			this.propertiesPanel = new app.properties.PropertiesPanel(this.model);
 
 			new Splitter($('#col-left'), $('#properties-panel'), SplitterOrientation.HORIZONTAL, 200, SplitterAnchor.SECOND, 'properties');
 			new Splitter(this.viewport.getContainer(), this.timeline.getContainer(), SplitterOrientation.VERTICAL, 200, SplitterAnchor.SECOND, 'timeline');
@@ -177,6 +183,7 @@ namespace app
 
 			this.viewport.setModel(project.activeModel);
 			this.timeline.setModel(project.activeModel);
+			this.propertiesPanel.setModel(project.activeModel);
 
 			this.viewport.focus();
 		}
