@@ -15,8 +15,8 @@ var app;
             if (typeof (obj) == 'string') {
                 obj = this.get(obj);
             }
-            obj.get = this.get;
-            obj.asLoadData = this.asLoadData;
+            obj.get = LoadData_get;
+            obj.asLoadData = LoadData_asLoadData;
             return obj;
         }
         var ProjectManager = (function () {
@@ -56,7 +56,7 @@ var app;
                  * Events
                  */
                 this.onConfirm = function (name, value) {
-                    console.log('onConfirm', name, value);
+                    // console.log('onConfirm', name, value);
                     if (name == 'NewProject') {
                         _this.newProject();
                     }
@@ -97,7 +97,7 @@ var app;
                         _this.rename(projectId, projectName);
                     }
                     else if (action == 'export') {
-                        _this.export(projectId, projectName);
+                        _this.exportProject(projectId, projectName);
                     }
                     else if (action == 'delete') {
                         _this.askDeleteProject(projectId, projectName);
@@ -139,8 +139,7 @@ var app;
                 };
                 this.onProjectManagerButtonClick = function (buttonId) {
                     if (buttonId == 'Import') {
-                        // TODO: Implement import
-                        console.log('Importing');
+                        _this.askImport();
                     }
                 };
                 this.onSaveAsConfirm = function (name, value) {
@@ -249,16 +248,72 @@ var app;
                     this.setLoadingMessage('No projects found');
                 }
             };
-            ProjectManager.prototype.export = function (projectId, projectName) {
+            ProjectManager.prototype.exportProject = function (projectId, projectName) {
                 this.projectsDb.get(String(projectId)).then(function (doc) {
                     delete doc._id;
                     delete doc._rev;
+                    delete doc.date;
                     var blob = new Blob([JSON.stringify(doc)], { type: 'text/json;charset=utf-8' });
                     saveAs(blob, projectName + '.json');
                 }).catch(function (error) {
                     app.App.notice("ERROR: Unable to read project for export: <strong>" + projectName + "</strong>", 'red');
                     console.error(error);
                 });
+            };
+            ProjectManager.prototype.importFromFile = function (file) {
+                var _this = this;
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    try {
+                        var doc = JSON.parse(event.target.result);
+                        doc.date = new Date().toJSON();
+                        // console.log(doc);
+                        if (!doc.name)
+                            throw new Error();
+                        var projectName = doc.name;
+                        _this.projectsDb.find({
+                            selector: {
+                                name: { $eq: name }
+                            },
+                            fields: ['_id', '_rev'],
+                            limit: 1
+                        }).then(function (results) {
+                            if (results.docs.length) {
+                                app.App.notice('Cannot import: A project with that name already exists');
+                            }
+                            else {
+                                _this.projectsDb.post(doc).then(function (response) {
+                                    _this.loadProjects();
+                                    app.App.notice('Project imported');
+                                }).catch(function (err) {
+                                    app.App.notice('Error importing project', 'red');
+                                    console.error(err);
+                                });
+                            }
+                        }).catch(function (error) {
+                            app.App.notice('There was an error reading from the database');
+                            console.error(error);
+                        });
+                    }
+                    catch (error) {
+                        app.App.notice('Cannot import: Invalid JSON data', 'red');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            ProjectManager.prototype.loadProjects = function () {
+                this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
+                this.disableButton(this.$openBtn);
+                this.disableButton(this.$importBtn);
+                this.$loadLastInput.prop('checked', app.Config.loadLastProjectOnStartUp);
+                this.projectsDb.find({
+                    selector: {
+                        name: { $gte: null },
+                        date: { $gte: null }
+                    },
+                    fields: ['_id', 'name'],
+                    sort: [{ 'date': 'desc' }]
+                }).then(this.updateProjectsList);
             };
             ProjectManager.prototype.newProject = function () {
                 this.activeProject = new projects.Project('New Project');
@@ -275,8 +330,7 @@ var app;
                 this.projectManagerDlg && this.projectManagerDlg.close();
                 this.projectsDb.get(String(projectId)).then(function (doc) {
                     try {
-                        doc.get = LoadData_get;
-                        doc.asLoadData = LoadData_asLoadData;
+                        doc = LoadData_asLoadData(doc);
                         _this.activeProject = projects.Project.load(doc);
                         app.Config.set('activeProject', _this.activeProject.id);
                         app.Config.set('activeProjectName', _this.activeProject.name);
@@ -376,6 +430,19 @@ var app;
             //
             ProjectManager.prototype.askDeleteProject = function (projectId, projectName) {
                 this.showConfirmDlg('Confirm Delete', "<strong>" + projectName + "</strong><br><br>\n\t\t\t\tAre you sure you want to delete this project?<br>\n\t\t\t\tThis action cannot be undone.", 'DeleteProject', projectId);
+            };
+            ProjectManager.prototype.askImport = function () {
+                var _this = this;
+                if (!this.$fileOpenInput) {
+                    this.$fileOpenInput = $('<input>').prop({
+                        type: 'file',
+                        // multiple: true,
+                        accept: '.json'
+                    }).on('change', function (event) {
+                        _this.importFromFile(_this.$fileOpenInput.prop('files')[0]);
+                    });
+                }
+                this.$fileOpenInput.trigger('click');
             };
             ProjectManager.prototype.rename = function (projectId, projectName) {
                 this.renameProjectId = projectId;
@@ -537,18 +604,7 @@ var app;
                 }
                 if (!this.pushDlg(this.projectManagerDlg))
                     return;
-                this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
-                this.disableButton(this.$openBtn);
-                this.disableButton(this.$importBtn);
-                this.$loadLastInput.prop('checked', app.Config.loadLastProjectOnStartUp);
-                this.projectsDb.find({
-                    selector: {
-                        name: { $gte: null },
-                        date: { $gte: null }
-                    },
-                    fields: ['_id', 'name'],
-                    sort: [{ 'date': 'desc' }]
-                }).then(this.updateProjectsList);
+                this.loadProjects();
                 this.projectManagerDlg.show();
             };
             ProjectManager.prototype.showPromptDlg = function (name, title, value, confirm) {

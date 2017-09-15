@@ -28,8 +28,8 @@ namespace app.projects
 			obj = this.get(obj);
 		}
 
-		obj.get = this.get;
-		obj.asLoadData = this.asLoadData;
+		obj.get = LoadData_get;
+		obj.asLoadData = LoadData_asLoadData;
 
 		return obj;
 	}
@@ -54,6 +54,8 @@ namespace app.projects
 
 		private projectManagerDlg:Dialog;
 		private projectListTooltips:jBox;
+
+		private $fileOpenInput:JQuery;
 
 		private $selectedProjectItem:JQuery = null;
 
@@ -154,11 +156,12 @@ namespace app.projects
 			}
 		}
 
-		private export(projectId, projectName)
+		private exportProject(projectId, projectName)
 		{
 			this.projectsDb.get(String(projectId)).then((doc:any) => {
 				delete doc._id;
 				delete doc._rev;
+				delete doc.date;
 
 				var blob = new Blob([JSON.stringify(doc)], {type: 'text/json;charset=utf-8'});
 				saveAs(blob, projectName + '.json');
@@ -167,6 +170,72 @@ namespace app.projects
 				App.notice(`ERROR: Unable to read project for export: <strong>${projectName}</strong>`, 'red');
 				console.error(error);
 			});
+		}
+
+		private importFromFile(file:File)
+		{
+			var reader = new FileReader();
+			reader.onload = (event:any) => {
+				try
+				{
+					var doc:LoadData = JSON.parse(event.target.result);
+					doc.date = new Date().toJSON();
+					// console.log(doc);
+
+					if(!doc.name) throw new Error();
+					var projectName = doc.name;
+
+					this.projectsDb.find({
+						selector: {
+							name: {$eq: name}
+						},
+						fields: ['_id', '_rev'],
+						limit: 1
+					}).then((results:any) => {
+						if(results.docs.length)
+						{
+							App.notice('Cannot import: A project with that name already exists');
+						}
+						else
+						{
+							this.projectsDb.post(<any> doc).then((response:any) => {
+								this.loadProjects();
+								App.notice('Project imported');
+							}).catch((err) => {
+								App.notice('Error importing project', 'red');
+								console.error(err);
+							});
+						}
+					}).catch((error) => {
+						App.notice('There was an error reading from the database');
+						console.error(error);
+					});
+				}
+				catch(error)
+				{
+					App.notice('Cannot import: Invalid JSON data', 'red');
+				}
+			};
+
+			reader.readAsText(file);
+		}
+
+		private loadProjects()
+		{
+			this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
+
+			this.disableButton(this.$openBtn);
+			this.disableButton(this.$importBtn);
+			this.$loadLastInput.prop('checked', Config.loadLastProjectOnStartUp);
+
+			this.projectsDb.find({
+				selector: {
+					name: {$gte: null},
+					date: {$gte: null}
+				},
+				fields: ['_id', 'name'],
+				sort: [{'date': 'desc'}]
+			}).then(this.updateProjectsList);
 		}
 
 		private newProject()
@@ -188,8 +257,7 @@ namespace app.projects
 			this.projectsDb.get(String(projectId)).then((doc:any) => {
 				try
 				{
-					doc.get = LoadData_get;
-					doc.asLoadData = LoadData_asLoadData;
+					doc = LoadData_asLoadData(doc);
 
 					this.activeProject = Project.load(doc);
 					Config.set('activeProject', this.activeProject.id);
@@ -312,6 +380,22 @@ namespace app.projects
 				'DeleteProject',
 				projectId
 			);
+		}
+
+		private askImport()
+		{
+			if(!this.$fileOpenInput)
+			{
+				this.$fileOpenInput = $('<input>').prop({
+					type: 'file',
+					// multiple: true,
+					accept: '.json'
+				}).on('change', (event) => {
+					this.importFromFile(this.$fileOpenInput.prop('files')[0]);
+				});
+			}
+
+			this.$fileOpenInput.trigger('click');
 		}
 
 		private rename(projectId:string, projectName:string)
@@ -533,21 +617,7 @@ namespace app.projects
 
 			if(!this.pushDlg(this.projectManagerDlg)) return;
 
-			this.setLoadingMessage('<i class="fa fa-spinner fa-spin"></i> Loading...');
-
-			this.disableButton(this.$openBtn);
-			this.disableButton(this.$importBtn);
-			this.$loadLastInput.prop('checked', Config.loadLastProjectOnStartUp);
-
-			this.projectsDb.find({
-				selector: {
-					name: {$gte: null},
-					date: {$gte: null}
-				},
-				fields: ['_id', 'name'],
-				sort: [{'date': 'desc'}]
-			}).then(this.updateProjectsList);
-
+			this.loadProjects();
 			this.projectManagerDlg.show();
 		}
 
@@ -618,7 +688,7 @@ namespace app.projects
 
 		private onConfirm = (name:string, value:any) =>
 		{
-			console.log('onConfirm', name, value);
+			// console.log('onConfirm', name, value);
 
 			if(name == 'NewProject')
 			{
@@ -683,7 +753,7 @@ namespace app.projects
 			}
 			else if(action == 'export')
 			{
-				this.export(projectId, projectName);
+				this.exportProject(projectId, projectName);
 			}
 			else if(action == 'delete')
 			{
@@ -759,8 +829,7 @@ namespace app.projects
 		{
 			if(buttonId == 'Import')
 			{
-				// TODO: Implement import
-				console.log('Importing');
+				this.askImport();
 			}
 		};
 
