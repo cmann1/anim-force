@@ -1,13 +1,15 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
+ TODO: Issue with isnerting frames
  TODO: Animation events
  TODO: Anchor nodes
+ TODO: Copy/paste nodes
  TODO: Sprite Selector:
  TODO: - Improve all-round / Completely redo
  TODO: - Remember state, scroll position, etc.
  TODO: - Lazy load/create groups
- TODO: - Auto show when adding a sprite
+ TODO: - ? Auto show when adding a sprite
  TODO: - - Auto set sprite node name to sprite name
  TODO: - Add cancel button
  TODO: Property panel:
@@ -15,7 +17,6 @@
  ---------------------------------------------------------------
 
  TODO: ? Ghosts
- TODO: Copy/paste nodes (with and without animation tracks)
  TODO: ? Sprite colour
  TODO: ? Keyframe easing
  TODO: Export options:

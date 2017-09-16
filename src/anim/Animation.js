@@ -2,6 +2,7 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
+        var Node = app.model.Node;
         var ContainerNode = app.model.ContainerNode;
         var Bone = app.model.Bone;
         var Sprite = app.model.Sprite;
@@ -247,11 +248,14 @@ var app;
                     return;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
-                if (node) {
+                if (node instanceof Node) {
                     var track = this.tracks[node.id];
                     if (track) {
                         track.deleteKeyframe(frameIndex);
                     }
+                }
+                else if (node instanceof anim.Track) {
+                    node.deleteKeyframe(frameIndex);
                 }
                 else {
                     for (var trackId in this.tracks) {
@@ -269,11 +273,15 @@ var app;
                     frameIndex = this.frameIndex;
                 var frameCount = 0;
                 var tracks;
-                if (node) {
+                if (node instanceof Node) {
                     tracks = {};
                     var track = this.tracks[node.id];
                     if (track)
                         tracks[node.id] = track;
+                }
+                else if (node instanceof anim.Track) {
+                    tracks = {};
+                    tracks[node.node.id] = node;
                 }
                 else {
                     tracks = this.tracks;
@@ -299,14 +307,16 @@ var app;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
                 var frameCount = 0;
+                var intoTrack = node instanceof anim.Track ? node : null;
+                var intoNode = node instanceof Node ? node : null;
                 for (var nodeId in frameData) {
                     if (!frameData.hasOwnProperty(nodeId))
                         continue;
-                    var track = this.tracks[node ? node.id : nodeId];
+                    var track = intoTrack ? intoTrack : this.tracks[intoNode ? intoNode.id : nodeId];
                     if (track) {
                         track.pasteKeyframes(frameData[nodeId], frameIndex);
                         frameCount++;
-                        if (node)
+                        if (intoTrack || intoNode)
                             break;
                     }
                 }
@@ -317,8 +327,12 @@ var app;
             };
             Animation.prototype.getClosestKeyframes = function (frameIndex, out, node) {
                 if (node === void 0) { node = null; }
-                if (node) {
+                if (node instanceof Node) {
                     this.tracks[node.id].getClosestKeyframes(frameIndex, out);
+                    return;
+                }
+                else if (node instanceof anim.Track) {
+                    node.getClosestKeyframes(frameIndex, out);
                     return;
                 }
                 for (var trackId in this.tracks) {

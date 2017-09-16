@@ -446,6 +446,7 @@ var app;
                 // if(this.mode == EditMode.PLAYBACK) return false;
                 if (keyCode == Key.H) {
                     app.Config.showControls = !app.Config.showControls;
+                    this.requiresUpdate = true;
                 }
                 return false;
             };

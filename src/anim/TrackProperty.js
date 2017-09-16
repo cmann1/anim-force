@@ -403,11 +403,12 @@ var app;
                     this.next = key.next;
                 }
                 else {
-                    if (prev == this.prev && (next == this.current || next == this.next)) {
-                        this.prev = key;
-                    }
-                    else if (next == this.next && (prev == this.current || prev == this.prev)) {
-                        this.next = key;
+                    if (prev == this.prev && (next == this.current || next == this.next) ||
+                        next == this.next && (prev == this.current || prev == this.prev)) {
+                        if (key.frameIndex > this.frameIndex)
+                            this.next = key;
+                        else
+                            this.prev = key;
                     }
                 }
                 if (frameIndex >= this.length) {

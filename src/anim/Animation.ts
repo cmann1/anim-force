@@ -313,19 +313,23 @@ namespace app.anim
 			return this.frameIndex;
 		}
 
-		public deleteKeyframe(node:Node = null, frameIndex = -1)
+		public deleteKeyframe(node:Node|Track = null, frameIndex = -1)
 		{
 			if(this.readOnly) return;
 
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
-			if(node)
+			if(node instanceof Node)
 			{
 				const track = this.tracks[node.id];
 				if(track)
 				{
 					track.deleteKeyframe(frameIndex);
 				}
+			}
+			else if(node instanceof Track)
+			{
+				node.deleteKeyframe(frameIndex);
 			}
 			else
 			{
@@ -338,18 +342,23 @@ namespace app.anim
 			this.dispatchChange('deleteKeyframe');
 		}
 
-		public copyKeyframes(frameData:any, node:Node = null, forceAll = false, cut = false, frameIndex = -1):number
+		public copyKeyframes(frameData:any, node:Node|Track = null, forceAll = false, cut = false, frameIndex = -1):number
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			var frameCount = 0;
 			var tracks:{[id:string]:Track};
 
-			if(node)
+			if(node instanceof Node)
 			{
 				tracks = {};
 				const track = this.tracks[node.id];
 				if(track) tracks[node.id] = track;
+			}
+			else if(node instanceof Track)
+			{
+				tracks = {};
+				tracks[node.node.id] = node;
 			}
 			else
 			{
@@ -376,26 +385,28 @@ namespace app.anim
 			return frameCount;
 		}
 
-		public pasteKeyframes(frameData:any, node:Node = null, frameIndex = -1):number
+		public pasteKeyframes(frameData:any, node:Node|Track = null, frameIndex = -1):number
 		{
 			if(this.readOnly) return 0;
-
 
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
 			var frameCount = 0;
 
+			const intoTrack = node instanceof Track ? node : null;
+			const intoNode = node instanceof Node ? node : null;
+
 			for(var nodeId in frameData)
 			{
 				if(!frameData.hasOwnProperty(nodeId)) continue;
 
-				const track = this.tracks[node ? node.id : nodeId];
+				const track = intoTrack ? intoTrack : this.tracks[intoNode ? intoNode.id : nodeId];
 				if(track)
 				{
 					track.pasteKeyframes(frameData[nodeId], frameIndex);
 					frameCount++;
 
-					if(node) break;
+					if(intoTrack || intoNode) break;
 				}
 			}
 
@@ -407,11 +418,16 @@ namespace app.anim
 			return frameCount;
 		}
 
-		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct, node:Node=null)
+		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct, node:Node|Track=null)
 		{
-			if(node)
+			if(node instanceof Node)
 			{
 				this.tracks[node.id].getClosestKeyframes(frameIndex, out);
+				return;
+			}
+			else if(node instanceof Track)
+			{
+				node.getClosestKeyframes(frameIndex, out);
 				return;
 			}
 

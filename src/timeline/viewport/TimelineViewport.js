@@ -18,16 +18,16 @@ var app;
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId, model, tree) {
                 var _this = _super.call(this, elementId) || this;
-                _this.nodeList = [];
+                _this.trackList = [];
                 _this.scrollX = 0;
                 _this.scrollY = 0;
                 _this.currentFrame = 0;
                 _this.selectedTrack = null;
                 _this.selectedFrame = -1;
                 _this.dragFrameIndicator = false;
-                _this.dragKeyframeNode = null;
+                _this.dragKeyframeTrack = null;
                 _this.dragKeyframeIndex = -1;
-                _this.dragKeyframeTargetNode = null;
+                _this.dragKeyframeTargetTrack = null;
                 _this.dragKeyframeTargetIndex = -1;
                 _this.dragKeyframeInitiated = false;
                 _this.deselectKeyframe = false;
@@ -77,7 +77,7 @@ var app;
                     _this.requiresUpdate = true;
                 };
                 _this.onModelStructureChange = function (model, event) {
-                    _this.updateNodeList();
+                    _this.updateTrackList();
                     _this.requiresUpdate = true;
                 };
                 _this.onModelModeChange = function (model, event) {
@@ -88,7 +88,7 @@ var app;
                 _this.onTreeNodeUpdate = function (node, event) {
                     var type = event.type;
                     if (type == 'nodeCollapse') {
-                        _this.updateNodeList();
+                        _this.updateTrackList();
                     }
                     _this.requiresUpdate = true;
                 };
@@ -143,19 +143,18 @@ var app;
                 ctx.clip();
                 ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
                 var y = 0;
-                for (var _i = 0, _a = this.nodeList; _i < _a.length; _i++) {
-                    var node = _a[_i];
+                for (var _i = 0, _a = this.trackList; _i < _a.length; _i++) {
+                    var track = _a[_i];
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
                         ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
                         ctx.fillStyle = app.Config.nodeBorder;
                         ctx.fillRect(this.scrollX, y + nodeHeight - 1, this.width, 1);
                         var lastKeyframe = -1;
-                        var track = animation.tracks[node.id];
                         var onScreenFrameCount = 0;
-                        var selectedFrame = this.selectedTrack == node ? this.selectedFrame : -1;
-                        var dragFrame = this.dragKeyframeNode == node ? this.dragKeyframeIndex : -1;
-                        var dropTargetFrame = this.dragKeyframeTargetNode == node ? this.dragKeyframeTargetIndex : -1;
+                        var selectedFrame = this.selectedTrack == track ? this.selectedFrame : -1;
+                        var dragFrame = this.dragKeyframeTrack == track ? this.dragKeyframeIndex : -1;
+                        var dropTargetFrame = this.dragKeyframeTargetTrack == track ? this.dragKeyframeTargetIndex : -1;
                         // Draw the background (selection and borders)
                         for (var j = firstFrame, x = firstFrame * frameWidth; j < lastFrame; j++) {
                             if (j == selectedFrame || j == dropTargetFrame) {
@@ -218,7 +217,7 @@ var app;
                             // Connect two keyframes outside of the drawing range
                             if (onScreenFrameCount == 0 && j + 1 == lastFrame) {
                                 var tmp = { prev: null, current: null, next: null };
-                                this.animation.getClosestKeyframes(j, tmp, node);
+                                this.animation.getClosestKeyframes(j, tmp, track);
                                 if (tmp.prev && tmp.next) {
                                     prev = tmp.prev;
                                     next = tmp.next;
@@ -319,7 +318,7 @@ var app;
                 this.model = model;
                 this.mode = model.mode;
                 this.animation = model.getActiveAnimation();
-                this.updateNodeList();
+                this.updateTrackList();
                 model.setAnimationListeners(this.onAnimationChange);
                 model.animationChange.on(this.onModelAnimationChange);
                 model.modeChange.on(this.onModelModeChange);
@@ -343,13 +342,13 @@ var app;
             };
             TimelineViewport.prototype.getNodeAt = function (y) {
                 var i = Math.floor((y + this.scrollY) / app.Config.nodeHeight);
-                return i < 0 || i >= this.nodeList.length ? null : this.nodeList[i];
+                return i < 0 || i >= this.trackList.length ? null : this.trackList[i];
             };
-            TimelineViewport.prototype.scrollIntoView = function (node, frame) {
-                if (node === void 0) { node = null; }
+            TimelineViewport.prototype.scrollIntoView = function (track, frame) {
+                if (track === void 0) { track = null; }
                 if (frame === void 0) { frame = NaN; }
-                if (node) {
-                    var trackY = this.nodeList.indexOf(node) * app.Config.nodeHeight;
+                if (track) {
+                    var trackY = this.trackList.indexOf(track) * app.Config.nodeHeight;
                     if (trackY + app.Config.nodeHeight > this.scrollY + this.height - app.Config.nodeHeight) {
                         this.scrollY = Math.floor(Math.max(0, trackY - this.height + app.Config.nodeHeight + app.Config.nodeHeight));
                     }
@@ -377,41 +376,50 @@ var app;
                 this.toolbar.updateFrameLabel();
                 this.scrollIntoView(null, this.currentFrame);
             };
-            TimelineViewport.prototype.setSelectedFrame = function (node, frameIndex, toggle) {
+            TimelineViewport.prototype.setSelectedFrame = function (track, frameIndex, toggle) {
                 if (frameIndex === void 0) { frameIndex = -1; }
                 if (toggle === void 0) { toggle = false; }
                 if (frameIndex < 0)
-                    node = null;
-                if (node == this.selectedTrack && frameIndex == this.selectedFrame) {
-                    if (toggle && node) {
+                    track = null;
+                if (track == this.selectedTrack && frameIndex == this.selectedFrame) {
+                    if (toggle && track) {
                         this.selectedTrack = null;
                         this.selectedFrame = -1;
                     }
                     return false;
                 }
-                this.selectedTrack = node;
-                this.selectedFrame = node ? frameIndex : -1;
+                this.selectedTrack = track;
+                this.selectedFrame = track ? frameIndex : -1;
                 return true;
             };
             TimelineViewport.prototype.stopKeyframeDrag = function (move, cancel) {
                 if (move === void 0) { move = false; }
                 if (cancel === void 0) { cancel = true; }
-                if (this.dragKeyframeNode) {
-                    if (!cancel && this.dragKeyframeTargetNode && (this.dragKeyframeNode != this.dragKeyframeTargetNode || this.dragKeyframeIndex != this.dragKeyframeTargetIndex)) {
+                if (this.dragKeyframeTrack) {
+                    if (!cancel && this.dragKeyframeTargetTrack && (this.dragKeyframeTrack != this.dragKeyframeTargetTrack || this.dragKeyframeIndex != this.dragKeyframeTargetIndex)) {
                         var frameData = {};
-                        this.animation.copyKeyframes(frameData, this.dragKeyframeNode, false, move, this.dragKeyframeIndex);
-                        this.animation.pasteKeyframes(frameData, this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
-                        this.setSelectedFrame(this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
+                        this.animation.copyKeyframes(frameData, this.dragKeyframeTrack, false, move, this.dragKeyframeIndex);
+                        // console.log(this.dragKeyframeTrack, this.dragKeyframeIndex);
+                        // console.log('>');
+                        // console.log(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
+                        // console.log(frameData);
+                        this.animation.pasteKeyframes(frameData, this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
+                        this.setSelectedFrame(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
                     }
-                    this.dragKeyframeNode = null;
+                    this.dragKeyframeTrack = null;
                     this.dragKeyframeIndex = -1;
                     this.dragKeyframeInitiated = false;
-                    this.dragKeyframeTargetNode = null;
+                    this.dragKeyframeTargetTrack = null;
                     this.dragKeyframeTargetIndex = -1;
                 }
             };
-            TimelineViewport.prototype.updateNodeList = function () {
-                this.nodeList = this.model.getNodeList(true);
+            TimelineViewport.prototype.updateTrackList = function () {
+                this.trackList = [];
+                var nodeList = this.model.getNodeList(true);
+                for (var _i = 0, nodeList_1 = nodeList; _i < nodeList_1.length; _i++) {
+                    var node = nodeList_1[_i];
+                    this.trackList.push(this.animation.tracks[node.id]);
+                }
             };
             TimelineViewport.prototype.onKeyDown = function (event) {
                 if (this.viewport.commonKey(event))
@@ -453,7 +461,7 @@ var app;
                         }
                     }
                     else if (keyCode == Key.Escape) {
-                        if (this.dragKeyframeNode) {
+                        if (this.dragKeyframeTargetTrack) {
                             this.stopKeyframeDrag();
                         }
                     }
@@ -530,8 +538,8 @@ var app;
                         if (!this.setSelectedFrame(this.getNodeAt(this.mouseY - app.Config.nodeHeight), this.getFrameIndexAt(this.mouseX))) {
                             this.deselectKeyframe = true;
                         }
-                        if (this.selectedTrack && this.animation.tracks[this.selectedTrack.id].getKeyFrame(this.selectedFrame)) {
-                            this.dragKeyframeNode = this.selectedTrack;
+                        if (this.selectedTrack && this.selectedTrack.getKeyFrame(this.selectedFrame)) {
+                            this.dragKeyframeTrack = this.selectedTrack;
                             this.dragKeyframeIndex = this.selectedFrame;
                         }
                     }
@@ -564,7 +572,7 @@ var app;
                     this.tree.setScroll(this.scrollY);
                     this.requiresUpdate = true;
                 }
-                else if (this.dragKeyframeNode) {
+                else if (this.dragKeyframeTrack) {
                     this.deselectKeyframe = false;
                     if (!this.dragKeyframeInitiated) {
                         var node = this.getNodeAt(this.mouseY - app.Config.nodeHeight);
@@ -574,9 +582,9 @@ var app;
                         }
                     }
                     if (this.dragKeyframeInitiated) {
-                        this.dragKeyframeTargetNode = this.getNodeAt(this.mouseY - app.Config.nodeHeight);
-                        this.dragKeyframeTargetIndex = this.dragKeyframeTargetNode ? this.getFrameIndexAt(this.mouseX) : -1;
-                        this.scrollIntoView(this.dragKeyframeTargetNode, this.dragKeyframeTargetIndex);
+                        this.dragKeyframeTargetTrack = this.getNodeAt(this.mouseY - app.Config.nodeHeight);
+                        this.dragKeyframeTargetIndex = this.dragKeyframeTargetTrack ? this.getFrameIndexAt(this.mouseX) : -1;
+                        this.scrollIntoView(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
                     }
                 }
             };
