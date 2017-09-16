@@ -1,8 +1,9 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Issue with isnerting frames
+ TODO: Resetting rotation doesn't work
  TODO: Animation events
+ TODO: - Add per track keyframe colours
  TODO: Anchor nodes
  TODO: Copy/paste nodes
  TODO: Sprite Selector:

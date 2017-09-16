@@ -482,10 +482,6 @@ namespace app.timeline
 						frameData, this.dragKeyframeTrack,
 						false, move, this.dragKeyframeIndex);
 
-					// console.log(this.dragKeyframeTrack, this.dragKeyframeIndex);
-					// console.log('>');
-					// console.log(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
-					// console.log(frameData);
 					this.animation.pasteKeyframes(frameData, this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
 
 					this.setSelectedFrame(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
@@ -551,6 +547,8 @@ namespace app.timeline
 				this.currentFrame = this.animation.getPosition();
 				this.toolbar.updateFrameLabel();
 				this.scrollX = animation.scrollX;
+
+				this.updateTrackList();
 
 				this.requiresUpdate = true;
 			}

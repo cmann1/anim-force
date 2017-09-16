@@ -13,17 +13,17 @@ var app;
     var anim;
     (function (anim) {
         var TrackPropertyType = app.anim.properties.TrackPropertyType;
-        var BoneTrack = (function (_super) {
-            __extends(BoneTrack, _super);
-            function BoneTrack(animation, node) {
-                var _this = _super.call(this, 'bone', animation, node) || this;
-                // this.addProperty('length', TrackPropertyType.NUMBER);
-                _this.addProperty('stretchY', TrackPropertyType.NUMBER);
+        var NodeTrack = (function (_super) {
+            __extends(NodeTrack, _super);
+            function NodeTrack(type, animation, node) {
+                var _this = _super.call(this, type, animation, node) || this;
+                _this.addProperty('offset', TrackPropertyType.VECTOR);
+                _this.addProperty('rotation', TrackPropertyType.ANGLE);
                 return _this;
             }
-            return BoneTrack;
-        }(anim.NodeTrack));
-        anim.BoneTrack = BoneTrack;
+            return NodeTrack;
+        }(anim.Track));
+        anim.NodeTrack = NodeTrack;
     })(anim = app.anim || (app.anim = {}));
 })(app || (app = {}));
-//# sourceMappingURL=BoneTrack.js.map
+//# sourceMappingURL=NodeTrack.js.map

@@ -12,6 +12,22 @@ namespace app.anim
 		public prev:VectorKeyframe = null;
 		public next:VectorKeyframe = null;
 
+		public set(propertyName:string, node:any, copyFrame:VectorKeyframe)
+		{
+			if(copyFrame)
+			{
+				this.x = copyFrame.x;
+				this.y = copyFrame.y;
+			}
+			else
+			{
+				this.x = node[propertyName + 'X'];
+				this.y = node[propertyName + 'Y'];
+			}
+		}
+
+		//
+
 		public save():any
 		{
 			var data = super.save();

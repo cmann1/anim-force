@@ -17,6 +17,8 @@ namespace app.anim
 
 	import Node = app.model.Node;
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
+	import TrackPropertyType = app.anim.properties.TrackPropertyType;
+	import TrackProperty = app.anim.properties.TrackProperty;
 
 	export class Track
 	{
@@ -25,23 +27,20 @@ namespace app.anim
 		protected animation:Animation;
 		protected properties:{[id:string]:TrackProperty} = {};
 
-		public node:Node;
+		public node:any;
 		public length:number = 1;
 		public interpolation:Interpolation = Interpolation.LINEAR;
 
-		constructor(type:string, animation:Animation, node:Node)
+		constructor(type:string, animation:Animation, node:any)
 		{
 			this.type = type;
 			this.animation = animation;
 			this.node = node;
-
-			this.addProperty('offset', TrackPropertyType.VECTOR);
-			this.addProperty('rotation', TrackPropertyType.ANGLE);
 		}
 
 		protected addProperty(propertyName:string, type:TrackPropertyType)
 		{
-			this.properties[propertyName] = new TrackProperty(this, propertyName, type);
+			this.properties[propertyName] = TrackProperty.create(this, propertyName, type);
 		}
 
 		public forceKeyframe(frameIndex = -1, copyFrom:Track=null)
@@ -167,7 +166,7 @@ namespace app.anim
 			{
 				const property = this.properties[propertyName];
 
-				if(property.copy(this.node, frameData, forceAll, frameIndex))
+				if(property.copy(frameData, forceAll, frameIndex))
 				{
 					frameCount++;
 				}

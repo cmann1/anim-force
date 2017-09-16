@@ -1,4 +1,4 @@
-namespace app.anim
+namespace app.anim.properties
 {
 
 	import LoadData = app.projects.LoadData;
@@ -34,11 +34,34 @@ namespace app.anim
 		public next:Keyframe = null;
 		public last:Keyframe = null;
 
-		constructor(track:Track, propertyName:string, type:TrackPropertyType)
+		protected KeyFrameClass:typeof Keyframe;
+
+		constructor(track:Track, propertyName:string, KeyFrameClass:typeof Keyframe, type:TrackPropertyType)
 		{
+			this.KeyFrameClass = KeyFrameClass;
 			this.track = track;
 			this.propertyName = propertyName;
 			this.type = type;
+		}
+
+		public static create(track:Track, propertyName:string, type:TrackPropertyType):TrackProperty
+		{
+			if(type == TrackPropertyType.NUMBER)
+			{
+				return new NumberProperty(track, propertyName);
+			}
+
+			if(type == TrackPropertyType.ANGLE)
+			{
+				return new AngleProperty(track, propertyName);
+			}
+
+			if(type == TrackPropertyType.VECTOR)
+			{
+				return new VectorProperty(track, propertyName);
+			}
+
+			throw new Error('Unknown track property type');
 		}
 
 		public gotoNextFrame()
@@ -178,7 +201,7 @@ namespace app.anim
 			return this.length;
 		}
 
-		public copy(node:Node, frameData:any, forceAll = false, frameIndex = -1):boolean
+		public copy(frameData:any, forceAll=false, frameIndex=-1):boolean
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
@@ -186,14 +209,14 @@ namespace app.anim
 
 			if(frame)
 			{
-				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, frame.prev, frame, frame.next);
+				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, frame.prev, frame, frame.next);
 
 				return true;
 			}
 			else if(forceAll)
 			{
 				this.getKeyFrameAt(frameIndex, KEYFRAME_DATA);
-				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, false, KEYFRAME_DATA.prev, KEYFRAME_DATA.current, KEYFRAME_DATA.next);
+				this.updateNode(frameData[this.propertyName] = {}, this.track.interpolation, KEYFRAME_DATA.prev, KEYFRAME_DATA.current, KEYFRAME_DATA.next);
 
 				return true;
 			}
@@ -201,151 +224,27 @@ namespace app.anim
 			return false;
 		}
 
-		public updateFrame(node:Node|any, frameIndex = -1, createKeyframe = true, copyFrom:TrackProperty=null)
+		public updateFrame(node:any, frameIndex=-1, createKeyframe=true, copyFrom:TrackProperty=null)
 		{
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 			var frame:Keyframe = this.frameList[frameIndex];
 			var copyFrame:Keyframe = copyFrom ? copyFrom.frameList[frameIndex] : null;
 
-			if(this.type == TrackPropertyType.VECTOR)
+			if(!frame && createKeyframe)
 			{
-				if(!frame && createKeyframe)
-				{
-					this.insert(frame = new VectorKeyframe(frameIndex));
-				}
-
-				if(frame)
-				{
-					const vecFrame = <VectorKeyframe> frame;
-
-					vecFrame.x = copyFrame
-						? (<VectorKeyframe> copyFrame).x
-						: node[this.propertyName + 'X'];
-					vecFrame.y = copyFrame
-						? (<VectorKeyframe> copyFrame).y
-						: node[this.propertyName + 'Y'];
-				}
+				this.insert(frame = new this.KeyFrameClass(frameIndex));
 			}
-			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
-			{
-				if(!frame && createKeyframe)
-				{
-					this.insert(frame = new NumberKeyframe(frameIndex));
-				}
 
-				if(frame)
-				{
-					(<NumberKeyframe> frame).value = copyFrame
-						? (<NumberKeyframe> copyFrame).value
-						: node[this.propertyName];
-				}
+			if(frame)
+			{
+				frame.set(this.propertyName, node, copyFrame);
 			}
 		}
 
-		public updateNode(node:Node|any, interpolation:Interpolation, atCurrent = true, prevKey:Keyframe = null, currentKey:Keyframe = null, nextKey:Keyframe = null)
+		public updateNode(node:any, interpolation:Interpolation,
+		                  prev:Keyframe=this.prev, current:Keyframe=this.current, next:Keyframe=this.next)
 		{
-			if(atCurrent)
-			{
-				prevKey = this.prev;
-				currentKey = this.current;
-				nextKey = this.next;
-			}
-
-			if(this.type == TrackPropertyType.VECTOR)
-			{
-				var x:number;
-				var y:number;
-				const prev = (<VectorKeyframe> prevKey);
-				const next = (<VectorKeyframe> nextKey);
-				const current = (<VectorKeyframe> currentKey);
-
-				if(current)
-				{
-					x = (<VectorKeyframe> current).x;
-					y = (<VectorKeyframe> current).y;
-				}
-				else if(prev && next)
-				{
-					const t:number = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
-
-					if(interpolation == Interpolation.COSINE)
-					{
-						var t2 = (1 - Math.cos(t * Math.PI)) / 2;
-						x = prev.x * (1 - t2) + next.x * t2;
-						y = prev.y * (1 - t2) + next.y * t2;
-					}
-					else
-					{
-						x = prev.x + (next.x - prev.x) * t;
-						y = prev.y + (next.y - prev.y) * t;
-					}
-				}
-				else if(prev)
-				{
-					x = prev.x;
-					y = prev.y;
-				}
-				else if(next)
-				{
-					x = next.x;
-					y = next.y;
-				}
-				else
-				{
-					x = node[this.propertyName + 'X'];
-					y = node[this.propertyName + 'Y'];
-				}
-
-				node[this.propertyName + 'X'] = x;
-				node[this.propertyName + 'Y'] = y;
-			}
-			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
-			{
-				var value:number;
-				const prev = (<NumberKeyframe> prevKey);
-				const next = (<NumberKeyframe> nextKey);
-				const current = (<NumberKeyframe> currentKey);
-
-				if(current)
-				{
-					value = current.value;
-				}
-				else if(prev && next)
-				{
-					const t:number = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
-					var delta:number = (next.value - prev.value);
-
-					if(this.type == TrackPropertyType.ANGLE)
-					{
-						delta = Math.normalizeAngle(delta);
-					}
-
-					if(interpolation == Interpolation.COSINE)
-					{
-						var t2 = (1 - Math.cos(t * Math.PI)) / 2;
-						value = prev.value * (1 - t2) + (prev.value + delta) * t2;
-					}
-					else
-					{
-						value = prev.value + delta * t;
-					}
-
-				}
-				else if(prev)
-				{
-					value = prev.value;
-				}
-				else if(next)
-				{
-					value = next.value;
-				}
-				else
-				{
-					value = node[this.propertyName];
-				}
-
-				node[this.propertyName] = value;
-			}
+			throw new Error('TrackProperty.update not implemented');
 		}
 
 		public getKeyFrameAt(frameIndex:number, out:KeyframeStruct)
@@ -434,14 +333,6 @@ namespace app.anim
 			this.length = data.get('length');
 
 			var frames = data.get('frames');
-			var KeyFrameClass;
-
-			if(this.type == TrackPropertyType.VECTOR)
-				KeyFrameClass = VectorKeyframe;
-			else if(this.type == TrackPropertyType.NUMBER || this.type == TrackPropertyType.ANGLE)
-				KeyFrameClass = NumberKeyframe;
-			else
-				throw new Error('Invalid animation propert type');
 
 			var prevKey:Keyframe = null;
 
@@ -450,7 +341,7 @@ namespace app.anim
 				frameData = data.asLoadData(frameData);
 
 				var frameIndex = frameData.get('frameIndex');
-				var key:Keyframe = new KeyFrameClass(frameIndex);
+				var key:Keyframe = new this.KeyFrameClass(frameIndex);
 				key.load(frameData);
 				this.frameList[frameIndex] = key;
 
@@ -555,6 +446,18 @@ namespace app.anim
 			}
 
 			this.frameList[frameIndex] = key;
+		}
+
+		protected getT(interpolation:Interpolation, prev:Keyframe, next:Keyframe):number
+		{
+			const t:number = (this.frameIndex - prev.frameIndex) / (next.frameIndex - prev.frameIndex);
+
+			if(interpolation == Interpolation.COSINE)
+			{
+				return (1 - Math.cos(t * Math.PI)) / 2;
+			}
+
+			return t;
 		}
 
 	}

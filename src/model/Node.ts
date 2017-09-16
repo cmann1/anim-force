@@ -141,7 +141,7 @@ namespace app.model
 		{
 			if(this.rotation != 0)
 			{
-				this.rotation = 1;
+				this.rotation = 0;
 				this.onPropertyChange('rotation');
 			}
 		}

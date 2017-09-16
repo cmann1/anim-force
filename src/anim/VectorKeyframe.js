@@ -20,6 +20,17 @@ var app;
                 _this.next = null;
                 return _this;
             }
+            VectorKeyframe.prototype.set = function (propertyName, node, copyFrame) {
+                if (copyFrame) {
+                    this.x = copyFrame.x;
+                    this.y = copyFrame.y;
+                }
+                else {
+                    this.x = node[propertyName + 'X'];
+                    this.y = node[propertyName + 'Y'];
+                }
+            };
+            //
             VectorKeyframe.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.x = this.x;

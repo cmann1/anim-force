@@ -8,6 +8,10 @@ var app;
                 this.next = null;
                 this.frameIndex = frameIndex;
             }
+            Keyframe.prototype.set = function (propertyName, node, copyFrame) {
+                throw new Error('Keyframe.set not implemented');
+            };
+            //
             Keyframe.prototype.save = function () {
                 return {
                     frameIndex: this.frameIndex

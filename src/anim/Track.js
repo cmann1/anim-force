@@ -12,6 +12,7 @@ var app;
             current: null,
             next: null,
         };
+        var TrackProperty = app.anim.properties.TrackProperty;
         var Track = (function () {
             function Track(type, animation, node) {
                 this.type = null;
@@ -21,11 +22,9 @@ var app;
                 this.type = type;
                 this.animation = animation;
                 this.node = node;
-                this.addProperty('offset', anim.TrackPropertyType.VECTOR);
-                this.addProperty('rotation', anim.TrackPropertyType.ANGLE);
             }
             Track.prototype.addProperty = function (propertyName, type) {
-                this.properties[propertyName] = new anim.TrackProperty(this, propertyName, type);
+                this.properties[propertyName] = TrackProperty.create(this, propertyName, type);
             };
             Track.prototype.forceKeyframe = function (frameIndex, copyFrom) {
                 if (frameIndex === void 0) { frameIndex = -1; }
@@ -111,7 +110,7 @@ var app;
                 var frameCount = 0;
                 for (var propertyName in this.properties) {
                     var property = this.properties[propertyName];
-                    if (property.copy(this.node, frameData, forceAll, frameIndex)) {
+                    if (property.copy(frameData, forceAll, frameIndex)) {
                         frameCount++;
                     }
                     if (cut && property.deleteKeyframe(frameIndex)) {

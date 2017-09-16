@@ -70,6 +70,7 @@ var app;
                         _this.currentFrame = _this.animation.getPosition();
                         _this.toolbar.updateFrameLabel();
                         _this.scrollX = animation.scrollX;
+                        _this.updateTrackList();
                         _this.requiresUpdate = true;
                     }
                 };
@@ -399,10 +400,6 @@ var app;
                     if (!cancel && this.dragKeyframeTargetTrack && (this.dragKeyframeTrack != this.dragKeyframeTargetTrack || this.dragKeyframeIndex != this.dragKeyframeTargetIndex)) {
                         var frameData = {};
                         this.animation.copyKeyframes(frameData, this.dragKeyframeTrack, false, move, this.dragKeyframeIndex);
-                        // console.log(this.dragKeyframeTrack, this.dragKeyframeIndex);
-                        // console.log('>');
-                        // console.log(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
-                        // console.log(frameData);
                         this.animation.pasteKeyframes(frameData, this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
                         this.setSelectedFrame(this.dragKeyframeTargetTrack, this.dragKeyframeTargetIndex);
                     }

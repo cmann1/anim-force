@@ -20,6 +20,12 @@ var app;
                 _this.next = null;
                 return _this;
             }
+            NumberKeyframe.prototype.set = function (propertyName, node, copyFrame) {
+                this.value = copyFrame
+                    ? copyFrame.value
+                    : node[propertyName];
+            };
+            //
             NumberKeyframe.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.value = this.value;

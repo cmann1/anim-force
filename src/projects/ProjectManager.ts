@@ -593,7 +593,7 @@ namespace app.projects
 				this.projectManagerDlg = new Dialog('ProjectManager', {
 					name: 'ProjectManager',
 					dlgClass: 'project-manager-dlg',
-					icon: 'tasks',
+					icon: 'folder-open',
 					content: this.$contentPane,
 					buttons: [
 						{label: 'Open', confirm: true},

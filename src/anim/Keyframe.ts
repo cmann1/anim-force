@@ -15,6 +15,13 @@ namespace app.anim
 			this.frameIndex = frameIndex;
 		}
 
+		public set(propertyName:string, node:any, copyFrame:Keyframe)
+		{
+			throw new Error('Keyframe.set not implemented');
+		}
+
+		//
+
 		public save():any
 		{
 			return {

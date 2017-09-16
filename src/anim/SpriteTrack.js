@@ -12,17 +12,18 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
+        var TrackPropertyType = app.anim.properties.TrackPropertyType;
         var SpriteTrack = (function (_super) {
             __extends(SpriteTrack, _super);
             function SpriteTrack(animation, node) {
                 var _this = _super.call(this, 'sprite', animation, node) || this;
-                _this.addProperty('frame', anim.TrackPropertyType.NUMBER);
-                _this.addProperty('scaleX', anim.TrackPropertyType.NUMBER);
-                _this.addProperty('scaleY', anim.TrackPropertyType.NUMBER);
+                _this.addProperty('frame', TrackPropertyType.NUMBER);
+                _this.addProperty('scaleX', TrackPropertyType.NUMBER);
+                _this.addProperty('scaleY', TrackPropertyType.NUMBER);
                 return _this;
             }
             return SpriteTrack;
-        }(anim.Track));
+        }(anim.NodeTrack));
         anim.SpriteTrack = SpriteTrack;
     })(anim = app.anim || (app.anim = {}));
 })(app || (app = {}));

@@ -11,6 +11,15 @@ namespace app.anim
 		public prev:NumberKeyframe = null;
 		public next:NumberKeyframe = null;
 
+		public set(propertyName:string, node:any, copyFrame:NumberKeyframe)
+		{
+			this.value = copyFrame
+				? copyFrame.value
+				: node[propertyName];
+		}
+
+		//
+
 		public save():any
 		{
 			var data = super.save();
