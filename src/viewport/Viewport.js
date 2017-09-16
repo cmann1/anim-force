@@ -412,11 +412,18 @@ var app;
                             this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
                         }
                     }
-                    else if (keyCode == Key.UpArrow || keyCode == Key.DownArrow) {
+                    else if (keyCode == Key.Numpad8 || keyCode == Key.Numpad2) {
                         var node = this.model.getSelectedNode();
                         if (node instanceof Sprite) {
-                            node.setFrame(node.frame + (keyCode == Key.UpArrow ? 1 : -1));
-                            this.showMessage('Frame: ' + node.frame);
+                            node.setFrame(Math.round(node.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
+                            this.showMessage('Frame: ' + (Math.round(node.frame) + 1) + '/' + node.frameCount);
+                        }
+                    }
+                    else if (keyCode == Key.Numpad4 || keyCode == Key.Numpad6) {
+                        var node = this.model.getSelectedNode();
+                        if (node instanceof Sprite) {
+                            node.setPalette(node.palette + (keyCode == Key.Numpad6 ? 1 : -1));
+                            this.showMessage('Palette: ' + (node.palette + 1) + '/' + node.paletteCount);
                         }
                     }
                     else if (keyCode == Key.Enter) {

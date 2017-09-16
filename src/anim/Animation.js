@@ -124,9 +124,11 @@ var app;
             Animation.prototype.initForAnimation = function () {
                 this.fpsStep = 1 / this.fps;
                 this.accumulatedTime = 0;
+                // console.log(this.fpsStep);
             };
             Animation.prototype.animateStep = function (deltaTime) {
                 this.accumulatedTime += deltaTime;
+                // console.log(deltaTime);
                 while (this.accumulatedTime > this.fpsStep) {
                     this.gotoNextFrame();
                     this.accumulatedTime -= this.fpsStep;

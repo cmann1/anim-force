@@ -20,6 +20,8 @@ var app;
                 if (frame === void 0) { frame = 0; }
                 if (name === void 0) { name = null; }
                 var _this = _super.call(this, name || (asset ? asset.spriteName : null)) || this;
+                _this.paletteCount = 0;
+                _this.frameCount = 0;
                 _this.src = null;
                 _this.srcX = 0;
                 _this.srcY = 0;
@@ -27,8 +29,8 @@ var app;
                 _this.srcHeight = 0;
                 _this.type = 'sprite';
                 _this.asset = asset;
-                _this.palette = palette;
-                _this.frame = frame;
+                _this._palette = palette;
+                _this._frame = frame;
                 (asset || SpriteAsset.NULL).setSpriteSource(_this);
                 _this.rotationHandle = new model.Handle(_this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION, app.Config.handle);
                 _this.scaleHandle = new model.Handle(_this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.SCALE, app.Config.handle);
@@ -40,9 +42,51 @@ var app;
                 _this.handles.push(_this.scaleYHandle);
                 return _this;
             }
+            Sprite.prototype.updateFrameData = function () {
+                this.srcX = this.frameData.x;
+                this.srcY = this.frameData.y;
+                this.srcWidth = this.frameData.width;
+                this.srcHeight = this.frameData.height;
+            };
             Object.defineProperty(Sprite.prototype, "name", {
                 get: function () {
                     return this._name || (this.asset && this.asset.spriteName) || 'Untitled Sprite ' + this.id;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "frame", {
+                get: function () {
+                    return this._frame;
+                },
+                set: function (value) {
+                    // if(value < 0) value = 0;
+                    // else if(value > this.frameCount - 1) value = this.frameCount - 1;
+                    if (this._frame == value)
+                        return;
+                    this._frame = value;
+                    this.frameData = this.spritePaletteData[this.getFrame()];
+                    this.updateFrameData();
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Sprite.prototype, "palette", {
+                get: function () {
+                    return this._palette;
+                },
+                set: function (value) {
+                    if (value < 0)
+                        value = 0;
+                    else if (value >= this.paletteCount)
+                        value = this.paletteCount - 1;
+                    if (this._palette == value)
+                        return;
+                    this._palette = value;
+                    this.spritePaletteData = this.spriteData[this._palette];
+                    this.frame = this._frame;
+                    this.frameData = this.spritePaletteData[this.getFrame()];
+                    this.updateFrameData();
                 },
                 enumerable: true,
                 configurable: true
@@ -51,13 +95,34 @@ var app;
                 this.asset = app.main.spriteManager.loadSprite(spriteGroup, spriteName);
                 this.asset.setSpriteSource(this);
             };
-            Sprite.prototype.setSrc = function (newSrc) {
-                this.src = newSrc;
-                this.onPropertyChange('src');
+            Sprite.prototype.getFrame = function () {
+                return mod(Math.round(this._frame), this.frameCount);
             };
             Sprite.prototype.setFrame = function (newFrame) {
+                var oldFrame = this._frame;
                 this.frame = newFrame;
-                this.asset.setSpriteSource(this);
+                if (this._frame != oldFrame) {
+                    this.onPropertyChange('frame');
+                }
+            };
+            Sprite.prototype.setPalette = function (newPalette) {
+                var oldPalette = this._palette;
+                this.palette = newPalette;
+                if (this._palette != oldPalette) {
+                    this.onPropertyChange('palette');
+                }
+            };
+            Sprite.prototype.setSrc = function (newSrc, spriteData, paletteCount, frameCount) {
+                this.paletteCount = paletteCount;
+                this.frameCount = frameCount;
+                this.spriteData = spriteData;
+                this.palette = this._palette;
+                this.spritePaletteData = spriteData[this._palette];
+                this.frame = this._frame;
+                this.frameData = this.spritePaletteData[this.getFrame()];
+                this.updateFrameData();
+                this.src = newSrc;
+                this.onPropertyChange('src');
             };
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (!this.worldAABB.contains(x, y))
@@ -182,16 +247,14 @@ var app;
             };
             Sprite.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
-                data.palette = this.palette;
-                data.frame = this.frame; // TODO: Remove this if it becomes animatable
+                data.palette = this._palette;
                 data.spriteSetName = this.asset ? this.asset.spriteSetName : '';
                 data.spriteName = this.asset ? this.asset.spriteName : '';
                 return data;
             };
             Sprite.prototype.load = function (data) {
                 _super.prototype.load.call(this, data);
-                this.palette = data.get('palette');
-                this.frame = data.get('frame'); // TODO: Remove this if it becomes animatable
+                this._palette = data.get('palette');
                 var spriteSetName = data.get('spriteSetName');
                 var spriteName = data.get('spriteName');
                 if (spriteSetName != '') {

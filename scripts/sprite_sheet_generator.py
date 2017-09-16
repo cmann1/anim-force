@@ -30,6 +30,8 @@ FRAME_PADDING = 1
 
 THUMB_SIZE = 42
 
+GENERATE_IMAGE = False
+
 #
 # SETUP
 # ---------------------------------------------------------------------
@@ -69,7 +71,10 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 		palette_count = sprite_data['palette_count']
 		palettes = sprite_data['palettes']
 
-		sprite_set_out_data.append(sprite_name)
+		sprite_set_out_data.append(dict(
+			name=sprite_name,
+			palettes=palette_count,
+			frames=frame_count))
 
 		print('  %s [p:%i f:%i]' % (sprite_name, palette_count, frame_count))
 
@@ -83,7 +88,9 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 			total_width += w + FRAME_PADDING
 			max_height = max(max_height, h + FRAME_PADDING)
 
-		sheet_image = Image.new('RGBA', (total_width + FRAME_PADDING, max_height * palette_count + FRAME_PADDING), (0, 0, 0, 0))
+		if GENERATE_IMAGE:
+			sheet_image = Image.new('RGBA', (total_width + FRAME_PADDING, max_height * palette_count + FRAME_PADDING), (0, 0, 0, 0))
+
 		sprite_sheet_data = dict(
 			palettes=[]
 		)
@@ -109,14 +116,15 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 				sprite_frame_x = frame_x + FRAME_PADDING
 				sprite_frame_y = frame_y + FRAME_PADDING
 
-				if os.path.exists(frame_path):
-					frame_image = Image.open(frame_path)
-					sheet_image.paste(frame_image, (sprite_frame_x, sprite_frame_y))
+				if GENERATE_IMAGE:
+					if os.path.exists(frame_path):
+						frame_image = Image.open(frame_path)
+						sheet_image.paste(frame_image, (sprite_frame_x, sprite_frame_y))
 
-					if palette_index == thumb_palette and frame_index == thumb_frame:
-						sprite_thumb_data.append((sprite_name, frame_image))
-				else:
-					print('ERROR: cannot open file %s' % frame_path)
+						if palette_index == thumb_palette and frame_index == thumb_frame:
+							sprite_thumb_data.append((sprite_name, frame_image))
+					else:
+						print('ERROR: cannot open file %s' % frame_path)
 
 				palette_data.append((sprite_frame_x, sprite_frame_y, w, h, x, y))
 
@@ -126,41 +134,43 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 			frame_y += max_height
 			pass
 
-		sheet_image.save('%s/%s.png' % (sprite_set_out_path, sprite_name), optimize=True, compress_level=9)
-		sheet_image.close()
+		if GENERATE_IMAGE:
+			sheet_image.save('%s/%s.png' % (sprite_set_out_path, sprite_name), optimize=True, compress_level=9)
+			sheet_image.close()
 
 		with open('%s/%s.json' % (sprite_set_out_path, sprite_name), 'w') as f:
 			json.dump(sprite_sheet_data, f, indent='\t')
 
 		pass
 
-	sprite_set_out_data = natsorted(sprite_set_out_data)
+	sprite_set_out_data = natsorted(sprite_set_out_data, key=lambda item: item['name'])
 	sprites_out_data.append(dict(name=sprite_set, sprites=sprite_set_out_data))
 
 	# Generate thumbnails
 
-	thumb_sheet = Image.new('RGBA', (len(sprite_set_data) * THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
-	sprite_thumb_data = natsorted(sprite_thumb_data, lambda x: x[0])
-	thumb_x = 0
-	group_first = True
+	if GENERATE_IMAGE:
+		thumb_sheet = Image.new('RGBA', (len(sprite_set_data) * THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
+		sprite_thumb_data = natsorted(sprite_thumb_data, lambda x: x[0])
+		thumb_x = 0
+		group_first = True
 
-	for sprite_name, thumb_image in sprite_thumb_data:
-		thumb_image.thumbnail((THUMB_SIZE, THUMB_SIZE))
-		thumb_w, thumb_h = thumb_image.size
-		thumb_sheet.paste(thumb_image, (thumb_x + int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
-		thumb_x += THUMB_SIZE
+		for sprite_name, thumb_image in sprite_thumb_data:
+			thumb_image.thumbnail((THUMB_SIZE, THUMB_SIZE))
+			thumb_w, thumb_h = thumb_image.size
+			thumb_sheet.paste(thumb_image, (thumb_x + int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
+			thumb_x += THUMB_SIZE
 
-		if group_first:
-			group_thumb_image = Image.new('RGBA', (THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
-			group_thumb_image.paste(thumb_image, (int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
-			group_thumb_image.save('%s/_group_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
-			group_thumb_image.close()
-			group_first = False
+			if group_first:
+				group_thumb_image = Image.new('RGBA', (THUMB_SIZE, THUMB_SIZE), (0, 0, 0, 0))
+				group_thumb_image.paste(thumb_image, (int((THUMB_SIZE - thumb_w) / 2), int((THUMB_SIZE - thumb_h) / 2)))
+				group_thumb_image.save('%s/_group_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
+				group_thumb_image.close()
+				group_first = False
 
-		thumb_image.close()
+			thumb_image.close()
 
-	thumb_sheet.save('%s/_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
-	thumb_sheet.close()
+		thumb_sheet.save('%s/_thumb.png' % sprite_set_out_path, optimize=True, compress_level=9)
+		thumb_sheet.close()
 
 	pass
 

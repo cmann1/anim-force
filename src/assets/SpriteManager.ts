@@ -59,9 +59,9 @@ namespace app.assets
 			for(var spriteSet of data)
 			{
 				var sprites = {};
-				for(var spriteName of spriteSet.sprites)
+				for(var spriteData of spriteSet.sprites)
 				{
-					sprites[spriteName] = {asset: null};
+					sprites[spriteData.name] = {asset: null};
 				}
 
 				this.spriteSets[spriteSet.name] = {

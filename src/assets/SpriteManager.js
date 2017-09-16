@@ -17,8 +17,8 @@ var app;
                         var spriteSet = data_1[_i];
                         var sprites = {};
                         for (var _a = 0, _b = spriteSet.sprites; _a < _b.length; _a++) {
-                            var spriteName = _b[_a];
-                            sprites[spriteName] = { asset: null };
+                            var spriteData = _b[_a];
+                            sprites[spriteData.name] = { asset: null };
                         }
                         _this.spriteSets[spriteSet.name] = {
                             sprites: sprites,

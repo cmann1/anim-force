@@ -1,8 +1,7 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Allow sprite frames to be animated
- TODO: - Refactor the way sprite source frames are stored/set to make this easier/faster
+ TODO: Keys to reset position, scale, and rotation
  TODO: Animation events
  TODO: Anchor nodes
  TODO: Sprite Selector:
@@ -18,7 +17,6 @@
 
  TODO: ? Ghosts
  TODO: Copy/paste nodes (with and without animation tracks)
- TODO: Disable timeline tree actions (buttons and keyboard shortcuts) when in playback mode
  TODO: ? Sprite colour
  TODO: ? Keyframe easing
  TODO: Export options:

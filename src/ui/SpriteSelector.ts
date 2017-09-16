@@ -58,10 +58,10 @@ namespace app.ui
 				var $content = $group.find('.content');
 
 				var thumbX = 0;
-				for(var spriteName of spriteList)
+				for(var spriteData of spriteList)
 				{
 					var $thumb = $(
-						`<div class="thumb-outer spr-tooltip" title="${spriteName}" data-group="${groupName}" data-sprite="${spriteName}">
+						`<div class="thumb-outer spr-tooltip" title="${spriteData.name} p[${spriteData.palettes}] f[${spriteData.frames}]" data-group="${groupName}" data-sprite="${spriteData.name}">
 							<div class="thumb" style="background: url('assets/sprites/${groupName}/_thumb.png') ${-thumbX}px 0"></div>
 						</div>`
 					);

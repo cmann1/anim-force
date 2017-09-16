@@ -77,7 +77,7 @@ var app;
                             var y = (sprite.srcHeight * 0.5 + frame.dfOriginY) * sprite.scaleY;
                             var worldX = sprite.worldX - (Math.cos(sprite.worldRotation) * x - Math.sin(sprite.worldRotation) * y);
                             var worldY = sprite.worldY - (Math.sin(sprite.worldRotation) * x + Math.cos(sprite.worldRotation) * y);
-                            animFrames.push(sprite.frame);
+                            animFrames.push(sprite.getFrame());
                             animX.push(exporters.Exporter.num(worldX));
                             animY.push(exporters.Exporter.num(worldY));
                             animRotation.push(exporters.Exporter.num(sprite.worldRotation * Math.RAD_TO_DEG));

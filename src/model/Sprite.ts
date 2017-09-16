@@ -9,10 +9,15 @@ namespace app.model
 
 	export class Sprite extends Node
 	{
+
 		public asset:app.assets.SpriteAsset;
+		public spriteData:SpriteFrame[][];
+		public spritePaletteData:SpriteFrame[];
 		public frameData:SpriteFrame;
-		public palette:number;
-		public frame:number;
+		public paletteCount:number = 0;
+		public frameCount:number = 0;
+		private _palette:number;
+		private _frame:number;
 
 		public src:HTMLImageElement = null;
 		public srcX:number = 0;
@@ -32,8 +37,8 @@ namespace app.model
 			this.type = 'sprite';
 
 			this.asset = asset;
-			this.palette = palette;
-			this.frame = frame;
+			this._palette = palette;
+			this._frame = frame;
 
 			(asset || SpriteAsset.NULL).setSpriteSource(this);
 
@@ -48,9 +53,55 @@ namespace app.model
 			this.handles.push(this.scaleYHandle);
 		}
 
+		private updateFrameData()
+		{
+			this.srcX = this.frameData.x;
+			this.srcY = this.frameData.y;
+			this.srcWidth = this.frameData.width;
+			this.srcHeight = this.frameData.height;
+		}
+
 		get name():string
 		{
 			return this._name || (this.asset && this.asset.spriteName) || 'Untitled Sprite ' + this.id;
+		}
+
+		get frame():number
+		{
+			return this._frame;
+		}
+		set frame(value:number)
+		{
+			// if(value < 0) value = 0;
+			// else if(value > this.frameCount - 1) value = this.frameCount - 1;
+
+			if(this._frame == value) return;
+
+			this._frame = value;
+			this.frameData = this.spritePaletteData[this.getFrame()];
+
+			this.updateFrameData();
+
+
+		}
+
+		get palette():number
+		{
+			return this._palette;
+		}
+		set palette(value:number)
+		{
+			if(value < 0) value = 0;
+			else if(value >= this.paletteCount) value = this.paletteCount - 1;
+
+			if(this._palette == value) return;
+
+			this._palette = value;
+			this.spritePaletteData = this.spriteData[this._palette];
+			this.frame = this._frame;
+			this.frameData = this.spritePaletteData[this.getFrame()];
+
+			this.updateFrameData();
 		}
 
 		public loadSprite(spriteGroup:string, spriteName:string)
@@ -59,16 +110,49 @@ namespace app.model
 			this.asset.setSpriteSource(this);
 		}
 
-		public setSrc(newSrc:HTMLImageElement)
+		public getFrame():number
 		{
-			this.src = newSrc;
-			this.onPropertyChange('src');
+			return mod(Math.round(this._frame), this.frameCount);
 		}
 
 		public setFrame(newFrame:number)
 		{
+			const oldFrame = this._frame;
 			this.frame = newFrame;
-			this.asset.setSpriteSource(this);
+
+			if(this._frame != oldFrame)
+			{
+				this.onPropertyChange('frame');
+			}
+		}
+
+		public setPalette(newPalette:number)
+		{
+			const oldPalette = this._palette;
+			this.palette = newPalette;
+
+			if(this._palette != oldPalette)
+			{
+				this.onPropertyChange('palette');
+			}
+		}
+
+		public setSrc(newSrc:HTMLImageElement, spriteData:SpriteFrame[][], paletteCount:number, frameCount:number)
+		{
+			this.paletteCount = paletteCount;
+			this.frameCount = frameCount;
+
+			this.spriteData = spriteData;
+			this.palette = this._palette;
+			this.spritePaletteData = spriteData[this._palette];
+			this.frame = this._frame;
+			this.frameData = this.spritePaletteData[this.getFrame()];
+
+			this.updateFrameData();
+
+			this.src = newSrc;
+
+			this.onPropertyChange('src');
 		}
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
@@ -247,8 +331,7 @@ namespace app.model
 		{
 			var data = super.save();
 
-			data.palette = this.palette;
-			data.frame = this.frame; // TODO: Remove this if it becomes animatable
+			data.palette = this._palette;
 			data.spriteSetName = this.asset ? this.asset.spriteSetName : '';
 			data.spriteName = this.asset ? this.asset.spriteName : '';
 
@@ -259,8 +342,7 @@ namespace app.model
 		{
 			super.load(data);
 
-			this.palette = data.get('palette');
-			this.frame = data.get('frame'); // TODO: Remove this if it becomes animatable
+			this._palette = data.get('palette');
 
 			var spriteSetName = data.get('spriteSetName');
 			var spriteName = data.get('spriteName');

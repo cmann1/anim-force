@@ -51,4 +51,7 @@ var Utils;
     }
     Utils.copyToClipboard = copyToClipboard;
 })(Utils || (Utils = {}));
+function mod(n, m) {
+    return ((n % m) + m) % m;
+}
 //# sourceMappingURL=Utils.js.map

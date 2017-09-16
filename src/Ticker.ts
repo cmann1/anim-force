@@ -92,7 +92,7 @@ namespace app.ticker
 			{
 				this.previousTime = time - (elapsedTime % this.fpsInterval);
 
-				this._tickCallback(elapsedTime * 0.001, time);
+				this._tickCallback(this.fpsInterval * 0.001, time);
 
 				// Update/measure the fps every 1 second
 				this.frameCount++;
@@ -103,6 +103,7 @@ namespace app.ticker
 					this.frameCount = 0;
 				}
 			}
+
 		}
 
 	}

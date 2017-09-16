@@ -44,8 +44,8 @@ var app;
                     var $content = $group.find('.content');
                     var thumbX = 0;
                     for (var _a = 0, spriteList_3 = spriteList_2; _a < spriteList_3.length; _a++) {
-                        var spriteName = spriteList_3[_a];
-                        var $thumb = $("<div class=\"thumb-outer spr-tooltip\" title=\"" + spriteName + "\" data-group=\"" + groupName + "\" data-sprite=\"" + spriteName + "\">\n\t\t\t\t\t\t\t<div class=\"thumb\" style=\"background: url('assets/sprites/" + groupName + "/_thumb.png') " + -thumbX + "px 0\"></div>\n\t\t\t\t\t\t</div>");
+                        var spriteData = spriteList_3[_a];
+                        var $thumb = $("<div class=\"thumb-outer spr-tooltip\" title=\"" + spriteData.name + " p[" + spriteData.palettes + "] f[" + spriteData.frames + "]\" data-group=\"" + groupName + "\" data-sprite=\"" + spriteData.name + "\">\n\t\t\t\t\t\t\t<div class=\"thumb\" style=\"background: url('assets/sprites/" + groupName + "/_thumb.png') " + -thumbX + "px 0\"></div>\n\t\t\t\t\t\t</div>");
                         $content.append($thumb);
                         thumbX += 42;
                     }

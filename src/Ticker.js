@@ -24,7 +24,7 @@ var app;
                     var elapsedTime = time - _this.previousTime;
                     if (elapsedTime > _this.fpsInterval) {
                         _this.previousTime = time - (elapsedTime % _this.fpsInterval);
-                        _this._tickCallback(elapsedTime * 0.001, time);
+                        _this._tickCallback(_this.fpsInterval * 0.001, time);
                         // Update/measure the fps every 1 second
                         _this.frameCount++;
                         if (time - _this.frameCountPrevTime >= 1000) {

@@ -83,7 +83,7 @@ namespace app.exporters
 						var worldX = sprite.worldX - (Math.cos(sprite.worldRotation) * x - Math.sin(sprite.worldRotation) * y);
 						var worldY = sprite.worldY - (Math.sin(sprite.worldRotation) * x + Math.cos(sprite.worldRotation) * y);
 
-						animFrames.push(sprite.frame);
+						animFrames.push(sprite.getFrame());
 						animX.push(Exporter.num(worldX));
 						animY.push(Exporter.num(worldY));
 						animRotation.push(Exporter.num(sprite.worldRotation * Math.RAD_TO_DEG));
