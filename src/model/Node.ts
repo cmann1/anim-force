@@ -117,6 +117,35 @@ namespace app.model
 			}
 		}
 
+		public resetOffset()
+		{
+			if(this.offsetX != 0 || this.offsetY != 0)
+			{
+				this.offsetX = 0;
+				this.offsetY = 0;
+				this.onPropertyChange('offset');
+			}
+		}
+
+		public resetScale()
+		{
+			if(this.scaleX != 1 || this.scaleY != 1)
+			{
+				this.scaleX = 1;
+				this.scaleY = 1;
+				this.onPropertyChange('scale');
+			}
+		}
+
+		public resetRotation()
+		{
+			if(this.rotation != 0)
+			{
+				this.rotation = 1;
+				this.onPropertyChange('rotation');
+			}
+		}
+
 		//
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
@@ -219,7 +248,10 @@ namespace app.model
 			}
 		}
 
-		public draw(ctx:CanvasRenderingContext2D, worldScale:number) { }
+		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
+		{
+
+		}
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{

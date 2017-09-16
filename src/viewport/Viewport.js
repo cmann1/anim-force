@@ -337,9 +337,10 @@ var app;
                     return;
                 if (this.commonKey(event))
                     return;
+                // console.log(keyCode);
                 var keyCode = event.keyCode;
                 var altKey = event.altKey;
-                // console.log(keyCode);
+                var selectedNode = this.model.getSelectedNode();
                 if (keyCode == Key.Home) {
                     this.reset();
                 }
@@ -349,7 +350,7 @@ var app;
                 else if (keyCode == Key.Subtract || keyCode == Key.Dash) {
                     this.zoom(-1);
                 }
-                else if (keyCode == Key.G) {
+                else if (keyCode == Key.G && !altKey) {
                     app.Config.set('drawGrid', !app.Config.drawGrid);
                 }
                 else if (keyCode == Key.Zero) {
@@ -397,34 +398,43 @@ var app;
                     // this.model.bindPose.forceKeyframe();
                 }
                 else if (this.mode != EditMode.PLAYBACK) {
+                    // Delete ndoe
                     if (keyCode == Key.Delete) {
                         if (!this.interaction.success) {
-                            var selectedNode = this.model.getSelectedNode();
                             if (selectedNode) {
                                 selectedNode.parent.removeChild(selectedNode);
                             }
                         }
                     }
                     else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
-                        var selectedNode = this.model.getSelectedNode();
                         if (selectedNode) {
                             this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey);
                             this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
                         }
                     }
                     else if (keyCode == Key.Numpad8 || keyCode == Key.Numpad2) {
-                        var node = this.model.getSelectedNode();
-                        if (node instanceof Sprite) {
-                            node.setFrame(Math.round(node.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
-                            this.showMessage('Frame: ' + (Math.round(node.frame) + 1) + '/' + node.frameCount);
+                        if (selectedNode instanceof Sprite) {
+                            selectedNode.setFrame(Math.round(selectedNode.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
+                            this.showMessage('Frame: ' + (Math.round(selectedNode.frame) + 1) + '/' + selectedNode.frameCount);
                         }
                     }
                     else if (keyCode == Key.Numpad4 || keyCode == Key.Numpad6) {
-                        var node = this.model.getSelectedNode();
-                        if (node instanceof Sprite) {
-                            node.setPalette(node.palette + (keyCode == Key.Numpad6 ? 1 : -1));
-                            this.showMessage('Palette: ' + (node.palette + 1) + '/' + node.paletteCount);
+                        if (selectedNode instanceof Sprite) {
+                            selectedNode.setPalette(selectedNode.palette + (keyCode == Key.Numpad6 ? 1 : -1));
+                            this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
                         }
+                    }
+                    else if (keyCode == Key.G && altKey) {
+                        if (selectedNode)
+                            selectedNode.resetOffset();
+                    }
+                    else if (keyCode == Key.S && altKey) {
+                        if (selectedNode)
+                            selectedNode.resetScale();
+                    }
+                    else if (keyCode == Key.R && altKey) {
+                        if (selectedNode)
+                            selectedNode.resetRotation();
                     }
                     else if (keyCode == Key.Enter) {
                         app.main.showSpriteSelector(this.onSpritesSelect);

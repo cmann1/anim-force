@@ -84,6 +84,26 @@ var app;
                         this.layer = MAX_LAYER;
                 }
             };
+            Node.prototype.resetOffset = function () {
+                if (this.offsetX != 0 || this.offsetY != 0) {
+                    this.offsetX = 0;
+                    this.offsetY = 0;
+                    this.onPropertyChange('offset');
+                }
+            };
+            Node.prototype.resetScale = function () {
+                if (this.scaleX != 1 || this.scaleY != 1) {
+                    this.scaleX = 1;
+                    this.scaleY = 1;
+                    this.onPropertyChange('scale');
+                }
+            };
+            Node.prototype.resetRotation = function () {
+                if (this.rotation != 0) {
+                    this.rotation = 1;
+                    this.onPropertyChange('rotation');
+                }
+            };
             //
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 return false;
@@ -153,7 +173,8 @@ var app;
                     handle.expand(this.worldAABB, worldScale);
                 }
             };
-            Node.prototype.draw = function (ctx, worldScale) { };
+            Node.prototype.draw = function (ctx, worldScale) {
+            };
             Node.prototype.drawControls = function (ctx, worldScale, viewport) {
                 for (var _i = 0, _a = this.handles; _i < _a.length; _i++) {
                     var handle = _a[_i];

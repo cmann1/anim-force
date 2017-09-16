@@ -136,13 +136,11 @@ namespace app.anim
 		{
 			this.fpsStep = 1 / this.fps;
 			this.accumulatedTime = 0;
-			// console.log(this.fpsStep);
 		}
 
 		public animateStep(deltaTime:number)
 		{
 			this.accumulatedTime += deltaTime;
-			// console.log(deltaTime);
 
 			while(this.accumulatedTime > this.fpsStep)
 			{

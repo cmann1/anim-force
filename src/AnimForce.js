@@ -1,7 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Keys to reset position, scale, and rotation
  TODO: Animation events
  TODO: Anchor nodes
  TODO: Sprite Selector:

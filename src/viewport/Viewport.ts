@@ -475,9 +475,10 @@ namespace app.viewport
 			if(this.timeline.commonKey(event)) return;
 			if(this.commonKey(event)) return;
 
+			// console.log(keyCode);
 			const keyCode = event.keyCode;
 			const altKey = event.altKey;
-			// console.log(keyCode);
+			const selectedNode = this.model.getSelectedNode();
 
 			if(keyCode == Key.Home)
 			{
@@ -497,7 +498,7 @@ namespace app.viewport
 			}
 
 			// Toggle draw grid
-			else if(keyCode == Key.G)
+			else if(keyCode == Key.G && !altKey)
 			{
 				Config.set('drawGrid', !Config.drawGrid);
 			}
@@ -563,11 +564,11 @@ namespace app.viewport
 
 			else if(this.mode != EditMode.PLAYBACK)
 			{
+				// Delete ndoe
 				if(keyCode == Key.Delete)
 				{
 					if(!this.interaction.success)
 					{
-						const selectedNode = this.model.getSelectedNode();
 						if(selectedNode)
 						{
 							selectedNode.parent.removeChild(selectedNode);
@@ -575,9 +576,9 @@ namespace app.viewport
 					}
 				}
 
+				// Change layer/sublayer
 				else if(keyCode == Key.PageDown || keyCode == Key.PageUp)
 				{
-					const selectedNode = this.model.getSelectedNode();
 					if(selectedNode)
 					{
 						this.model.increaseSelectedNodeLayer(
@@ -589,24 +590,40 @@ namespace app.viewport
 
 				}
 
+				// Change sprite frame
 				else if(keyCode == Key.Numpad8 || keyCode == Key.Numpad2)
 				{
-					var node = this.model.getSelectedNode();
-					if(node instanceof Sprite)
+					if(selectedNode instanceof Sprite)
 					{
-						node.setFrame(Math.round(node.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
-						this.showMessage('Frame: ' + (Math.round(node.frame) + 1) + '/' + node.frameCount);
+						selectedNode.setFrame(Math.round(selectedNode.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
+						this.showMessage('Frame: ' + (Math.round(selectedNode.frame) + 1) + '/' + selectedNode.frameCount);
 					}
 				}
 
+				// Change palette
 				else if(keyCode == Key.Numpad4 || keyCode == Key.Numpad6)
 				{
-					var node = this.model.getSelectedNode();
-					if(node instanceof Sprite)
+					if(selectedNode instanceof Sprite)
 					{
-						node.setPalette(node.palette + (keyCode == Key.Numpad6 ? 1 : -1));
-						this.showMessage('Palette: ' + (node.palette + 1) + '/' + node.paletteCount);
+						selectedNode.setPalette(selectedNode.palette + (keyCode == Key.Numpad6 ? 1 : -1));
+						this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
 					}
+				}
+
+				// Reset offset
+				else if(keyCode == Key.G && altKey)
+				{
+					if(selectedNode) selectedNode.resetOffset();
+				}
+				// Reset scale
+				else if(keyCode == Key.S && altKey)
+				{
+					if(selectedNode) selectedNode.resetScale();
+				}
+				// Reset rotation
+				else if(keyCode == Key.R && altKey)
+				{
+					if(selectedNode) selectedNode.resetRotation();
 				}
 
 				// TODO: REMOVE
