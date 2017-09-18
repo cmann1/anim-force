@@ -25,18 +25,26 @@ var app;
                 if (current) {
                     value = current.value;
                 }
-                else if (prev && next) {
-                    value = prev.value;
-                }
-                else if (prev) {
-                    value = prev.value;
-                }
-                else if (next) {
-                    value = next.value;
-                }
                 else {
-                    value = node[this.propertyName];
+                    value = null;
                 }
+                // else if(prev && next)
+                // {
+                // 	value = prev.value;
+                //
+                // }
+                // else if(prev)
+                // {
+                // 	value = prev.value;
+                // }
+                // else if(next)
+                // {
+                // 	value = next.value;
+                // }
+                // else
+                // {
+                // 	value = node[this.propertyName];
+                // }
                 node[this.propertyName] = value;
             };
             return StringProperty;

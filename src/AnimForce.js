@@ -1,14 +1,14 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Animation events
- TODO: - Exporting to AngelScript
  TODO: When adjusting bone length, keep children relative position
  TODO: Anchor nodes
- TODO: Emitter nodes
+ TODO: ? Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?
+ TODO: ? Sound nodes
  TODO: Copy/paste nodes
+ 
  TODO: Sprite Selector:
  TODO: - Improve all-round / Completely redo
  TODO: - Remember state, scroll position, etc.

@@ -6,7 +6,7 @@ String.prototype.toTitleCase = function () {
         .replace(/([a-z])([0-9])/ig, '$1 $2')
         .replace(/([0-9])([a-z])/ig, '$1 $2')
         .replace(/\w\S*/g, function (txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        return txt.charAt(0).toUpperCase() + txt.substr(1);
     });
 };
 String.prototype.toVarName = function () {

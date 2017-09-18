@@ -7,6 +7,7 @@ namespace app.exporters
 	import ContainerNode = app.model.ContainerNode;
 	import Animation = app.anim.Animation;
 	import SpriteFrame = app.assets.SpriteFrame;
+	import EventNode = app.model.EventNode;
 
 	export class AngelScriptExporter extends Exporter
 	{
@@ -20,6 +21,8 @@ namespace app.exporters
 			var spriteLayers:number[] = [];
 			var spriteSubLayers:number[] = [];
 			var spritePalettes:number[] = [];
+
+			var eventNodes:EventNode[] = [];
 
 			var nodes:Node[] = model.getNodeList();
 
@@ -38,6 +41,10 @@ namespace app.exporters
 						spritePalettes.push(sprite.palette);
 					}
 				}
+				else if(node instanceof EventNode)
+				{
+					eventNodes.push(node);
+				}
 			}
 
 			var animIndex = 0;
@@ -52,6 +59,7 @@ namespace app.exporters
 			var outRotation = [];
 			var outScaleX = [];
 			var outScaleY = [];
+			var outEvent = [];
 
 			for(var anim of anims)
 			{
@@ -72,6 +80,7 @@ namespace app.exporters
 				var animRotation = [];
 				var animScaleX = [];
 				var animScaleY = [];
+				var animEvent = [];
 
 				for(var i = 0; i < frameCount; i++)
 				{
@@ -91,6 +100,16 @@ namespace app.exporters
 						animScaleY.push(Exporter.num(sprite.scaleY));
 					}
 
+					var eventName:string = null;
+					for(var event of eventNodes)
+					{
+						if(event.event)
+							eventName = event.event;
+					}
+
+					if(eventName)
+						animEvent.push(`${i},'${eventName}'`);
+
 					anim.gotoNextFrame();
 					model.prepareChildren();
 				}
@@ -101,6 +120,7 @@ namespace app.exporters
 				outRotation.push(animRotation.join(','));
 				outScaleX.push(animScaleX.join(','));
 				outScaleY.push(animScaleY.join(','));
+				outEvent.push(animEvent.length ? '{' + animEvent.join('},{') + '}' : '');
 				animNames.push(`'${anim.name}',${animIndex}`);
 
 				anim.setPosition(currentFrame);
@@ -109,7 +129,9 @@ namespace app.exporters
 			}
 
 
-			return `class ${className} : trigger_base
+			return `funcdef void EventCallback(string);
+
+class ${className} : trigger_base
 {
 	scene@ g;
 	script@ script;
@@ -135,11 +157,13 @@ namespace app.exporters
 	array<array<float>> anims_rotation = {{${outRotation.join('},{')}}};
 	array<array<float>> anims_scale_x = {{${outScaleX.join('},{')}}};
 	array<array<float>> anims_scale_y = {{${outScaleY.join('},{')}}};
+	array<dictionary> anims_event = {{${outEvent.join('},{')}}};
 	dictionary anims_name = {{${animNames.join('},{')}}};
 	
 	// Current animation
 	[text] string current_anim = "None";
 	[hidden] float current_frame = 0;
+	[hidden] int current_whole_frame = 0;
 	[hidden] int current_frame_count = 0;
 	[hidden] float current_fps_step = 0;
 	[hidden] bool current_loop = false;
@@ -149,6 +173,9 @@ namespace app.exporters
 	[hidden] array<float>@ current_rotation = @null;
 	[hidden] array<float>@ current_scale_x = @null;
 	[hidden] array<float>@ current_scale_y = @null;
+	[hidden] dictionary@ current_event = @null;
+	
+	EventCallback@ event_callback = null;
 	
 	${className}()
 	{
@@ -185,6 +212,8 @@ namespace app.exporters
 		if(current_frame > current_frame_count - 1){
 			current_frame = current_loop ? 0 : current_frame_count - 1;
 		}
+		
+		check_event();
 	}
 	
 	void goto_prev_frame()
@@ -194,6 +223,8 @@ namespace app.exporters
 		if(current_frame < 0){
 			current_frame = current_loop ? current_frame_count - 1 : 0;
 		}
+		
+		check_event();
 	}
 	
 	void set_animation(string name)
@@ -216,6 +247,9 @@ namespace app.exporters
 		@current_rotation = @anims_rotation[anim_index];
 		@current_scale_x = @anims_scale_x[anim_index];
 		@current_scale_y = @anims_scale_y[anim_index];
+		@current_event = @anims_event[anim_index];
+		
+		check_event();
 	}
 	
 	void set_position(int frame)
@@ -224,6 +258,18 @@ namespace app.exporters
 		else if(frame >= current_frame_count) frame = current_frame_count - 1;
 		
 		current_frame = frame;
+		check_event();
+	}
+
+	string get_event()
+	{
+		const string frame = current_whole_frame + "";
+		if(current_event.exists(frame))
+		{
+			return string(current_event[frame]);
+		}
+		
+		return '';
 	}
 	
 	void step()
@@ -231,10 +277,28 @@ namespace app.exporters
 		if(is_playing)
 		{
 			current_frame += current_fps_step;
+			
+			if(current_frame > current_frame_count - 1){
+				current_frame = current_loop ? 0 : current_frame_count - 1;
+			}
+			
+			check_event();
 		}
-		
-		if(current_frame > current_frame_count - 1){
-			current_frame = current_loop ? 0 : current_frame_count - 1;
+	}
+	
+	void check_event()
+	{
+		const int whole_frame = int(floor(current_frame));
+		if(current_whole_frame != whole_frame)
+		{
+			current_whole_frame = whole_frame;
+			
+			if(@event_callback != null)
+			{
+				const string frame = current_whole_frame + "";
+				if(current_event.exists(frame))
+					event_callback(string(current_event[frame]));
+			}
 		}
 	}
 	

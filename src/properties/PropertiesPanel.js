@@ -13,13 +13,13 @@ var app;
                 this.$panel.find('button.btn-export-as').on('click', function () {
                     var out = (new AngelScriptExporter()).exportModel(_this.model);
                     Utils.copyToClipboard(out);
-                    app.App.notice('Output copied to clipboard');
+                    app.App.notice('Output copied to clipboard', 'blue');
                 });
                 // TODO: Remove
                 this.$panel.find('button.btn-export-spr').on('click', function () {
                     var out = (new SpriteGroupExporter()).exportModel(_this.model);
                     Utils.copyToClipboard(out);
-                    app.App.notice('Output copied to clipboard');
+                    app.App.notice('Output copied to clipboard', 'blue');
                 });
             }
             PropertiesPanel.prototype.setModel = function (model) {

@@ -8,7 +8,6 @@ namespace app.viewport
 	import SelectionEvent = app.model.events.SelectionEvent;
 	import StructureChangeEvent = app.model.events.StructureChangeEvent;
 	import Node = app.model.Node;
-	import AngelScriptExporter = app.exporters.AngelScriptExporter;
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
 	import EditMode = app.model.EditMode;
