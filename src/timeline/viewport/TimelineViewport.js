@@ -14,11 +14,15 @@ var app;
     (function (timeline) {
         var Key = KeyCodes.Key;
         var EditMode = app.model.EditMode;
+        var PromptDlg = app.ui.PromptDlg;
+        var EventTrack = app.anim.EventTrack;
         var TimelineViewport = (function (_super) {
             __extends(TimelineViewport, _super);
             function TimelineViewport(elementId, model, tree) {
                 var _this = _super.call(this, elementId) || this;
                 _this.trackList = [];
+                _this.eventEditTrack = null;
+                _this.eventEditFrame = -1;
                 _this.scrollX = 0;
                 _this.scrollY = 0;
                 _this.currentFrame = 0;
@@ -43,6 +47,30 @@ var app;
                 /*
                  * Events
                  */
+                _this.onCanvasDblClick = function (event) {
+                    if (_this.mode == EditMode.ANIMATE) {
+                        if (_this.mouseY > app.Config.nodeHeight) {
+                            if (event.button == 0) {
+                                var track = _this.getNodeAt(_this.mouseY - app.Config.nodeHeight);
+                                if (track instanceof EventTrack) {
+                                    var frame = _this.getFrameIndexAt(_this.mouseX);
+                                    _this.showEventPrompt(track, _this.getFrameIndexAt(_this.mouseX));
+                                }
+                            }
+                        }
+                    }
+                };
+                _this.onEventConfirm = function (name, value) {
+                    value = $.trim(value);
+                    if (value == '') {
+                        _this.animation.deleteKeyframe(_this.eventEditTrack.node, _this.eventEditFrame);
+                    }
+                    else {
+                        _this.eventEditTrack.node.event = value;
+                        _this.animation.forceKeyframe(_this.eventEditTrack.node, _this.eventEditFrame);
+                    }
+                };
+                //
                 _this.onAnimationChange = function (animation, event) {
                     var type = event.type;
                     if (type == 'position' || type == 'clear') {
@@ -95,6 +123,7 @@ var app;
                 _this.tree = tree;
                 tree.scrollChange.on(_this.onTreeScroll);
                 tree.treeNodeUpdate.on(_this.onTreeNodeUpdate);
+                _this.$canvas.on('dblclick', _this.onCanvasDblClick);
                 _this.$container.on('resize', _this.onResize);
                 _this.$container.parent().on('resize', _this.onResize);
                 _this.$container.parent().parent().parent().on('resize', _this.onResize);
@@ -387,6 +416,28 @@ var app;
                 this.selectedFrame = track ? frameIndex : -1;
                 return true;
             };
+            TimelineViewport.prototype.showEventPrompt = function (track, frame) {
+                if (!this.eventPrompt) {
+                    this.eventPrompt = new PromptDlg('Event Name', {
+                        target: this.$container,
+                        position: { x: 'center', y: 'bottom' },
+                        pointer: true,
+                        pointTo: 'bottom',
+                        buttons: [
+                            { label: 'Accept', confirm: true },
+                            { label: 'Cancel', cancel: true }
+                        ],
+                        confirm: this.onEventConfirm
+                    });
+                }
+                var key = track.getKeyFrame(frame);
+                this.eventEditTrack = track;
+                this.eventEditFrame = frame;
+                var offset = this.eventPrompt.dialog.options.offset;
+                offset.x = frame * app.Config.frameWidth - this.scrollX + app.Config.frameWidth * 0.5 - this.width * 0.5;
+                offset.y = app.Config.nodeHeight + this.trackList.indexOf(track) * app.Config.nodeHeight - this.scrollY - this.height;
+                this.eventPrompt.show(key ? key.value : '');
+            };
             TimelineViewport.prototype.stopKeyframeDrag = function (move, cancel) {
                 if (move === void 0) { move = false; }
                 if (cancel === void 0) { cancel = true; }
@@ -412,6 +463,7 @@ var app;
                     this.trackList.push(this.animation.tracks[node.id]);
                 }
             };
+            //
             TimelineViewport.prototype.onKeyDown = function (event) {
                 if (this.viewport.commonKey(event))
                     return;

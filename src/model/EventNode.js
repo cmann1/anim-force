@@ -87,6 +87,12 @@ var app;
                     this.worldAABB.draw(ctx, worldScale);
                 }
             };
+            EventNode.prototype.setEvent = function (event) {
+                if (this.event == event)
+                    return;
+                this.event = event;
+                this.onPropertyChange('event');
+            };
             //
             EventNode.prototype.save = function () {
                 var data = _super.prototype.save.call(this);

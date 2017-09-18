@@ -112,6 +112,14 @@ namespace app.model
 			}
 		}
 
+		public setEvent(event:string)
+		{
+			if(this.event == event) return;
+
+			this.event = event;
+			this.onPropertyChange('event');
+		}
+
 		//
 
 		public save():any

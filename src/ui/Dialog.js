@@ -41,6 +41,10 @@ var app;
                 this.title = title;
                 var defaults = {
                     name: 'Dlg' + (++Dialog.nextId),
+                    pointer: false,
+                    pointTo: 'target',
+                    target: null,
+                    fixed: true,
                     dlgClass: '',
                     overlay: true,
                     overlayClass: 'clear',
@@ -120,6 +124,10 @@ var app;
                 }
                 this.dlg = new jBox('Modal', {
                     title: this.icon + this.title,
+                    pointer: options.pointer,
+                    pointTo: options.pointTo,
+                    fixed: options.fixed,
+                    target: options.target,
                     addClass: 'jbox-dialog-wrapper ' + options.type + ' ' + options.dlgClass,
                     overlay: options.overlay,
                     overlayClass: options.overlayClass,
@@ -167,6 +175,13 @@ var app;
             Dialog.prototype.getContent = function () {
                 return this.$contentPane;
             };
+            Object.defineProperty(Dialog.prototype, "dialog", {
+                get: function () {
+                    return this.dlg;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Dialog.prototype.reposition = function () {
                 this.dlg.position();
             };

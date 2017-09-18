@@ -35,6 +35,10 @@ namespace app.ui
 
 			var defaults = {
 				name: 'Dlg' + (++Dialog.nextId),
+				pointer: false,
+				pointTo: 'target',
+				target: null,
+				fixed: true,
 				dlgClass: '',
 				overlay: true,
 				overlayClass: 'clear',
@@ -151,6 +155,10 @@ namespace app.ui
 
 			this.dlg = new jBox('Modal', {
 				title: this.icon + this.title,
+				pointer: options.pointer,
+				pointTo: options.pointTo,
+				fixed: options.fixed,
+				target: options.target,
 				addClass: 'jbox-dialog-wrapper ' + options.type + ' ' + options.dlgClass,
 				overlay: options.overlay,
 				overlayClass: options.overlayClass,
@@ -215,6 +223,11 @@ namespace app.ui
 		public getContent():JQuery
 		{
 			return this.$contentPane;
+		}
+
+		public get dialog():jBox
+		{
+			return this.dlg;
 		}
 
 		public reposition()

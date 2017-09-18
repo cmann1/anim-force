@@ -16,6 +16,9 @@ namespace app.timeline
 	import EditMode = app.model.EditMode;
 	import Keyframe = app.anim.Keyframe;
 	import KeyframeStruct = app.anim.KeyframeStruct;
+	import PromptDlg = app.ui.PromptDlg;
+	import EventTrack = app.anim.EventTrack;
+	import StringKeyframe = app.anim.StringKeyframe;
 
 	export class TimelineViewport extends app.Canvas
 	{
@@ -28,6 +31,9 @@ namespace app.timeline
 		private trackList:Track[] = [];
 
 		private toolbar:TimelineToolbar;
+		private eventPrompt:PromptDlg;
+		private eventEditTrack:EventTrack = null;
+		private eventEditFrame:number = -1;
 
 		private scrollX:number = 0;
 		private scrollY:number = 0;
@@ -65,6 +71,8 @@ namespace app.timeline
 
 			tree.scrollChange.on(this.onTreeScroll);
 			tree.treeNodeUpdate.on(this.onTreeNodeUpdate);
+
+			this.$canvas .on('dblclick', this.onCanvasDblClick);
 
 			this.$container.on('resize', this.onResize);
 			this.$container.parent().on('resize', this.onResize);
@@ -466,6 +474,33 @@ namespace app.timeline
 			return true;
 		}
 
+		private showEventPrompt(track:EventTrack, frame:number)
+		{
+			if(!this.eventPrompt)
+			{
+				this.eventPrompt = new PromptDlg('Event Name', {
+					target: this.$container,
+					position: {x: 'center', y: 'bottom'},
+					pointer: true,
+					pointTo: 'bottom',
+					buttons: [
+						{label: 'Accept', confirm: true},
+						{label: 'Cancel', cancel: true}
+					],
+					confirm: this.onEventConfirm
+				});
+			}
+
+			const key = <StringKeyframe> track.getKeyFrame(frame);
+			this.eventEditTrack = track;
+			this.eventEditFrame = frame;
+
+			const offset = this.eventPrompt.dialog.options.offset;
+			offset.x = frame * Config.frameWidth - this.scrollX + Config.frameWidth * 0.5 - this.width * 0.5;
+			offset.y = Config.nodeHeight + this.trackList.indexOf(track) * Config.nodeHeight - this.scrollY - this.height;
+			this.eventPrompt.show(key ? key.value : '');
+		}
+
 		private stopKeyframeDrag(move=false, cancel=true)
 		{
 			if(this.dragKeyframeTrack)
@@ -505,6 +540,41 @@ namespace app.timeline
 		 * Events
 		 */
 
+		private onCanvasDblClick = (event) =>
+		{
+			if(this.mode == EditMode.ANIMATE)
+			{
+				if(this.mouseY > Config.nodeHeight)
+				{
+					if(event.button == 0)
+					{
+						const track = this.getNodeAt(this.mouseY - Config.nodeHeight);
+						if(track instanceof EventTrack)
+						{
+							const frame = this.getFrameIndexAt(this.mouseX);
+							this.showEventPrompt(track, this.getFrameIndexAt(this.mouseX));
+						}
+					}
+				}
+			}
+		};
+
+		private onEventConfirm = (name:string, value?:any) =>
+		{
+			value = $.trim(value);
+
+			if(value == '')
+			{
+				this.animation.deleteKeyframe(this.eventEditTrack.node, this.eventEditFrame);
+			}
+			else
+			{
+				this.eventEditTrack.node.event = value;
+				this.animation.forceKeyframe(this.eventEditTrack.node, this.eventEditFrame);
+			}
+		};
+
+		//
 
 		private onAnimationChange = (animation:Animation, event:Event) =>
 		{
@@ -582,6 +652,8 @@ namespace app.timeline
 			this.scrollY = event.scrollY;
 			this.requiresUpdate = true;
 		};
+
+		//
 
 		protected onKeyDown(event)
 		{

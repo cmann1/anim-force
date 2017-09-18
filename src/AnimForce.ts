@@ -2,9 +2,8 @@
  Ordered To-Do's:
  ---------------------------------------------------------------
  TODO: Animation events
- TODO: - Just make a regular event node - it will make things a lot simpler
  TODO: - Rendering event labels in timeline
- TODO: - How will event keyframes be edited?
+ TODO: - Don't render keyframe arrows
  TODO: When adjusting bone length, keep children relative position
  TODO: Anchor nodes
  TODO: Emitter nodes
