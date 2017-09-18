@@ -16,6 +16,9 @@ namespace app.anim
 			super('event', animation, node);
 
 			this.bulkKeyframeOperations = false;
+			this.tweenable = false;
+			this.keyLabelProperty = 'event';
+			this.keyLabelField = 'value';
 
 			this.addProperty('event', TrackPropertyType.STRING);
 

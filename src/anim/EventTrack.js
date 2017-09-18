@@ -18,6 +18,9 @@ var app;
             function EventTrack(animation, node) {
                 var _this = _super.call(this, 'event', animation, node) || this;
                 _this.bulkKeyframeOperations = false;
+                _this.tweenable = false;
+                _this.keyLabelProperty = 'event';
+                _this.keyLabelField = 'value';
                 _this.addProperty('event', TrackPropertyType.STRING);
                 _this.keyframeColour = '#719ef9';
                 _this.keyframeBorderColour = '#2b63d4';

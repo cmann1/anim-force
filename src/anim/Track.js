@@ -18,6 +18,9 @@ var app;
                 this.type = null;
                 this.properties = {};
                 this.bulkKeyframeOperations = true;
+                this.tweenable = true;
+                this.keyLabelProperty = null;
+                this.keyLabelField = null;
                 this.length = 1;
                 this.interpolation = Interpolation.LINEAR;
                 this.keyframeColour = '#f9e26f';
@@ -60,12 +63,15 @@ var app;
                     property.updateNode(this.node, this.interpolation);
                 }
             };
-            Track.prototype.getKeyFrame = function (frameIndex) {
+            Track.prototype.getKeyFrame = function (frameIndex, from) {
+                if (from === void 0) { from = null; }
                 for (var propertyName in this.properties) {
-                    var property = this.properties[propertyName];
+                    var property = this.properties[from || propertyName];
                     if (frameIndex < property.length && property.frameList[frameIndex]) {
                         return property.frameList[frameIndex];
                     }
+                    if (from)
+                        return null;
                 }
                 return null;
             };

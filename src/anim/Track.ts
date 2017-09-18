@@ -29,6 +29,9 @@ namespace app.anim
 		protected properties:{[id:string]:TrackProperty} = {};
 
 		public bulkKeyframeOperations = true;
+		public tweenable = true;
+		public keyLabelProperty:string = null;
+		public keyLabelField:string = null;
 
 		public node:any;
 		public length:number = 1;
@@ -90,16 +93,18 @@ namespace app.anim
 			}
 		}
 
-		public getKeyFrame(frameIndex:number):Keyframe
+		public getKeyFrame(frameIndex:number, from:string=null):Keyframe
 		{
 			for(var propertyName in this.properties)
 			{
-				const property = this.properties[propertyName];
+				const property = this.properties[from || propertyName];
 
 				if(frameIndex < property.length && property.frameList[frameIndex])
 				{
 					return property.frameList[frameIndex];
 				}
+
+				if(from) return null;
 			}
 
 			return null;

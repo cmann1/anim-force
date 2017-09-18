@@ -44,6 +44,7 @@ var app;
                 _this.scrubColour = 'rgba(255, 50, 50, 0.5)';
                 _this.keyframeSize = 4;
                 _this.selectedFrameColour = '#fdf4a8';
+                _this.labelFontSize = '12px';
                 /*
                  * Events
                  */
@@ -69,6 +70,10 @@ var app;
                         _this.eventEditTrack.node.event = value;
                         _this.animation.forceKeyframe(_this.eventEditTrack.node, _this.eventEditFrame);
                     }
+                    _this.$canvas.focus();
+                };
+                _this.onEventDlgClose = function (dlg) {
+                    _this.$canvas.focus();
                 };
                 //
                 _this.onAnimationChange = function (animation, event) {
@@ -133,6 +138,10 @@ var app;
                 _this.headerGrad.addColorStop(0, app.Config.node);
                 _this.headerGrad.addColorStop(1, app.Config.nodeBottom);
                 _this.setModel(model);
+                _this.labelCanvas = document.createElement('canvas');
+                _this.labelCanvas.width = app.Config.frameWidth * 10;
+                _this.labelCanvas.height = app.Config.nodeHeight;
+                _this.labelCtx = _this.labelCanvas.getContext('2d');
                 return _this;
             }
             //
@@ -165,6 +174,11 @@ var app;
                 ctx.rect(0, nodeHeight, this.width, this.height - nodeHeight);
                 ctx.clip();
                 ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
+                var labelCtx = this.labelCtx;
+                labelCtx.font = this.labelFontSize + " " + app.Config.font;
+                labelCtx.fillStyle = app.Config.text;
+                labelCtx.textAlign = 'left';
+                labelCtx.textBaseline = 'middle';
                 var y = 0;
                 for (var _i = 0, _a = this.trackList; _i < _a.length; _i++) {
                     var track = _a[_i];
@@ -200,6 +214,7 @@ var app;
                             x += frameWidth;
                         }
                         // Draw keyframes
+                        var labels = [];
                         for (var j = firstFrame, x = firstFrame * frameWidth; j < lastFrame; j++) {
                             var prev = null;
                             var next = null;
@@ -210,6 +225,11 @@ var app;
                                 var keyframe = track.getKeyFrame(j);
                                 if (keyframe) {
                                     onScreenFrameCount++;
+                                    if (labels.length) {
+                                        var label_1 = labels[labels.length - 1];
+                                        if (label_1.x + label_1.width > x)
+                                            label_1.width = x - label_1.x - 1;
+                                    }
                                     // Keyframe diamond
                                     ctx.fillStyle = keyframeColour;
                                     ctx.strokeStyle = keyframeBorderColour;
@@ -221,6 +241,15 @@ var app;
                                     ctx.closePath();
                                     ctx.fill();
                                     ctx.stroke();
+                                    if (track.keyLabelProperty && (keyframe = track.getKeyFrame(j, track.keyLabelProperty))) {
+                                        var label_2 = String(keyframe[track.keyLabelField]);
+                                        var labelWidth = labelCtx.measureText(label_2).width;
+                                        labels.push({
+                                            x: x + frameWidth + 4,
+                                            text: label_2,
+                                            width: labelWidth
+                                        });
+                                    }
                                     // There needs to be an arrow connecting keyframes
                                     if (keyframe.next && keyframe.next.frameIndex > keyframe.frameIndex + 1) {
                                         lastKeyframe = j;
@@ -250,22 +279,36 @@ var app;
                                 }
                             }
                             // Draw keyframe connection arrows
-                            while (arrowCount--) {
-                                cx = next.frameIndex * frameWidth - 3;
-                                ctx.strokeStyle = keyframeBorderColour;
-                                ctx.beginPath();
-                                ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
-                                ctx.lineTo(cx, cy);
-                                ctx.lineTo(cx - 4, cy - 4);
-                                ctx.moveTo(cx, cy);
-                                ctx.lineTo(cx - 4, cy + 4);
-                                ctx.stroke();
-                                if (arrowCount > 0) {
-                                    prev = prev.prev;
-                                    next = prev.next;
+                            if (track.tweenable) {
+                                while (arrowCount--) {
+                                    cx = next.frameIndex * frameWidth - 3;
+                                    ctx.strokeStyle = keyframeBorderColour;
+                                    ctx.beginPath();
+                                    ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
+                                    ctx.lineTo(cx, cy);
+                                    ctx.lineTo(cx - 4, cy - 4);
+                                    ctx.moveTo(cx, cy);
+                                    ctx.lineTo(cx - 4, cy + 4);
+                                    ctx.stroke();
+                                    if (arrowCount > 0) {
+                                        prev = prev.prev;
+                                        next = prev.next;
+                                    }
                                 }
                             }
                             x += frameWidth;
+                        }
+                        // Draw keyframe labels
+                        if (labels.length) {
+                            for (var _b = 0, labels_1 = labels; _b < labels_1.length; _b++) {
+                                var label = labels_1[_b];
+                                if (label.width < frameWidth - 5)
+                                    continue;
+                                labelCtx.clearRect(0, 0, this.labelCanvas.width, this.labelCanvas.height);
+                                labelCtx.fillText(label.text, 0, frameCY);
+                                var sw = Math.min(label.width, this.labelCanvas.width);
+                                ctx.drawImage(this.labelCanvas, 0, 0, sw, nodeHeight, label.x, y, sw, nodeHeight);
+                            }
                         }
                     } // End if
                     y += nodeHeight;
@@ -427,7 +470,8 @@ var app;
                             { label: 'Accept', confirm: true },
                             { label: 'Cancel', cancel: true }
                         ],
-                        confirm: this.onEventConfirm
+                        confirm: this.onEventConfirm,
+                        close: this.onEventDlgClose
                     });
                 }
                 var key = track.getKeyFrame(frame);

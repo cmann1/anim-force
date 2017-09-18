@@ -19,6 +19,7 @@ namespace app.timeline
 	import PromptDlg = app.ui.PromptDlg;
 	import EventTrack = app.anim.EventTrack;
 	import StringKeyframe = app.anim.StringKeyframe;
+	import Dialog = app.ui.Dialog;
 
 	export class TimelineViewport extends app.Canvas
 	{
@@ -60,6 +61,10 @@ namespace app.timeline
 		private scrubColour = 'rgba(255, 50, 50, 0.5)';
 		private keyframeSize = 4;
 		private selectedFrameColour = '#fdf4a8';
+		private labelFontSize = '12px';
+
+		private labelCanvas:HTMLCanvasElement;
+		private labelCtx:CanvasRenderingContext2D;
 
 		public viewport:app.viewport.Viewport;
 
@@ -86,6 +91,11 @@ namespace app.timeline
 			this.headerGrad.addColorStop(1, Config.nodeBottom);
 
 			this.setModel(model);
+
+			this.labelCanvas = document.createElement('canvas');
+			this.labelCanvas.width = Config.frameWidth * 10;
+			this.labelCanvas.height = Config.nodeHeight;
+			this.labelCtx = this.labelCanvas.getContext('2d');
 		}
 
 		//
@@ -127,6 +137,12 @@ namespace app.timeline
 			ctx.clip();
 
 			ctx.translate(-this.scrollX, -this.scrollY + nodeHeight);
+
+			const labelCtx = this.labelCtx;
+			labelCtx.font = `${this.labelFontSize} ${Config.font}`;
+			labelCtx.fillStyle = Config.text;
+			labelCtx.textAlign = 'left';
+			labelCtx.textBaseline = 'middle';
 
 			var y = 0;
 			for(var track of this.trackList)
@@ -177,6 +193,8 @@ namespace app.timeline
 
 					// Draw keyframes
 
+					var labels = [];
+
 					for(var j = firstFrame, x = firstFrame * frameWidth; j < lastFrame; j++)
 					{
 						var prev:Keyframe = null;
@@ -188,10 +206,17 @@ namespace app.timeline
 
 						if(j < animationLength)
 						{
-							const keyframe = track.getKeyFrame(j);
+							let keyframe = track.getKeyFrame(j);
 							if(keyframe)
 							{
 								onScreenFrameCount++;
+
+								if(labels.length)
+								{
+									const label = labels[labels.length - 1];
+									if(label.x + label.width > x)
+										label.width = x - label.x - 1;
+								}
 
 								// Keyframe diamond
 								ctx.fillStyle = keyframeColour;
@@ -204,6 +229,17 @@ namespace app.timeline
 								ctx.closePath();
 								ctx.fill();
 								ctx.stroke();
+
+								if(track.keyLabelProperty && (keyframe = track.getKeyFrame(j, track.keyLabelProperty)))
+								{
+									const label = String(keyframe[track.keyLabelField]);
+									const labelWidth = labelCtx.measureText(label).width;
+									labels.push({
+										x: x + frameWidth + 4,
+										text: label,
+										width: labelWidth
+									});
+								}
 
 								// There needs to be an arrow connecting keyframes
 								if(keyframe.next && keyframe.next.frameIndex > keyframe.frameIndex + 1)
@@ -242,26 +278,46 @@ namespace app.timeline
 						}
 
 						// Draw keyframe connection arrows
-						while(arrowCount--)
+						if(track.tweenable)
 						{
-							cx = next.frameIndex * frameWidth - 3;
-							ctx.strokeStyle = keyframeBorderColour;
-							ctx.beginPath();
-							ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
-							ctx.lineTo(cx, cy);
-							ctx.lineTo(cx - 4, cy - 4);
-							ctx.moveTo(cx, cy);
-							ctx.lineTo(cx - 4, cy + 4);
-							ctx.stroke();
-
-							if(arrowCount > 0)
+							while(arrowCount--)
 							{
-								prev = prev.prev;
-								next = prev.next;
+								cx = next.frameIndex * frameWidth - 3;
+								ctx.strokeStyle = keyframeBorderColour;
+								ctx.beginPath();
+								ctx.moveTo(prev.frameIndex * frameWidth + frameWidth + 2, cy);
+								ctx.lineTo(cx, cy);
+								ctx.lineTo(cx - 4, cy - 4);
+								ctx.moveTo(cx, cy);
+								ctx.lineTo(cx - 4, cy + 4);
+								ctx.stroke();
+
+								if(arrowCount > 0)
+								{
+									prev = prev.prev;
+									next = prev.next;
+								}
 							}
 						}
 
 						x += frameWidth;
+					}
+
+					// Draw keyframe labels
+					if(labels.length)
+					{
+						for(var label of labels)
+						{
+							if(label.width < frameWidth - 5) continue;
+
+							labelCtx.clearRect(0, 0, this.labelCanvas.width, this.labelCanvas.height);
+							labelCtx.fillText(label.text, 0, frameCY);
+
+							const sw = Math.min(label.width, this.labelCanvas.width);
+							ctx.drawImage(this.labelCanvas,
+								0, 0, sw, nodeHeight,
+								label.x, y, sw, nodeHeight);
+						}
 					}
 
 				} // End if
@@ -487,7 +543,8 @@ namespace app.timeline
 						{label: 'Accept', confirm: true},
 						{label: 'Cancel', cancel: true}
 					],
-					confirm: this.onEventConfirm
+					confirm: this.onEventConfirm,
+					close: this.onEventDlgClose
 				});
 			}
 
@@ -572,6 +629,13 @@ namespace app.timeline
 				this.eventEditTrack.node.event = value;
 				this.animation.forceKeyframe(this.eventEditTrack.node, this.eventEditFrame);
 			}
+
+			this.$canvas.focus();
+		};
+
+		private onEventDlgClose = (dlg:Dialog) =>
+		{
+			this.$canvas.focus();
 		};
 
 		//

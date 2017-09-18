@@ -2,8 +2,7 @@
  Ordered To-Do's:
  ---------------------------------------------------------------
  TODO: Animation events
- TODO: - Rendering event labels in timeline
- TODO: - Don't render keyframe arrows
+ TODO: - Exporting to AngelScript
  TODO: When adjusting bone length, keep children relative position
  TODO: Anchor nodes
  TODO: Emitter nodes
