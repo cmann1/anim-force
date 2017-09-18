@@ -2,12 +2,12 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
-        var Node = app.model.Node;
         var ContainerNode = app.model.ContainerNode;
         var Bone = app.model.Bone;
         var Sprite = app.model.Sprite;
         var EventDispatcher = app.events.EventDispatcher;
         var Event = app.events.Event;
+        var EventNode = app.model.EventNode;
         var Animation = (function () {
             function Animation(name, model, readOnly, forceKeyframe) {
                 if (readOnly === void 0) { readOnly = false; }
@@ -56,6 +56,7 @@ var app;
                     else if (type == 'removeChild') {
                         _this.removeNodeRecursive(target);
                     }
+                    _this.dispatchChange('updateTracks');
                 };
                 this.name = name;
                 this.model = model;
@@ -102,14 +103,17 @@ var app;
                 if (target instanceof Bone) {
                     track = new anim.BoneTrack(this, target);
                 }
-                if (target instanceof Sprite) {
+                else if (target instanceof Sprite) {
                     track = new anim.SpriteTrack(this, target);
+                }
+                else if (target instanceof EventNode) {
+                    track = new anim.EventTrack(this, target);
                 }
                 target.propertyChange.on(this.onNodePropertyChange);
                 if (!track) {
                     console.error('Cannot create animation track for', target);
                 }
-                if (forceKeyframe) {
+                if (forceKeyframe && track.bulkKeyframeOperations) {
                     track.forceKeyframe(0, copyFrom);
                 }
                 track.setPosition(this.frameIndex);
@@ -120,6 +124,7 @@ var app;
                 this.length = 1;
                 this.fps = 30;
                 this.tracks = {};
+                this.initTracksFromModel();
                 this.dispatchChange('clear');
             };
             Animation.prototype.initForAnimation = function () {
@@ -151,7 +156,9 @@ var app;
                 }
                 else {
                     for (var trackId in this.tracks) {
-                        this.tracks[trackId].forceKeyframe(frameIndex);
+                        var track = this.tracks[trackId];
+                        if (track.bulkKeyframeOperations)
+                            track.forceKeyframe(frameIndex);
                     }
                 }
                 this.dispatchChange('keyframe');
@@ -248,18 +255,20 @@ var app;
                     return;
                 if (frameIndex < 0)
                     frameIndex = this.frameIndex;
-                if (node instanceof Node) {
+                if (node instanceof anim.Track) {
+                    node.deleteKeyframe(frameIndex);
+                }
+                else if (node && node.id !== undefined) {
                     var track = this.tracks[node.id];
                     if (track) {
                         track.deleteKeyframe(frameIndex);
                     }
                 }
-                else if (node instanceof anim.Track) {
-                    node.deleteKeyframe(frameIndex);
-                }
                 else {
                     for (var trackId in this.tracks) {
-                        this.tracks[trackId].deleteKeyframe(frameIndex);
+                        var track = this.tracks[trackId];
+                        if (track.bulkKeyframeOperations)
+                            track.deleteKeyframe(frameIndex);
                     }
                 }
                 this.dispatchChange('deleteKeyframe');
@@ -273,15 +282,15 @@ var app;
                     frameIndex = this.frameIndex;
                 var frameCount = 0;
                 var tracks;
-                if (node instanceof Node) {
+                if (node instanceof anim.Track) {
+                    tracks = {};
+                    tracks[node.node.id] = node;
+                }
+                else if (node && node.id !== undefined) {
                     tracks = {};
                     var track = this.tracks[node.id];
                     if (track)
                         tracks[node.id] = track;
-                }
-                else if (node instanceof anim.Track) {
-                    tracks = {};
-                    tracks[node.node.id] = node;
                 }
                 else {
                     tracks = this.tracks;
@@ -308,7 +317,7 @@ var app;
                     frameIndex = this.frameIndex;
                 var frameCount = 0;
                 var intoTrack = node instanceof anim.Track ? node : null;
-                var intoNode = node instanceof Node ? node : null;
+                var intoNode = !(node instanceof anim.Track) && node && node.id !== undefined ? node : null;
                 for (var nodeId in frameData) {
                     if (!frameData.hasOwnProperty(nodeId))
                         continue;
@@ -327,12 +336,12 @@ var app;
             };
             Animation.prototype.getClosestKeyframes = function (frameIndex, out, node) {
                 if (node === void 0) { node = null; }
-                if (node instanceof Node) {
-                    this.tracks[node.id].getClosestKeyframes(frameIndex, out);
+                if (node instanceof anim.Track) {
+                    node.getClosestKeyframes(frameIndex, out);
                     return;
                 }
-                else if (node instanceof anim.Track) {
-                    node.getClosestKeyframes(frameIndex, out);
+                else if (node && node.id !== undefined) {
+                    this.tracks[node.id].getClosestKeyframes(frameIndex, out);
                     return;
                 }
                 for (var trackId in this.tracks) {

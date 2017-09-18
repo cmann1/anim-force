@@ -30,7 +30,7 @@ namespace app.model
 		public scaleXHandle:Handle;
 		public scaleYHandle:Handle;
 
-		constructor(asset:app.assets.SpriteAsset, palette:number=0, frame:number=0, name:string=null)
+		constructor(asset:app.assets.SpriteAsset=null, palette:number=0, frame:number=0, name:string=null)
 		{
 			super(name || (asset ? asset.spriteName : null));
 
@@ -64,6 +64,11 @@ namespace app.model
 		get name():string
 		{
 			return this._name || (this.asset && this.asset.spriteName) || 'Untitled Sprite ' + this.id;
+		}
+
+		set name(value:string)
+		{
+			this.setName(value);
 		}
 
 		get frame():number
@@ -326,6 +331,8 @@ namespace app.model
 				this.worldAABB.draw(ctx, worldScale);
 			}
 		}
+
+		//
 
 		public save():any
 		{

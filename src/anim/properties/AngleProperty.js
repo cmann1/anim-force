@@ -12,41 +12,38 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
-        var properties;
-        (function (properties) {
-            var AngleProperty = (function (_super) {
-                __extends(AngleProperty, _super);
-                function AngleProperty(track, propertyName) {
-                    return _super.call(this, track, propertyName, anim.NumberKeyframe, properties.TrackPropertyType.ANGLE) || this;
+        var AngleProperty = (function (_super) {
+            __extends(AngleProperty, _super);
+            function AngleProperty(track, propertyName) {
+                return _super.call(this, track, propertyName, anim.NumberKeyframe, anim.TrackPropertyType.ANGLE) || this;
+            }
+            AngleProperty.prototype.updateNode = function (node, interpolation, prev, current, next) {
+                if (prev === void 0) { prev = this.prev; }
+                if (current === void 0) { current = this.current; }
+                if (next === void 0) { next = this.next; }
+                var value;
+                if (current) {
+                    value = current.value;
                 }
-                AngleProperty.prototype.updateNode = function (node, interpolation, prev, current, next) {
-                    if (prev === void 0) { prev = this.prev; }
-                    if (current === void 0) { current = this.current; }
-                    if (next === void 0) { next = this.next; }
-                    var value;
-                    if (current) {
-                        value = current.value;
-                    }
-                    else if (prev && next) {
-                        var t = this.getT(interpolation, prev, next);
-                        var delta = Math.normalizeAngle(next.value - prev.value);
-                        value = prev.value * (1 - t) + (prev.value + delta) * t;
-                    }
-                    else if (prev) {
-                        value = prev.value;
-                    }
-                    else if (next) {
-                        value = next.value;
-                    }
-                    else {
-                        value = node[this.propertyName];
-                    }
-                    node[this.propertyName] = value;
-                };
-                return AngleProperty;
-            }(properties.TrackProperty));
-            properties.AngleProperty = AngleProperty;
-        })(properties = anim.properties || (anim.properties = {}));
+                else if (prev && next) {
+                    var t = this.getT(interpolation, prev, next);
+                    var delta = Math.normalizeAngle(next.value - prev.value);
+                    value = prev.value * (1 - t) + (prev.value + delta) * t;
+                }
+                else if (prev) {
+                    value = prev.value;
+                }
+                else if (next) {
+                    value = next.value;
+                }
+                else {
+                    value = node[this.propertyName];
+                }
+                node[this.propertyName] = value;
+            };
+            return AngleProperty;
+        }(anim.TrackProperty));
+        anim.AngleProperty = AngleProperty;
     })(anim = app.anim || (app.anim = {}));
 })(app || (app = {}));
 //# sourceMappingURL=AngleProperty.js.map

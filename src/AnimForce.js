@@ -1,10 +1,16 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Resetting rotation doesn't work
+ TODO: Renaimgin sprite nodes no longer works?
  TODO: Animation events
- TODO: - Add per track keyframe colours
+ TODO: - Just make a regular event node - it will make things a lot simpler
+ TODO: - Rendering event labels in timeline
+ TODO: - How will event keyframes be edited?
+ TODO: When adjusting bone length, keep children relative position
  TODO: Anchor nodes
+ TODO: Emitter nodes
+ TODO: - Check how emitter entities work in game
+ TODO: - How will rotation be handled?
  TODO: Copy/paste nodes
  TODO: Sprite Selector:
  TODO: - Improve all-round / Completely redo

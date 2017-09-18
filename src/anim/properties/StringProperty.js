@@ -12,12 +12,12 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
-        var NumberProperty = (function (_super) {
-            __extends(NumberProperty, _super);
-            function NumberProperty(track, propertyName) {
-                return _super.call(this, track, propertyName, anim.NumberKeyframe, anim.TrackPropertyType.NUMBER) || this;
+        var StringProperty = (function (_super) {
+            __extends(StringProperty, _super);
+            function StringProperty(track, propertyName) {
+                return _super.call(this, track, propertyName, anim.StringKeyframe, anim.TrackPropertyType.STRING) || this;
             }
-            NumberProperty.prototype.updateNode = function (node, interpolation, prev, current, next) {
+            StringProperty.prototype.updateNode = function (node, interpolation, prev, current, next) {
                 if (prev === void 0) { prev = this.prev; }
                 if (current === void 0) { current = this.current; }
                 if (next === void 0) { next = this.next; }
@@ -26,9 +26,7 @@ var app;
                     value = current.value;
                 }
                 else if (prev && next) {
-                    var t = this.getT(interpolation, prev, next);
-                    var delta = (next.value - prev.value);
-                    value = prev.value * (1 - t) + (prev.value + delta) * t;
+                    value = prev.value;
                 }
                 else if (prev) {
                     value = prev.value;
@@ -41,9 +39,9 @@ var app;
                 }
                 node[this.propertyName] = value;
             };
-            return NumberProperty;
+            return StringProperty;
         }(anim.TrackProperty));
-        anim.NumberProperty = NumberProperty;
+        anim.StringProperty = StringProperty;
     })(anim = app.anim || (app.anim = {}));
 })(app || (app = {}));
-//# sourceMappingURL=NumberProperty.js.map
+//# sourceMappingURL=StringProperty.js.map

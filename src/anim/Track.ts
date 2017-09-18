@@ -17,8 +17,9 @@ namespace app.anim
 
 	import Node = app.model.Node;
 	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
-	import TrackPropertyType = app.anim.properties.TrackPropertyType;
-	import TrackProperty = app.anim.properties.TrackProperty;
+	import TrackPropertyType = app.anim.TrackPropertyType;
+	import TrackProperty = app.anim.TrackProperty;
+	import Keyframe = app.anim.Keyframe;
 
 	export class Track
 	{
@@ -27,9 +28,16 @@ namespace app.anim
 		protected animation:Animation;
 		protected properties:{[id:string]:TrackProperty} = {};
 
+		public bulkKeyframeOperations = true;
+
 		public node:any;
 		public length:number = 1;
 		public interpolation:Interpolation = Interpolation.LINEAR;
+
+		public keyframeColour = '#f9e26f';
+		public keyframeBorderColour = '#d4b82d';
+		public keyframeDisabledColour = '#fff4be';
+		public keyframeDisabledBorderColour = '#dacd8f';
 
 		constructor(type:string, animation:Animation, node:any)
 		{

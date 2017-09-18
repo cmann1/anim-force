@@ -53,10 +53,6 @@ namespace app.timeline
 		private headerFrameInterval:number = 5;
 		private scrubColour = 'rgba(255, 50, 50, 0.5)';
 		private keyframeSize = 4;
-		private keyframeColour = '#f9e26f';
-		private keyframeBorderColour = '#d4b82d';
-		private keyframeDisabledColour = '#fff4be';
-		private keyframeDisabledBorderColour = '#dacd8f';
 		private selectedFrameColour = '#fdf4a8';
 
 		public viewport:app.viewport.Viewport;
@@ -110,9 +106,6 @@ namespace app.timeline
 			const frameCY = nodeHeight * 0.5;
 			const keyframeSize = this.keyframeSize;
 
-			const keyframeColour = this.mode != EditMode.EDIT ? this.keyframeColour : this.keyframeDisabledColour;
-			const keyframeBorderColour = this.mode != EditMode.EDIT ? this.keyframeBorderColour : this.keyframeDisabledBorderColour;
-
 			const firstFrame = Math.floor(left / frameWidth);
 			const lastFrame = Math.ceil(right / frameWidth);
 
@@ -130,6 +123,9 @@ namespace app.timeline
 			var y = 0;
 			for(var track of this.trackList)
 			{
+				const keyframeColour = this.mode != EditMode.EDIT ? track.keyframeColour : track.keyframeDisabledColour;
+				const keyframeBorderColour = this.mode != EditMode.EDIT ? track.keyframeBorderColour : track.keyframeDisabledBorderColour;
+
 				if(y <= bottom && y + nodeHeight >= top)
 				{
 					ctx.fillStyle = Config.node;
@@ -154,7 +150,7 @@ namespace app.timeline
 
 							if(j == dragFrame)
 							{
-								ctx.fillStyle = this.keyframeBorderColour;
+								ctx.fillStyle = track.keyframeBorderColour;
 								ctx.fillRect(x, y, 1, nodeHeight - 1);
 								ctx.fillRect(x + frameWidth - 2, y, 1, nodeHeight - 1);
 								ctx.fillRect(x + 1, y, frameWidth - 3, 1);
@@ -376,7 +372,6 @@ namespace app.timeline
 			model.animationChange.on(this.onModelAnimationChange);
 			model.modeChange.on(this.onModelModeChange);
 			model.selectionChange.on(this.onModelSelectionChange);
-			model.structureChange.on(this.onModelStructureChange);
 
 			this.currentFrame = this.animation.getPosition();
 			this.toolbar.setModel(model);
@@ -523,6 +518,10 @@ namespace app.timeline
 			{
 				this.setSelectedFrame(this.selectedTrack, this.selectedFrame);
 			}
+			else if(type == 'updateTracks')
+			{
+				this.updateTrackList();
+			}
 
 			this.requiresUpdate = true;
 		};
@@ -556,12 +555,6 @@ namespace app.timeline
 
 		private onModelSelectionChange = (model:Model, event:SelectionEvent) =>
 		{
-			this.requiresUpdate = true;
-		};
-
-		private onModelStructureChange = (model:Model, event:StructureChangeEvent) =>
-		{
-			this.updateTrackList();
 			this.requiresUpdate = true;
 		};
 

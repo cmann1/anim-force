@@ -643,7 +643,7 @@ namespace app.viewport
 
 			if(keyCode == Key.H)
 			{
-				Config.showControls = !Config.showControls;
+				Config.set('showControls', !Config.showControls);
 				this.requiresUpdate = true;
 			}
 

@@ -11,6 +11,7 @@ namespace app.anim
 	import EventDispatcher = app.events.EventDispatcher;
 	import Event = app.events.Event;
 	import LoadData = app.projects.LoadData;
+	import EventNode = app.model.EventNode;
 
 	export class Animation
 	{
@@ -100,10 +101,13 @@ namespace app.anim
 			{
 				track = new BoneTrack(this, target);
 			}
-
-			if(target instanceof Sprite)
+			else if(target instanceof Sprite)
 			{
 				track = new SpriteTrack(this, target);
+			}
+			else if(target instanceof EventNode)
+			{
+				track = new EventTrack(this, target);
 			}
 
 			target.propertyChange.on(this.onNodePropertyChange);
@@ -113,7 +117,7 @@ namespace app.anim
 				console.error('Cannot create animation track for', target);
 			}
 
-			if(forceKeyframe)
+			if(forceKeyframe && track.bulkKeyframeOperations)
 			{
 				track.forceKeyframe(0, copyFrom);
 			}
@@ -128,6 +132,7 @@ namespace app.anim
 			this.length = 1;
 			this.fps = 30;
 			this.tracks = {};
+			this.initTracksFromModel();
 
 			this.dispatchChange('clear');
 		}
@@ -172,7 +177,9 @@ namespace app.anim
 			{
 				for(var trackId in this.tracks)
 				{
-					this.tracks[trackId].forceKeyframe(frameIndex);
+					const track = this.tracks[trackId];
+					if(track.bulkKeyframeOperations)
+						track.forceKeyframe(frameIndex);
 				}
 			}
 
@@ -319,7 +326,11 @@ namespace app.anim
 
 			if(frameIndex < 0) frameIndex = this.frameIndex;
 
-			if(node instanceof Node)
+			if(node instanceof Track)
+			{
+				node.deleteKeyframe(frameIndex);
+			}
+			else if(node && node.id !== undefined)
 			{
 				const track = this.tracks[node.id];
 				if(track)
@@ -327,15 +338,13 @@ namespace app.anim
 					track.deleteKeyframe(frameIndex);
 				}
 			}
-			else if(node instanceof Track)
-			{
-				node.deleteKeyframe(frameIndex);
-			}
 			else
 			{
 				for(var trackId in this.tracks)
 				{
-					this.tracks[trackId].deleteKeyframe(frameIndex);
+					const track = this.tracks[trackId];
+					if(track.bulkKeyframeOperations)
+						track.deleteKeyframe(frameIndex);
 				}
 			}
 
@@ -349,16 +358,16 @@ namespace app.anim
 			var frameCount = 0;
 			var tracks:{[id:string]:Track};
 
-			if(node instanceof Node)
+			if(node instanceof Track)
+			{
+				tracks = {};
+				tracks[node.node.id] = node;
+			}
+			else if(node && node.id !== undefined)
 			{
 				tracks = {};
 				const track = this.tracks[node.id];
 				if(track) tracks[node.id] = track;
-			}
-			else if(node instanceof Track)
-			{
-				tracks = {};
-				tracks[node.node.id] = node;
 			}
 			else
 			{
@@ -394,7 +403,7 @@ namespace app.anim
 			var frameCount = 0;
 
 			const intoTrack = node instanceof Track ? node : null;
-			const intoNode = node instanceof Node ? node : null;
+			const intoNode = !(node instanceof Track) && node && node.id !== undefined ? node : null;
 
 			for(var nodeId in frameData)
 			{
@@ -420,14 +429,14 @@ namespace app.anim
 
 		public getClosestKeyframes(frameIndex:number, out:KeyframeStruct, node:Node|Track=null)
 		{
-			if(node instanceof Node)
-			{
-				this.tracks[node.id].getClosestKeyframes(frameIndex, out);
-				return;
-			}
-			else if(node instanceof Track)
+			if(node instanceof Track)
 			{
 				node.getClosestKeyframes(frameIndex, out);
+				return;
+			}
+			else if(node && node.id !== undefined)
+			{
+				this.tracks[node.id].getClosestKeyframes(frameIndex, out);
 				return;
 			}
 
@@ -511,7 +520,7 @@ namespace app.anim
 			{
 				if(!tracks.hasOwnProperty(trackId)) continue;
 
-				var node = this.model.getNode(trackId);
+				var node:Node = this.model.getNode(trackId);
 				var track = this.tracks[trackId];
 
 				if(!node || !track)
@@ -540,7 +549,7 @@ namespace app.anim
 		 * Events
 		 */
 
-		private onNodePropertyChange = (node:app.model.Node, event:PropertyChangeEvent) =>
+		private onNodePropertyChange = (node:Node, event:PropertyChangeEvent) =>
 		{
 			if(!this.active) return;
 
@@ -578,6 +587,8 @@ namespace app.anim
 			{
 				this.removeNodeRecursive(target);
 			}
+
+			this.dispatchChange('updateTracks');
 		};
 
 	}

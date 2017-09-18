@@ -12,6 +12,7 @@ namespace app.timeline.tree
 	import ScrollEvent = app.events.ScrollEvent;
 	import ContainerNode = app.model.ContainerNode;
 	import Event = app.events.Event;
+	import EventNode = app.model.EventNode;
 
 	export class TimelineTree
 	{
@@ -500,7 +501,9 @@ namespace app.timeline.tree
 				if(type == 'Add Bone')
 					newNode = new Bone();
 				else if(type == 'Add Sprite')
-					newNode = new Sprite(null);
+					newNode = new Sprite();
+				else if(type == 'Add Event')
+					newNode = new EventNode();
 
 				if(newNode)
 				{

@@ -445,7 +445,7 @@ var app;
                 var keyCode = event.keyCode;
                 // if(this.mode == EditMode.PLAYBACK) return false;
                 if (keyCode == Key.H) {
-                    app.Config.showControls = !app.Config.showControls;
+                    app.Config.set('showControls', !app.Config.showControls);
                     this.requiresUpdate = true;
                 }
                 return false;

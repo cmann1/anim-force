@@ -3,6 +3,7 @@ var app;
     var projects;
     (function (projects) {
         var Model = app.model.Model;
+        var Node = app.model.Node;
         var Project = (function () {
             function Project(name) {
                 this.isNew = true;
@@ -11,6 +12,7 @@ var app;
                 this.id = null;
                 this.rev = null;
                 this.name = name;
+                Node.setCurrentId(0);
             }
             Project.prototype.addModel = function (model) {
                 this.models.push(model);
@@ -21,6 +23,7 @@ var app;
             Project.prototype.save = function () {
                 var data = {
                     name: this.name,
+                    nextNodeId: Node.getCurrentId(),
                     models: [],
                     activeModel: -1,
                     date: new Date().toJSON(),
@@ -45,6 +48,7 @@ var app;
                     project.id = data._id;
                     project.rev = data._rev;
                 }
+                Node.setCurrentId(data.get('nextNodeId'));
                 for (var _i = 0, _a = data.models; _i < _a.length; _i++) {
                     var modelData = _a[_i];
                     project.addModel(new Model().load(data.asLoadData(modelData)));

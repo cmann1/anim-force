@@ -2,6 +2,7 @@ namespace app.projects
 {
 
 	import Model = app.model.Model;
+	import Node = app.model.Node;
 
 	export class Project
 	{
@@ -18,6 +19,7 @@ namespace app.projects
 		constructor(name:string)
 		{
 			this.name = name;
+			Node.setCurrentId(0);
 		}
 
 		public addModel(model:Model)
@@ -34,6 +36,7 @@ namespace app.projects
 		{
 			var data:any = {
 				name: this.name,
+				nextNodeId: Node.getCurrentId(),
 				models: [],
 				activeModel: -1,
 				date: new Date().toJSON(),
@@ -67,6 +70,8 @@ namespace app.projects
 				project.id = data._id;
 				project.rev = data._rev;
 			}
+
+			Node.setCurrentId(data.get('nextNodeId'));
 
 			for(var modelData of data.models)
 			{

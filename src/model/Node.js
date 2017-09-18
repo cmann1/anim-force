@@ -32,9 +32,35 @@ var app;
                 this.drawIndex = 0;
                 this.selected = false;
                 this.highlighted = false;
-                this.id = Node.nextId++;
+                this.id = Node.getNewId();
                 this._name = name;
             }
+            Node.getNewId = function () {
+                return Node.nextId++;
+            };
+            Node.getCurrentId = function () {
+                return Node.nextId;
+            };
+            Node.setCurrentId = function (id) {
+                Node.nextId = id;
+            };
+            Object.defineProperty(Node.prototype, "name", {
+                get: function () {
+                    return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
+                },
+                set: function (value) {
+                    this.setName(value);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Node.prototype.setName = function (value) {
+                value = $.trim(value);
+                if (value == this._name)
+                    return;
+                this._name = value;
+                this.onPropertyChange('name');
+            };
             Node.prototype.setModel = function (model) {
                 if (model == this.model)
                     return;
@@ -183,20 +209,6 @@ var app;
                     }
                 }
             };
-            Object.defineProperty(Node.prototype, "name", {
-                get: function () {
-                    return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
-                },
-                set: function (value) {
-                    value = $.trim(value);
-                    if (value == this._name)
-                        return;
-                    this._name = value;
-                    this.onPropertyChange('name');
-                },
-                enumerable: true,
-                configurable: true
-            });
             //
             Node.prototype.save = function () {
                 return {
@@ -219,6 +231,9 @@ var app;
                 else if (type == 'sprite') {
                     node = new model_1.Sprite(null).load(data);
                 }
+                else if (type == 'event') {
+                    node = new model_1.EventNode().load(data);
+                }
                 else {
                     throw new Error('Unexpected node type');
                 }
@@ -227,6 +242,9 @@ var app;
             /*
              * Events
              */
+            Node.prototype.onPropertyChange = function (type) {
+                this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
+            };
             Node.prototype.onStructureChange = function (type, parent, target, index, other) {
                 this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, target, index, other));
                 if (this.parent) {
@@ -235,9 +253,6 @@ var app;
                 else if (this.model) {
                     this.model.onStructureChange(type, parent, target, index, other);
                 }
-            };
-            Node.prototype.onPropertyChange = function (type) {
-                this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
             };
             return Node;
         }());

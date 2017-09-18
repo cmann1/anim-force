@@ -1,4 +1,4 @@
-namespace app.anim.properties
+namespace app.anim
 {
 
 	import LoadData = app.projects.LoadData;
@@ -14,7 +14,8 @@ namespace app.anim.properties
 	{
 		NUMBER,
 		ANGLE,
-		VECTOR
+		VECTOR,
+		STRING
 	}
 
 	export class TrackProperty
@@ -59,6 +60,11 @@ namespace app.anim.properties
 			if(type == TrackPropertyType.VECTOR)
 			{
 				return new VectorProperty(track, propertyName);
+			}
+
+			if(type == TrackPropertyType.STRING)
+			{
+				return new StringProperty(track, propertyName);
 			}
 
 			throw new Error('Unknown track property type');

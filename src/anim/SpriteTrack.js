@@ -12,7 +12,7 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
-        var TrackPropertyType = app.anim.properties.TrackPropertyType;
+        var TrackPropertyType = app.anim.TrackPropertyType;
         var SpriteTrack = (function (_super) {
             __extends(SpriteTrack, _super);
             function SpriteTrack(animation, node) {

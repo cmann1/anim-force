@@ -15,7 +15,7 @@ namespace app.timeline.tree
 		public children:TreeNode[] = [];
 		public childrenVisible:boolean = true;
 
-		constructor(tree:TimelineTree, nodeType:string, node:Node, allowFold=true)
+		constructor(tree:TimelineTree, nodeType:string, node:ContainerNode, allowFold=true)
 		{
 			super(tree, nodeType, node);
 
@@ -100,7 +100,7 @@ namespace app.timeline.tree
 
 		public addNodeAfter(node:Node, sibling:TreeNode):Node
 		{
-			(<ContainerNode> this.node).addChildAfter(node, sibling.node);
+			this.node.addChildAfter(node, sibling.node);
 
 			return node;
 		}

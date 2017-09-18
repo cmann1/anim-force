@@ -11,6 +11,7 @@ var app;
             var EventDispatcher = app.events.EventDispatcher;
             var ScrollEvent = app.events.ScrollEvent;
             var Event = app.events.Event;
+            var EventNode = app.model.EventNode;
             var TimelineTree = (function () {
                 function TimelineTree(elementId, model) {
                     var _this = this;
@@ -155,7 +156,9 @@ var app;
                             if (type == 'Add Bone')
                                 newNode = new Bone();
                             else if (type == 'Add Sprite')
-                                newNode = new Sprite(null);
+                                newNode = new Sprite();
+                            else if (type == 'Add Event')
+                                newNode = new EventNode();
                             if (newNode) {
                                 if (_this.selectedNode instanceof tree_1.ContainerTreeNode && (!event.ctrlKey || _this.selectedNode == _this.rootNode))
                                     _this.selectedNode.addNode(newNode);

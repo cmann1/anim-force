@@ -16,6 +16,7 @@ var app;
         var Sprite = (function (_super) {
             __extends(Sprite, _super);
             function Sprite(asset, palette, frame, name) {
+                if (asset === void 0) { asset = null; }
                 if (palette === void 0) { palette = 0; }
                 if (frame === void 0) { frame = 0; }
                 if (name === void 0) { name = null; }
@@ -51,6 +52,9 @@ var app;
             Object.defineProperty(Sprite.prototype, "name", {
                 get: function () {
                     return this._name || (this.asset && this.asset.spriteName) || 'Untitled Sprite ' + this.id;
+                },
+                set: function (value) {
+                    this.setName(value);
                 },
                 enumerable: true,
                 configurable: true
@@ -245,6 +249,7 @@ var app;
                     this.worldAABB.draw(ctx, worldScale);
                 }
             };
+            //
             Sprite.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.palette = this._palette;

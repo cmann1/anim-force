@@ -319,7 +319,6 @@ var app;
             Model.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.nextAnimationId = this.nextAnimationId;
-                data.nextNodeId = model.Node.nextId;
                 data.mode = this.mode;
                 data.bindPose = this.bindPose.save();
                 data.animations = {};
@@ -332,9 +331,9 @@ var app;
             };
             Model.prototype.load = function (data) {
                 // console.log(data);
+                this.nodeMap = {};
                 _super.prototype.load.call(this, data);
                 this.nextAnimationId = data.get('nextAnimationId');
-                model.Node.nextId = data.get('nextNodeId');
                 this._mode = data.get('mode');
                 this.bindPose.initTracksFromModel(false);
                 this.bindPose.load(data.asLoadData('bindPose'));

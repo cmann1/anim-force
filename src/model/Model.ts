@@ -419,7 +419,6 @@ namespace app.model
 			var data = super.save();
 
 			data.nextAnimationId = this.nextAnimationId;
-			data.nextNodeId = Node.nextId;
 			data.mode = this.mode;
 			data.bindPose = this.bindPose.save();
 			data.animations = {};
@@ -437,11 +436,11 @@ namespace app.model
 		public load(data:LoadData):Model
 		{
 			// console.log(data);
+			this.nodeMap = {};
 
 			super.load(data);
 
 			this.nextAnimationId = data.get('nextAnimationId');
-			Node.nextId = data.get('nextNodeId');
 			this._mode = data.get('mode');
 
 			this.bindPose.initTracksFromModel(false);

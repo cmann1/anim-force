@@ -12,13 +12,18 @@ var app;
             current: null,
             next: null,
         };
-        var TrackProperty = app.anim.properties.TrackProperty;
+        var TrackProperty = app.anim.TrackProperty;
         var Track = (function () {
             function Track(type, animation, node) {
                 this.type = null;
                 this.properties = {};
+                this.bulkKeyframeOperations = true;
                 this.length = 1;
                 this.interpolation = Interpolation.LINEAR;
+                this.keyframeColour = '#f9e26f';
+                this.keyframeBorderColour = '#d4b82d';
+                this.keyframeDisabledColour = '#fff4be';
+                this.keyframeDisabledBorderColour = '#dacd8f';
                 this.type = type;
                 this.animation = animation;
                 this.node = node;

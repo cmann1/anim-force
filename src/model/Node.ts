@@ -13,12 +13,14 @@ namespace app.model
 
 	export class Node
 	{
-		static nextId:number = 0;
+
+		private static nextId:number = 0;
 
 		public id:number;
 		public type:string;
-		public canHaveChildren:boolean = false;
 		protected _name:string;
+
+		public canHaveChildren:boolean = false;
 
 		public model:Model;
 		public parent:ContainerNode;
@@ -56,8 +58,43 @@ namespace app.model
 
 		constructor(name:string)
 		{
-			this.id = Node.nextId++;
+			this.id = Node.getNewId();
 			this._name = name;
+		}
+
+		public static getNewId():number
+		{
+			return Node.nextId++;
+		}
+
+		public static getCurrentId():number
+		{
+			return Node.nextId;
+		}
+
+		public static setCurrentId(id:number)
+		{
+			Node.nextId = id;
+		}
+
+		get name():string
+		{
+			return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
+		}
+
+		set name(value:string)
+		{
+			this.setName(value);
+		}
+
+		protected setName(value:string)
+		{
+			value = $.trim(value);
+
+			if(value == this._name) return;
+
+			this._name = value;
+			this.onPropertyChange('name');
 		}
 
 		public setModel(model:Model)
@@ -264,21 +301,6 @@ namespace app.model
 			}
 		}
 
-		get name():string
-		{
-			return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
-		}
-
-		set name(value:string)
-		{
-			value = $.trim(value);
-
-			if(value == this._name) return;
-
-			this._name = value;
-			this.onPropertyChange('name');
-		}
-
 		//
 
 		public save():any
@@ -311,6 +333,10 @@ namespace app.model
 			{
 				node = new Sprite(null).load(data);
 			}
+			else if(type == 'event')
+			{
+				node = new EventNode().load(data);
+			}
 			else
 			{
 				throw new Error('Unexpected node type');
@@ -322,6 +348,11 @@ namespace app.model
 		/*
 		 * Events
 		 */
+
+		protected onPropertyChange(type:string)
+		{
+			this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
+		}
 
 		protected onStructureChange(type:string, parent:ContainerNode, target:Node, index:number, other:Node)
 		{
@@ -335,11 +366,6 @@ namespace app.model
 			{
 				this.model.onStructureChange(type, parent, target, index, other);
 			}
-		}
-
-		protected onPropertyChange(type:string)
-		{
-			this.propertyChange.dispatch(this, new PropertyChangeEvent(type));
 		}
 
 	}

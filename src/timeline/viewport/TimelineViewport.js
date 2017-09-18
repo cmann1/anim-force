@@ -39,10 +39,6 @@ var app;
                 _this.headerFrameInterval = 5;
                 _this.scrubColour = 'rgba(255, 50, 50, 0.5)';
                 _this.keyframeSize = 4;
-                _this.keyframeColour = '#f9e26f';
-                _this.keyframeBorderColour = '#d4b82d';
-                _this.keyframeDisabledColour = '#fff4be';
-                _this.keyframeDisabledBorderColour = '#dacd8f';
                 _this.selectedFrameColour = '#fdf4a8';
                 /*
                  * Events
@@ -54,6 +50,9 @@ var app;
                     }
                     else if (type == 'length') {
                         _this.setSelectedFrame(_this.selectedTrack, _this.selectedFrame);
+                    }
+                    else if (type == 'updateTracks') {
+                        _this.updateTrackList();
                     }
                     _this.requiresUpdate = true;
                 };
@@ -75,10 +74,6 @@ var app;
                     }
                 };
                 _this.onModelSelectionChange = function (model, event) {
-                    _this.requiresUpdate = true;
-                };
-                _this.onModelStructureChange = function (model, event) {
-                    _this.updateTrackList();
                     _this.requiresUpdate = true;
                 };
                 _this.onModelModeChange = function (model, event) {
@@ -132,8 +127,6 @@ var app;
                 var frameCX = frameWidth * 0.5;
                 var frameCY = nodeHeight * 0.5;
                 var keyframeSize = this.keyframeSize;
-                var keyframeColour = this.mode != EditMode.EDIT ? this.keyframeColour : this.keyframeDisabledColour;
-                var keyframeBorderColour = this.mode != EditMode.EDIT ? this.keyframeBorderColour : this.keyframeDisabledBorderColour;
                 var firstFrame = Math.floor(left / frameWidth);
                 var lastFrame = Math.ceil(right / frameWidth);
                 ctx.clearRect(0, 0, this.width, this.height);
@@ -146,6 +139,8 @@ var app;
                 var y = 0;
                 for (var _i = 0, _a = this.trackList; _i < _a.length; _i++) {
                     var track = _a[_i];
+                    var keyframeColour = this.mode != EditMode.EDIT ? track.keyframeColour : track.keyframeDisabledColour;
+                    var keyframeBorderColour = this.mode != EditMode.EDIT ? track.keyframeBorderColour : track.keyframeDisabledBorderColour;
                     if (y <= bottom && y + nodeHeight >= top) {
                         ctx.fillStyle = app.Config.node;
                         ctx.fillRect(this.scrollX, y, this.width, nodeHeight);
@@ -162,7 +157,7 @@ var app;
                                 ctx.fillStyle = this.selectedFrameColour;
                                 ctx.fillRect(x, y, frameWidth - 1, nodeHeight - 1);
                                 if (j == dragFrame) {
-                                    ctx.fillStyle = this.keyframeBorderColour;
+                                    ctx.fillStyle = track.keyframeBorderColour;
                                     ctx.fillRect(x, y, 1, nodeHeight - 1);
                                     ctx.fillRect(x + frameWidth - 2, y, 1, nodeHeight - 1);
                                     ctx.fillRect(x + 1, y, frameWidth - 3, 1);
@@ -324,7 +319,6 @@ var app;
                 model.animationChange.on(this.onModelAnimationChange);
                 model.modeChange.on(this.onModelModeChange);
                 model.selectionChange.on(this.onModelSelectionChange);
-                model.structureChange.on(this.onModelStructureChange);
                 this.currentFrame = this.animation.getPosition();
                 this.toolbar.setModel(model);
                 this.requiresUpdate = true;

@@ -3,11 +3,12 @@ namespace app.timeline.tree
 
 	import Bone = app.model.Bone;
 	import Node = app.model.Node;
+	import ContainerNode = app.model.ContainerNode;
 
 	export class RootTreeNode extends ContainerTreeNode
 	{
 
-		constructor(tree:TimelineTree, nodeType:string, node:Node)
+		constructor(tree:TimelineTree, nodeType:string, node:ContainerNode)
 		{
 			super(tree, nodeType, node, false);
 		}

@@ -13,17 +13,21 @@ var app;
     var anim;
     (function (anim) {
         var TrackPropertyType = app.anim.TrackPropertyType;
-        var NodeTrack = (function (_super) {
-            __extends(NodeTrack, _super);
-            function NodeTrack(type, animation, node) {
-                var _this = _super.call(this, type, animation, node) || this;
-                _this.addProperty('offset', TrackPropertyType.VECTOR);
-                _this.addProperty('rotation', TrackPropertyType.ANGLE);
+        var EventTrack = (function (_super) {
+            __extends(EventTrack, _super);
+            function EventTrack(animation, node) {
+                var _this = _super.call(this, 'event', animation, node) || this;
+                _this.bulkKeyframeOperations = false;
+                _this.addProperty('event', TrackPropertyType.STRING);
+                _this.keyframeColour = '#719ef9';
+                _this.keyframeBorderColour = '#2b63d4';
+                _this.keyframeDisabledColour = '#bdd8ff';
+                _this.keyframeDisabledBorderColour = '#90afda';
                 return _this;
             }
-            return NodeTrack;
+            return EventTrack;
         }(anim.Track));
-        anim.NodeTrack = NodeTrack;
+        anim.EventTrack = EventTrack;
     })(anim = app.anim || (app.anim = {}));
 })(app || (app = {}));
-//# sourceMappingURL=NodeTrack.js.map
+//# sourceMappingURL=EventTrack.js.map

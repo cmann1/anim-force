@@ -94,6 +94,9 @@ div#timeline-tree-toolbar{
 	&.bone > .item .icon:before{
 		content: "\f0c1"; // chain
 	}
+	&.event > .item .icon:before{
+		content: "\f0ae"; // tasks
+	}
 
 	.item .fold-icon{
 		width: 10px;

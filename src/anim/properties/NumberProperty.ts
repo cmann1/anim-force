@@ -1,4 +1,4 @@
-namespace app.anim.properties
+namespace app.anim
 {
 
 	export class NumberProperty extends TrackProperty
