@@ -97,11 +97,16 @@ i.btn.fa{
 i.btn.fa:hover{
 	background: $selected-bg;
 	color: $selected-color;
+	box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
 i.btn.fa.disabled, i.fa.disabled:hover{
 	pointer-events: none;
 	background: inherit !important;
 	color: $disabled-color !important;
+}
+i.btn.fa:active:before{
+	position: relative;
+	top: 1px;
 }
 div.disabled
 {
@@ -115,6 +120,10 @@ div.disabled
 	flex-grow: 1;
 	min-width: 10px;
 	min-height: 10px;
+}
+.flex-filler.min{
+	min-width: inherit;
+	min-height: inherit;
 }
 .flex-filler.wide{
 	min-width: 20px;

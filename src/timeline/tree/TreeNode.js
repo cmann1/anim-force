@@ -13,9 +13,26 @@ var app;
                     /*
                      * Events
                      */
+                    this.onActionButtonClick = function (event) {
+                        var action = $(event.currentTarget).data('action');
+                        if (action == 'visible') {
+                            _this.node.visible = !_this.node.visible;
+                        }
+                        event.preventDefault();
+                        return false;
+                    };
+                    this.onActionButtonMouseDown = function (event) {
+                        event.stopPropagation();
+                        event.stopImmediatePropagation();
+                        event.preventDefault();
+                        return false;
+                    };
                     this.onNodePropertyChange = function (sender, event) {
                         var property = event.type;
-                        if (property == 'name' || property == 'src') {
+                        if (property == 'visible') {
+                            _this.updateVisibilityIcon();
+                        }
+                        else if (property == 'name' || property == 'src') {
                             _this.$label.text(_this.node.name);
                         }
                     };
@@ -54,7 +71,23 @@ var app;
                     this.$item = this.$element.find('.item')
                         .on('mousedown', this.onMouseDown)
                         .on('mouseenter', this.onMouseEnter)
-                        .on('mouseleave', this.onMouseExit);
+                        .on('mouseleave', this.onMouseExit)
+                        .on('click', '.actions i', this.onActionButtonClick)
+                        .on('mousedown', '.actions i', this.onActionButtonMouseDown)
+                        .on('dblclick', function (event) {
+                        // For some reason sometimes click the visibility icon will cause the item mouseexit event to fire
+                        // Add this seems to help a little
+                        event.preventDefault();
+                        return false;
+                    });
+                    if (this.canHide()) {
+                        this.$item.append('<div class="flex-filler min"></div>');
+                        this.$item.append('<div class="actions">' +
+                            '<i class="fa fa-eye btn btn-visible" data-action="visible"></i>' +
+                            '</div>');
+                        this.$visibilityButton = this.$item.find('.actions i.btn-visible');
+                        this.updateVisibilityIcon();
+                    }
                 }
                 Object.defineProperty(TreeNode.prototype, "highlighted", {
                     get: function () {
@@ -120,6 +153,16 @@ var app;
                         this.$element.after(treeNode.$element);
                     }
                     return true;
+                };
+                //
+                TreeNode.prototype.canHide = function () {
+                    return true;
+                };
+                TreeNode.prototype.updateVisibilityIcon = function () {
+                    if (!this.$visibilityButton)
+                        return;
+                    this.$visibilityButton.toggleClass('fa-eye', this.node.visible);
+                    this.$visibilityButton.toggleClass('fa-eye-slash', !this.node.visible);
                 };
                 TreeNode.onRenameInputBlur = function (event) {
                     if (TreeNode.renameNode) {

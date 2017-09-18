@@ -34,7 +34,7 @@ var app;
                 return _this;
             }
             Bone.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (this.boneWorldAABB.contains(x, y)) {
+                if (this.visible && this.boneWorldAABB.contains(x, y)) {
                     if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
                         return true;
                     }
@@ -85,6 +85,8 @@ var app;
                     var child = _a[_i];
                     child.drawControls(ctx, worldScale, viewport);
                 }
+                if (!this.visible)
+                    return;
                 ctx.save();
                 var x = this.worldX * worldScale;
                 var y = this.worldY * worldScale;

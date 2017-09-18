@@ -37,7 +37,7 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(this.boneWorldAABB.contains(x, y))
+			if(this.visible && this.boneWorldAABB.contains(x, y))
 			{
 				if(this.hitTestHandles(x, y, worldScaleFactor, result))
 				{
@@ -109,6 +109,8 @@ namespace app.model
 			{
 				child.drawControls(ctx, worldScale, viewport);
 			}
+
+			if(!this.visible) return;
 
 			ctx.save();
 

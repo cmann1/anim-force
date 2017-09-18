@@ -1,7 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Renaimgin sprite nodes no longer works?
  TODO: Animation events
  TODO: - Just make a regular event node - it will make things a lot simpler
  TODO: - Rendering event labels in timeline

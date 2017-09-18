@@ -162,7 +162,7 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(!this.worldAABB.contains(x, y)) return false;
+			if(!this.visible || !this.worldAABB.contains(x, y)) return false;
 
 			if(this.hitTestHandles(x, y, worldScaleFactor, result))
 			{
@@ -278,7 +278,7 @@ namespace app.model
 				this.worldX + w1, this.worldY + h1
 			);
 
-			if(drawList && this.worldAABB.intersects(viewport))
+			if(this.visible && drawList && this.worldAABB.intersects(viewport))
 			{
 				drawList.add(this);
 			}
@@ -302,7 +302,7 @@ namespace app.model
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
-			if(!this.worldAABB.intersects(viewport)) return;
+			if(!this.visible || !this.worldAABB.intersects(viewport)) return;
 
 			ctx.save();
 

@@ -19,6 +19,7 @@ namespace app.timeline.tree
 		public $element:JQuery;
 		public $item:JQuery;
 		public $label:JQuery = null;
+		public $visibilityButton:JQuery;
 
 		constructor(tree:TimelineTree, nodeType:string, node:Node)
 		{
@@ -43,7 +44,28 @@ namespace app.timeline.tree
 			this.$item = this.$element.find('.item')
 				.on('mousedown', this.onMouseDown)
 				.on('mouseenter', this.onMouseEnter)
-				.on('mouseleave', this.onMouseExit);
+				.on('mouseleave', this.onMouseExit)
+				.on('click', '.actions i', this.onActionButtonClick)
+				.on('mousedown', '.actions i', this.onActionButtonMouseDown)
+				.on('dblclick', (event)=>{
+					// For some reason sometimes click the visibility icon will cause the item mouseexit event to fire
+					// Add this seems to help a little
+					event.preventDefault();
+					return false;
+				});
+
+			if(this.canHide())
+			{
+				this.$item.append('<div class="flex-filler min"></div>');
+				this.$item.append(
+					'<div class="actions">' +
+						'<i class="fa fa-eye btn btn-visible" data-action="visible"></i>' +
+					'</div>'
+				);
+				this.$visibilityButton = this.$item.find('.actions i.btn-visible');
+
+				this.updateVisibilityIcon();
+			}
 		}
 
 		get highlighted():boolean
@@ -129,15 +151,55 @@ namespace app.timeline.tree
 			return true;
 		}
 
+		//
+
+		protected canHide():boolean
+		{
+			return true;
+		}
+
+		protected updateVisibilityIcon()
+		{
+			if(!this.$visibilityButton) return;
+
+			this.$visibilityButton.toggleClass('fa-eye', this.node.visible);
+			this.$visibilityButton.toggleClass('fa-eye-slash', !this.node.visible);
+		}
+
 		/*
 		 * Events
 		 */
+
+		protected onActionButtonClick = (event) =>
+		{
+			const action = $(event.currentTarget).data('action');
+
+			if(action == 'visible')
+			{
+				this.node.visible = !this.node.visible;
+			}
+
+			event.preventDefault();
+			return false;
+		};
+
+		protected onActionButtonMouseDown = (event) =>
+		{
+			event.stopPropagation();
+			event.stopImmediatePropagation();
+			event.preventDefault();
+			return false;
+		};
 
 		protected onNodePropertyChange = (sender:Node, event:PropertyChangeEvent) =>
 		{
 			const property:string = event.type;
 
-			if(property == 'name' || property == 'src')
+			if(property == 'visible')
+			{
+				this.updateVisibilityIcon();
+			}
+			else if(property == 'name' || property == 'src')
 			{
 				this.$label.text(this.node.name);
 			}

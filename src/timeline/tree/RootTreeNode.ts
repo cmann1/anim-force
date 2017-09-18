@@ -25,6 +25,11 @@ namespace app.timeline.tree
 			return super.handleDragOver(treeNode, x, y, true, true);
 		}
 
+		protected canHide():boolean
+		{
+			return false;
+		}
+
 	}
 
 }

@@ -128,6 +128,7 @@ var app;
                         this.cameraVelX = 0;
                     if (Math.abs(this.cameraVelY) < 0.01)
                         this.cameraVelY = 0;
+                    this.requiresUpdate = true;
                 }
                 var viewWidth = this.width / this.scale;
                 var viewHeight = this.height / this.scale;
@@ -316,6 +317,7 @@ var app;
             };
             //
             Viewport.prototype.zoom = function (direction) {
+                var _this = this;
                 if (direction === void 0) { direction = 1; }
                 this.scaleIndex += direction;
                 if (this.scaleIndex < 0)
@@ -323,7 +325,10 @@ var app;
                 else if (this.scaleIndex >= this.scales.length)
                     this.scaleIndex = this.scales.length - 1;
                 var scale = this.scales[this.scaleIndex];
-                createjs.Tween.get(this, { override: true }).to({ scale: scale }, 50).call(this.onZoomComplete);
+                createjs.Tween.get(this, { override: true })
+                    .to({ scale: scale }, 50)
+                    .call(this.onZoomComplete)
+                    .addEventListener('change', function () { _this.requiresUpdate = true; });
                 this.stageAnchorX = this.stageMouse.x;
                 this.stageAnchorY = this.stageMouse.y;
                 this.showMessage("Zoom: " + scale);
@@ -509,7 +514,7 @@ var app;
                     this.interaction.constrain = event.shiftKey;
                     this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
                 }
-                else {
+                else if (this.mode != EditMode.PLAYBACK) {
                     if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.highlightInteraction)) {
                         this.highlightInteraction.node.setHighlighted(true);
                     }

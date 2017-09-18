@@ -114,6 +114,7 @@ namespace app.viewport
 
 				if(Math.abs(this.cameraVelX) < 0.01) this.cameraVelX = 0;
 				if(Math.abs(this.cameraVelY) < 0.01) this.cameraVelY = 0;
+				this.requiresUpdate = true;
 			}
 
 			var viewWidth = this.width / this.scale;
@@ -400,7 +401,10 @@ namespace app.viewport
 			else if(this.scaleIndex >= this.scales.length) this.scaleIndex = this.scales.length - 1;
 
 			const scale = this.scales[this.scaleIndex];
-			createjs.Tween.get(this, {override: true}).to({scale: scale}, 50).call(this.onZoomComplete);
+			createjs.Tween.get(this, {override: true})
+				.to({scale: scale}, 50)
+				.call(this.onZoomComplete)
+				.addEventListener('change', () => {this.requiresUpdate = true});
 
 			this.stageAnchorX = this.stageMouse.x;
 			this.stageAnchorY = this.stageMouse.y;
@@ -752,7 +756,7 @@ namespace app.viewport
 				this.interaction.constrain = event.shiftKey;
 				this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
 			}
-			else
+			else if(this.mode != EditMode.PLAYBACK)
 			{
 				if(this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.highlightInteraction))
 				{

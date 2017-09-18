@@ -341,6 +341,9 @@ div#timeline-tree-toolbar {
   content: "\f0d7"; }
 .model-node .item .fold-icon.collapsed:before {
   content: "\f0da"; }
+.model-node .item .btn-visible {
+  width: 14px;
+  height: 14px; }
 .model-node .children {
   margin-left: 8px;
   padding-left: 8px;
@@ -547,12 +550,17 @@ i.btn.fa {
 
 i.btn.fa:hover {
   background: indianred;
-  color: #FFF; }
+  color: #FFF;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5); }
 
 i.btn.fa.disabled, i.fa.disabled:hover {
   pointer-events: none;
   background: inherit !important;
   color: #b5b5b5 !important; }
+
+i.btn.fa:active:before {
+  position: relative;
+  top: 1px; }
 
 div.disabled {
   color: #b5b5b5 !important; }
@@ -564,6 +572,10 @@ div.disabled {
   flex-grow: 1;
   min-width: 10px;
   min-height: 10px; }
+
+.flex-filler.min {
+  min-width: inherit;
+  min-height: inherit; }
 
 .flex-filler.wide {
   min-width: 20px;

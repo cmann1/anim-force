@@ -229,6 +229,9 @@ var app;
                 }
                 this.selectionChange.dispatch(this, new SelectionEvent('selection', node));
             };
+            Model.prototype.updateNodeVisibility = function (node) {
+                this.selectionChange.dispatch(this, new SelectionEvent('visibility', node));
+            };
             //
             Model.prototype.clear = function () {
                 this.nodeMap = {};

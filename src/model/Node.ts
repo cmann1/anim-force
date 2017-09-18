@@ -13,7 +13,6 @@ namespace app.model
 
 	export class Node
 	{
-
 		private static nextId:number = 0;
 
 		public id:number;
@@ -53,6 +52,7 @@ namespace app.model
 
 		public selected:boolean = false;
 		public highlighted:boolean = false;
+		protected _visible:boolean = true;
 
 		///
 
@@ -95,6 +95,18 @@ namespace app.model
 
 			this._name = value;
 			this.onPropertyChange('name');
+		}
+
+		get visible():boolean
+		{
+			return this._visible;
+		}
+
+		set visible(value:boolean)
+		{
+			if(this._visible == value) return;
+			this._visible = value;
+			this.onPropertyChange('visible');
 		}
 
 		public setModel(model:Model)
@@ -192,7 +204,7 @@ namespace app.model
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(Config.showControls)
+			if(this._visible && Config.showControls)
 			{
 				// Do it in reverse order so that handles in front are checked first
 				for(var i = this.handles.length - 1; i >= 0; i--)
@@ -309,6 +321,7 @@ namespace app.model
 				id: this.id,
 				type: this.type,
 				name: this._name,
+				visible: this._visible,
 			};
 		}
 
@@ -316,6 +329,7 @@ namespace app.model
 		{
 			this.id = data.get('id');
 			this._name = data.get('name');
+			this._visible = data.get('visible');
 
 			return this;
 		}

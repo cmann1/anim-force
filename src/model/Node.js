@@ -32,6 +32,7 @@ var app;
                 this.drawIndex = 0;
                 this.selected = false;
                 this.highlighted = false;
+                this._visible = true;
                 this.id = Node.getNewId();
                 this._name = name;
             }
@@ -61,6 +62,19 @@ var app;
                 this._name = value;
                 this.onPropertyChange('name');
             };
+            Object.defineProperty(Node.prototype, "visible", {
+                get: function () {
+                    return this._visible;
+                },
+                set: function (value) {
+                    if (this._visible == value)
+                        return;
+                    this._visible = value;
+                    this.onPropertyChange('visible');
+                },
+                enumerable: true,
+                configurable: true
+            });
             Node.prototype.setModel = function (model) {
                 if (model == this.model)
                     return;
@@ -135,7 +149,7 @@ var app;
                 return false;
             };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
-                if (app.Config.showControls) {
+                if (this._visible && app.Config.showControls) {
                     // Do it in reverse order so that handles in front are checked first
                     for (var i = this.handles.length - 1; i >= 0; i--) {
                         var handle = this.handles[i];
@@ -215,11 +229,13 @@ var app;
                     id: this.id,
                     type: this.type,
                     name: this._name,
+                    visible: this._visible,
                 };
             };
             Node.prototype.load = function (data) {
                 this.id = data.get('id');
                 this._name = data.get('name');
+                this._visible = data.get('visible');
                 return this;
             };
             Node.load = function (data) {

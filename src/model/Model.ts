@@ -300,6 +300,11 @@ namespace app.model
 			this.selectionChange.dispatch(this, new SelectionEvent('selection', <Node>node));
 		}
 
+		public updateNodeVisibility(node:Node)
+		{
+			this.selectionChange.dispatch(this, new SelectionEvent('visibility', node));
+		}
+
 		//
 
 		public clear():void

@@ -129,7 +129,7 @@ var app;
                 this.onPropertyChange('src');
             };
             Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (!this.worldAABB.contains(x, y))
+                if (!this.visible || !this.worldAABB.contains(x, y))
                     return false;
                 if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
                     return true;
@@ -213,7 +213,7 @@ var app;
                 var w1 = (this.srcHeight * scaleY * sinR + this.srcWidth * scaleX * cosR) * 0.5;
                 var h1 = (this.srcWidth * scaleX * sinR + this.srcHeight * scaleY * cosR) * 0.5;
                 this.worldAABB.unionF(this.worldX - w1, this.worldY - h1, this.worldX + w1, this.worldY + h1);
-                if (drawList && this.worldAABB.intersects(viewport)) {
+                if (this.visible && drawList && this.worldAABB.intersects(viewport)) {
                     drawList.add(this);
                 }
             };
@@ -227,7 +227,7 @@ var app;
                 ctx.restore();
             };
             Sprite.prototype.drawControls = function (ctx, worldScale, viewport) {
-                if (!this.worldAABB.intersects(viewport))
+                if (!this.visible || !this.worldAABB.intersects(viewport))
                     return;
                 ctx.save();
                 var scaleX = this.scaleX * worldScale;
