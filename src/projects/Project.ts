@@ -72,6 +72,7 @@ namespace app.projects
 			}
 
 			Node.setCurrentId(data.get('nextNodeId'));
+			Node.autoId = false;
 
 			for(var modelData of data.models)
 			{
@@ -85,6 +86,8 @@ namespace app.projects
 
 			var viewportData = data.asLoadData('viewport');
 			App.getViewport().load(viewportData);
+
+			Node.autoId = true;
 
 			project.isNew = false;
 			return project;

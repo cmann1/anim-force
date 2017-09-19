@@ -230,6 +230,34 @@ namespace app.model
 			this.onStructureChange('clear', this, null, -1, null);
 		}
 
+		//
+
+		protected copyFrom(from:ContainerNode, recursive=true):ContainerNode
+		{
+			super.copyFrom(from);
+
+			this.children = [];
+			this.childCount = recursive ? from.childCount : 0;
+
+			if(recursive)
+			{
+				for(var child of from.children)
+				{
+					child = child.clone();
+					child.parent = this;
+					this.children.push(child);
+				}
+			}
+
+			this.stretchX = from.stretchX;
+			this.stretchY = from.stretchY;
+
+			this.worldEndPointX = from.worldEndPointX;
+			this.worldEndPointY = from.worldEndPointY;
+
+			return this;
+		}
+
 		public save():any
 		{
 			var data = super.save();

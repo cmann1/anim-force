@@ -37,7 +37,7 @@ var app;
                 this._name = name;
             }
             Node.getNewId = function () {
-                return Node.nextId++;
+                return Node.autoId ? Node.nextId++ : Node.nextId;
             };
             Node.getCurrentId = function () {
                 return Node.nextId;
@@ -224,6 +224,30 @@ var app;
                 }
             };
             //
+            Node.prototype.getInstance = function () {
+                throw new Error('Node.getInstance must not implemented');
+            };
+            Node.prototype.copyFrom = function (from, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                this._name = from.name + '-copy';
+                this.offsetX = from.offsetX;
+                this.offsetY = from.offsetY;
+                this.rotation = from.rotation;
+                this.scaleX = from.scaleX;
+                this.scaleY = from.scaleY;
+                this.layer = from.layer;
+                this.subLayer = from.subLayer;
+                this.worldX = from.worldX;
+                this.worldY = from.worldY;
+                this.worldRotation = from.worldRotation;
+                this.drawIndex = from.drawIndex;
+                this._visible = from._visible;
+                return this;
+            };
+            Node.prototype.clone = function (recursive) {
+                if (recursive === void 0) { recursive = true; }
+                return this.getInstance().copyFrom(this, recursive);
+            };
             Node.prototype.save = function () {
                 return {
                     id: this.id,
@@ -273,6 +297,7 @@ var app;
             return Node;
         }());
         Node.nextId = 0;
+        Node.autoId = true;
         model_1.Node = Node;
     })(model = app.model || (app.model = {}));
 })(app || (app = {}));

@@ -556,6 +556,7 @@ var app;
             };
             TimelineViewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;
+                var ctrlKey = event.ctrlKey;
                 var shiftKey = event.shiftKey;
                 if (this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK) {
                     // Playback
@@ -583,8 +584,8 @@ var app;
                         this.animation.gotoNextKeyframe();
                         return true;
                     }
-                    else if (keyCode == Key.D) {
-                        this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+                    else if (!ctrlKey && keyCode == Key.X) {
+                        this.animation.deleteKeyframe(shiftKey ? null : this.model.getSelectedNode());
                         return true;
                     }
                     else if (keyCode == Key.I) {

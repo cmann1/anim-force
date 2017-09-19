@@ -334,6 +334,11 @@ namespace app.model
 
 		//
 
+		protected getInstance():Sprite
+		{
+			return new Sprite(this.asset, this.palette, this.frame);
+		}
+
 		public save():any
 		{
 			var data = super.save();

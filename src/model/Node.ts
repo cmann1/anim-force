@@ -14,6 +14,7 @@ namespace app.model
 	export class Node
 	{
 		private static nextId:number = 0;
+		public static autoId = true;
 
 		public id:number;
 		public type:string;
@@ -64,7 +65,7 @@ namespace app.model
 
 		public static getNewId():number
 		{
-			return Node.nextId++;
+			return Node.autoId ? Node.nextId++ : Node.nextId;
 		}
 
 		public static getCurrentId():number
@@ -314,6 +315,39 @@ namespace app.model
 		}
 
 		//
+
+		protected getInstance():Node
+		{
+			throw new Error('Node.getInstance must not implemented');
+		}
+
+		protected copyFrom(from:Node, recursive=true):Node
+		{
+			this._name = from.name + '-copy';
+
+			this.offsetX = from.offsetX;
+			this.offsetY = from.offsetY;
+			this.rotation = from.rotation;
+			this.scaleX = from.scaleX;
+			this.scaleY = from.scaleY;
+
+			this.layer = from.layer;
+			this.subLayer = from.subLayer;
+
+			this.worldX = from.worldX;
+			this.worldY = from.worldY;
+			this.worldRotation = from.worldRotation;
+			this.drawIndex = from.drawIndex;
+
+			this._visible = from._visible;
+
+			return this;
+		}
+
+		public clone(recursive=true):Node
+		{
+			return this.getInstance().copyFrom(this, recursive);
+		}
 
 		public save():any
 		{

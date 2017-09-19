@@ -786,6 +786,7 @@ namespace app.timeline
 		public commonKey(event):boolean
 		{
 			const keyCode = event.keyCode;
+			const ctrlKey = event.ctrlKey;
 			const shiftKey = event.shiftKey;
 
 			if(this.mode == EditMode.ANIMATE || this.mode == EditMode.PLAYBACK)
@@ -825,9 +826,9 @@ namespace app.timeline
 				}
 
 				// Keyframes
-				else if(keyCode == Key.D)
+				else if(!ctrlKey && keyCode == Key.X)
 				{
-					this.animation.deleteKeyframe(event.shiftKey ? null : this.model.getSelectedNode());
+					this.animation.deleteKeyframe(shiftKey ? null : this.model.getSelectedNode());
 					return true;
 				}
 				else if(keyCode == Key.I)

@@ -177,6 +177,26 @@ var app;
                 this.childCount = 0;
                 this.onStructureChange('clear', this, null, -1, null);
             };
+            //
+            ContainerNode.prototype.copyFrom = function (from, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                _super.prototype.copyFrom.call(this, from);
+                this.children = [];
+                this.childCount = recursive ? from.childCount : 0;
+                if (recursive) {
+                    for (var _i = 0, _a = from.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child = child.clone();
+                        child.parent = this;
+                        this.children.push(child);
+                    }
+                }
+                this.stretchX = from.stretchX;
+                this.stretchY = from.stretchY;
+                this.worldEndPointX = from.worldEndPointX;
+                this.worldEndPointY = from.worldEndPointY;
+                return this;
+            };
             ContainerNode.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 if (!(this instanceof model_1.Model)) {

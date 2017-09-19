@@ -108,6 +108,16 @@ var app;
                 }
                 ctx.restore();
             };
+            //
+            Bone.prototype.getInstance = function () {
+                return new Bone();
+            };
+            Bone.prototype.copyFrom = function (from, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                _super.prototype.copyFrom.call(this, from, recursive);
+                this.length = from.length;
+                return this;
+            };
             Bone.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.length = this.length;

@@ -250,6 +250,9 @@ var app;
                 }
             };
             //
+            Sprite.prototype.getInstance = function () {
+                return new Sprite(this.asset, this.palette, this.frame);
+            };
             Sprite.prototype.save = function () {
                 var data = _super.prototype.save.call(this);
                 data.palette = this._palette;

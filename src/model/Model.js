@@ -122,6 +122,15 @@ var app;
                 }
             };
             //
+            Model.prototype.duplicateSelected = function (recursive) {
+                if (recursive === void 0) { recursive = true; }
+                if (!this.selectedNode)
+                    return null;
+                console.log(recursive);
+                var copy = this.selectedNode.clone(recursive);
+                this.selectedNode.parent.addChild(copy);
+                return copy;
+            };
             Model.prototype.getActiveAnimation = function () {
                 return this.activeAnimation;
             };

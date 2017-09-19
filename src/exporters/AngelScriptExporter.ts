@@ -317,10 +317,7 @@ class ${className} : trigger_base
 				current_sprite_frame[fi + i], sprites_palettes[i],
 				x + current_x[fi + i], y + current_y[fi + i], current_rotation[fi + i],
 				current_scale_x[fi + i], current_scale_y[fi + i], colour);
-			//g.draw_rectangle_world(22, 20, x + current_x[fi + i]-4, y + current_y[fi + i]-4, x + current_x[fi + i]+4, y + current_y[fi + i]+4, 0, i >= 2 ? 0xFF0000FF : (i == 1 ? 0xFF00FF00 : 0xFFFF0000));
 		}
-		
-		//g.draw_rectangle_world(22, 20, x-4, y-4, x+4, y+4, 0, 0xFFFF0000);
 	}
 	
 	void editor_draw(float sub_frame)

@@ -576,7 +576,7 @@ namespace app.anim
 
 				if(!track)
 				{
-					this.tracks[target.id] = this.createTrack(target);
+					this.initNodes([target]);
 				}
 				else if(this.active)
 				{

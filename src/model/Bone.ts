@@ -141,6 +141,22 @@ namespace app.model
 			ctx.restore();
 		}
 
+		//
+
+		protected getInstance():Bone
+		{
+			return new Bone();
+		}
+
+		protected copyFrom(from:Bone, recursive=true):Bone
+		{
+			super.copyFrom(from, recursive);
+
+			this.length = from.length;
+
+			return this;
+		}
+
 		public save():any
 		{
 			var data = super.save();

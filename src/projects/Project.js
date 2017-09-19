@@ -49,6 +49,7 @@ var app;
                     project.rev = data._rev;
                 }
                 Node.setCurrentId(data.get('nextNodeId'));
+                Node.autoId = false;
                 for (var _i = 0, _a = data.models; _i < _a.length; _i++) {
                     var modelData = _a[_i];
                     project.addModel(new Model().load(data.asLoadData(modelData)));
@@ -58,6 +59,7 @@ var app;
                 }
                 var viewportData = data.asLoadData('viewport');
                 app.App.getViewport().load(viewportData);
+                Node.autoId = true;
                 project.isNew = false;
                 return project;
             };

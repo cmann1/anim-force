@@ -141,6 +141,17 @@ namespace app.model
 
 		//
 
+		public duplicateSelected(recursive=true):Node
+		{
+			if(!this.selectedNode) return null;
+
+			console.log(recursive);
+			var copy = this.selectedNode.clone(recursive);
+			this.selectedNode.parent.addChild(copy);
+
+			return copy;
+		}
+
 		public getActiveAnimation():app.anim.Animation
 		{
 			return this.activeAnimation;

@@ -14,7 +14,6 @@ var app;
     (function (viewport) {
         var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
-        var Bone = app.model.Bone;
         var EditMode = app.model.EditMode;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
@@ -345,6 +344,7 @@ var app;
                 // console.log(keyCode);
                 var keyCode = event.keyCode;
                 var altKey = event.altKey;
+                var shiftKey = event.shiftKey;
                 var selectedNode = this.model.getSelectedNode();
                 if (keyCode == Key.Home) {
                     this.reset();
@@ -361,88 +361,62 @@ var app;
                 else if (keyCode == Key.Zero) {
                     app.Config.set('drawAABB', !app.Config.drawAABB);
                 }
-                else if (keyCode == Key.A) {
-                    var spriteAsset = app.main.spriteManager.loadSprite('props6', 'npc_1'); // leaf
-                    var spriteAsset2 = app.main.spriteManager.loadSprite('props6', 'npc_2'); // maid
-                    var spriteAsset3 = app.main.spriteManager.loadSprite('props6', 'npc_5'); // sci
-                    var bone;
-                    var bone2;
-                    var sprite;
-                    var sprite2;
-                    var sprite3;
-                    this.model.clear();
-                    this.model.addChild(bone = new Bone());
-                    // bone.rotation = Math.PI * 0.25;
-                    bone.addChild(sprite = new Sprite(spriteAsset, 0, 0));
-                    sprite3 = new Sprite(spriteAsset3, 0, 0);
-                    sprite3.rotation = Math.PI * 0.25;
-                    sprite3.offsetX = 50;
-                    sprite3.offsetY = 50;
-                    bone.addChild(sprite3);
-                    bone2 = new Bone();
-                    bone2.offsetX = -50;
-                    bone.addChild(bone2);
-                    bone2.addChild(sprite2 = new Sprite(spriteAsset2, 0, 0));
-                    sprite.offsetY = bone.length / 2;
-                    sprite2.offsetY = bone2.length / 2;
-                    sprite3 = new Sprite(spriteAsset3, 0, 0);
-                    sprite3.rotation = -Math.PI * 0.25;
-                    sprite3.offsetX = -50;
-                    sprite3.offsetY = 50;
-                    bone.addChild(sprite3);
-                    sprite3 = new Sprite(spriteAsset3, 0, 0);
-                    sprite3.rotation = -Math.PI * 0.5;
-                    sprite3.offsetX = 0;
-                    sprite3.offsetY = 150;
-                    bone.addChild(sprite3);
-                    sprite3 = new Sprite(spriteAsset2, 0, 0);
-                    sprite3.rotation = -Math.PI * 0.5;
-                    sprite3.offsetX = 0;
-                    sprite3.offsetY = -150;
-                    bone.addChild(sprite3);
-                    // this.model.bindPose.forceKeyframe();
-                }
                 else if (this.mode != EditMode.PLAYBACK) {
-                    // Delete ndoe
-                    if (keyCode == Key.Delete) {
-                        if (!this.interaction.success) {
+                    if (!this.interaction.success) {
+                        // Delete node
+                        if (keyCode == Key.Delete) {
                             if (selectedNode) {
                                 selectedNode.parent.removeChild(selectedNode);
                             }
                         }
-                    }
-                    else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
-                        if (selectedNode) {
-                            this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey);
-                            this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
+                        else if (keyCode == Key.D) {
+                            var node = this.model.duplicateSelected(!shiftKey);
+                            if (node) {
+                                // TODO: Start drag interaction
+                                this.interaction.x = 0;
+                                this.interaction.y = 0;
+                                this.interaction.offset = node.rotation;
+                                this.interaction.node = node;
+                                this.interaction.part = 'base';
+                                this.interaction.node.setSelected(true);
+                                this.interaction.success = true;
+                                this.interaction.node.updateInteraction(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction);
+                                this.requiresUpdate = true;
+                            }
                         }
-                    }
-                    else if (keyCode == Key.Numpad8 || keyCode == Key.Numpad2) {
-                        if (selectedNode instanceof Sprite) {
-                            selectedNode.setFrame(Math.round(selectedNode.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
-                            this.showMessage('Frame: ' + (Math.round(selectedNode.frame) + 1) + '/' + selectedNode.frameCount);
+                        else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
+                            if (selectedNode) {
+                                this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey);
+                                this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
+                            }
                         }
-                    }
-                    else if (keyCode == Key.Numpad4 || keyCode == Key.Numpad6) {
-                        if (selectedNode instanceof Sprite) {
-                            selectedNode.setPalette(selectedNode.palette + (keyCode == Key.Numpad6 ? 1 : -1));
-                            this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
+                        else if (keyCode == Key.Numpad8 || keyCode == Key.Numpad2) {
+                            if (selectedNode instanceof Sprite) {
+                                selectedNode.setFrame(Math.round(selectedNode.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
+                                this.showMessage('Frame: ' + (Math.round(selectedNode.frame) + 1) + '/' + selectedNode.frameCount);
+                            }
                         }
-                    }
-                    else if (keyCode == Key.G && altKey) {
-                        if (selectedNode)
-                            selectedNode.resetOffset();
-                    }
-                    else if (keyCode == Key.S && altKey) {
-                        if (selectedNode)
-                            selectedNode.resetScale();
-                    }
-                    else if (keyCode == Key.R && altKey) {
-                        if (selectedNode)
-                            selectedNode.resetRotation();
-                    }
-                    else if (keyCode == Key.Enter) {
-                        app.main.showSpriteSelector(this.onSpritesSelect);
+                        else if (keyCode == Key.Numpad4 || keyCode == Key.Numpad6) {
+                            if (selectedNode instanceof Sprite) {
+                                selectedNode.setPalette(selectedNode.palette + (keyCode == Key.Numpad6 ? 1 : -1));
+                                this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
+                            }
+                        }
+                        else if (keyCode == Key.G && altKey) {
+                            if (selectedNode)
+                                selectedNode.resetOffset();
+                        }
+                        else if (keyCode == Key.S && altKey) {
+                            if (selectedNode)
+                                selectedNode.resetScale();
+                        }
+                        else if (keyCode == Key.R && altKey) {
+                            if (selectedNode)
+                                selectedNode.resetRotation();
+                        }
+                        else if (keyCode == Key.Enter) {
+                            app.main.showSpriteSelector(this.onSpritesSelect);
+                        }
                     }
                 }
             };

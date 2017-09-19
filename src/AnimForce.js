@@ -1,14 +1,13 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: When adjusting bone length, keep children relative position
  TODO: Anchor nodes
- TODO: ? Emitter nodes
+ TODO: - Export to AngelScript
+ TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?
- TODO: ? Sound nodes
- TODO: Copy/paste nodes
- 
+ TODO: ?Sound nodes
+
  TODO: Sprite Selector:
  TODO: - Improve all-round / Completely redo
  TODO: - Remember state, scroll position, etc.
@@ -25,7 +24,7 @@
  TODO: ? Keyframe easing
  TODO: Export options:
  TODO: - sprite_group: Option to not use sprite layers and sublayers
- TODO: - AngelScript: Selected animation only
+ TODO: - AngelScript: Selected animations only
  TODO: Timeline:
  TODO: - Somehow indicate that a keyframe is selected - it might not be obvious (esp. if the selected keyframe is not in view)
  TODO: - ???

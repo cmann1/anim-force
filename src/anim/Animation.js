@@ -47,7 +47,7 @@ var app;
                     else if (type == 'addChild') {
                         var track = _this.tracks[target.id];
                         if (!track) {
-                            _this.tracks[target.id] = _this.createTrack(target);
+                            _this.initNodes([target]);
                         }
                         else if (_this.active) {
                             track.updateKeyframe();
