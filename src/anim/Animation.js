@@ -8,6 +8,7 @@ var app;
         var EventDispatcher = app.events.EventDispatcher;
         var Event = app.events.Event;
         var EventNode = app.model.EventNode;
+        var Anchor = app.model.Anchor;
         var Animation = (function () {
             function Animation(name, model, readOnly, forceKeyframe) {
                 if (readOnly === void 0) { readOnly = false; }
@@ -108,6 +109,9 @@ var app;
                 }
                 else if (target instanceof EventNode) {
                     track = new anim.EventTrack(this, target);
+                }
+                else if (target instanceof Anchor) {
+                    track = new anim.NodeTrack('anchor', this, target);
                 }
                 target.propertyChange.on(this.onNodePropertyChange);
                 if (!track) {

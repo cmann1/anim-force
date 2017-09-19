@@ -13,6 +13,7 @@ namespace app.timeline.tree
 	import ContainerNode = app.model.ContainerNode;
 	import Event = app.events.Event;
 	import EventNode = app.model.EventNode;
+	import Anchor = app.model.Anchor;
 
 	export class TimelineTree
 	{
@@ -504,6 +505,8 @@ namespace app.timeline.tree
 					newNode = new Sprite();
 				else if(type == 'Add Event')
 					newNode = new EventNode();
+				else if(type == 'Add Anchor')
+					newNode = new Anchor();
 
 				if(newNode)
 				{

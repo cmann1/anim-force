@@ -372,7 +372,6 @@ var app;
                         else if (keyCode == Key.D) {
                             var node = this.model.duplicateSelected(!shiftKey);
                             if (node) {
-                                // TODO: Start drag interaction
                                 this.interaction.x = 0;
                                 this.interaction.y = 0;
                                 this.interaction.offset = node.rotation;

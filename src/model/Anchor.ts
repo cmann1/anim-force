@@ -8,22 +8,25 @@ namespace app.model
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
 
-	export class EventNode extends BoxNode
+	export class Anchor extends BoxNode
 	{
 
-		public event:string = null;
+		// TODO: Provide an interface for enabling/disabling rotation and scale for anchor nodes
 
 		constructor(name:string=null)
 		{
 			super(name, false, false);
-			this.boxWidth = this.boxHeight = 50;
+			this.drawOutline = false;
 
-			this.type = 'event';
+			this.type = 'anchor';
+			this.boxWidth = this.boxHeight = 40;
+
+			this.hitRadius = this.boxWidth * 0.5 * 0.75;
 		}
 
 		get name():string
 		{
-			return this._name || 'Events-' + this.id;
+			return this._name || 'anchor-' + this.id;
 		}
 		set name(value:string)
 		{
@@ -36,53 +39,51 @@ namespace app.model
 
 			ctx.save();
 
+			const scaleX = this.scaleX * worldScale;
+			const scaleY = this.scaleY * worldScale;
 			const w = this.boxWidth * 0.5;
+			const h = this.boxHeight * 0.5;
 
 			ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
-			ctx.translate(-w * worldScale, -w * worldScale);
+			ctx.rotate(this.worldRotation);
 
-			ctx.scale(worldScale, worldScale);
-			ctx.font = '42px FontAwesome';
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-			ctx.fillText('\uf0ae', w, w + 2);
+			ctx.fillStyle = Config.control;
+			ctx.beginPath();
+			ctx.arc(0, 0, this.hitRadius, 0, Math.PI * 2);
+			ctx.moveTo(-w * scaleX, 0);
+			ctx.lineTo(w * scaleX, 0);
+			ctx.moveTo(0, -h * scaleY);
+			ctx.lineTo(0, h * scaleY);
+			ctx.stroke();
 
 			ctx.restore();
 
 			super.drawControls(ctx, worldScale, viewport);
 		}
 
-		public setEvent(event:string)
-		{
-			if(this.event == event) return;
-
-			this.event = event;
-			this.onPropertyChange('event');
-		}
-
 		//
 
 		protected getInstance():Node
 		{
-			return null;
+			return new Anchor();
 		}
 
 		public save():any
 		{
 			var data = super.save();
 
-			data.offsetX = this.offsetX;
-			data.offsetY = this.offsetY;
+			data.allowRotation = this.allowRotation;
+			data.allowScale = this.allowScale;
 
 			return data;
 		}
 
-		public load(data:LoadData):EventNode
+		public load(data:LoadData):Anchor
 		{
 			super.load(data);
 
-			this.offsetX = data.get('offsetX');
-			this.offsetY = data.get('offsetY');
+			this.allowRotation = data.get('allowRotation');
+			this.allowScale = data.get('allowScale');
 
 			return this;
 		}

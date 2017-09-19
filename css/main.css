@@ -332,6 +332,8 @@ div#timeline-tree-toolbar {
   content: "\f0c1"; }
 .model-node.event > .item .icon:before {
   content: "\f0ae"; }
+.model-node.anchor > .item .icon:before {
+  content: "\f05b"; }
 .model-node .item .fold-icon {
   width: 10px;
   text-align: center;

@@ -12,6 +12,7 @@ namespace app.anim
 	import Event = app.events.Event;
 	import LoadData = app.projects.LoadData;
 	import EventNode = app.model.EventNode;
+	import Anchor = app.model.Anchor;
 
 	export class Animation
 	{
@@ -108,6 +109,10 @@ namespace app.anim
 			else if(target instanceof EventNode)
 			{
 				track = new EventTrack(this, target);
+			}
+			else if(target instanceof Anchor)
+			{
+				track = new NodeTrack('anchor', this, target);
 			}
 
 			target.propertyChange.on(this.onNodePropertyChange);

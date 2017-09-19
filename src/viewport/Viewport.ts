@@ -532,7 +532,6 @@ namespace app.viewport
 
 						if(node)
 						{
-							// TODO: Start drag interaction
 							this.interaction.x = 0;
 							this.interaction.y = 0;
 							this.interaction.offset = node.rotation;

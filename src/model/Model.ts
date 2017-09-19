@@ -145,9 +145,12 @@ namespace app.model
 		{
 			if(!this.selectedNode) return null;
 
-			console.log(recursive);
 			var copy = this.selectedNode.clone(recursive);
-			this.selectedNode.parent.addChild(copy);
+
+			if(copy)
+			{
+				this.selectedNode.parent.addChild(copy);
+			}
 
 			return copy;
 		}

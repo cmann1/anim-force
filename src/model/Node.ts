@@ -346,7 +346,8 @@ namespace app.model
 
 		public clone(recursive=true):Node
 		{
-			return this.getInstance().copyFrom(this, recursive);
+			var copy = this.getInstance();
+			return copy ? copy.copyFrom(this, recursive) : null;
 		}
 
 		public save():any
@@ -384,6 +385,10 @@ namespace app.model
 			else if(type == 'event')
 			{
 				node = new EventNode().load(data);
+			}
+			else if(type == 'anchor')
+			{
+				node = new Anchor().load(data);
 			}
 			else
 			{

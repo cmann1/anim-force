@@ -246,7 +246,8 @@ var app;
             };
             Node.prototype.clone = function (recursive) {
                 if (recursive === void 0) { recursive = true; }
-                return this.getInstance().copyFrom(this, recursive);
+                var copy = this.getInstance();
+                return copy ? copy.copyFrom(this, recursive) : null;
             };
             Node.prototype.save = function () {
                 return {
@@ -273,6 +274,9 @@ var app;
                 }
                 else if (type == 'event') {
                     node = new model_1.EventNode().load(data);
+                }
+                else if (type == 'anchor') {
+                    node = new model_1.Anchor().load(data);
                 }
                 else {
                     throw new Error('Unexpected node type');
