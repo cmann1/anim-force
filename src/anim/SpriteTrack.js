@@ -18,8 +18,6 @@ var app;
             function SpriteTrack(animation, node) {
                 var _this = _super.call(this, 'sprite', animation, node) || this;
                 _this.addProperty('frame', TrackPropertyType.NUMBER);
-                _this.addProperty('scaleX', TrackPropertyType.NUMBER);
-                _this.addProperty('scaleY', TrackPropertyType.NUMBER);
                 return _this;
             }
             return SpriteTrack;

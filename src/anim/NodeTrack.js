@@ -19,6 +19,8 @@ var app;
                 var _this = _super.call(this, type, animation, node) || this;
                 _this.addProperty('offset', TrackPropertyType.VECTOR);
                 _this.addProperty('rotation', TrackPropertyType.ANGLE);
+                _this.addProperty('scaleX', TrackPropertyType.NUMBER);
+                _this.addProperty('scaleY', TrackPropertyType.NUMBER);
                 return _this;
             }
             return NodeTrack;

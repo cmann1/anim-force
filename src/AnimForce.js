@@ -1,9 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Anchor nodes
- TODO: - Export to AngelScript
- TODO: - Per anchor to disable exporting scale and/or rotation
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?

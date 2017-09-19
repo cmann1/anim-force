@@ -183,7 +183,8 @@ namespace app.model
 			{
 				this.scaleX = 1;
 				this.scaleY = 1;
-				this.onPropertyChange('scale');
+				this.onPropertyChange('scaleX');
+				this.onPropertyChange('scaleY');
 			}
 		}
 

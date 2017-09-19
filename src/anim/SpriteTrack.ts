@@ -15,8 +15,6 @@ namespace app.anim
 			super('sprite', animation, node);
 
 			this.addProperty('frame', TrackPropertyType.NUMBER);
-			this.addProperty('scaleX', TrackPropertyType.NUMBER);
-			this.addProperty('scaleY', TrackPropertyType.NUMBER);
 		}
 
 	}

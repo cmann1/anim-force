@@ -16,6 +16,8 @@ namespace app.anim
 
 			this.addProperty('offset', TrackPropertyType.VECTOR);
 			this.addProperty('rotation', TrackPropertyType.ANGLE);
+			this.addProperty('scaleX', TrackPropertyType.NUMBER);
+			this.addProperty('scaleY', TrackPropertyType.NUMBER);
 		}
 
 	}

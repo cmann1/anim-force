@@ -8,6 +8,7 @@ namespace app.exporters
 	import Animation = app.anim.Animation;
 	import SpriteFrame = app.assets.SpriteFrame;
 	import EventNode = app.model.EventNode;
+	import Anchor = app.model.Anchor;
 
 	export class AngelScriptExporter extends Exporter
 	{
@@ -23,6 +24,8 @@ namespace app.exporters
 			var spritePalettes:number[] = [];
 
 			var eventNodes:EventNode[] = [];
+			var anchorNodes:Anchor[] = [];
+			var outAnchorNames:string[]|any = [];
 
 			var nodes:Node[] = model.getNodeList();
 
@@ -45,6 +48,11 @@ namespace app.exporters
 				{
 					eventNodes.push(node);
 				}
+				else if(node instanceof Anchor)
+				{
+					anchorNodes.push(node);
+					outAnchorNames.push(`'${node.name}',AnchorData(${outAnchorNames.length},${node.allowRotation?1:0},${node.allowScale?1:0})`);
+				}
 			}
 
 			var animIndex = 0;
@@ -60,6 +68,7 @@ namespace app.exporters
 			var outScaleX = [];
 			var outScaleY = [];
 			var outEvent = [];
+			var outAnchor:any = [];
 
 			for(var anim of anims)
 			{
@@ -81,6 +90,7 @@ namespace app.exporters
 				var animScaleX = [];
 				var animScaleY = [];
 				var animEvent = [];
+				var animAnchor = [];
 
 				for(var i = 0; i < frameCount; i++)
 				{
@@ -107,6 +117,14 @@ namespace app.exporters
 							eventName = event.event;
 					}
 
+					for(var anchor of anchorNodes)
+					{
+						var d = `${Exporter.num(anchor.worldX)},${Exporter.num(anchor.worldY)}`;
+						if(anchor.allowRotation) d += ',' + Exporter.num(anchor.worldRotation);
+						if(anchor.allowScale) d += `,${Exporter.num(anchor.scaleX)},${Exporter.num(anchor.scaleY)}`;
+						animAnchor.push(d);
+					}
+
 					if(eventName)
 						animEvent.push(`${i},'${eventName}'`);
 
@@ -123,13 +141,40 @@ namespace app.exporters
 				outEvent.push(animEvent.length ? '{' + animEvent.join('},{') + '}' : '');
 				animNames.push(`'${anim.name}',${animIndex}`);
 
+				if(animAnchor.length)
+					outAnchor.push(`{${animAnchor.join('},{')}}`);
+
 				anim.setPosition(currentFrame);
 				anim.suppressEvents = false;
 				animIndex++;
 			}
 
+			var anchors = !!outAnchor.length;
+			var anchorCountVar = '';
+			var anchorFuncs = ANCHOR_FUNCS;
+			if(anchors)
+			{
+				outAnchorNames = `dictionary anchors_name = {{${outAnchorNames.join('},{')}}};`;
+				outAnchor = `array<array<array<float>>> anims_anchor = {{${outAnchor.join('},\n\t\t{')}}};`;
+				anchorCountVar = `int anchor_count = ${anchorNodes.length};`;
 
-			return `funcdef void EventCallback(string);
+				anchorFuncs = anchorFuncs
+					.replace('__POS', ANCHOR_POS_CODE)
+					.replace('__ROT', ANCHOR_ROT_CODE)
+					.replace('__SCALE', ANCHOR_SCALE_CODE);
+			}
+			else
+			{
+				outAnchorNames = '';
+				outAnchor = '';
+
+				anchorFuncs = anchorFuncs
+					.replace('__POS', '')
+					.replace('__ROT', '')
+					.replace('__SCALE', '');
+			}
+
+			return $.trim(`funcdef void EventCallback(string);
 
 class ${className} : trigger_base
 {
@@ -139,7 +184,9 @@ class ${className} : trigger_base
 	
 	[text] bool is_playing = true;
 
+	// Nodes
 	int sprites_count = ${spriteGroupList.length};
+	${anchorCountVar}
 	array<string> sprites_sets = {'${spriteGroupList.join("','")}'};
 	array<string> sprites_names = {'${spriteNameList.join("','")}'};
 	array<sprites@> sprites_list(sprites_count);
@@ -151,13 +198,15 @@ class ${className} : trigger_base
 	array<int> anims_frame_count = {${animFrameCount.join(',')}};
 	array<float> anims_fps_step = {${animFps.join(',')}};
 	array<bool> anims_loop = {${animLoop.join(',')}};
-	array<array<int>> anims_sprite_frame = {{${outFrames.join('},{')}}};
-	array<array<float>> anims_x = {{${outX.join('},{')}}};
-	array<array<float>> anims_y = {{${outY.join('},{')}}};
-	array<array<float>> anims_rotation = {{${outRotation.join('},{')}}};
-	array<array<float>> anims_scale_x = {{${outScaleX.join('},{')}}};
-	array<array<float>> anims_scale_y = {{${outScaleY.join('},{')}}};
+	array<array<int>> anims_sprite_frame = {{${outFrames.join('},\n\t\t{')}}};
+	array<array<float>> anims_x = {{${outX.join('},\n\t\t{')}}};
+	array<array<float>> anims_y = {{${outY.join('},\n\t\t{')}}};
+	array<array<float>> anims_rotation = {{${outRotation.join('},\n\t\t{')}}};
+	array<array<float>> anims_scale_x = {{${outScaleX.join('},\n\t\t{')}}};
+	array<array<float>> anims_scale_y = {{${outScaleY.join('},\n\t\t{')}}};
 	array<dictionary> anims_event = {{${outEvent.join('},{')}}};
+	${outAnchor}
+	${outAnchorNames}
 	dictionary anims_name = {{${animNames.join('},{')}}};
 	
 	// Current animation
@@ -174,6 +223,7 @@ class ${className} : trigger_base
 	[hidden] array<float>@ current_scale_x = @null;
 	[hidden] array<float>@ current_scale_y = @null;
 	[hidden] dictionary@ current_event = @null;
+	[hidden] array<array<float>>@ current_anchor = @null;
 	
 	EventCallback@ event_callback = null;
 	
@@ -195,6 +245,7 @@ class ${className} : trigger_base
 		set_animation(current_anim);
 	}
 	
+	// Playback
 	void play()
 	{
 		is_playing = true;
@@ -248,6 +299,7 @@ class ${className} : trigger_base
 		@current_scale_x = @anims_scale_x[anim_index];
 		@current_scale_y = @anims_scale_y[anim_index];
 		@current_event = @anims_event[anim_index];
+		${anchors ? '@current_anchor = @anims_anchor[anim_index];' : ''}
 		
 		check_event();
 	}
@@ -272,6 +324,9 @@ class ${className} : trigger_base
 		return '';
 	}
 	
+	${anchorFuncs}
+	
+	// Entity
 	void step()
 	{
 		if(is_playing)
@@ -324,8 +379,87 @@ class ${className} : trigger_base
 	{
 		draw(sub_frame);
 	}
-}`;
+}
+
+${anchors ? ANCHOR_DATA_CLASS : ''}`);
 		}
 	}
+
+	var ANCHOR_DATA_CLASS = `class AnchorData
+{
+	int index;
+	int allowRotation;
+	int allowScale;
+
+	AnchorData(int index, int allowRotation, int allowScale)
+	{
+		this.index = index;
+		this.allowRotation = allowRotation;
+		this.allowScale = allowScale;
+	}
+}`;
+
+	var ANCHOR_FUNCS = `
+	bool get_anchor_pos(string name, float &out out_x, float &out out_y)
+	{__POS
+		out_x = 0;
+		out_y = 0;
+		return false;
+	}
+	
+	bool get_anchor_rot(string name, float &out out_rot)
+	{__ROT
+		out_rot = 0;
+		return false;
+	}
+	
+	bool get_anchor_scale(string name, float &out out_scale_x, float &out out_scale_y)
+	{__SCALE
+		out_scale_x = 1;
+		out_scale_y = 1;
+		return false;
+	}`;
+
+	var ANCHOR_POS_CODE = `
+		if(anchors_name.exists(name))
+		{
+			AnchorData@ anchor = cast<AnchorData>(anchors_name[name]);
+			
+			const int fi = int(current_frame) * anchor_count;
+			out_x = current_anchor[fi + anchor.index][0];
+			out_y = current_anchor[fi + anchor.index][1];
+			return true;
+		}
+		`;
+
+	var ANCHOR_ROT_CODE = `
+		if(anchors_name.exists(name))
+		{
+			AnchorData@ anchor = cast<AnchorData>(anchors_name[name]);
+		
+			if(anchor.allowRotation == 1)
+			{
+				const int fi = int(current_frame) * anchor_count;
+				out_rot = current_anchor[fi + anchor.index][2];
+				return true;
+			}
+		}
+		`;
+
+	var ANCHOR_SCALE_CODE = `
+		if(anchors_name.exists(name))
+		{
+			AnchorData@ anchor = cast<AnchorData>(anchors_name[name]);
+			
+			if(anchor.allowScale == 1)
+			{
+				const int i = anchor.allowRotation == 1 ? 3 : 2;
+				const int fi = int(current_frame) * anchor_count;
+				out_scale_x = current_anchor[fi + anchor.index][i];
+				out_scale_y = current_anchor[fi + anchor.index][i + 1];
+				return true;
+			}
+		}
+		`;
 
 }

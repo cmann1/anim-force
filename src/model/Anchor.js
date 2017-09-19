@@ -43,7 +43,9 @@ var app;
                 var w = this.boxWidth * 0.5;
                 var h = this.boxHeight * 0.5;
                 ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
-                ctx.rotate(this.worldRotation);
+                if (this.allowRotation) {
+                    ctx.rotate(this.worldRotation);
+                }
                 ctx.fillStyle = app.Config.control;
                 ctx.beginPath();
                 ctx.arc(0, 0, this.hitRadius, 0, Math.PI * 2);
