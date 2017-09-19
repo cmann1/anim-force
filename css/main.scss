@@ -49,6 +49,7 @@ html, body{
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	z-index: 999999;
 
 	.content{
 		margin:0 auto;

@@ -1,12 +1,12 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
+ TODO: Sprite selector thumbnails are incorrect
+ TODO: Recursive layer/sublayer inc/dec
  TODO: Multiple selection
  TODO: Lock children
  TODO: Reset bone stretch
- TODO: Shift click vs icon to recurse
- TODO: Sprite selector thumbnails are incorrect
- TODO: Anchor drag offset incorrect
+ TODO: Shift click vis icon to recurse
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?
@@ -55,7 +55,7 @@ var app;
             this.loadCount = 0;
             this.runningTime = 0;
             this.onLoadQueue = function () {
-                if (!_this.projectManager && app.Config.isLoaded && app.$body) {
+                if (!_this.projectManager && _this._spriteManager.isReady() && app.Config.isLoaded && app.$body) {
                     _this.loadCount++;
                     _this.projectManager = new ProjectManager();
                     _this.projectManager.init(_this.onProjectManagerReady);
@@ -101,7 +101,8 @@ var app;
             App.instance = this;
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
             this.ticker = new Ticker(this.onTick);
-            this._spriteManager = new SpriteManager('assets/sprites/');
+            this.loadCount++;
+            this._spriteManager = new SpriteManager('assets/sprites/', this.onLoadQueue);
             this.loadCount++;
             app.Config.init(this.onLoadQueue);
             this.loadCount++;

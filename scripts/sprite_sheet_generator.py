@@ -30,7 +30,7 @@ FRAME_PADDING = 1
 
 THUMB_SIZE = 42
 
-GENERATE_IMAGE = False
+GENERATE_IMAGE = True
 
 #
 # SETUP
@@ -48,9 +48,9 @@ os.makedirs(OUT_DIR, exist_ok=True)
 sprites_out_data = []
 
 for sprite_set, sprite_set_data in sprite_sets_data.items():
-	# if sprite_set != 'fonts':
-	# if sprite_set != 'props6' and sprite_set != 'dustman':
-	# 	continue
+	# if sprite_set != 'dustkid':
+		# if sprite_set != 'props6' and sprite_set != 'dustman':
+		# continue
 
 	if sprite_set == 'tile6':
 		continue
@@ -70,6 +70,9 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 		frame_count = sprite_data['frame_count']
 		palette_count = sprite_data['palette_count']
 		palettes = sprite_data['palettes']
+
+		if frame_count == 0:
+			continue
 
 		sprite_set_out_data.append(dict(
 			name=sprite_name,
@@ -115,6 +118,9 @@ for sprite_set, sprite_set_data in sprite_sets_data.items():
 
 				sprite_frame_x = frame_x + FRAME_PADDING
 				sprite_frame_y = frame_y + FRAME_PADDING
+
+				if not os.path.exists(frame_path):
+					print('ERROR: cannot open file %s' % frame_path)
 
 				if GENERATE_IMAGE:
 					if os.path.exists(frame_path):

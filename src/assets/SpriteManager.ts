@@ -8,10 +8,12 @@ namespace app.assets
 		private spriteSetsList:any = null;
 
 		private ready = false;
+		private readyCallback:() => void;
 
-		constructor(basePath)
+		constructor(basePath, readyCallback:() => void)
 		{
 			this.basePath = basePath;
+			this.readyCallback = readyCallback;
 
 			SpriteAsset.init();
 
@@ -71,6 +73,11 @@ namespace app.assets
 			}
 
 			this.ready = true;
+
+			if(this.readyCallback)
+			{
+				this.readyCallback();
+			}
 		}
 
 	}

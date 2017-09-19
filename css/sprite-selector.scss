@@ -2,32 +2,17 @@
 
 #sprite_selector{
 	width: 900px;
+	display: flex !important;
+	flex-direction: row;
+	flex-wrap: wrap;
 
-	.sprite_group{
-		margin-bottom: 10px;
-		min-width: 500px;
+	.sprite-group{
+		margin: 0 10px 10px 0;
 
-		.fold-icon:before{
-			content: "\f078"; // fa-chevron-down
-		}
-		&.collapsed .fold-icon:before{
-			content: "\f054"; // fa-chevron-right
-		}
-		&.collapsed .content{
-			height: 0;
-			display: none;
-		}
-	}
-
-	.heading{
 		cursor: pointer;
 		border: 1px solid $margin-border-colour;
 		border-radius: 3px;
 		padding: 5px;
-
-		.fold-icon{
-			margin-left: 10px;
-		}
 
 		&:hover{
 			background-color: $highlighted-soft-bg;
@@ -41,12 +26,14 @@
 		}
 	}
 
+	.content.collapsed{
+		height: 0;
+		display: none;
+	}
+
 	.content{
 		display: flex;
-		margin-left: 20px;
-		border-left: 1px dashed;
-		padding: 10px 0 0 10px;
-		border-left: 1px $margin-border-colour dashed;
+		margin-bottom: 10px;
 		overflow: hidden;
 		flex-wrap: wrap;
 	}

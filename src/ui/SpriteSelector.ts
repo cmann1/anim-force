@@ -8,7 +8,10 @@ namespace app.ui
 
 		private modal:jBox;
 		private $container;
+		private $content;
 		private callback:SpriteSelectCallback;
+
+		private scrollTop = 0;
 
 		constructor()
 		{
@@ -24,6 +27,7 @@ namespace app.ui
 			this.callback = callback;
 
 			this.modal.open();
+			setTimeout(() => {this.modal.position();}, 100);
 		}
 
 		hide()
@@ -35,7 +39,7 @@ namespace app.ui
 		{
 			this.$container = $('#sprite_selector');
 			this.$container
-				.on('click', '.heading', this.onHeadingClick)
+				.on('click', '.sprite-group', this.onHeadingClick)
 				.on('click', '.thumb-outer', this.onSpriteClick);
 
 			var spriteList = app.main.spriteManager.getSpriteList();
@@ -46,16 +50,11 @@ namespace app.ui
 				const spriteList = groupData['sprites'];
 
 				var $group = $(
-					`<div class="sprite_group collapsed">
-						<div class="heading">
-							<i class="fa fold-icon"></i>
-							<img src="assets/sprites/${groupName}/_group_thumb.png" alt="">
-							<span>${groupName.toTitleCase()}</span>
-						</div>
-						<div class="content"></div>
+					`<div class="sprite-group spr-tooltip" title="${groupName}">
+						<img src="assets/sprites/${groupName}/_group_thumb.png" alt="">
 					</div>`
 				);
-				var $content = $group.find('.content');
+				var $content = this.$content = $('<div class="content collapsed"></div>');
 
 				var thumbX = 0;
 				for(var spriteData of spriteList)
@@ -70,6 +69,7 @@ namespace app.ui
 				}
 
 				this.$container.append($group);
+				this.$container.append($content);
 			}
 
 			new jBox('Tooltip', {
@@ -80,14 +80,17 @@ namespace app.ui
 			this.modal = new jBox('Modal', {
 				title: '<i class="fa fa-image fa-2x"></i> Sprite Selector',
 				content: this.$container,
-				isolateScroll: false
+				isolateScroll: false,
+				onOpen: this.onDialogOpen,
+				onPosition: this.onDialogPosition,
+				onClose: this.onDialogClose,
 			});
 		}
 
 		protected onHeadingClick = (event) =>
 		{
-			$(event.currentTarget).parent().toggleClass('collapsed');
-			// this.modal.position();
+			$(event.currentTarget).next().toggleClass('collapsed');
+			this.modal.position();
 		};
 
 		protected onSpriteClick = (event) =>
@@ -102,6 +105,22 @@ namespace app.ui
 			}
 
 			this.hide();
+		};
+
+		protected onDialogOpen = (event) =>
+		{
+			this.modal.position();
+			this.modal.content.scrollTop(this.scrollTop);
+		};
+
+		protected onDialogPosition = (event) =>
+		{
+			this.modal.content.scrollTop(this.scrollTop);
+		};
+
+		protected onDialogClose = (event) =>
+		{
+			this.scrollTop = this.modal.content.scrollTop();
 		};
 
 	}

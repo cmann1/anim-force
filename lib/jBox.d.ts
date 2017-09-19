@@ -10,6 +10,8 @@ declare class jBox
 {
 
 	options:any;
+	wrapper:JQuery;
+	content:JQuery;
 
 	constructor(type:string, options?:any);
 

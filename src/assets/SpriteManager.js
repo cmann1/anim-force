@@ -3,7 +3,7 @@ var app;
     var assets;
     (function (assets) {
         var SpriteManager = (function () {
-            function SpriteManager(basePath) {
+            function SpriteManager(basePath, readyCallback) {
                 var _this = this;
                 this.spriteSets = {};
                 this.spriteSetsList = null;
@@ -26,8 +26,12 @@ var app;
                         };
                     }
                     _this.ready = true;
+                    if (_this.readyCallback) {
+                        _this.readyCallback();
+                    }
                 };
                 this.basePath = basePath;
+                this.readyCallback = readyCallback;
                 assets.SpriteAsset.init();
                 $.ajax({
                     dataType: 'json',

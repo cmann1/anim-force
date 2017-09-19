@@ -50,14 +50,22 @@ namespace app.model
 				ctx.rotate(this.worldRotation);
 			}
 
-			ctx.fillStyle = Config.control;
-			ctx.beginPath();
-			ctx.arc(0, 0, this.hitRadius, 0, Math.PI * 2);
-			ctx.moveTo(-w * scaleX, 0);
-			ctx.lineTo(w * scaleX, 0);
-			ctx.moveTo(0, -h * scaleY);
-			ctx.lineTo(0, h * scaleY);
-			ctx.stroke();
+			ctx.lineWidth = 3;
+			ctx.strokeStyle = Config.anchor;
+
+			for(var i = 0; i < 2; i++)
+			{
+				ctx.beginPath();
+				ctx.arc(0, 0, this.hitRadius * worldScale, 0, Math.PI * 2);
+				ctx.moveTo(-w * scaleX, 0);
+				ctx.lineTo(w * scaleX, 0);
+				ctx.moveTo(0, -h * scaleY);
+				ctx.lineTo(0, h * scaleY);
+				ctx.stroke();
+
+				ctx.lineWidth = 1.75;
+				ctx.strokeStyle = Config.control;
+			}
 
 			ctx.restore();
 
