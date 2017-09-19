@@ -41,6 +41,7 @@ var app;
     Config.activeProject = null;
     Config.activeProjectName = null;
     Config.loadLastProjectOnStartUp = true;
+    Config.appendNameOnCopy = false;
     // Viewport settings
     Config.showFps = true;
     Config.showControls = true;

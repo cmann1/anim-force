@@ -1,8 +1,9 @@
 interface String
 {
-	ucFirst(this:string): string;
-	toTitleCase(this:string): string;
-	toVarName(this:string): string;
+	ucFirst(this:string):string;
+	toTitleCase(this:string):string;
+	toVarName(this:string):string;
+	endsWith(suffix:string):boolean;
 }
 interface Math
 {
@@ -34,6 +35,12 @@ String.prototype.toVarName = function()
 		.replace(/\s+([a-z])/g, function(txt){ return txt.toUpperCase(); })
 		.replace(/\s+/g, '');
 };
+if(typeof String.prototype.endsWith !== 'function')
+{
+	String.prototype.endsWith = function(suffix) {
+		return this.indexOf(suffix, this.length - suffix.length) !== -1;
+	};
+}
 
 // public static double normalizeAngle(double a, double center) {
 // 	return a - TWO_PI * FastMath.floor((a + FastMath.PI - center) / TWO_PI);

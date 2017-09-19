@@ -238,7 +238,17 @@ var app;
             };
             Node.prototype.copyFrom = function (from, recursive) {
                 if (recursive === void 0) { recursive = true; }
-                this._name = from.name + '-copy';
+                var name = from.name;
+                if (app.Config.appendNameOnCopy) {
+                    var match = name.match(/(.+)-copy(\d+)?$/);
+                    if (!match)
+                        this._name = name + '-copy';
+                    else
+                        this._name = match[1] + '-copy' + (match[2] !== undefined ? parseInt(match[2]) + 1 : '2');
+                }
+                else {
+                    this._name = name;
+                }
                 this.offsetX = from.offsetX;
                 this.offsetY = from.offsetY;
                 this.rotation = from.rotation;

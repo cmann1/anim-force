@@ -336,7 +336,20 @@ namespace app.model
 
 		protected copyFrom(from:Node, recursive=true):Node
 		{
-			this._name = from.name + '-copy';
+
+			var name = from.name;
+			if(Config.appendNameOnCopy)
+			{
+				var match = name.match(/(.+)-copy(\d+)?$/);
+				if(!match)
+					this._name = name + '-copy';
+				else
+					this._name = match[1] + '-copy' + (match[2] !== undefined ? parseInt(match[2]) + 1 : '2');
+			}
+			else
+			{
+				this._name = name;
+			}
 
 			this.offsetX = from.offsetX;
 			this.offsetY = from.offsetY;

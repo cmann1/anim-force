@@ -20,6 +20,8 @@ namespace app
 		static activeProjectName:string = null;
 		static loadLastProjectOnStartUp = true;
 
+		static appendNameOnCopy = false;
+
 		// Viewport settings
 
 		static showFps = true;
