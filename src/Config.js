@@ -59,6 +59,7 @@ var app;
     Config.AABB = '#F00';
     Config.childrenAABB = '#0F0';
     Config.boneAABB = '#00F';
+    Config.anchor = '#ffc78c';
     Config.interactionTolerance = 2;
     Config.boneThickness = 3;
     Config.boneStretchHandleDist = 20;

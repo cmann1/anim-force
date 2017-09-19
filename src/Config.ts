@@ -45,6 +45,8 @@ namespace app
 		static childrenAABB = '#0F0';
 		static boneAABB = '#00F';
 
+		static anchor = '#ffc78c';
+
 		static interactionTolerance = 2;
 
 		static boneThickness = 3;

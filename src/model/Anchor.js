@@ -46,14 +46,19 @@ var app;
                 if (this.allowRotation) {
                     ctx.rotate(this.worldRotation);
                 }
-                ctx.fillStyle = app.Config.control;
-                ctx.beginPath();
-                ctx.arc(0, 0, this.hitRadius, 0, Math.PI * 2);
-                ctx.moveTo(-w * scaleX, 0);
-                ctx.lineTo(w * scaleX, 0);
-                ctx.moveTo(0, -h * scaleY);
-                ctx.lineTo(0, h * scaleY);
-                ctx.stroke();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = app.Config.anchor;
+                for (var i = 0; i < 2; i++) {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.hitRadius * worldScale, 0, Math.PI * 2);
+                    ctx.moveTo(-w * scaleX, 0);
+                    ctx.lineTo(w * scaleX, 0);
+                    ctx.moveTo(0, -h * scaleY);
+                    ctx.lineTo(0, h * scaleY);
+                    ctx.stroke();
+                    ctx.lineWidth = 1.75;
+                    ctx.strokeStyle = app.Config.control;
+                }
                 ctx.restore();
                 _super.prototype.drawControls.call(this, ctx, worldScale, viewport);
             };
