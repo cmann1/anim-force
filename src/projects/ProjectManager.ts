@@ -272,7 +272,8 @@ namespace app.projects
 					console.error(error);
 					callback && callback();
 				}
-			}).catch((error) => {
+			})
+			.catch((error) => {
 				App.notice(`ERROR: Unable to open project: <strong>${projectName}</strong>`, 'red');
 				console.error(error);
 				callback && callback();

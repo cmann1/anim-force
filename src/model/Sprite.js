@@ -69,17 +69,13 @@ var app;
             });
             Object.defineProperty(Sprite.prototype, "palette", {
                 get: function () {
-                    return this._palette;
+                    return this.getPalette();
                 },
                 set: function (value) {
-                    if (value < 0)
-                        value = 0;
-                    else if (value >= this.paletteCount)
-                        value = this.paletteCount - 1;
                     if (this._palette == value)
                         return;
                     this._palette = value;
-                    this.spritePaletteData = this.spriteData[this._palette];
+                    this.spritePaletteData = this.spriteData[this.getPalette()];
                     this.frame = this._frame;
                     this.frameData = this.spritePaletteData[this.getFrame()];
                     this.updateFrameData();
@@ -93,6 +89,9 @@ var app;
             };
             Sprite.prototype.getFrame = function () {
                 return mod(Math.round(this._frame), this.frameCount);
+            };
+            Sprite.prototype.getPalette = function () {
+                return mod(Math.round(this._palette), this.paletteCount);
             };
             Sprite.prototype.setFrame = function (newFrame) {
                 var oldFrame = this._frame;
@@ -113,7 +112,7 @@ var app;
                 this.frameCount = frameCount;
                 this.spriteData = spriteData;
                 this.palette = this._palette;
-                this.spritePaletteData = spriteData[this._palette];
+                this.spritePaletteData = spriteData[this.getPalette()];
                 this.frame = this._frame;
                 this.frameData = this.spritePaletteData[this.getFrame()];
                 this.updateFrameData();

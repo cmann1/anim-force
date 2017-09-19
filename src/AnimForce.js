@@ -1,6 +1,9 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
+ TODO: Multiple selection
+ TODO: Lock children
+ TODO: Reset bone stretch
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?

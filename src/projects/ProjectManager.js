@@ -343,7 +343,8 @@ var app;
                         console.error(error);
                         callback && callback();
                     }
-                }).catch(function (error) {
+                })
+                    .catch(function (error) {
                     app.App.notice("ERROR: Unable to open project: <strong>" + projectName + "</strong>", 'red');
                     console.error(error);
                     callback && callback();

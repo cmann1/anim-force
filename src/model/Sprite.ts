@@ -76,17 +76,14 @@ namespace app.model
 
 		get palette():number
 		{
-			return this._palette;
+			return this.getPalette();
 		}
 		set palette(value:number)
 		{
-			if(value < 0) value = 0;
-			else if(value >= this.paletteCount) value = this.paletteCount - 1;
-
 			if(this._palette == value) return;
 
 			this._palette = value;
-			this.spritePaletteData = this.spriteData[this._palette];
+			this.spritePaletteData = this.spriteData[this.getPalette()];
 			this.frame = this._frame;
 			this.frameData = this.spritePaletteData[this.getFrame()];
 
@@ -102,6 +99,11 @@ namespace app.model
 		public getFrame():number
 		{
 			return mod(Math.round(this._frame), this.frameCount);
+		}
+
+		public getPalette():number
+		{
+			return mod(Math.round(this._palette), this.paletteCount);
 		}
 
 		public setFrame(newFrame:number)
@@ -133,7 +135,7 @@ namespace app.model
 
 			this.spriteData = spriteData;
 			this.palette = this._palette;
-			this.spritePaletteData = spriteData[this._palette];
+			this.spritePaletteData = spriteData[this.getPalette()];
 			this.frame = this._frame;
 			this.frameData = this.spritePaletteData[this.getFrame()];
 
