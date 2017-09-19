@@ -370,6 +370,8 @@ namespace app.model
 				type: this.type,
 				name: this._name,
 				visible: this._visible,
+				layer: this.layer,
+				subLayer: this.subLayer,
 			};
 		}
 
@@ -378,6 +380,8 @@ namespace app.model
 			this.id = data.get('id');
 			this._name = data.get('name');
 			this._visible = data.get('visible');
+			this.layer = data.get('layer');
+			this.subLayer = data.get('subLayer');
 
 			return this;
 		}

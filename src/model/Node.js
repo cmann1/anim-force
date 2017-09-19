@@ -264,12 +264,16 @@ var app;
                     type: this.type,
                     name: this._name,
                     visible: this._visible,
+                    layer: this.layer,
+                    subLayer: this.subLayer,
                 };
             };
             Node.prototype.load = function (data) {
                 this.id = data.get('id');
                 this._name = data.get('name');
                 this._visible = data.get('visible');
+                this.layer = data.get('layer');
+                this.subLayer = data.get('subLayer');
                 return this;
             };
             Node.load = function (data) {
