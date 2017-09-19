@@ -36,15 +36,9 @@ var app;
                 }
                 var w = Math.abs(this.boxWidth * 0.5 * this.scaleX);
                 var h = Math.abs(this.boxHeight * 0.5 * this.scaleY);
-                if (this._allowRotation) {
-                    var local = app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-                    x = local.x;
-                    y = local.y;
-                }
-                else {
-                    x -= this.worldX;
-                    y -= this.worldY;
-                }
+                var local = app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+                x = local.x;
+                y = local.y;
                 if (((this.selected || this.hitRadius == -1) && x >= -w && x <= w && y >= -h && y <= h) ||
                     (this.hitRadius != -1 && x * x + y * y <= this.hitRadius * this.hitRadius)) {
                     result.x = x;

@@ -38,18 +38,9 @@ namespace app.model
 
 			const w = Math.abs(this.boxWidth * 0.5 * this.scaleX);
 			const h = Math.abs(this.boxHeight * 0.5 * this.scaleY);
-
-			if(this._allowRotation)
-			{
-				const local = MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
-				x = local.x;
-				y = local.y;
-			}
-			else
-			{
-				x -= this.worldX;
-				y -= this.worldY;
-			}
+			const local = MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
+			x = local.x;
+			y = local.y;
 
 			if(
 				((this.selected || this.hitRadius == -1) && x >= -w && x <= w && y >= -h && y <= h) ||
