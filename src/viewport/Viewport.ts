@@ -551,7 +551,7 @@ namespace app.viewport
 						{
 							this.model.increaseSelectedNodeLayer(
 								keyCode == Key.PageDown ? -1 : 1,
-								altKey
+								altKey, shiftKey
 							);
 							this.showMessage(`Layer: ${selectedNode.layer}.${selectedNode.subLayer}`);
 						}

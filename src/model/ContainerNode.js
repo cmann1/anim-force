@@ -149,6 +149,17 @@ var app;
                     ? this.parent ? this.parent.next(this) : this
                     : this.children[index];
             };
+            ContainerNode.prototype.increaseLayer = function (amount, subLayer, recurse) {
+                if (subLayer === void 0) { subLayer = false; }
+                if (recurse === void 0) { recurse = false; }
+                _super.prototype.increaseLayer.call(this, amount, subLayer, recurse);
+                if (recurse) {
+                    for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child.increaseLayer(amount, subLayer, recurse);
+                    }
+                }
+            };
             ContainerNode.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 if (this.childrenWorldAABB.contains(x, y)) {
                     for (var i = this.childCount - 1; i >= 0; i--) {

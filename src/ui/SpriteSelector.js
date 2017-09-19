@@ -7,6 +7,7 @@ var app;
                 var _this = this;
                 this.scrollTop = 0;
                 this.onHeadingClick = function (event) {
+                    _this.scrollTop = _this.modal.content.scrollTop();
                     $(event.currentTarget).next().toggleClass('collapsed');
                     _this.modal.position();
                 };

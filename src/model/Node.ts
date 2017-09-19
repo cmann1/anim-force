@@ -151,7 +151,7 @@ namespace app.model
 			return this.parent.next(this);
 		}
 
-		public increaseLayer(amount:number, subLayer=false)
+		public increaseLayer(amount:number, subLayer=false, recurse=false)
 		{
 			if(subLayer)
 			{

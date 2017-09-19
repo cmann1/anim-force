@@ -187,6 +187,19 @@ namespace app.model
 				: this.children[index];
 		}
 
+		public increaseLayer(amount:number, subLayer=false, recurse=false)
+		{
+			super.increaseLayer(amount, subLayer, recurse);
+
+			if(recurse)
+			{
+				for(var child of this.children)
+				{
+					child.increaseLayer(amount, subLayer, recurse);
+				}
+			}
+		}
+
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
 			if(this.childrenWorldAABB.contains(x, y))

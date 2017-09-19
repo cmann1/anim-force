@@ -1,8 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Sprite selector thumbnails are incorrect
- TODO: Recursive layer/sublayer inc/dec
  TODO: Multiple selection
  TODO: Lock children
  TODO: Reset bone stretch

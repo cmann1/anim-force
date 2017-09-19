@@ -89,6 +89,7 @@ namespace app.ui
 
 		protected onHeadingClick = (event) =>
 		{
+			this.scrollTop = this.modal.content.scrollTop();
 			$(event.currentTarget).next().toggleClass('collapsed');
 			this.modal.position();
 		};

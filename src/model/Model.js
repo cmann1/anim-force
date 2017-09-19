@@ -325,11 +325,12 @@ var app;
                 this.animationChange.dispatch(this.bindPose, new Event('updateAnimationList'));
                 this.animationChange.dispatch(anim, new Event('setAnimation'));
             };
-            Model.prototype.increaseSelectedNodeLayer = function (amount, subLayer) {
+            Model.prototype.increaseSelectedNodeLayer = function (amount, subLayer, recurse) {
                 if (subLayer === void 0) { subLayer = false; }
+                if (recurse === void 0) { recurse = false; }
                 if (!this.selectedNode)
                     return;
-                this.selectedNode.increaseLayer(amount, subLayer);
+                this.selectedNode.increaseLayer(amount, subLayer, recurse);
             };
             Object.defineProperty(Model.prototype, "mode", {
                 get: function () {

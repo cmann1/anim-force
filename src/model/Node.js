@@ -107,8 +107,9 @@ var app;
                     return this;
                 return this.parent.next(this);
             };
-            Node.prototype.increaseLayer = function (amount, subLayer) {
+            Node.prototype.increaseLayer = function (amount, subLayer, recurse) {
                 if (subLayer === void 0) { subLayer = false; }
+                if (recurse === void 0) { recurse = false; }
                 if (subLayer) {
                     this.subLayer += amount;
                     if (this.subLayer < 0)

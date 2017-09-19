@@ -412,11 +412,11 @@ namespace app.model
 			this.animationChange.dispatch(anim, new Event('setAnimation'));
 		}
 
-		public increaseSelectedNodeLayer(amount:number, subLayer=false)
+		public increaseSelectedNodeLayer(amount:number, subLayer=false, recurse=false)
 		{
 			if(!this.selectedNode) return;
 
-			this.selectedNode.increaseLayer(amount, subLayer);
+			this.selectedNode.increaseLayer(amount, subLayer, recurse);
 		}
 
 		public get mode():app.model.EditMode

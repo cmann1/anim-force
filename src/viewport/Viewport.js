@@ -385,7 +385,7 @@ var app;
                         }
                         else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
                             if (selectedNode) {
-                                this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey);
+                                this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey, shiftKey);
                                 this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
                             }
                         }
