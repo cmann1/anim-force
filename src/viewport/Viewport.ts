@@ -592,6 +592,18 @@ namespace app.viewport
 						if(selectedNode) selectedNode.resetRotation();
 					}
 
+					// Flip
+					else if(keyCode == Key.Y)
+					{
+						if(selectedNode)
+						{
+							if(shiftKey)
+								selectedNode.flipY();
+							else
+								selectedNode.flipX();
+						}
+					}
+
 					// TODO: REMOVE
 					else if(keyCode == Key.Enter)
 					{

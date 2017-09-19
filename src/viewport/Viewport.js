@@ -413,6 +413,14 @@ var app;
                             if (selectedNode)
                                 selectedNode.resetRotation();
                         }
+                        else if (keyCode == Key.Y) {
+                            if (selectedNode) {
+                                if (shiftKey)
+                                    selectedNode.flipY();
+                                else
+                                    selectedNode.flipX();
+                            }
+                        }
                         else if (keyCode == Key.Enter) {
                             app.main.showSpriteSelector(this.onSpritesSelect);
                         }

@@ -109,6 +109,9 @@ var app;
                 ctx.restore();
             };
             //
+            Bone.prototype.flipX = function () { };
+            Bone.prototype.flipY = function () { };
+            //
             Bone.prototype.getInstance = function () {
                 return new Bone();
             };

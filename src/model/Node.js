@@ -145,6 +145,14 @@ var app;
                     this.onPropertyChange('rotation');
                 }
             };
+            Node.prototype.flipX = function () {
+                this.scaleX = -this.scaleX;
+                this.onPropertyChange('scaleX');
+            };
+            Node.prototype.flipY = function () {
+                this.scaleY = -this.scaleY;
+                this.onPropertyChange('scaleY');
+            };
             //
             Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
                 return false;

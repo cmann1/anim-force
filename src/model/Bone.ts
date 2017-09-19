@@ -143,6 +143,12 @@ namespace app.model
 
 		//
 
+		public flipX() {}
+
+		public flipY() {}
+
+		//
+
 		protected getInstance():Bone
 		{
 			return new Bone();

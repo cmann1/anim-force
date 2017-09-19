@@ -197,6 +197,18 @@ namespace app.model
 			}
 		}
 
+		public flipX()
+		{
+			this.scaleX = -this.scaleX;
+			this.onPropertyChange('scaleX');
+		}
+
+		public flipY()
+		{
+			this.scaleY = -this.scaleY;
+			this.onPropertyChange('scaleY');
+		}
+
 		//
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
