@@ -316,7 +316,7 @@ var app;
                 var currentFrameX = currentFrame * frameWidth;
                 if (this.mode != EditMode.EDIT && currentFrameX <= right && currentFrameX + frameWidth >= left) {
                     ctx.fillStyle = this.scrubColour;
-                    ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, 0, 2, this.width);
+                    ctx.fillRect(currentFrameX + frameWidth * 0.5 - 1, top, 2, bottom - top);
                 }
                 ctx.restore();
                 this.requiresUpdate = false;

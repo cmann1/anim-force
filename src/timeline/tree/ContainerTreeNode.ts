@@ -27,6 +27,8 @@ namespace app.timeline.tree
 						.on('mousedown', this.onFoldIconMouseDown)
 						.on('click', this.onToggleChildren)
 				);
+
+				this.setOpen(!node.collapsed);
 			}
 
 			for(var child of this.node.children)

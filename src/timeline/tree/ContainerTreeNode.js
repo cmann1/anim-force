@@ -42,6 +42,7 @@ var app;
                         _this.$item.prepend(_this.$foldIcon = $('<i class="fa fold-icon"></i>')
                             .on('mousedown', _this.onFoldIconMouseDown)
                             .on('click', _this.onToggleChildren));
+                        _this.setOpen(!node.collapsed);
                     }
                     for (var _i = 0, _a = _this.node.children; _i < _a.length; _i++) {
                         var child = _a[_i];
