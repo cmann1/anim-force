@@ -510,7 +510,7 @@ namespace app.model
 			this.modeChange.dispatch(this, new Event('mode'));
 		}
 
-		protected nodeDrawOrder = (a:Node, b:Node):number =>
+		protected nodeDrawOrderSelect = (a:Node, b:Node):number =>
 		{
 			if(a.layer < b.layer || b == this.selectedNode)
 			{
@@ -526,6 +526,29 @@ namespace app.model
 				return -1;
 			}
 			if(a.subLayer > b.subLayer || a == this.selectedNode)
+			{
+				return 1;
+			}
+
+			return a.drawIndex - b.drawIndex;
+		};
+
+		protected nodeDrawOrder = (a:Node, b:Node):number =>
+		{
+			if(a.layer < b.layer)
+			{
+				return -1;
+			}
+			if(a.layer > b.layer)
+			{
+				return 1;
+			}
+
+			if(a.subLayer < b.subLayer)
+			{
+				return -1;
+			}
+			if(a.subLayer > b.subLayer)
 			{
 				return 1;
 			}

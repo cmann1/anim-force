@@ -40,7 +40,7 @@ var app;
                 _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
                 _this.animationChange = new EventDispatcher();
-                _this.nodeDrawOrder = function (a, b) {
+                _this.nodeDrawOrderSelect = function (a, b) {
                     if (a.layer < b.layer || b == _this.selectedNode) {
                         return -1;
                     }
@@ -51,6 +51,21 @@ var app;
                         return -1;
                     }
                     if (a.subLayer > b.subLayer || a == _this.selectedNode) {
+                        return 1;
+                    }
+                    return a.drawIndex - b.drawIndex;
+                };
+                _this.nodeDrawOrder = function (a, b) {
+                    if (a.layer < b.layer) {
+                        return -1;
+                    }
+                    if (a.layer > b.layer) {
+                        return 1;
+                    }
+                    if (a.subLayer < b.subLayer) {
+                        return -1;
+                    }
+                    if (a.subLayer > b.subLayer) {
                         return 1;
                     }
                     return a.drawIndex - b.drawIndex;
