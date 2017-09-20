@@ -113,6 +113,9 @@ var app;
             };
             Node.prototype.setSelected = function (selected) {
                 this.model.setSelectedNode(selected ? this : null);
+                if (this.highlighted) {
+                    this.model.setHighlightedNode(null);
+                }
             };
             Node.prototype.setHighlighted = function (highlighted) {
                 this.model.setHighlightedNode(highlighted ? this : null);

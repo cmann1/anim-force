@@ -146,16 +146,23 @@ var app;
             Sprite.prototype.drawControls = function (ctx, worldScale, viewport) {
                 if (!this.visible || !this.worldAABB.intersects(viewport))
                     return;
-                if (!this.selected && this.highlighted) {
+                if (this.selected || this.highlighted) {
                     ctx.save();
                     ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
                     ctx.rotate(this.worldRotation);
                     ctx.scale(this.scaleX * worldScale, this.scaleY * worldScale);
                     ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
-                    // ctx.globalAlpha = 0.75;
-                    // ctx.globalCompositeOperation = 'overlay';
-                    ctx.globalCompositeOperation = 'color-dodge';
+                    // Draw a normal and color-dodge so that dark sprites are still visible when highlighted
+                    // and other sprites are still brighter
+                    ctx.globalAlpha = 0.2;
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.drawImage(this.src, this.srcX, this.srcY, this.srcWidth, this.srcHeight, 0, 0, this.srcWidth, this.srcHeight);
+                    if (!this.selected) {
+                        ctx.globalAlpha = 0.5;
+                        // ctx.globalCompositeOperation = 'overlay';
+                        ctx.globalCompositeOperation = 'color-dodge';
+                        ctx.drawImage(this.src, this.srcX, this.srcY, this.srcWidth, this.srcHeight, 0, 0, this.srcWidth, this.srcHeight);
+                    }
                     ctx.restore();
                 }
                 _super.prototype.drawControls.call(this, ctx, worldScale, viewport);

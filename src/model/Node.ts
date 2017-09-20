@@ -157,6 +157,11 @@ namespace app.model
 		public setSelected(selected:boolean)
 		{
 			this.model.setSelectedNode(selected ? this : null);
+
+			if(this.highlighted)
+			{
+				this.model.setHighlightedNode(null);
+			}
 		}
 
 		public setHighlighted(highlighted:boolean)
