@@ -47,6 +47,8 @@ var app;
     Config.showControls = true;
     Config.drawAABB = false;
     Config.drawGrid = true;
+    Config.drawOutlines = true;
+    Config.pixelHitTest = true;
     // UI style
     Config.text = '#444';
     Config.font = 'monospace';

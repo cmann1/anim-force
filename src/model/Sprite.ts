@@ -19,7 +19,7 @@ namespace app.model
 		private _palette:number;
 		private _frame:number;
 
-		public src:HTMLImageElement = null;
+		public src:HTMLCanvasElement = null;
 		public srcX:number = 0;
 		public srcY:number = 0;
 		public srcWidth:number = 0;
@@ -128,7 +128,7 @@ namespace app.model
 			}
 		}
 
-		public setSrc(newSrc:HTMLImageElement, spriteData:SpriteFrame[][], paletteCount:number, frameCount:number)
+		public setSrc(newSrc:HTMLCanvasElement, spriteData:SpriteFrame[][], paletteCount:number, frameCount:number)
 		{
 			this.paletteCount = paletteCount;
 			this.frameCount = frameCount;
@@ -146,6 +146,31 @@ namespace app.model
 			this.onPropertyChange('src');
 		}
 
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction, recursive=true):boolean
+		{
+			if(super.hitTest(x, y, worldScaleFactor, result))
+			{
+				if(!this.selected && Config.pixelHitTest && this.asset && this.asset.ctx && result.part == 'base')
+				{
+					const pixel = this.asset.ctx.getImageData(
+						this.srcX + this.srcWidth * 0.5 + result.x / this.scaleX,
+						this.srcY + this.srcHeight * 0.5 + result.y / this.scaleY,
+						1, 1).data;
+
+					if(pixel[3] < 16)
+					{
+						result.node = null;
+						result.part = null;
+						return false;
+					}
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
 		{
 			ctx.save();
@@ -160,6 +185,32 @@ namespace app.model
 				0, 0, this.srcWidth, this.srcHeight);
 
 			ctx.restore();
+		}
+
+		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
+		{
+			if(!this.visible || !this.worldAABB.intersects(viewport)) return;
+
+			if(!this.selected && this.highlighted)
+			{
+				ctx.save();
+
+				ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
+				ctx.rotate(this.worldRotation);
+				ctx.scale(this.scaleX * worldScale, this.scaleY * worldScale);
+				ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
+
+				// ctx.globalAlpha = 0.75;
+				// ctx.globalCompositeOperation = 'overlay';
+				ctx.globalCompositeOperation = 'color-dodge';
+				ctx.drawImage(this.src,
+					this.srcX, this.srcY, this.srcWidth, this.srcHeight,
+					0, 0, this.srcWidth, this.srcHeight);
+
+				ctx.restore();
+			}
+
+			super.drawControls(ctx, worldScale, viewport);
 		}
 
 		//

@@ -132,7 +132,10 @@ namespace app
 			this.mouseX = event.pageX - offset.left;
 			this.mouseY = event.pageY - offset.top;
 
-			this.onMouseMove(event);
+			if(this.mousePrevX != this.mouseX || this.mousePrevY != this.mouseY)
+			{
+				this.onMouseMove(event);
+			}
 		};
 
 		protected onWindowContextMenu = (event) =>

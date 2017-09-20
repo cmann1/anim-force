@@ -15,6 +15,7 @@ var app;
         var Key = KeyCodes.Key;
         var Sprite = app.model.Sprite;
         var EditMode = app.model.EditMode;
+        var Anchor = app.model.Anchor;
         var Viewport = (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId, model) {
@@ -47,6 +48,8 @@ var app;
                 _this.mouseGrabY = NaN;
                 _this.stageAnchorX = NaN;
                 _this.stageAnchorY = NaN;
+                _this.selectMouseX = NaN;
+                _this.selectMouseY = NaN;
                 _this.interaction = new viewport.Interaction();
                 _this.highlightInteraction = new viewport.Interaction();
                 /*
@@ -66,6 +69,9 @@ var app;
                         _this.toggleFps(app.Config.showFps);
                     }
                 };
+                _this.onModelChange = function (model, event) {
+                    _this.requiresUpdate = true;
+                };
                 _this.onModelSelectionChange = function (model, event) {
                     _this.requiresUpdate = true;
                 };
@@ -82,7 +88,7 @@ var app;
                 _this.onModelModeChange = function (model, event) {
                     _this.mode = model.mode;
                     if (_this.mode == EditMode.PLAYBACK) {
-                        _this.interaction.success = false;
+                        _this.interaction.reset();
                     }
                 };
                 // TODO: REMOVE
@@ -270,6 +276,7 @@ var app;
                 this.model = model;
                 this.mode = model.mode;
                 model.setAnimationListeners(this.onAnimationChange);
+                model.change.on(this.onModelChange);
                 model.animationChange.on(this.onModelAnimationChange);
                 model.modeChange.on(this.onModelModeChange);
                 model.selectionChange.on(this.onModelSelectionChange);
@@ -413,6 +420,18 @@ var app;
                             if (selectedNode)
                                 selectedNode.resetRotation();
                         }
+                        else if (keyCode == Key.L && altKey) {
+                            if (selectedNode)
+                                selectedNode.resetLength();
+                        }
+                        else if (keyCode == Key.One || keyCode == Key.Two) {
+                            if (selectedNode && selectedNode instanceof Anchor) {
+                                if (keyCode == Key.One)
+                                    selectedNode.allowRotation = !selectedNode.allowRotation;
+                                else
+                                    selectedNode.allowScale = !selectedNode.allowScale;
+                            }
+                        }
                         else if (keyCode == Key.Y) {
                             if (selectedNode) {
                                 if (shiftKey)
@@ -430,7 +449,11 @@ var app;
             Viewport.prototype.commonKey = function (event) {
                 var keyCode = event.keyCode;
                 // if(this.mode == EditMode.PLAYBACK) return false;
-                if (keyCode == Key.H) {
+                if (keyCode == Key.Eight) {
+                    app.Config.set('drawOutlines', !app.Config.drawOutlines);
+                    this.requiresUpdate = true;
+                }
+                else if (keyCode == Key.Nine) {
                     app.Config.set('showControls', !app.Config.showControls);
                     this.requiresUpdate = true;
                 }
@@ -442,10 +465,11 @@ var app;
                 this.$canvas.focus();
                 if (event.button == 0) {
                     if (this.mode != EditMode.PLAYBACK) {
-                        this.interaction.success = false;
+                        this.interaction.reset();
                         if (this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction)) {
                             this.interaction.node.setSelected(true);
                             this.interaction.success = true;
+                            this.interaction.selectUnderneath = true;
                         }
                         else {
                             this.model.setSelectedNode(null);
@@ -463,7 +487,7 @@ var app;
             };
             Viewport.prototype.onMouseUp = function (event) {
                 if (event.button == 0) {
-                    this.interaction.success = false;
+                    this.interaction.reset();
                 }
                 else if (event.button == 2) {
                     if (!isNaN(this.mouseGrabX)) {
@@ -504,6 +528,7 @@ var app;
                     }
                 }
                 this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
+                this.interaction.selectUnderneath = false;
             };
             return Viewport;
         }(app.Canvas));

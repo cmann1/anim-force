@@ -26,6 +26,7 @@ var app;
                 this.subLayer = 19;
                 /// Rendering related
                 this.worldAABB = new AABB();
+                this.controlWorldAABB = new AABB();
                 this.worldX = 0;
                 this.worldY = 0;
                 this.worldRotation = 0;
@@ -33,6 +34,7 @@ var app;
                 this.selected = false;
                 this.highlighted = false;
                 this._visible = true;
+                this._locked = false;
                 this.id = Node.getNewId();
                 this._name = name;
             }
@@ -45,6 +47,29 @@ var app;
             Node.setCurrentId = function (id) {
                 Node.nextId = id;
             };
+            Node.prototype.setName = function (value) {
+                value = $.trim(value);
+                if (value == this._name)
+                    return;
+                this._name = value;
+                this.onPropertyChange('name');
+            };
+            Object.defineProperty(Node.prototype, "locked", {
+                get: function () {
+                    return this._locked;
+                },
+                set: function (value) {
+                    if (this._locked == value)
+                        return;
+                    this._locked = value;
+                    this.onPropertyChange('locked');
+                    if (value && this.selected) {
+                        this.setSelected(false);
+                    }
+                },
+                enumerable: true,
+                configurable: true
+            });
             Object.defineProperty(Node.prototype, "name", {
                 get: function () {
                     return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
@@ -55,13 +80,6 @@ var app;
                 enumerable: true,
                 configurable: true
             });
-            Node.prototype.setName = function (value) {
-                value = $.trim(value);
-                if (value == this._name)
-                    return;
-                this._name = value;
-                this.onPropertyChange('name');
-            };
             Object.defineProperty(Node.prototype, "visible", {
                 get: function () {
                     return this._visible;
@@ -75,6 +93,14 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            Node.prototype.setLocked = function (value, recurse) {
+                if (recurse === void 0) { recurse = false; }
+                this.locked = value;
+            };
+            Node.prototype.setVisible = function (value, recurse) {
+                if (recurse === void 0) { recurse = false; }
+                this.visible = value;
+            };
             Node.prototype.setModel = function (model) {
                 if (model == this.model)
                     return;
@@ -146,6 +172,8 @@ var app;
                     this.onPropertyChange('rotation');
                 }
             };
+            Node.prototype.resetLength = function () {
+            };
             Node.prototype.flipX = function () {
                 this.scaleX = -this.scaleX;
                 this.onPropertyChange('scaleX');
@@ -155,8 +183,17 @@ var app;
                 this.onPropertyChange('scaleY');
             };
             //
-            Node.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+            Node.prototype.hitTest = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
                 return false;
+            };
+            Node.prototype.hitTestControls = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                if (!this.visible || !this.controlWorldAABB.contains(x, y))
+                    return false;
+                if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
+                    return true;
+                }
             };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
                 if (this._visible && app.Config.showControls) {
@@ -222,6 +259,7 @@ var app;
                         continue;
                     handle.expand(this.worldAABB, worldScale);
                 }
+                this.controlWorldAABB.from(this.worldAABB);
             };
             Node.prototype.draw = function (ctx, worldScale) {
             };
@@ -275,6 +313,7 @@ var app;
                     type: this.type,
                     name: this._name,
                     visible: this._visible,
+                    locked: this._locked,
                     layer: this.layer,
                     subLayer: this.subLayer,
                 };
@@ -283,6 +322,7 @@ var app;
                 this.id = data.get('id');
                 this._name = data.get('name');
                 this._visible = data.get('visible');
+                this._locked = data.get('locked');
                 this.layer = data.get('layer');
                 this.subLayer = data.get('subLayer');
                 return this;

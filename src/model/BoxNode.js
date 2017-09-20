@@ -28,12 +28,8 @@ var app;
                 _this.allowScale = allowScale;
                 return _this;
             }
-            BoxNode.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (!this.visible || !this.worldAABB.contains(x, y))
-                    return false;
-                if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
-                    return true;
-                }
+            BoxNode.prototype.hitTest = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
                 var w = Math.abs(this.boxWidth * 0.5 * this.scaleX);
                 var h = Math.abs(this.boxHeight * 0.5 * this.scaleY);
                 var local = app.MathUtils.rotate(x - this.worldX, y - this.worldY, -this.worldRotation);
@@ -53,7 +49,7 @@ var app;
             BoxNode.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 var part = interaction.part;
                 if (part == 'scale' || part == 'scaleX' || part == 'scaleY') {
-                    var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
+                    var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, this._allowRotation ? -this.worldRotation : 0);
                     if (part == 'scale' && interaction.constrain) {
                         var scale = Math.sqrt(local.x * local.x + local.y * local.y) / interaction.offset;
                         this.scaleX = interaction.initialX * scale;
@@ -95,18 +91,21 @@ var app;
                     this.rotationHandle.x = x + local_1.x;
                     this.rotationHandle.y = y + local_1.y;
                 }
+                else {
+                    this.worldRotation = 0;
+                }
                 if (this._allowScale) {
                     this.scaleHandle.active = this.selected;
                     this.scaleXHandle.active = this.selected;
                     this.scaleYHandle.active = this.selected;
                     this.scaleHandle.rotation = this.scaleXHandle.rotation = this.scaleYHandle.rotation = this.worldRotation;
-                    var local = app.MathUtils.rotate(w, h, this.worldRotation);
+                    var local = app.MathUtils.rotate(w, h, this._allowRotation ? this.worldRotation : 0);
                     this.scaleHandle.x = x + local.x;
                     this.scaleHandle.y = y + local.y;
-                    local = app.MathUtils.rotate(w, 0, this.worldRotation);
+                    local = app.MathUtils.rotate(w, 0, this._allowRotation ? this.worldRotation : 0);
                     this.scaleXHandle.x = x + local.x;
                     this.scaleXHandle.y = y + local.y;
-                    local = app.MathUtils.rotate(0, h, this.worldRotation);
+                    local = app.MathUtils.rotate(0, h, this._allowRotation ? this.worldRotation : 0);
                     this.scaleYHandle.x = x + local.x;
                     this.scaleYHandle.y = y + local.y;
                 }
@@ -130,7 +129,7 @@ var app;
             BoxNode.prototype.drawControls = function (ctx, worldScale, viewport) {
                 if (!this.visible || !this.worldAABB.intersects(viewport))
                     return;
-                if (this.drawOutline || this.selected || this.highlighted) {
+                if ((this.drawOutline && app.Config.drawOutlines) || this.selected || this.highlighted) {
                     ctx.save();
                     var scaleX = this.scaleX * worldScale;
                     var scaleY = this.scaleY * worldScale;
@@ -162,12 +161,13 @@ var app;
                         return;
                     this._allowRotation = allow;
                     if (allow) {
-                        this.rotationHandle = new model.Handle(this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION, app.Config.handle);
+                        if (!this.rotationHandle)
+                            this.rotationHandle = new model.Handle(this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION, app.Config.handle);
                         this.handles.push(this.rotationHandle);
                     }
                     else if (this.rotationHandle) {
                         this.handles.splice(this.handles.indexOf(this.rotationHandle), 1);
-                        this.rotationHandle = null;
+                        this.rotation = 0;
                     }
                 },
                 enumerable: true,
@@ -182,20 +182,22 @@ var app;
                         return;
                     this._allowScale = allow;
                     if (allow) {
-                        this.scaleHandle = new model.Handle(this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.SCALE, app.Config.handle);
-                        this.scaleXHandle = new model.Handle(this, 'scaleX', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
-                        this.scaleYHandle = new model.Handle(this, 'scaleY', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
+                        if (!this.scaleHandle)
+                            this.scaleHandle = new model.Handle(this, 'scale', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.SCALE, app.Config.handle);
+                        if (!this.scaleXHandle)
+                            this.scaleXHandle = new model.Handle(this, 'scaleX', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
+                        if (!this.scaleYHandle)
+                            this.scaleYHandle = new model.Handle(this, 'scaleY', app.Config.handleRadius, model.HandleShape.SQUARE, model.HandleType.AXIS, app.Config.handle);
                         this.handles.push(this.scaleHandle);
                         this.handles.push(this.scaleXHandle);
                         this.handles.push(this.scaleYHandle);
                     }
                     else {
                         this.handles.splice(this.handles.indexOf(this.scaleHandle), 1);
-                        this.scaleHandle = null;
-                        this.handles.splice(this.handles.indexOf(this.scaleHandle), 1);
-                        this.scaleXHandle = null;
+                        this.handles.splice(this.handles.indexOf(this.scaleXHandle), 1);
                         this.handles.splice(this.handles.indexOf(this.scaleYHandle), 1);
-                        this.scaleYHandle = null;
+                        this.scaleX = 1;
+                        this.scaleY = 1;
                     }
                 },
                 enumerable: true,

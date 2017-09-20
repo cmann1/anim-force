@@ -27,7 +27,12 @@ namespace app.timeline.tree
 
 		protected canHide():boolean
 		{
-			return false;
+			return true;
+		}
+
+		protected canLock():boolean
+		{
+			return true;
 		}
 
 	}

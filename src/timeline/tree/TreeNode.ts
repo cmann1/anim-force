@@ -19,6 +19,8 @@ namespace app.timeline.tree
 		public $element:JQuery;
 		public $item:JQuery;
 		public $label:JQuery = null;
+		public $actionBar:JQuery = null;
+		public $lockButton:JQuery;
 		public $visibilityButton:JQuery;
 
 		constructor(tree:TimelineTree, nodeType:string, node:Node)
@@ -56,15 +58,14 @@ namespace app.timeline.tree
 
 			if(this.canHide())
 			{
-				this.$item.append('<div class="flex-filler min"></div>');
-				this.$item.append(
-					'<div class="actions">' +
-						'<i class="fa fa-eye btn btn-visible" data-action="visible"></i>' +
-					'</div>'
-				);
-				this.$visibilityButton = this.$item.find('.actions i.btn-visible');
-
+				this.$visibilityButton = this.addAction('eye', 'visible');
 				this.updateVisibilityIcon();
+			}
+
+			if(this.canLock())
+			{
+				this.$lockButton = this.addAction('unlock-alt', 'lock');
+				this.updateLockIcon();
 			}
 		}
 
@@ -153,16 +154,43 @@ namespace app.timeline.tree
 
 		//
 
+		protected addAction(icon:string, action:string):JQuery
+		{
+			if(!this.$actionBar)
+			{
+				this.$item.append('<div class="flex-filler min"></div>');
+				this.$item.append(this.$actionBar = $('<div class="actions"></div>'));
+			}
+
+			var $btn = $(`<i class="fa fa-${icon} btn btn-${action}" data-action="${action}"></i>`);
+			this.$actionBar.append($btn);
+
+			return $btn;
+		}
+
 		protected canHide():boolean
 		{
 			return true;
+		}
+
+		protected canLock():boolean
+		{
+			return true;
+		}
+
+		protected updateLockIcon()
+		{
+			if(!this.$lockButton) return;
+
+			this.$lockButton.toggleClass('fa-lock', this.node.locked);
+			this.$lockButton.toggleClass('fa-unlock-alt inactive', !this.node.locked);
 		}
 
 		protected updateVisibilityIcon()
 		{
 			if(!this.$visibilityButton) return;
 
-			this.$visibilityButton.toggleClass('fa-eye', this.node.visible);
+			this.$visibilityButton.toggleClass('fa-eye inactive', this.node.visible);
 			this.$visibilityButton.toggleClass('fa-eye-slash', !this.node.visible);
 		}
 
@@ -176,7 +204,12 @@ namespace app.timeline.tree
 
 			if(action == 'visible')
 			{
-				this.node.visible = !this.node.visible;
+				this.node.setVisible(!this.node.visible, event.shiftKey);
+			}
+
+			else if(action == 'lock')
+			{
+				this.node.setLocked(!this.node.locked, event.shiftKey);
 			}
 
 			event.preventDefault();
@@ -198,6 +231,10 @@ namespace app.timeline.tree
 			if(property == 'visible')
 			{
 				this.updateVisibilityIcon();
+			}
+			else if(property == 'locked')
+			{
+				this.updateLockIcon();
 			}
 			else if(property == 'name' || property == 'src')
 			{

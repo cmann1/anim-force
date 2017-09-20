@@ -160,22 +160,65 @@ var app;
                     }
                 }
             };
-            ContainerNode.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (this.childrenWorldAABB.contains(x, y)) {
+            ContainerNode.prototype.resetLength = function () {
+                if (this.model.mode != model_1.EditMode.EDIT) {
+                    if (this.stretchY != 1) {
+                        this.stretchY = 1;
+                        this.onPropertyChange('stretchY');
+                    }
+                }
+            };
+            ContainerNode.prototype.hitTest = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                if (recursive && this.childrenWorldAABB.contains(x, y)) {
                     for (var i = this.childCount - 1; i >= 0; i--) {
                         var child = this.children[i];
-                        if (child.hitTest(x, y, worldScaleFactor, result)) {
+                        if (!child.locked && child.hitTest(x, y, worldScaleFactor, result, true)) {
                             return true;
                         }
                     }
                 }
-                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
+                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result, recursive);
+            };
+            ContainerNode.prototype.hitTestControls = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                if (_super.prototype.hitTestControls.call(this, x, y, worldScaleFactor, result, recursive))
+                    return true;
+                if (recursive && this.childrenWorldAABB.contains(x, y)) {
+                    for (var i = this.childCount - 1; i >= 0; i--) {
+                        var child = this.children[i];
+                        if (!child.locked && child.hitTestControls(x, y, worldScaleFactor, result, true)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             };
             ContainerNode.prototype.setModel = function (model) {
                 _super.prototype.setModel.call(this, model);
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
                     child.setModel(model);
+                }
+            };
+            ContainerNode.prototype.setLocked = function (value, recurse) {
+                if (recurse === void 0) { recurse = false; }
+                this.locked = value;
+                if (recurse) {
+                    for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child.setLocked(value, true);
+                    }
+                }
+            };
+            ContainerNode.prototype.setVisible = function (value, recurse) {
+                if (recurse === void 0) { recurse = false; }
+                this.visible = value;
+                if (recurse) {
+                    for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child.setVisible(value, true);
+                    }
                 }
             };
             ContainerNode.prototype.clear = function () {
@@ -191,7 +234,7 @@ var app;
             //
             ContainerNode.prototype.copyFrom = function (from, recursive) {
                 if (recursive === void 0) { recursive = true; }
-                _super.prototype.copyFrom.call(this, from);
+                _super.prototype.copyFrom.call(this, from, recursive);
                 this.children = [];
                 this.childCount = recursive ? from.childCount : 0;
                 if (recursive) {

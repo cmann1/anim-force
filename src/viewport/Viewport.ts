@@ -12,6 +12,7 @@ namespace app.viewport
 	import Event = app.events.Event;
 	import EditMode = app.model.EditMode;
 	import LoadData = app.projects.LoadData;
+	import Anchor = app.model.Anchor;
 
 	export class Viewport extends app.Canvas
 	{
@@ -54,6 +55,8 @@ namespace app.viewport
 		protected mouseGrabY:number = NaN;
 		protected stageAnchorX:number = NaN;
 		protected stageAnchorY:number = NaN;
+		protected selectMouseX:number = NaN;
+		protected selectMouseY:number = NaN;
 
 		protected interaction:Interaction = new Interaction();
 		protected highlightInteraction:Interaction = new Interaction();
@@ -327,6 +330,7 @@ namespace app.viewport
 			this.mode = model.mode;
 
 			model.setAnimationListeners(this.onAnimationChange);
+			model.change.on(this.onModelChange);
 			model.animationChange.on(this.onModelAnimationChange);
 			model.modeChange.on(this.onModelModeChange);
 			model.selectionChange.on(this.onModelSelectionChange);
@@ -438,6 +442,11 @@ namespace app.viewport
 			}
 		};
 
+		protected onModelChange = (model:Model, event:Event) =>
+		{
+			this.requiresUpdate = true;
+		};
+
 		protected onModelSelectionChange = (model:Model, event:SelectionEvent) =>
 		{
 			this.requiresUpdate = true;
@@ -465,7 +474,7 @@ namespace app.viewport
 
 			if(this.mode == EditMode.PLAYBACK)
 			{
-				this.interaction.success = false;
+				this.interaction.reset();
 			}
 		};
 
@@ -591,6 +600,23 @@ namespace app.viewport
 					{
 						if(selectedNode) selectedNode.resetRotation();
 					}
+					// Reset length
+					else if(keyCode == Key.L && altKey)
+					{
+						if(selectedNode) selectedNode.resetLength();
+					}
+
+					// Toggle anchor rotation and scaling
+					else if(keyCode == Key.One || keyCode == Key.Two)
+					{
+						if(selectedNode && selectedNode instanceof Anchor)
+						{
+							if(keyCode == Key.One)
+								selectedNode.allowRotation = !selectedNode.allowRotation;
+							else
+								selectedNode.allowScale = !selectedNode.allowScale;
+						}
+					}
 
 					// Flip
 					else if(keyCode == Key.Y)
@@ -621,7 +647,13 @@ namespace app.viewport
 
 			// if(this.mode == EditMode.PLAYBACK) return false;
 
-			if(keyCode == Key.H)
+			if(keyCode == Key.Eight)
+			{
+				Config.set('drawOutlines', !Config.drawOutlines);
+				this.requiresUpdate = true;
+			}
+
+			else if(keyCode == Key.Nine)
 			{
 				Config.set('showControls', !Config.showControls);
 				this.requiresUpdate = true;
@@ -653,12 +685,13 @@ namespace app.viewport
 			{
 				if(this.mode != EditMode.PLAYBACK)
 				{
-					this.interaction.success = false;
+					this.interaction.reset();
 
 					if(this.model.hitTest(this.stageMouse.x, this.stageMouse.y, 1 / this.scale, this.interaction))
 					{
 						this.interaction.node.setSelected(true);
 						this.interaction.success = true;
+						this.interaction.selectUnderneath = true;
 					}
 					else
 					{
@@ -683,7 +716,7 @@ namespace app.viewport
 		{
 			if(event.button == 0)
 			{
-				this.interaction.success = false;
+				this.interaction.reset();
 			}
 
 			else if(event.button == 2)
@@ -745,6 +778,8 @@ namespace app.viewport
 			}
 
 			this.screenToStage(this.mouseX, this.mouseY, this.stageMouse);
+
+			this.interaction.selectUnderneath = false;
 		}
 
 		protected onZoomComplete = () =>

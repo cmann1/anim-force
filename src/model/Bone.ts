@@ -9,8 +9,6 @@ namespace app.model
 	{
 		public length:number = 100;
 
-		public boneWorldAABB:AABB = new AABB();
-
 		public baseHandle:Handle;
 		public endPointHandle:Handle;
 		public boneHandle:Handle;
@@ -33,19 +31,6 @@ namespace app.model
 			this.handles.push(this.endPointHandle);
 			this.handles.push(this.stretchHandle);
 			this.handles.push(this.lengthHandle);
-		}
-
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
-		{
-			if(this.visible && this.boneWorldAABB.contains(x, y))
-			{
-				if(this.hitTestHandles(x, y, worldScaleFactor, result))
-				{
-					return true;
-				}
-			}
-
-			return super.hitTest(x, y, worldScaleFactor, result);
 		}
 
 		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
@@ -87,7 +72,6 @@ namespace app.model
 			this.stretchHandle.rotation = this.lengthHandle.rotation = this.worldRotation;
 
 			this.prepareAABB(worldScale);
-			this.boneWorldAABB.from(this.worldAABB);
 
 			this.childrenWorldAABB.reset();
 
@@ -133,7 +117,7 @@ namespace app.model
 
 			if(Config.drawAABB)
 			{
-				this.boneWorldAABB.draw(ctx, worldScale, Config.boneAABB);
+				this.controlWorldAABB.draw(ctx, worldScale, Config.boneAABB);
 				this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
 				this.worldAABB.draw(ctx, worldScale);
 			}
@@ -142,6 +126,21 @@ namespace app.model
 		}
 
 		//
+
+		public resetLength()
+		{
+			if(this.model.mode == EditMode.EDIT)
+			{
+				if(this.length != 100)
+				{
+					this.length = 100;
+					this.onPropertyChange('length');
+					return;
+				}
+			}
+
+			super.resetLength();
+		}
 
 		public flipX() {}
 

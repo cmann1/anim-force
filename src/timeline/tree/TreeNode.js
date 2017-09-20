@@ -10,13 +10,17 @@ var app;
                     var _this = this;
                     this.parent = null;
                     this.$label = null;
+                    this.$actionBar = null;
                     /*
                      * Events
                      */
                     this.onActionButtonClick = function (event) {
                         var action = $(event.currentTarget).data('action');
                         if (action == 'visible') {
-                            _this.node.visible = !_this.node.visible;
+                            _this.node.setVisible(!_this.node.visible, event.shiftKey);
+                        }
+                        else if (action == 'lock') {
+                            _this.node.setLocked(!_this.node.locked, event.shiftKey);
                         }
                         event.preventDefault();
                         return false;
@@ -31,6 +35,9 @@ var app;
                         var property = event.type;
                         if (property == 'visible') {
                             _this.updateVisibilityIcon();
+                        }
+                        else if (property == 'locked') {
+                            _this.updateLockIcon();
                         }
                         else if (property == 'name' || property == 'src') {
                             _this.$label.text(_this.node.name);
@@ -81,12 +88,12 @@ var app;
                         return false;
                     });
                     if (this.canHide()) {
-                        this.$item.append('<div class="flex-filler min"></div>');
-                        this.$item.append('<div class="actions">' +
-                            '<i class="fa fa-eye btn btn-visible" data-action="visible"></i>' +
-                            '</div>');
-                        this.$visibilityButton = this.$item.find('.actions i.btn-visible');
+                        this.$visibilityButton = this.addAction('eye', 'visible');
                         this.updateVisibilityIcon();
+                    }
+                    if (this.canLock()) {
+                        this.$lockButton = this.addAction('unlock-alt', 'lock');
+                        this.updateLockIcon();
                     }
                 }
                 Object.defineProperty(TreeNode.prototype, "highlighted", {
@@ -155,13 +162,31 @@ var app;
                     return true;
                 };
                 //
+                TreeNode.prototype.addAction = function (icon, action) {
+                    if (!this.$actionBar) {
+                        this.$item.append('<div class="flex-filler min"></div>');
+                        this.$item.append(this.$actionBar = $('<div class="actions"></div>'));
+                    }
+                    var $btn = $("<i class=\"fa fa-" + icon + " btn btn-" + action + "\" data-action=\"" + action + "\"></i>");
+                    this.$actionBar.append($btn);
+                    return $btn;
+                };
                 TreeNode.prototype.canHide = function () {
                     return true;
+                };
+                TreeNode.prototype.canLock = function () {
+                    return true;
+                };
+                TreeNode.prototype.updateLockIcon = function () {
+                    if (!this.$lockButton)
+                        return;
+                    this.$lockButton.toggleClass('fa-lock', this.node.locked);
+                    this.$lockButton.toggleClass('fa-unlock-alt inactive', !this.node.locked);
                 };
                 TreeNode.prototype.updateVisibilityIcon = function () {
                     if (!this.$visibilityButton)
                         return;
-                    this.$visibilityButton.toggleClass('fa-eye', this.node.visible);
+                    this.$visibilityButton.toggleClass('fa-eye inactive', this.node.visible);
                     this.$visibilityButton.toggleClass('fa-eye-slash', !this.node.visible);
                 };
                 TreeNode.onRenameInputBlur = function (event) {

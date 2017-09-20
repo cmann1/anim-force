@@ -45,7 +45,9 @@ var app;
                 var offset = _this.$canvas.offset();
                 _this.mouseX = event.pageX - offset.left;
                 _this.mouseY = event.pageY - offset.top;
-                _this.onMouseMove(event);
+                if (_this.mousePrevX != _this.mouseX || _this.mousePrevY != _this.mouseY) {
+                    _this.onMouseMove(event);
+                }
             };
             this.onWindowContextMenu = function (event) {
                 if (_this.canvasRightMouseDown || event.target == _this.canvas) {

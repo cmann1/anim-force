@@ -200,22 +200,54 @@ namespace app.model
 			}
 		}
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		public resetLength()
 		{
-			if(this.childrenWorldAABB.contains(x, y))
+			if(this.model.mode != EditMode.EDIT)
+			{
+				if(this.stretchY != 1)
+				{
+					this.stretchY = 1;
+					this.onPropertyChange('stretchY');
+				}
+			}
+		}
+
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction, recursive=true):boolean
+		{
+			if(recursive && this.childrenWorldAABB.contains(x, y))
 			{
 				for(let i = this.childCount - 1; i >= 0; i--)
 				{
 					const child = this.children[i];
 
-					if(child.hitTest(x, y, worldScaleFactor, result))
+					if(!child.locked && child.hitTest(x, y, worldScaleFactor, result, true))
 					{
 						return true;
 					}
 				}
 			}
 
-			return super.hitTest(x, y, worldScaleFactor, result);
+			return super.hitTest(x, y, worldScaleFactor, result, recursive);
+		}
+
+		public hitTestControls(x:number, y:number, worldScaleFactor:number, result:Interaction, recursive=true):boolean
+		{
+			if(super.hitTestControls(x, y, worldScaleFactor, result, recursive)) return true;
+
+			if(recursive && this.childrenWorldAABB.contains(x, y))
+			{
+				for(let i = this.childCount - 1; i >= 0; i--)
+				{
+					const child = this.children[i];
+
+					if(!child.locked && child.hitTestControls(x, y, worldScaleFactor, result, true))
+					{
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		public setModel(model:Model)
@@ -225,6 +257,32 @@ namespace app.model
 			for(var child of this.children)
 			{
 				child.setModel(model);
+			}
+		}
+
+		public setLocked(value:boolean, recurse=false)
+		{
+			this.locked = value;
+
+			if(recurse)
+			{
+				for(var child of this.children)
+				{
+					child.setLocked(value, true);
+				}
+			}
+		}
+
+		public setVisible(value:boolean, recurse=false)
+		{
+			this.visible = value;
+
+			if(recurse)
+			{
+				for(var child of this.children)
+				{
+					child.setVisible(value, true);
+				}
 			}
 		}
 
@@ -247,7 +305,7 @@ namespace app.model
 
 		protected copyFrom(from:ContainerNode, recursive=true):ContainerNode
 		{
-			super.copyFrom(from);
+			super.copyFrom(from, recursive);
 
 			this.children = [];
 			this.childCount = recursive ? from.childCount : 0;

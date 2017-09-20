@@ -28,6 +28,9 @@ namespace app
 		static showControls = true;
 		static drawAABB = false;
 		static drawGrid = true;
+		static drawOutlines = true;
+
+		static pixelHitTest = true;
 
 		// UI style
 

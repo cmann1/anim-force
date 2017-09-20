@@ -119,6 +119,21 @@ var app;
                 this.src = newSrc;
                 this.onPropertyChange('src');
             };
+            Sprite.prototype.hitTest = function (x, y, worldScaleFactor, result, recursive) {
+                if (recursive === void 0) { recursive = true; }
+                if (_super.prototype.hitTest.call(this, x, y, worldScaleFactor, result)) {
+                    if (!this.selected && app.Config.pixelHitTest && this.asset && this.asset.ctx && result.part == 'base') {
+                        var pixel = this.asset.ctx.getImageData(this.srcX + this.srcWidth * 0.5 + result.x / this.scaleX, this.srcY + this.srcHeight * 0.5 + result.y / this.scaleY, 1, 1).data;
+                        if (pixel[3] < 16) {
+                            result.node = null;
+                            result.part = null;
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            };
             Sprite.prototype.draw = function (ctx, worldScale) {
                 ctx.save();
                 ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
@@ -127,6 +142,23 @@ var app;
                 ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
                 ctx.drawImage(this.src, this.srcX, this.srcY, this.srcWidth, this.srcHeight, 0, 0, this.srcWidth, this.srcHeight);
                 ctx.restore();
+            };
+            Sprite.prototype.drawControls = function (ctx, worldScale, viewport) {
+                if (!this.visible || !this.worldAABB.intersects(viewport))
+                    return;
+                if (!this.selected && this.highlighted) {
+                    ctx.save();
+                    ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
+                    ctx.rotate(this.worldRotation);
+                    ctx.scale(this.scaleX * worldScale, this.scaleY * worldScale);
+                    ctx.translate(-this.srcWidth * 0.5, -this.srcHeight * 0.5);
+                    // ctx.globalAlpha = 0.75;
+                    // ctx.globalCompositeOperation = 'overlay';
+                    ctx.globalCompositeOperation = 'color-dodge';
+                    ctx.drawImage(this.src, this.srcX, this.srcY, this.srcWidth, this.srcHeight, 0, 0, this.srcWidth, this.srcHeight);
+                    ctx.restore();
+                }
+                _super.prototype.drawControls.call(this, ctx, worldScale, viewport);
             };
             //
             Sprite.prototype.getInstance = function () {

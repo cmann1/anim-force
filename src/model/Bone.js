@@ -12,14 +12,12 @@ var app;
 (function (app) {
     var model;
     (function (model) {
-        var AABB = app.viewport.AABB;
         var Bone = (function (_super) {
             __extends(Bone, _super);
             function Bone(name) {
                 if (name === void 0) { name = null; }
                 var _this = _super.call(this, name) || this;
                 _this.length = 100;
-                _this.boneWorldAABB = new AABB();
                 _this.type = 'bone';
                 _this.baseHandle = new model.Handle(_this, 'base');
                 _this.endPointHandle = new model.Handle(_this, 'rotation', app.Config.handleRadius, model.HandleShape.CIRCLE, model.HandleType.ROTATION);
@@ -33,14 +31,6 @@ var app;
                 _this.handles.push(_this.lengthHandle);
                 return _this;
             }
-            Bone.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (this.visible && this.boneWorldAABB.contains(x, y)) {
-                    if (this.hitTestHandles(x, y, worldScaleFactor, result)) {
-                        return true;
-                    }
-                }
-                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
-            };
             Bone.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
                 if (interaction.part == 'stretchY') {
                     var local = app.MathUtils.rotate(x - this.worldX - interaction.x, y - this.worldY - interaction.y, -this.worldRotation);
@@ -69,7 +59,6 @@ var app;
                 this.stretchHandle.y = this.lengthHandle.y = this.worldEndPointY + Math.sin(this.worldRotation - Math.PI * 0.5) * (app.Config.boneStretchHandleDist / worldScale);
                 this.stretchHandle.rotation = this.lengthHandle.rotation = this.worldRotation;
                 this.prepareAABB(worldScale);
-                this.boneWorldAABB.from(this.worldAABB);
                 this.childrenWorldAABB.reset();
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
@@ -102,13 +91,23 @@ var app;
                 }
                 _super.prototype.drawControls.call(this, ctx, worldScale, viewport);
                 if (app.Config.drawAABB) {
-                    this.boneWorldAABB.draw(ctx, worldScale, app.Config.boneAABB);
+                    this.controlWorldAABB.draw(ctx, worldScale, app.Config.boneAABB);
                     this.childrenWorldAABB.draw(ctx, worldScale, app.Config.childrenAABB);
                     this.worldAABB.draw(ctx, worldScale);
                 }
                 ctx.restore();
             };
             //
+            Bone.prototype.resetLength = function () {
+                if (this.model.mode == model.EditMode.EDIT) {
+                    if (this.length != 100) {
+                        this.length = 100;
+                        this.onPropertyChange('length');
+                        return;
+                    }
+                }
+                _super.prototype.resetLength.call(this);
+            };
             Bone.prototype.flipX = function () { };
             Bone.prototype.flipY = function () { };
             //

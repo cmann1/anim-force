@@ -14,7 +14,6 @@ var app;
     (function (model) {
         var Anchor = (function (_super) {
             __extends(Anchor, _super);
-            // TODO: Provide an interface for enabling/disabling rotation and scale for anchor nodes
             function Anchor(name) {
                 if (name === void 0) { name = null; }
                 var _this = _super.call(this, name, false, false) || this;
@@ -22,6 +21,7 @@ var app;
                 _this.type = 'anchor';
                 _this.boxWidth = _this.boxHeight = 40;
                 _this.hitRadius = _this.boxWidth * 0.5 * 0.75;
+                _this.layer = _this.subLayer = 24;
                 return _this;
             }
             Object.defineProperty(Anchor.prototype, "name", {
@@ -34,6 +34,11 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            Anchor.prototype.increaseLayer = function (amount, subLayer, recurse) {
+                if (subLayer === void 0) { subLayer = false; }
+                if (recurse === void 0) { recurse = false; }
+            };
+            //
             Anchor.prototype.drawControls = function (ctx, worldScale, viewport) {
                 if (!this.visible || !this.worldAABB.intersects(viewport))
                     return;
@@ -67,6 +72,7 @@ var app;
                 return new Anchor();
             };
             Anchor.prototype.save = function () {
+                this.layer = this.subLayer = 24;
                 var data = _super.prototype.save.call(this);
                 data.allowRotation = this.allowRotation;
                 data.allowScale = this.allowScale;

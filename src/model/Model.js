@@ -37,6 +37,7 @@ var app;
                 _this.activeAnimation = null;
                 _this.animationList = null;
                 /// Events
+                _this.change = new EventDispatcher();
                 _this.modeChange = new EventDispatcher();
                 _this.selectionChange = new EventDispatcher();
                 _this.animationChange = new EventDispatcher();
@@ -70,6 +71,12 @@ var app;
                     }
                     return a.drawIndex - b.drawIndex;
                 };
+                /*
+                 * Events
+                 */
+                _this.onNodePropertyChange = function (sender, event) {
+                    _this.change.dispatch(_this, new Event('change'));
+                };
                 _this.model = _this;
                 _this.type = 'model';
                 _this.bindPose.active = true;
@@ -84,22 +91,25 @@ var app;
                 console.error('Use drawModel instead');
             };
             Model.prototype.drawModel = function (ctx, worldScale, viewport) {
-                this.drawList.clear();
-                var i = 0;
-                for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
-                    var child = _a[_i];
-                    child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
-                    if (i++ == 0) {
-                        this.childrenWorldAABB.from(child.worldAABB);
+                // Update draw list
+                {
+                    this.drawList.clear();
+                    var i = 0;
+                    for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+                        if (i++ == 0) {
+                            this.childrenWorldAABB.from(child.worldAABB);
+                        }
+                        else {
+                            this.childrenWorldAABB.union(child.worldAABB);
+                        }
                     }
-                    else {
-                        this.childrenWorldAABB.union(child.worldAABB);
-                    }
+                    this.worldAABB.from(this.childrenWorldAABB);
+                    this.drawList.list.sort(this.nodeDrawOrder);
                 }
-                this.worldAABB.from(this.childrenWorldAABB);
                 ctx.save();
                 var drawList = this.drawList.list;
-                drawList.sort(this.nodeDrawOrder);
                 for (var _b = 0, drawList_1 = drawList; _b < drawList_1.length; _b++) {
                     var node = drawList_1[_b];
                     node.draw(ctx, worldScale);
@@ -124,10 +134,29 @@ var app;
                 ctx.restore();
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
-                if (this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result)) {
+                if (this.hitTestControls(x, y, worldScaleFactor, result)) {
                     return true;
                 }
-                return _super.prototype.hitTest.call(this, x, y, worldScaleFactor, result);
+                var drawList = this.drawList.list;
+                var i = drawList.length - 1;
+                if (this.selectedNode) {
+                    if (result.selectUnderneath) {
+                        i = drawList.indexOf(this.selectedNode) - 1;
+                        if (i < 0)
+                            i = drawList.length - 1;
+                    }
+                    else if (this.selectedNode.hitTest(x, y, worldScaleFactor, result, false)) {
+                        return true;
+                    }
+                }
+                while (i >= 0) {
+                    var node = drawList[i--];
+                    if (!node.locked && node.hitTest(x, y, worldScaleFactor, result, false)) {
+                        return true;
+                    }
+                }
+                return false;
+                // return super.hitTest(x, y, worldScaleFactor, result);
             };
             Model.prototype.prepareChildren = function () {
                 this.drawList.clear();
@@ -272,9 +301,11 @@ var app;
             };
             Model.prototype.addNode = function (node) {
                 this.nodeMap[node.id] = node;
+                node.propertyChange.on(this.onNodePropertyChange);
             };
             Model.prototype.removeNode = function (node) {
                 delete this.nodeMap[node.id];
+                node.propertyChange.off(this.onNodePropertyChange);
             };
             Model.prototype.getNode = function (id) {
                 return this.nodeMap[id];
@@ -397,9 +428,6 @@ var app;
                 this._mode = value;
                 this.modeChange.dispatch(this, new Event('mode'));
             };
-            /*
-             * Events
-             */
             Model.prototype.onStructureChange = function (type, parent, source, index, other) {
                 this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
             };

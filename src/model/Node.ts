@@ -46,6 +46,7 @@ namespace app.model
 		/// Rendering related
 
 		public worldAABB:AABB = new AABB();
+		public controlWorldAABB:AABB = new AABB();
 		public worldX:number = 0;
 		public worldY:number = 0;
 		public worldRotation:number = 0;
@@ -54,6 +55,7 @@ namespace app.model
 		public selected:boolean = false;
 		public highlighted:boolean = false;
 		protected _visible:boolean = true;
+		protected _locked:boolean = false;
 
 		///
 
@@ -78,16 +80,6 @@ namespace app.model
 			Node.nextId = id;
 		}
 
-		get name():string
-		{
-			return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
-		}
-
-		set name(value:string)
-		{
-			this.setName(value);
-		}
-
 		protected setName(value:string)
 		{
 			value = $.trim(value);
@@ -96,6 +88,33 @@ namespace app.model
 
 			this._name = value;
 			this.onPropertyChange('name');
+		}
+
+		get locked():boolean
+		{
+			return this._locked;
+		}
+
+		set locked(value:boolean)
+		{
+			if(this._locked == value) return;
+			this._locked = value;
+			this.onPropertyChange('locked');
+
+			if(value && this.selected)
+			{
+				this.setSelected(false);
+			}
+		}
+
+		get name():string
+		{
+			return this._name || 'Untitled ' + this.type.toTitleCase() + ' ' + this.id;
+		}
+
+		set name(value:string)
+		{
+			this.setName(value);
 		}
 
 		get visible():boolean
@@ -108,6 +127,16 @@ namespace app.model
 			if(this._visible == value) return;
 			this._visible = value;
 			this.onPropertyChange('visible');
+		}
+
+		public setLocked(value:boolean, recurse=false)
+		{
+			this.locked = value;
+		}
+
+		public setVisible(value:boolean, recurse=false)
+		{
+			this.visible = value;
 		}
 
 		public setModel(model:Model)
@@ -197,6 +226,10 @@ namespace app.model
 			}
 		}
 
+		public resetLength()
+		{
+		}
+
 		public flipX()
 		{
 			this.scaleX = -this.scaleX;
@@ -211,9 +244,19 @@ namespace app.model
 
 		//
 
-		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
+		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction, recursive=true):boolean
 		{
 			return false;
+		}
+
+		public hitTestControls(x:number, y:number, worldScaleFactor:number, result:Interaction, recursive=true):boolean
+		{
+			if(!this.visible || !this.controlWorldAABB.contains(x, y)) return false;
+
+			if(this.hitTestHandles(x, y, worldScaleFactor, result))
+			{
+				return true;
+			}
 		}
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
@@ -309,6 +352,8 @@ namespace app.model
 
 				handle.expand(this.worldAABB, worldScale);
 			}
+
+			this.controlWorldAABB.from(this.worldAABB);
 		}
 
 		public draw(ctx:CanvasRenderingContext2D, worldScale:number)
@@ -383,6 +428,7 @@ namespace app.model
 				type: this.type,
 				name: this._name,
 				visible: this._visible,
+				locked: this._locked,
 				layer: this.layer,
 				subLayer: this.subLayer,
 			};
@@ -393,6 +439,7 @@ namespace app.model
 			this.id = data.get('id');
 			this._name = data.get('name');
 			this._visible = data.get('visible');
+			this._locked = data.get('locked');
 			this.layer = data.get('layer');
 			this.subLayer = data.get('subLayer');
 

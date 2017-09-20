@@ -1,10 +1,11 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
+ TODO: Layer palette for hiding and locking layers and sublayers
+ TODO: ? Layer and sprite colours
+
  TODO: Multiple selection
- TODO: Lock children
- TODO: Reset bone stretch
- TODO: Shift click vis icon to recurse
+ TODO: Groups
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?

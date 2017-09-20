@@ -11,8 +11,6 @@ namespace app.model
 	export class Anchor extends BoxNode
 	{
 
-		// TODO: Provide an interface for enabling/disabling rotation and scale for anchor nodes
-
 		constructor(name:string=null)
 		{
 			super(name, false, false);
@@ -22,6 +20,8 @@ namespace app.model
 			this.boxWidth = this.boxHeight = 40;
 
 			this.hitRadius = this.boxWidth * 0.5 * 0.75;
+
+			this.layer = this.subLayer = 24;
 		}
 
 		get name():string
@@ -32,6 +32,13 @@ namespace app.model
 		{
 			this.setName(value);
 		}
+
+		public increaseLayer(amount:number, subLayer=false, recurse=false)
+		{
+
+		}
+
+		//
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
@@ -81,6 +88,8 @@ namespace app.model
 
 		public save():any
 		{
+			this.layer = this.subLayer = 24;
+
 			var data = super.save();
 
 			data.allowRotation = this.allowRotation;

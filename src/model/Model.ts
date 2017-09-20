@@ -9,6 +9,7 @@ namespace app.model
 	import Animation = app.anim.Animation;
 	import Event = app.events.Event;
 	import LoadData = app.projects.LoadData;
+	import PropertyChangeEvent = app.model.events.PropertyChangeEvent;
 
 	export enum EditMode
 	{
@@ -36,6 +37,7 @@ namespace app.model
 
 		/// Events
 
+		public change:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public modeChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public selectionChange:EventDispatcher<Model> = new EventDispatcher<Model>();
 		public animationChange:EventDispatcher<Animation> = new EventDispatcher<Animation>();
@@ -64,28 +66,31 @@ namespace app.model
 
 		public drawModel(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
-			this.drawList.clear();
-
-			var i = 0;
-			for(var child of this.children)
+			// Update draw list
 			{
-				child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
+				this.drawList.clear();
+				var i = 0;
+				for(var child of this.children)
+				{
+					child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
 
-				if(i++ == 0)
-				{
-					this.childrenWorldAABB.from(child.worldAABB);
+					if(i++ == 0)
+					{
+						this.childrenWorldAABB.from(child.worldAABB);
+					}
+					else
+					{
+						this.childrenWorldAABB.union(child.worldAABB);
+					}
 				}
-				else
-				{
-					this.childrenWorldAABB.union(child.worldAABB);
-				}
+
+				this.worldAABB.from(this.childrenWorldAABB);
+
+				this.drawList.list.sort(this.nodeDrawOrder);
 			}
 
-			this.worldAABB.from(this.childrenWorldAABB);
-
 			ctx.save();
-			var drawList:Node[] = this.drawList.list;
-			drawList.sort(this.nodeDrawOrder);
+			const drawList:Node[] = this.drawList.list;
 			for(var node of drawList)
 			{
 				node.draw(ctx, worldScale);
@@ -121,12 +126,39 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(this.selectedNode && this.selectedNode.hitTest(x, y, worldScaleFactor, result))
+			if(this.hitTestControls(x ,y, worldScaleFactor, result))
 			{
 				return true;
 			}
 
-			return super.hitTest(x, y, worldScaleFactor, result);
+			const drawList = this.drawList.list;
+			var i = drawList.length - 1;
+
+			if(this.selectedNode)
+			{
+				if(result.selectUnderneath)
+				{
+					i = drawList.indexOf(this.selectedNode) - 1;
+					if(i < 0) i = drawList.length - 1;
+				}
+				else if(this.selectedNode.hitTest(x, y, worldScaleFactor, result, false))
+				{
+					return true;
+				}
+			}
+
+
+			while(i >= 0)
+			{
+				const node = drawList[i--];
+				if(!node.locked && node.hitTest(x ,y, worldScaleFactor, result, false))
+				{
+					return true;
+				}
+			}
+
+			return false;
+			// return super.hitTest(x, y, worldScaleFactor, result);
 		}
 
 		public prepareChildren()
@@ -341,11 +373,13 @@ namespace app.model
 		public addNode(node:Node)
 		{
 			this.nodeMap[node.id] = node;
+			node.propertyChange.on(this.onNodePropertyChange);
 		}
 
 		public removeNode(node:Node)
 		{
 			delete this.nodeMap[node.id];
+			node.propertyChange.off(this.onNodePropertyChange);
 		}
 
 		public getNode(id):Node
@@ -559,6 +593,11 @@ namespace app.model
 		/*
 		 * Events
 		 */
+
+		protected onNodePropertyChange = (sender:Node, event:PropertyChangeEvent) =>
+		{
+			this.change.dispatch(this, new Event('change'));
+		};
 
 		public onStructureChange(type:string, parent:ContainerNode, source:Node, index:number, other:Node)
 		{

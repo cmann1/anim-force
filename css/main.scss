@@ -109,6 +109,9 @@ i.btn.fa:active:before{
 	position: relative;
 	top: 1px;
 }
+i.btn.inactive::before{
+	opacity: 0.5;
+}
 div.disabled
 {
 	color: $disabled-color !important;

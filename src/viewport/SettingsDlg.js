@@ -8,8 +8,10 @@ var app;
                 this.onDlgOpen = function (event) {
                     _this.$showFps.prop('checked', app.Config.showFps);
                     _this.$showControls.prop('checked', app.Config.showControls);
+                    _this.$drawOutlines.prop('checked', app.Config.drawOutlines);
                     _this.$drawAABB.prop('checked', app.Config.drawAABB);
                     _this.$drawGrid.prop('checked', app.Config.drawGrid);
+                    _this.$pixelHitTest.prop('checked', app.Config.pixelHitTest);
                 };
                 this.onInputChange = function (event) {
                     var type = event.target.id.replace('view-prop-', '');
@@ -21,8 +23,10 @@ var app;
                 this.$dlg = $('#viewport-properties-dlg');
                 this.$showFps = this.$dlg.find('#view-prop-showFps');
                 this.$showControls = this.$dlg.find('#view-prop-showControls');
+                this.$drawOutlines = this.$dlg.find('#view-prop-drawOutlines');
                 this.$drawAABB = this.$dlg.find('#view-prop-drawAABB');
                 this.$drawGrid = this.$dlg.find('#view-prop-drawGrid');
+                this.$pixelHitTest = this.$dlg.find('#view-prop-pixelHitTest');
                 this.$dlg.find('input').on('change', this.onInputChange);
                 this.dlg = new jBox('Modal', {
                     title: 'Viewport Settings',

@@ -29,7 +29,10 @@ var app;
                     return _super.prototype.handleDragOver.call(this, treeNode, x, y, true, true);
                 };
                 RootTreeNode.prototype.canHide = function () {
-                    return false;
+                    return true;
+                };
+                RootTreeNode.prototype.canLock = function () {
+                    return true;
                 };
                 return RootTreeNode;
             }(tree_1.ContainerTreeNode));

@@ -11,7 +11,11 @@ var app;
                 this.initialY = 0;
                 this.constrain = false;
                 this.success = false;
+                this.selectUnderneath = false;
             }
+            Interaction.prototype.reset = function () {
+                this.success = false;
+            };
             return Interaction;
         }());
         viewport.Interaction = Interaction;

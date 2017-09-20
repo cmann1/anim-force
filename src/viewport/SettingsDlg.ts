@@ -8,8 +8,10 @@ namespace app.viewport
 		private dlg:jBox;
 		private $showFps:JQuery;
 		private $showControls:JQuery;
+		private $drawOutlines:JQuery;
 		private $drawAABB:JQuery;
 		private $drawGrid:JQuery;
+		private $pixelHitTest:JQuery;
 
 		constructor(viewport:Viewport, $viewportContainer)
 		{
@@ -20,8 +22,10 @@ namespace app.viewport
 			this.$dlg = $('#viewport-properties-dlg');
 			this.$showFps = this.$dlg.find('#view-prop-showFps');
 			this.$showControls = this.$dlg.find('#view-prop-showControls');
+			this.$drawOutlines = this.$dlg.find('#view-prop-drawOutlines');
 			this.$drawAABB = this.$dlg.find('#view-prop-drawAABB');
 			this.$drawGrid = this.$dlg.find('#view-prop-drawGrid');
+			this.$pixelHitTest = this.$dlg.find('#view-prop-pixelHitTest');
 			this.$dlg.find('input').on('change', this.onInputChange);
 			this.dlg = new jBox('Modal', {
 				title: 'Viewport Settings',
@@ -49,8 +53,10 @@ namespace app.viewport
 		{
 			this.$showFps.prop('checked', Config.showFps);
 			this.$showControls.prop('checked', Config.showControls);
+			this.$drawOutlines.prop('checked', Config.drawOutlines);
 			this.$drawAABB.prop('checked', Config.drawAABB);
 			this.$drawGrid.prop('checked', Config.drawGrid);
+			this.$pixelHitTest.prop('checked', Config.pixelHitTest);
 		};
 
 		private onInputChange = (event) =>

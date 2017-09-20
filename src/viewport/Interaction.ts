@@ -15,6 +15,12 @@ namespace app.viewport
 		public part:string;
 		public constrain:boolean = false;
 		public success:boolean = false;
+		public selectUnderneath = false;
+
+		public reset()
+		{
+			this.success = false;
+		}
 
 	}
 
