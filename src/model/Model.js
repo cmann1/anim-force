@@ -428,6 +428,8 @@ var app;
                 this._mode = value;
                 this.modeChange.dispatch(this, new Event('mode'));
             };
+            Model.prototype.updateLayer = function () {
+            };
             Model.prototype.onStructureChange = function (type, parent, source, index, other) {
                 this.structureChange.dispatch(this, new StructureChangeEvent(type, parent, source, index, other));
             };

@@ -61,7 +61,7 @@ var app;
                     _this.onCanvasMouseMove(event, true);
                 }
             };
-            this.onResize = function () {
+            this.onResize = function (mutations) {
                 _this.updateCanvasSize();
             };
             this.canvas = document.getElementById(elementId);
@@ -83,6 +83,7 @@ var app;
                 .on('mouseup', this.onCanvasMouseUp)
                 .on('contextmenu', this.onWindowContextMenu)
                 .focus();
+            new ResizeSensor(this.$container[0], this.onResize, app.main.requestValidation);
         }
         Canvas.prototype.focus = function () {
             this.$canvas.focus();

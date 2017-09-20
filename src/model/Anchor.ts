@@ -21,7 +21,8 @@ namespace app.model
 
 			this.hitRadius = this.boxWidth * 0.5 * 0.75;
 
-			this.layer = this.subLayer = 24;
+			this.layer = this.subLayer = MAX_LAYER + 1;
+			this.updateLayer();
 		}
 
 		get name():string
@@ -88,7 +89,7 @@ namespace app.model
 
 		public save():any
 		{
-			this.layer = this.subLayer = 24;
+			this.layer = this.subLayer = MAX_LAYER;
 
 			var data = super.save();
 

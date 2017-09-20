@@ -544,6 +544,11 @@ namespace app.model
 			this.modeChange.dispatch(this, new Event('mode'));
 		}
 
+		protected updateLayer()
+		{
+
+		}
+
 		protected nodeDrawOrderSelect = (a:Node, b:Node):number =>
 		{
 			if(a.layer < b.layer || b == this.selectedNode)

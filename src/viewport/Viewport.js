@@ -52,6 +52,7 @@ var app;
                 _this.selectMouseY = NaN;
                 _this.interaction = new viewport.Interaction();
                 _this.highlightInteraction = new viewport.Interaction();
+                _this.layers = [];
                 /*
                  * Model Events
                  */
@@ -103,9 +104,12 @@ var app;
                     _this.stageAnchorX = NaN;
                     _this.stageAnchorY = NaN;
                 };
+                for (var layer = 0; layer <= MAX_LAYER; layer++) {
+                    for (var subLayer = 0; subLayer <= MAX_SUB_LAYER; subLayer++) {
+                        _this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new viewport.Layer();
+                    }
+                }
                 _this.setModel(model);
-                _this.$container.on('resize', _this.onResize);
-                _this.$container.parent().on('resize', _this.onResize);
                 _this.$message = $('<div class="viewport-message"></div>');
                 _this.$container.append(_this.$message);
                 _this.$message.hide();
@@ -117,6 +121,14 @@ var app;
                 app.Config.change.on(_this.onConfigChange);
                 return _this;
             }
+            Viewport.prototype.getLayer = function (layer, subLayer) {
+                var index = ((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF);
+                var layerInstance = this.layers[index];
+                if (!layerInstance) {
+                    layerInstance = this.layers[index] = new viewport.Layer();
+                }
+                return layerInstance;
+            };
             //
             Viewport.prototype.step = function (deltaTime, timestamp) {
                 if (this.mode == EditMode.PLAYBACK) {

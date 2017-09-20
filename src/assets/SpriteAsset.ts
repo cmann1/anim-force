@@ -96,15 +96,21 @@ namespace app.assets
 
 		protected load(img:HTMLImageElement=null)
 		{
+			if(img)
+			{
+				this.sheet = <HTMLCanvasElement> document.createElement('canvas');
+				this.sheet.width = img.width;
+				this.sheet.height = img.height;
+				this.ctx = this.sheet.getContext('2d');
+				this.ctx.drawImage(img, 0, 0, img.width, img.height);
+			}
+
 			if(--this.loaded == 0)
 			{
-				if(img)
+
+				if(!this.sheet)
 				{
-					this.sheet = <HTMLCanvasElement> document.createElement('canvas');
-					this.sheet.width = img.width;
-					this.sheet.height = img.height;
-					this.ctx = this.sheet.getContext('2d');
-					this.ctx.drawImage(img, 0, 0, img.width, img.height);
+					throw new Error('Image not loaded');
 				}
 
 				for(var sprite of this.queuedSprites)

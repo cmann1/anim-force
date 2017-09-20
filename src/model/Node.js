@@ -6,8 +6,6 @@ var app;
         var StructureChangeEvent = model_1.events.StructureChangeEvent;
         var PropertyChangeEvent = model_1.events.PropertyChangeEvent;
         var AABB = app.viewport.AABB;
-        var MAX_LAYER = 22;
-        var MAX_SUB_LAYER = 24;
         var Node = (function () {
             ///
             function Node(name) {
@@ -37,6 +35,7 @@ var app;
                 this._locked = false;
                 this.id = Node.getNewId();
                 this._name = name;
+                this.updateLayer();
             }
             Node.getNewId = function () {
                 return Node.autoId ? Node.nextId++ : Node.nextId;
@@ -53,6 +52,10 @@ var app;
                     return;
                 this._name = value;
                 this.onPropertyChange('name');
+            };
+            Node.prototype.updateLayer = function () {
+                var index = ((this.layer & 0xFFFF) << 16) | (this.subLayer & 0xFFFF);
+                this.currentLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
             };
             Object.defineProperty(Node.prototype, "locked", {
                 get: function () {
@@ -153,6 +156,7 @@ var app;
                     else if (this.layer > MAX_LAYER)
                         this.layer = MAX_LAYER;
                 }
+                this.updateLayer();
             };
             Node.prototype.resetOffset = function () {
                 if (this.offsetX != 0 || this.offsetY != 0) {
@@ -280,8 +284,8 @@ var app;
             };
             Node.prototype.copyFrom = function (from, recursive) {
                 if (recursive === void 0) { recursive = true; }
-                var name = from.name;
-                if (app.Config.appendNameOnCopy) {
+                var name = from._name;
+                if (app.Config.appendNameOnCopy && name != null) {
                     var match = name.match(/(.+)-copy(\d+)?$/);
                     if (!match)
                         this._name = name + '-copy';

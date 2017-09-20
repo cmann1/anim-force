@@ -79,11 +79,6 @@ namespace app.timeline
 
 			this.$canvas .on('dblclick', this.onCanvasDblClick);
 
-			this.$container.on('resize', this.onResize);
-			this.$container.parent().on('resize', this.onResize);
-			this.$container.parent().parent().parent().on('resize', this.onResize);
-			app.$window.on('resize', this.onResize);
-
 			this.toolbar = new TimelineToolbar(model, this, this.$container.parent().find('#timeline-toolbar'));
 
 			this.headerGrad = this.ctx.createLinearGradient(0, 0, 0, Config.nodeHeight);

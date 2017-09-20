@@ -21,7 +21,8 @@ var app;
                 _this.type = 'anchor';
                 _this.boxWidth = _this.boxHeight = 40;
                 _this.hitRadius = _this.boxWidth * 0.5 * 0.75;
-                _this.layer = _this.subLayer = 24;
+                _this.layer = _this.subLayer = MAX_LAYER + 1;
+                _this.updateLayer();
                 return _this;
             }
             Object.defineProperty(Anchor.prototype, "name", {
@@ -72,7 +73,7 @@ var app;
                 return new Anchor();
             };
             Anchor.prototype.save = function () {
-                this.layer = this.subLayer = 24;
+                this.layer = this.subLayer = MAX_LAYER;
                 var data = _super.prototype.save.call(this);
                 data.allowRotation = this.allowRotation;
                 data.allowScale = this.allowScale;

@@ -4,8 +4,8 @@
  TODO: Layer palette for hiding and locking layers and sublayers
  TODO: - Store a Layer instance for each node (updating when the node's layer/sublayer changes)
 
- TODO: Multiple selection
- TODO: Groups
+ TODO: ?Multiple selection
+ TODO: ?Groups
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?
@@ -37,6 +37,8 @@
  TODO: Help
  TODO: - List of shortcut keys
  */
+var MAX_LAYER = 22;
+var MAX_SUB_LAYER = 24;
 var app;
 (function (app) {
     var Ticker = app.ticker.Ticker;
@@ -51,7 +53,19 @@ var app;
             this.model = new Model(); // A blank model so things work before a project is loaded
             this.spriteSelector = null;
             this.loadCount = 0;
-            this.runningTime = 0;
+            this.validationId = 0;
+            this.validationQueue = [];
+            this.validationQueueSize = 0;
+            //
+            this.step = function (deltaTime, timestamp) {
+                for (var i = 0; i < _this.validationQueueSize; i++) {
+                    _this.validationQueue[i]();
+                }
+                _this.validationQueueSize = 0;
+                _this.viewport.step(deltaTime, timestamp);
+                _this.timeline.step(deltaTime, timestamp);
+                _this.draw();
+            };
             this.onLoadQueue = function () {
                 if (!_this.projectManager && _this._spriteManager.isReady() && app.Config.isLoaded && app.$body) {
                     _this.loadCount++;
@@ -68,16 +82,15 @@ var app;
                     _this.ticker.start();
                 }
             };
+            this.requestValidation = function (callback) {
+                _this.validationQueue[_this.validationQueueSize++] = callback;
+                return _this.validationId++;
+            };
             /*
             * Events
             */
             this.onProjectManagerReady = function () {
                 _this.onLoadQueue();
-            };
-            this.onTick = function (deltaTime, timestamp) {
-                _this.runningTime++;
-                _this.step(deltaTime, timestamp);
-                _this.draw();
             };
             this.onWindowLoad = function () {
                 app.$body = $(document.body);
@@ -88,7 +101,6 @@ var app;
             this.onWindowResize = function () {
                 _this.viewport.updateCanvasSize();
                 _this.step(0, 0);
-                _this.draw();
             };
             this.onWindowBlur = function () {
                 _this.ticker.stop();
@@ -98,7 +110,7 @@ var app;
             };
             App.instance = this;
             createjs.Ticker.timingMode = createjs.Ticker.RAF;
-            this.ticker = new Ticker(this.onTick);
+            this.ticker = new Ticker(this.step);
             this.loadCount++;
             this._spriteManager = new SpriteManager('assets/sprites/', this.onLoadQueue);
             this.loadCount++;
@@ -120,11 +132,6 @@ var app;
                 autoClose: time,
                 attributes: { x: 'left', y: 'top' }
             });
-        };
-        //
-        App.prototype.step = function (deltaTime, timestamp) {
-            this.viewport.step(deltaTime, timestamp);
-            this.timeline.step(deltaTime, timestamp);
         };
         App.prototype.draw = function () {
             this.viewport.draw();

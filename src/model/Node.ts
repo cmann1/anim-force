@@ -7,9 +7,7 @@ namespace app.model
 	import AABB = app.viewport.AABB;
 	import Interaction = app.viewport.Interaction;
 	import LoadData = app.projects.LoadData;
-
-	const MAX_LAYER = 22;
-	const MAX_SUB_LAYER = 24;
+	import Layer = app.viewport.Layer;
 
 	export class Node
 	{
@@ -40,6 +38,7 @@ namespace app.model
 		public scaleX:number = 1;
 		public scaleY:number = 1;
 
+		public currentLayer:Layer;
 		public layer:number = 17;
 		public subLayer:number = 19;
 
@@ -63,6 +62,8 @@ namespace app.model
 		{
 			this.id = Node.getNewId();
 			this._name = name;
+
+			this.updateLayer();
 		}
 
 		public static getNewId():number
@@ -88,6 +89,12 @@ namespace app.model
 
 			this._name = value;
 			this.onPropertyChange('name');
+		}
+
+		protected updateLayer()
+		{
+			var index = ((this.layer & 0xFFFF) << 16) | (this.subLayer & 0xFFFF);
+			this.currentLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
 		}
 
 		get locked():boolean
@@ -199,6 +206,8 @@ namespace app.model
 				if(this.layer < 0) this.layer = 0;
 				else if(this.layer > MAX_LAYER) this.layer = MAX_LAYER;
 			}
+
+			this.updateLayer();
 		}
 
 		public resetOffset()
@@ -387,8 +396,8 @@ namespace app.model
 		protected copyFrom(from:Node, recursive=true):Node
 		{
 
-			var name = from.name;
-			if(Config.appendNameOnCopy)
+			var name = from._name;
+			if(Config.appendNameOnCopy && name != null)
 			{
 				var match = name.match(/(.+)-copy(\d+)?$/);
 				if(!match)

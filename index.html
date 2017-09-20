@@ -19,6 +19,8 @@
 	<script src="lib/pouchdb-6.3.4.js"></script>
 	<script src="lib/pouchdb.find.js"></script>
 	<script src="lib/FileSaver.js"></script>
+	<script src="lib/ResizeSensor.js"></script>
+	<script src="lib/ElementQueries.js"></script>
 	
 	<!--<script src="lib/easeljs-0.8.2.combined.js"></script>-->
 	<script src="lib/tweenjs-0.6.2.combined.js"></script>
@@ -56,6 +58,7 @@
 	
 	<script src="src/viewport/AABB.js"></script>
 	<script src="src/viewport/Interaction.js"></script>
+	<script src="src/viewport/Layer.js"></script>
 	
 	<script src="src/model/DrawList.js"></script>
 	<script src="src/model/Handle.js"></script>
@@ -116,6 +119,14 @@
 	<div id="viewport-container">
 		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
 		<i class="fa fa-gear btn settings-btn"></i>
+		<div id="layer-palette">
+			<div class="column layers">
+				<div class="heading">Layers</div>
+			</div>
+			<div class="column sublayers">
+				<div class="heading">Sub</div>
+			</div>
+		</div>
 	</div>
 	
 	<div id="timeline-panel">

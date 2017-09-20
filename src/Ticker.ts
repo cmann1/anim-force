@@ -56,6 +56,11 @@ namespace app.ticker
 			this.fpsInterval = 1000 / newTargetFps;
 		}
 
+		get ticking():boolean
+		{
+			return this.isRunning;
+		}
+
 		getFps = ():number =>
 		{
 			return this.isRunning

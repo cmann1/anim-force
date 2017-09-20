@@ -50,6 +50,8 @@ namespace app
 				.on('mouseup', this.onCanvasMouseUp)
 				.on('contextmenu', this.onWindowContextMenu)
 				.focus();
+
+			new ResizeSensor(this.$container[0], this.onResize, app.main.requestValidation);
 		}
 
 		public focus()
@@ -156,7 +158,7 @@ namespace app
 			}
 		};
 
-		protected onResize = () =>
+		protected onResize = (mutations) =>
 		{
 			this.updateCanvasSize();
 		};

@@ -472,6 +472,15 @@ canvas#timeline {
     padding: 10px;
     flex-grow: 1; }
 
+#layer-palette {
+  position: absolute;
+  left: 0;
+  bottom: 0; }
+  #layer-palette .column .heading {
+    background: #fafafa;
+    border-bottom: 1px solid #e0e0e0;
+    border-radius: 4px 4px 0 0; }
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px; }

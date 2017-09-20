@@ -4,8 +4,8 @@
  TODO: Layer palette for hiding and locking layers and sublayers
  TODO: - Store a Layer instance for each node (updating when the node's layer/sublayer changes)
 
- TODO: Multiple selection
- TODO: Groups
+ TODO: ?Multiple selection
+ TODO: ?Groups
  TODO: ?Emitter nodes
  TODO: - Check how emitter entities work in game
  TODO: - How will rotation be handled?
@@ -37,6 +37,9 @@
  TODO: Help
  TODO: - List of shortcut keys
  */
+
+const MAX_LAYER = 22;
+const MAX_SUB_LAYER = 24;
 
 namespace app
 {
@@ -72,14 +75,16 @@ namespace app
 
 		protected loadCount = 0;
 
-		public runningTime:number = 0;
+		protected validationId = 0;
+		protected validationQueue:(()=>void)[] = [];
+		protected validationQueueSize = 0;
 
 		constructor()
 		{
 			App.instance = this;
 
 			createjs.Ticker.timingMode = createjs.Ticker.RAF;
-			this.ticker = new Ticker(this.onTick);
+			this.ticker = new Ticker(this.step);
 
 			this.loadCount++;
 			this._spriteManager = new SpriteManager('assets/sprites/', this.onLoadQueue);
@@ -111,11 +116,19 @@ namespace app
 
 		//
 
-		protected step(deltaTime:number, timestamp:number)
+		protected step = (deltaTime:number, timestamp:number) =>
 		{
+			for(var i = 0; i < this.validationQueueSize; i++)
+			{
+				this.validationQueue[i]();
+			}
+			this.validationQueueSize = 0;
+
 			this.viewport.step(deltaTime, timestamp);
 			this.timeline.step(deltaTime, timestamp);
-		}
+
+			this.draw();
+		};
 
 		protected draw()
 		{
@@ -203,6 +216,12 @@ namespace app
 			this.spriteSelector.show(callback);
 		}
 
+		public requestValidation = (callback:()=>void) =>
+		{
+			this.validationQueue[this.validationQueueSize++] = callback;
+			return this.validationId++;
+		};
+
 		/*
 		* Events
 		*/
@@ -210,13 +229,6 @@ namespace app
 		protected onProjectManagerReady = () =>
 		{
 			this.onLoadQueue();
-		};
-
-		protected onTick = (deltaTime:number, timestamp:number) =>
-		{
-			this.runningTime++;
-			this.step(deltaTime, timestamp);
-			this.draw();
 		};
 
 		protected onWindowLoad = () =>
@@ -232,9 +244,7 @@ namespace app
 		protected onWindowResize = () =>
 		{
 			this.viewport.updateCanvasSize();
-
 			this.step(0, 0);
-			this.draw();
 		};
 
 		protected onWindowBlur = () =>

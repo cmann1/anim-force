@@ -90,13 +90,16 @@ var app;
             };
             SpriteAsset.prototype.load = function (img) {
                 if (img === void 0) { img = null; }
+                if (img) {
+                    this.sheet = document.createElement('canvas');
+                    this.sheet.width = img.width;
+                    this.sheet.height = img.height;
+                    this.ctx = this.sheet.getContext('2d');
+                    this.ctx.drawImage(img, 0, 0, img.width, img.height);
+                }
                 if (--this.loaded == 0) {
-                    if (img) {
-                        this.sheet = document.createElement('canvas');
-                        this.sheet.width = img.width;
-                        this.sheet.height = img.height;
-                        this.ctx = this.sheet.getContext('2d');
-                        this.ctx.drawImage(img, 0, 0, img.width, img.height);
+                    if (!this.sheet) {
+                        throw new Error('Image not loaded');
                     }
                     for (var _i = 0, _a = this.queuedSprites; _i < _a.length; _i++) {
                         var sprite = _a[_i];

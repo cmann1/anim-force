@@ -69,16 +69,23 @@ namespace app.viewport
 		private model:Model;
 		private mode:EditMode;
 
+		private layers:Layer[] = [];
+
 		public timeline:app.timeline.TimelineViewport;
 
 		constructor(elementId, model:Model)
 		{
 			super(elementId);
 
-			this.setModel(model);
+			for(var layer = 0; layer <= MAX_LAYER; layer++)
+			{
+				for(var subLayer = 0; subLayer <= MAX_SUB_LAYER; subLayer++)
+				{
+					this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new Layer();
+				}
+			}
 
-			this.$container.on('resize', this.onResize);
-			this.$container.parent().on('resize', this.onResize);
+			this.setModel(model);
 
 			this.$message = $('<div class="viewport-message"></div>');
 			this.$container.append(this.$message);
@@ -93,6 +100,19 @@ namespace app.viewport
 			new SettingsDlg(this, this.$container);
 
 			Config.change.on(this.onConfigChange);
+		}
+
+		public getLayer(layer:number, subLayer:number):Layer
+		{
+			const index = ((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF);
+			var layerInstance = this.layers[index];
+
+			if(!layerInstance)
+			{
+				layerInstance = this.layers[index] = new Layer();
+			}
+
+			return layerInstance;
 		}
 
 		//

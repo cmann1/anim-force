@@ -66,6 +66,13 @@ var app;
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(Ticker.prototype, "ticking", {
+                get: function () {
+                    return this.isRunning;
+                },
+                enumerable: true,
+                configurable: true
+            });
             Ticker.prototype.start = function () {
                 this.isRunning = true;
                 this.frameCountPrevTime = 0;
