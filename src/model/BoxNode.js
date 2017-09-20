@@ -91,9 +91,6 @@ var app;
                     this.rotationHandle.x = x + local_1.x;
                     this.rotationHandle.y = y + local_1.y;
                 }
-                else {
-                    this.worldRotation = 0;
-                }
                 if (this._allowScale) {
                     this.scaleHandle.active = this.selected;
                     this.scaleXHandle.active = this.selected;
@@ -120,7 +117,7 @@ var app;
                     this.worldAABB.unionF(this.worldX - w1, this.worldY - h1, this.worldX + w1, this.worldY + h1);
                 }
                 else {
-                    this.worldAABB.unionF(this.worldX - this.boxWidth, this.worldY - this.boxHeight, this.worldX + this.boxWidth, this.worldY + this.boxHeight);
+                    this.worldAABB.unionF(this.worldX - this.boxWidth * 0.5, this.worldY - this.boxHeight * 0.5, this.worldX + this.boxWidth * 0.5, this.worldY + this.boxHeight * 0.5);
                 }
                 if (this.visible && drawList && this.worldAABB.intersects(viewport)) {
                     drawList.add(this);
@@ -136,7 +133,7 @@ var app;
                     var w = this.boxWidth * 0.5;
                     var h = this.boxHeight * 0.5;
                     ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
-                    ctx.rotate(this.worldRotation);
+                    ctx.rotate(this._allowRotation ? this.worldRotation : 0);
                     ctx.translate(-w * scaleX, -h * scaleY);
                     ctx.setLineDash([2, 2]);
                     ctx.strokeStyle = this.selected ? app.Config.selected : (this.highlighted ? app.Config.highlighted : app.Config.control);

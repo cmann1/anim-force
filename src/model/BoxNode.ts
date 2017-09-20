@@ -115,10 +115,6 @@ namespace app.model
 				this.rotationHandle.x = x + local.x;
 				this.rotationHandle.y = y + local.y;
 			}
-			else
-			{
-				this.worldRotation = 0;
-			}
 
 			if(this._allowScale)
 			{
@@ -156,8 +152,8 @@ namespace app.model
 			}
 			else{
 				this.worldAABB.unionF(
-					this.worldX - this.boxWidth, this.worldY - this.boxHeight,
-					this.worldX + this.boxWidth, this.worldY + this.boxHeight
+					this.worldX - this.boxWidth * 0.5, this.worldY - this.boxHeight * 0.5,
+					this.worldX + this.boxWidth * 0.5, this.worldY + this.boxHeight * 0.5
 				);
 			}
 
@@ -181,7 +177,7 @@ namespace app.model
 				const h = this.boxHeight * 0.5;
 
 				ctx.translate(this.worldX * worldScale, this.worldY * worldScale);
-				ctx.rotate(this.worldRotation);
+				ctx.rotate(this._allowRotation ? this.worldRotation : 0);
 				ctx.translate(-w * scaleX, -h * scaleY);
 
 				ctx.setLineDash([2, 2]);

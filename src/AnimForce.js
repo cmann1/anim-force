@@ -2,7 +2,7 @@
  Ordered To-Do's:
  ---------------------------------------------------------------
  TODO: Layer palette for hiding and locking layers and sublayers
- TODO: ? Layer and sprite colours
+ TODO: - Store a Layer instance for each node (updating when the node's layer/sublayer changes)
 
  TODO: Multiple selection
  TODO: Groups
@@ -25,7 +25,6 @@
  ---------------------------------------------------------------
 
  TODO: ? Ghosts
- TODO: ? Sprite colour
  TODO: ? Keyframe easing
  TODO: Export options:
  TODO: - sprite_group: Option to not use sprite layers and sublayers
