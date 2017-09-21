@@ -79,9 +79,9 @@ namespace app.viewport
 
 			for(var layer = 0; layer <= MAX_LAYER; layer++)
 			{
-				for(var subLayer = 0; subLayer <= MAX_SUB_LAYER; subLayer++)
+				for(var subLayer = 0; subLayer <= MAX_SUB_LAYER + 1; subLayer++)
 				{
-					this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new Layer();
+					this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new Layer(layer, subLayer - 1);
 				}
 			}
 
@@ -98,18 +98,19 @@ namespace app.viewport
 			}
 
 			new SettingsDlg(this, this.$container);
+			new LayerPalette(this);
 
 			Config.change.on(this.onConfigChange);
 		}
 
 		public getLayer(layer:number, subLayer:number):Layer
 		{
-			const index = ((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF);
+			const index = ((layer & 0xFFFF) << 16) | ((subLayer + 1) & 0xFFFF);
 			var layerInstance = this.layers[index];
 
 			if(!layerInstance)
 			{
-				layerInstance = this.layers[index] = new Layer();
+				layerInstance = this.layers[index] = new Layer(layer, subLayer);
 			}
 
 			return layerInstance;

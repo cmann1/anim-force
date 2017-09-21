@@ -6,10 +6,13 @@ namespace app.viewport
 
 		public visible = true;
 		public locked = false;
+		public subLayer:number;
+		public layer:number;
 
-		constructor()
+		constructor(layer:number, subLayer:number)
 		{
-
+			this.layer = layer;
+			this.subLayer = subLayer;
 		}
 
 	}

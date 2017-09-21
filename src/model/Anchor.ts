@@ -21,7 +21,8 @@ namespace app.model
 
 			this.hitRadius = this.boxWidth * 0.5 * 0.75;
 
-			this.layer = this.subLayer = MAX_LAYER + 1;
+			this.layer = MAX_LAYER;
+			this.subLayer = MAX_SUB_LAYER;
 			this.updateLayer();
 		}
 
@@ -32,11 +33,6 @@ namespace app.model
 		set name(value:string)
 		{
 			this.setName(value);
-		}
-
-		public increaseLayer(amount:number, subLayer=false, recurse=false)
-		{
-
 		}
 
 		//
@@ -89,8 +85,6 @@ namespace app.model
 
 		public save():any
 		{
-			this.layer = this.subLayer = MAX_LAYER;
-
 			var data = super.save();
 
 			data.allowRotation = this.allowRotation;

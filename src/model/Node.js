@@ -20,8 +20,8 @@ var app;
                 this.rotation = 0;
                 this.scaleX = 1;
                 this.scaleY = 1;
-                this.layer = 17;
-                this.subLayer = 19;
+                this.layer = DEFAULT_LAYER;
+                this.subLayer = DEFAULT_SUB_LAYER;
                 /// Rendering related
                 this.worldAABB = new AABB();
                 this.controlWorldAABB = new AABB();
@@ -54,12 +54,13 @@ var app;
                 this.onPropertyChange('name');
             };
             Node.prototype.updateLayer = function () {
-                var index = ((this.layer & 0xFFFF) << 16) | (this.subLayer & 0xFFFF);
-                this.currentLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
+                this.currentLayer = app.App.getViewport().getLayer(this.layer, -1);
+                this.currentSubLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
             };
             Object.defineProperty(Node.prototype, "locked", {
+                //
                 get: function () {
-                    return this._locked;
+                    return this._locked || this.currentLayer.locked || this.currentSubLayer.locked;
                 },
                 set: function (value) {
                     if (this._locked == value)
@@ -85,13 +86,15 @@ var app;
             });
             Object.defineProperty(Node.prototype, "visible", {
                 get: function () {
-                    return this._visible;
+                    return this._visible && this.currentLayer.visible && this.currentSubLayer.visible;
                 },
                 set: function (value) {
                     if (this._visible == value)
                         return;
                     this._visible = value;
                     this.onPropertyChange('visible');
+                    if (!value && this.selected)
+                        this.setSelected(false);
                 },
                 enumerable: true,
                 configurable: true
@@ -203,7 +206,7 @@ var app;
                 }
             };
             Node.prototype.hitTestHandles = function (x, y, worldScaleFactor, result) {
-                if (this._visible && app.Config.showControls) {
+                if (this.visible && app.Config.showControls) {
                     // Do it in reverse order so that handles in front are checked first
                     for (var i = this.handles.length - 1; i >= 0; i--) {
                         var handle = this.handles[i];
@@ -332,6 +335,7 @@ var app;
                 this._locked = data.get('locked');
                 this.layer = data.get('layer');
                 this.subLayer = data.get('subLayer');
+                this.updateLayer();
                 return this;
             };
             Node.load = function (data) {

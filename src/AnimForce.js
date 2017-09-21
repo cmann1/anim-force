@@ -1,9 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Layer palette for hiding and locking layers and sublayers
- TODO: - Store a Layer instance for each node (updating when the node's layer/sublayer changes)
-
  TODO: ?Multiple selection
  TODO: ?Groups
  TODO: ?Emitter nodes
@@ -25,6 +22,7 @@
  ---------------------------------------------------------------
 
  TODO: ? Ghosts
+ TODO: ? Save layer states with project
  TODO: ? Keyframe easing
  TODO: Export options:
  TODO: - sprite_group: Option to not use sprite layers and sublayers
@@ -39,6 +37,8 @@
  */
 var MAX_LAYER = 22;
 var MAX_SUB_LAYER = 24;
+var DEFAULT_LAYER = 17;
+var DEFAULT_SUB_LAYER = 19;
 var app;
 (function (app) {
     var Ticker = app.ticker.Ticker;
@@ -67,6 +67,9 @@ var app;
                 _this.draw();
             };
             this.onLoadQueue = function () {
+                if (app.Config.isLoaded && !_this.viewport) {
+                    _this.initUI();
+                }
                 if (!_this.projectManager && _this._spriteManager.isReady() && app.Config.isLoaded && app.$body) {
                     _this.loadCount++;
                     _this.projectManager = new ProjectManager();
@@ -79,6 +82,10 @@ var app;
                         .on('blur', _this.onWindowBlur)
                         .focus();
                     $('#app-loading-screen').remove();
+                    if (_this.pendingProject) {
+                        _this.setProject(_this.pendingProject);
+                        _this.pendingProject = null;
+                    }
                     _this.ticker.start();
                 }
             };
@@ -95,7 +102,6 @@ var app;
             this.onWindowLoad = function () {
                 app.$body = $(document.body);
                 app.$window = $(window);
-                _this.initUI();
                 _this.onLoadQueue();
             };
             this.onWindowResize = function () {
@@ -154,6 +160,10 @@ var app;
         };
         //
         App.prototype.setProject = function (project) {
+            if (this.loadCount) {
+                this.pendingProject = project;
+                return;
+            }
             this.project = this.projectManager.getActiveProject();
             this.model = this.project.activeModel;
             if (project.isNew) {
@@ -163,7 +173,7 @@ var app;
             this.viewport.setModel(project.activeModel);
             this.timeline.setModel(project.activeModel);
             this.propertiesPanel.setModel(project.activeModel);
-            this.viewport.focus();
+            this.viewport && this.viewport.focus();
         };
         Object.defineProperty(App.prototype, "spriteManager", {
             get: function () {

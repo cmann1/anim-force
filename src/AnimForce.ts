@@ -1,9 +1,6 @@
 /*
  Ordered To-Do's:
  ---------------------------------------------------------------
- TODO: Layer palette for hiding and locking layers and sublayers
- TODO: - Store a Layer instance for each node (updating when the node's layer/sublayer changes)
-
  TODO: ?Multiple selection
  TODO: ?Groups
  TODO: ?Emitter nodes
@@ -25,6 +22,7 @@
  ---------------------------------------------------------------
 
  TODO: ? Ghosts
+ TODO: ? Save layer states with project
  TODO: ? Keyframe easing
  TODO: Export options:
  TODO: - sprite_group: Option to not use sprite layers and sublayers
@@ -40,6 +38,9 @@
 
 const MAX_LAYER = 22;
 const MAX_SUB_LAYER = 24;
+
+const DEFAULT_LAYER = 17;
+const DEFAULT_SUB_LAYER = 19;
 
 namespace app
 {
@@ -74,6 +75,7 @@ namespace app
 		protected projectManager:ProjectManager;
 
 		protected loadCount = 0;
+		protected pendingProject:Project;
 
 		protected validationId = 0;
 		protected validationQueue:(()=>void)[] = [];
@@ -159,6 +161,11 @@ namespace app
 
 		protected onLoadQueue = () =>
 		{
+			if(Config.isLoaded && !this.viewport)
+			{
+				this.initUI();
+			}
+
 			if(!this.projectManager && this._spriteManager.isReady() && Config.isLoaded && app.$body)
 			{
 				this.loadCount++;
@@ -176,6 +183,12 @@ namespace app
 
 				$('#app-loading-screen').remove();
 
+				if(this.pendingProject)
+				{
+					this.setProject(this.pendingProject);
+					this.pendingProject = null;
+				}
+
 				this.ticker.start();
 			}
 		};
@@ -184,6 +197,12 @@ namespace app
 
 		public setProject(project:Project)
 		{
+			if(this.loadCount)
+			{
+				this.pendingProject = project;
+				return;
+			}
+
 			this.project = this.projectManager.getActiveProject();
 			this.model = this.project.activeModel;
 
@@ -197,7 +216,7 @@ namespace app
 			this.timeline.setModel(project.activeModel);
 			this.propertiesPanel.setModel(project.activeModel);
 
-			this.viewport.focus();
+			this.viewport && this.viewport.focus();
 		}
 
 		public get spriteManager():app.assets.SpriteManager
@@ -235,8 +254,6 @@ namespace app
 		{
 			app.$body = $(document.body);
 			app.$window = $(window);
-
-			this.initUI();
 
 			this.onLoadQueue();
 		};

@@ -39,8 +39,9 @@ namespace app.model
 		public scaleY:number = 1;
 
 		public currentLayer:Layer;
-		public layer:number = 17;
-		public subLayer:number = 19;
+		public currentSubLayer:Layer;
+		public layer:number = DEFAULT_LAYER;
+		public subLayer:number = DEFAULT_SUB_LAYER;
 
 		/// Rendering related
 
@@ -93,13 +94,15 @@ namespace app.model
 
 		protected updateLayer()
 		{
-			var index = ((this.layer & 0xFFFF) << 16) | (this.subLayer & 0xFFFF);
-			this.currentLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
+			this.currentLayer = app.App.getViewport().getLayer(this.layer, -1);
+			this.currentSubLayer = app.App.getViewport().getLayer(this.layer, this.subLayer);
 		}
+
+		//
 
 		get locked():boolean
 		{
-			return this._locked;
+			return this._locked || this.currentLayer.locked || this.currentSubLayer.locked;
 		}
 
 		set locked(value:boolean)
@@ -126,7 +129,7 @@ namespace app.model
 
 		get visible():boolean
 		{
-			return this._visible;
+			return this._visible && this.currentLayer.visible && this.currentSubLayer.visible;
 		}
 
 		set visible(value:boolean)
@@ -134,6 +137,9 @@ namespace app.model
 			if(this._visible == value) return;
 			this._visible = value;
 			this.onPropertyChange('visible');
+
+			if(!value && this.selected)
+				this.setSelected(false);
 		}
 
 		public setLocked(value:boolean, recurse=false)
@@ -275,7 +281,7 @@ namespace app.model
 
 		public hitTestHandles(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
-			if(this._visible && Config.showControls)
+			if(this.visible && Config.showControls)
 			{
 				// Do it in reverse order so that handles in front are checked first
 				for(var i = this.handles.length - 1; i >= 0; i--)
@@ -456,6 +462,8 @@ namespace app.model
 			this._locked = data.get('locked');
 			this.layer = data.get('layer');
 			this.subLayer = data.get('subLayer');
+
+			this.updateLayer();
 
 			return this;
 		}

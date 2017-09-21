@@ -124,7 +124,7 @@ var app;
                 }
             };
             BoxNode.prototype.drawControls = function (ctx, worldScale, viewport) {
-                if (!this.visible || !this.worldAABB.intersects(viewport))
+                if (!this._visible || !this.worldAABB.intersects(viewport))
                     return;
                 if ((this.drawOutline && app.Config.drawOutlines) || this.selected || this.highlighted) {
                     ctx.save();

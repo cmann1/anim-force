@@ -3,9 +3,11 @@ var app;
     var viewport;
     (function (viewport) {
         var Layer = (function () {
-            function Layer() {
+            function Layer(layer, subLayer) {
                 this.visible = true;
                 this.locked = false;
+                this.layer = layer;
+                this.subLayer = subLayer;
             }
             return Layer;
         }());

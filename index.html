@@ -93,6 +93,7 @@
 	<script src="src/exporters/SpriteGroupExporter.js"></script>
 	
 	<script src="src/viewport/SettingsDlg.js"></script>
+	<script src="src/viewport/LayerPalette.js"></script>
 	<script src="src/Canvas.js"></script>
 	<script src="src/viewport/Viewport.js"></script>
 	
@@ -119,12 +120,15 @@
 	<div id="viewport-container">
 		<canvas id="viewport" tabindex="1" class="no-select"></canvas>
 		<i class="fa fa-gear btn settings-btn"></i>
-		<div id="layer-palette">
-			<div class="column layers">
-				<div class="heading">Layers</div>
-			</div>
+		<div id="layer-palette" class="hidden">
+			<i class="fa fa-th-list btn btn-show"></i>
 			<div class="column sublayers">
-				<div class="heading">Sub</div>
+				<div class="heading">Sub [<span class="layer-number">0</span>]</div>
+				<div class="items"></div>
+			</div>
+			<div class="column layers">
+				<div class="heading"><i class="fa fa-caret-down"></i> Layers</div>
+				<div class="items"></div>
 			</div>
 		</div>
 	</div>

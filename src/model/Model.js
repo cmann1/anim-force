@@ -81,6 +81,8 @@ var app;
                 _this.type = 'model';
                 _this.bindPose.active = true;
                 _this.activeAnimation = _this.bindPose;
+                _this.layer = _this.subLayer = MAX_LAYER + 10;
+                _this.updateLayer();
                 return _this;
             }
             //
@@ -98,11 +100,13 @@ var app;
                     for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                         var child = _a[_i];
                         child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
-                        if (i++ == 0) {
-                            this.childrenWorldAABB.from(child.worldAABB);
-                        }
-                        else {
-                            this.childrenWorldAABB.union(child.worldAABB);
+                        if (child.visible) {
+                            if (i++ == 0) {
+                                this.childrenWorldAABB.from(child.worldAABB);
+                            }
+                            else {
+                                this.childrenWorldAABB.union(child.worldAABB);
+                            }
                         }
                     }
                     this.worldAABB.from(this.childrenWorldAABB);
@@ -286,6 +290,21 @@ var app;
             Model.prototype.updateNodeVisibility = function (node) {
                 this.selectionChange.dispatch(this, new SelectionEvent('visibility', node));
             };
+            Object.defineProperty(Model.prototype, "locked", {
+                //
+                get: function () {
+                    return true;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Model.prototype, "visible", {
+                get: function () {
+                    return true;
+                },
+                enumerable: true,
+                configurable: true
+            });
             //
             Model.prototype.clear = function () {
                 this.nodeMap = {};

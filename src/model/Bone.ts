@@ -31,6 +31,10 @@ namespace app.model
 			this.handles.push(this.endPointHandle);
 			this.handles.push(this.stretchHandle);
 			this.handles.push(this.lengthHandle);
+
+			this.layer = MAX_LAYER;
+			this.subLayer = MAX_SUB_LAYER;
+			this.updateLayer();
 		}
 
 		public updateInteraction(x:number, y:number, worldScaleFactor:number, interaction:Interaction):boolean
@@ -79,7 +83,8 @@ namespace app.model
 			{
 				child.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, worldScale, 1, this.stretchY, this.worldRotation, drawList, viewport);
 
-				this.childrenWorldAABB.union(child.worldAABB);
+				if(child.visible)
+					this.childrenWorldAABB.union(child.worldAABB);
 			}
 
 			this.worldAABB.union(this.childrenWorldAABB);

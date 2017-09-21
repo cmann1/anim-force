@@ -32,6 +32,8 @@ namespace app
 
 		static pixelHitTest = true;
 
+		static showLayerPalette = false;
+
 		// UI style
 
 		static text = '#444';

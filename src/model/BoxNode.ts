@@ -165,7 +165,7 @@ namespace app.model
 
 		public drawControls(ctx:CanvasRenderingContext2D, worldScale:number, viewport:AABB)
 		{
-			if(!this.visible || !this.worldAABB.intersects(viewport)) return;
+			if(!this._visible || !this.worldAABB.intersects(viewport)) return;
 
 			if((this.drawOutline && Config.drawOutlines) || this.selected || this.highlighted)
 			{

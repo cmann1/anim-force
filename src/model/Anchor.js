@@ -21,7 +21,8 @@ var app;
                 _this.type = 'anchor';
                 _this.boxWidth = _this.boxHeight = 40;
                 _this.hitRadius = _this.boxWidth * 0.5 * 0.75;
-                _this.layer = _this.subLayer = MAX_LAYER + 1;
+                _this.layer = MAX_LAYER;
+                _this.subLayer = MAX_SUB_LAYER;
                 _this.updateLayer();
                 return _this;
             }
@@ -35,10 +36,6 @@ var app;
                 enumerable: true,
                 configurable: true
             });
-            Anchor.prototype.increaseLayer = function (amount, subLayer, recurse) {
-                if (subLayer === void 0) { subLayer = false; }
-                if (recurse === void 0) { recurse = false; }
-            };
             //
             Anchor.prototype.drawControls = function (ctx, worldScale, viewport) {
                 if (!this.visible || !this.worldAABB.intersects(viewport))
@@ -73,7 +70,6 @@ var app;
                 return new Anchor();
             };
             Anchor.prototype.save = function () {
-                this.layer = this.subLayer = MAX_LAYER;
                 var data = _super.prototype.save.call(this);
                 data.allowRotation = this.allowRotation;
                 data.allowScale = this.allowScale;

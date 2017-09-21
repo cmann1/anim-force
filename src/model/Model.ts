@@ -50,6 +50,9 @@ namespace app.model
 
 			this.bindPose.active = true;
 			this.activeAnimation = this.bindPose;
+
+			this.layer = this.subLayer = MAX_LAYER + 10;
+			this.updateLayer();
 		}
 
 		//
@@ -74,13 +77,16 @@ namespace app.model
 				{
 					child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
 
-					if(i++ == 0)
+					if(child.visible)
 					{
-						this.childrenWorldAABB.from(child.worldAABB);
-					}
-					else
-					{
-						this.childrenWorldAABB.union(child.worldAABB);
+						if(i++ == 0)
+						{
+							this.childrenWorldAABB.from(child.worldAABB);
+						}
+						else
+						{
+							this.childrenWorldAABB.union(child.worldAABB);
+						}
 					}
 				}
 
@@ -349,6 +355,18 @@ namespace app.model
 		public updateNodeVisibility(node:Node)
 		{
 			this.selectionChange.dispatch(this, new SelectionEvent('visibility', node));
+		}
+
+		//
+
+		get locked():boolean
+		{
+			return true;
+		}
+
+		get visible():boolean
+		{
+			return true;
 		}
 
 		//

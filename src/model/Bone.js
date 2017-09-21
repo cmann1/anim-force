@@ -29,6 +29,9 @@ var app;
                 _this.handles.push(_this.endPointHandle);
                 _this.handles.push(_this.stretchHandle);
                 _this.handles.push(_this.lengthHandle);
+                _this.layer = MAX_LAYER;
+                _this.subLayer = MAX_SUB_LAYER;
+                _this.updateLayer();
                 return _this;
             }
             Bone.prototype.updateInteraction = function (x, y, worldScaleFactor, interaction) {
@@ -63,7 +66,8 @@ var app;
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
                     child.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, worldScale, 1, this.stretchY, this.worldRotation, drawList, viewport);
-                    this.childrenWorldAABB.union(child.worldAABB);
+                    if (child.visible)
+                        this.childrenWorldAABB.union(child.worldAABB);
                 }
                 this.worldAABB.union(this.childrenWorldAABB);
             };

@@ -105,8 +105,8 @@ var app;
                     _this.stageAnchorY = NaN;
                 };
                 for (var layer = 0; layer <= MAX_LAYER; layer++) {
-                    for (var subLayer = 0; subLayer <= MAX_SUB_LAYER; subLayer++) {
-                        _this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new viewport.Layer();
+                    for (var subLayer = 0; subLayer <= MAX_SUB_LAYER + 1; subLayer++) {
+                        _this.layers[((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF)] = new viewport.Layer(layer, subLayer - 1);
                     }
                 }
                 _this.setModel(model);
@@ -118,14 +118,15 @@ var app;
                     _this.fpsDisplay.hide();
                 }
                 new viewport.SettingsDlg(_this, _this.$container);
+                new viewport.LayerPalette(_this);
                 app.Config.change.on(_this.onConfigChange);
                 return _this;
             }
             Viewport.prototype.getLayer = function (layer, subLayer) {
-                var index = ((layer & 0xFFFF) << 16) | (subLayer & 0xFFFF);
+                var index = ((layer & 0xFFFF) << 16) | ((subLayer + 1) & 0xFFFF);
                 var layerInstance = this.layers[index];
                 if (!layerInstance) {
-                    layerInstance = this.layers[index] = new viewport.Layer();
+                    layerInstance = this.layers[index] = new viewport.Layer(layer, subLayer);
                 }
                 return layerInstance;
             };
