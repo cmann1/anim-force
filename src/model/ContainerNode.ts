@@ -301,6 +301,19 @@ namespace app.model
 			this.onStructureChange('clear', this, null, -1, null);
 		}
 
+		public resetToBindPose(recurse:boolean)
+		{
+			if(recurse)
+			{
+				for(let child of this.children)
+				{
+					child.resetToBindPose(true);
+				}
+			}
+
+			super.resetToBindPose(recurse);
+		}
+
 		//
 
 		protected copyFrom(from:ContainerNode, recursive=true):ContainerNode

@@ -100,13 +100,11 @@ var app;
                     for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                         var child = _a[_i];
                         child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
-                        if (child.visible) {
-                            if (i++ == 0) {
-                                this.childrenWorldAABB.from(child.worldAABB);
-                            }
-                            else {
-                                this.childrenWorldAABB.union(child.worldAABB);
-                            }
+                        if (i++ == 0) {
+                            this.childrenWorldAABB.from(child.worldAABB);
+                        }
+                        else {
+                            this.childrenWorldAABB.union(child.worldAABB);
                         }
                     }
                     this.worldAABB.from(this.childrenWorldAABB);
@@ -132,12 +130,15 @@ var app;
                     }
                 }
                 if (app.Config.drawAABB) {
-                    // this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
+                    this.childrenWorldAABB.draw(ctx, worldScale, app.Config.childrenAABB);
                     this.worldAABB.draw(ctx, worldScale, '#0FF');
                 }
                 ctx.restore();
             };
             Model.prototype.hitTest = function (x, y, worldScaleFactor, result) {
+                if (this.selectedNode && this.selectedNode.hitTestControls(x, y, worldScaleFactor, result)) {
+                    return true;
+                }
                 if (this.hitTestControls(x, y, worldScaleFactor, result)) {
                     return true;
                 }
@@ -152,6 +153,9 @@ var app;
                     else if (this.selectedNode.hitTest(x, y, worldScaleFactor, result, false)) {
                         return true;
                     }
+                }
+                if (this.hitTestControls(x, y, worldScaleFactor, result)) {
+                    return true;
                 }
                 while (i >= 0) {
                     var node = drawList[i--];
@@ -329,10 +333,18 @@ var app;
             Model.prototype.getNode = function (id) {
                 return this.nodeMap[id];
             };
-            Model.prototype.addNewAnimation = function (name, select) {
+            Model.prototype.addNewAnimation = function (name, select, copyFrom) {
                 if (select === void 0) { select = false; }
+                if (copyFrom === void 0) { copyFrom = false; }
+                if (copyFrom && !this.activeAnimation)
+                    copyFrom = false;
                 if (name == null || name == 'None') {
-                    name = 'Untitled Animation ' + (++this.nextAnimationId);
+                    if (copyFrom) {
+                        name = this.activeAnimation.name + '_copy';
+                    }
+                    else {
+                        name = 'Untitled Animation ' + (++this.nextAnimationId);
+                    }
                 }
                 var newName = name;
                 var newIndex = 1;
@@ -341,6 +353,8 @@ var app;
                     newIndex++;
                 }
                 var anim = new app.anim.Animation(newName, this);
+                if (copyFrom)
+                    anim.copyFrom(this.activeAnimation);
                 this.animations[newName] = anim;
                 this.animationList = null;
                 this.animationChange.dispatch(anim, new Event('newAnimation'));

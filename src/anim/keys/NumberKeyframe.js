@@ -18,6 +18,9 @@ var app;
                 var _this = _super !== null && _super.apply(this, arguments) || this;
                 _this.prev = null;
                 _this.next = null;
+                _this.toString = function () {
+                    return "NumberKeyframe[" + _this.frameIndex + "](\"" + _this.value + "\")";
+                };
                 return _this;
             }
             NumberKeyframe.prototype.set = function (propertyName, node, copyFrame) {

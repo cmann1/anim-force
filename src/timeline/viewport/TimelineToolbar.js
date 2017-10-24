@@ -94,7 +94,7 @@ var app;
                         }
                     }
                     if (type == 'add-anim') {
-                        _this.model.addNewAnimation(null, true);
+                        _this.model.addNewAnimation(null, true, true);
                     }
                 };
                 this.timeline = timeline;

@@ -175,6 +175,13 @@ var app;
                 return this.length = newLength;
             };
             //
+            Track.prototype.copyFrom = function (track) {
+                this.length = track.length;
+                this.interpolation = track.interpolation;
+                for (var propertyName in track.properties) {
+                    this.properties[propertyName].copyFrom(track.properties[propertyName]);
+                }
+            };
             Track.prototype.save = function () {
                 var data = {
                     type: this.type,

@@ -131,6 +131,16 @@ var app;
                 this.initTracksFromModel();
                 this.dispatchChange('clear');
             };
+            Animation.prototype.copyFrom = function (from) {
+                this.fps = from.fps;
+                this.loop = from.loop;
+                this.skipLastFrame = from.skipLastFrame;
+                this.length = from.length;
+                for (var trackId in from.tracks) {
+                    this.tracks[trackId].copyFrom(from.tracks[trackId]);
+                }
+                this.updateNodes();
+            };
             Animation.prototype.initForAnimation = function () {
                 this.fpsStep = 1 / this.fps;
                 this.accumulatedTime = 0;
@@ -221,6 +231,12 @@ var app;
                 var next = this.getNextKeyframe();
                 if (next) {
                     this.setPosition(next.frameIndex);
+                }
+            };
+            Animation.prototype.updateNode = function (node) {
+                var track = this.tracks[node.id];
+                if (track) {
+                    track.updateNode();
                 }
             };
             Animation.prototype.updateNodes = function () {

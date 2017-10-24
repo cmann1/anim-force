@@ -26,6 +26,11 @@ namespace app.anim
 			}
 		}
 
+		public toString = () : string => {
+
+			return `VectorKeyframe[${this.frameIndex}](${this.x}, ${this.y})`;
+		};
+
 		//
 
 		public save():any
@@ -45,6 +50,7 @@ namespace app.anim
 
 			return this;
 		}
+
 
 	}
 

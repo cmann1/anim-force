@@ -324,7 +324,7 @@ namespace app.timeline
 
 			if(type == 'add-anim')
 			{
-				this.model.addNewAnimation(null, true);
+				this.model.addNewAnimation(null, true, true);
 			}
 		};
 

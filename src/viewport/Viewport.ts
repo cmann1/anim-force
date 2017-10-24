@@ -606,6 +606,11 @@ namespace app.viewport
 						}
 					}
 
+					// Reset to bind pose
+					else if(keyCode == Key.B && altKey)
+					{
+						if(selectedNode) selectedNode.resetToBindPose(shiftKey);
+					}
 					// Reset offset
 					else if(keyCode == Key.G && altKey)
 					{

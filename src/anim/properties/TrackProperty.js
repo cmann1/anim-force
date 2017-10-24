@@ -230,6 +230,31 @@ var app;
                 return out;
             };
             //
+            TrackProperty.prototype.copyFrom = function (property) {
+                var frame = property.frames;
+                var prev = null;
+                this.frames = null;
+                this.frameList = [];
+                while (frame) {
+                    var frameIndex = frame.frameIndex;
+                    var newFrame = new this.KeyFrameClass(frameIndex);
+                    newFrame.set(null, null, frame);
+                    this.frameList[frameIndex] = newFrame;
+                    if (!this.frames)
+                        this.frames = newFrame;
+                    newFrame.prev = prev;
+                    if (prev)
+                        prev.next = newFrame;
+                    prev = newFrame;
+                    this.last = newFrame;
+                    frame = frame.next;
+                }
+                this.frameIndex = property.frameIndex;
+                this.length = property.length;
+                this.current = property.current ? this.frameList[property.current.frameIndex] : null;
+                this.prev = property.prev ? this.frameList[property.prev.frameIndex] : null;
+                this.next = property.next ? this.frameList[property.next.frameIndex] : null;
+            };
             TrackProperty.prototype.save = function () {
                 var data = {
                     type: this.type,
@@ -276,18 +301,18 @@ var app;
                 var prev = data.get('prev');
                 var next = data.get('next');
                 if (current != -1) {
-                    if (!this.frameList[current])
-                        throw new Error('Invalid frame index');
+                    // if(!this.frameList[current])
+                    // 	throw new Error(`Invalid frame index (current:${current}) id[${this.track.node.id}.${this.propertyName}]`);
                     this.current = this.frameList[current];
                 }
                 if (prev != -1) {
-                    if (!this.frameList[prev])
-                        throw new Error('Invalid frame index');
+                    // if(!this.frameList[prev])
+                    // 	throw new Error(`Invalid frame index (prev:${prev}) id[${this.track.node.id}.${this.propertyName}]`);
                     this.prev = this.frameList[prev];
                 }
                 if (next != -1) {
-                    if (!this.frameList[next])
-                        throw new Error('Invalid frame index');
+                    // if(!this.frameList[next])
+                    // 	throw new Error(`Invalid frame index (next:${next}) id[${this.track.node.id}.${this.propertyName}]`);
                     this.next = this.frameList[next];
                 }
                 return this;

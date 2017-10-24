@@ -142,6 +142,21 @@ namespace app.anim
 			this.dispatchChange('clear');
 		}
 
+		public copyFrom(from:Animation)
+		{
+			this.fps = from.fps;
+			this.loop = from.loop;
+			this.skipLastFrame = from.skipLastFrame;
+			this.length = from.length;
+
+			for(var trackId in from.tracks)
+			{
+				this.tracks[trackId].copyFrom(from.tracks[trackId]);
+			}
+
+			this.updateNodes()
+		}
+
 		public initForAnimation()
 		{
 			this.fpsStep = 1 / this.fps;
@@ -279,6 +294,15 @@ namespace app.anim
 			if(next)
 			{
 				this.setPosition(next.frameIndex);
+			}
+		}
+
+		public updateNode(node:Node)
+		{
+			const track = this.tracks[node.id];
+			if(track)
+			{
+				track.updateNode();
 			}
 		}
 

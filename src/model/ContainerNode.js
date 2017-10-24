@@ -231,6 +231,15 @@ var app;
                 this.childCount = 0;
                 this.onStructureChange('clear', this, null, -1, null);
             };
+            ContainerNode.prototype.resetToBindPose = function (recurse) {
+                if (recurse) {
+                    for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
+                        var child = _a[_i];
+                        child.resetToBindPose(true);
+                    }
+                }
+                _super.prototype.resetToBindPose.call(this, recurse);
+            };
             //
             ContainerNode.prototype.copyFrom = function (from, recursive) {
                 if (recursive === void 0) { recursive = true; }

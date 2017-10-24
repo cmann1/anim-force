@@ -18,6 +18,9 @@ var app;
                 var _this = _super !== null && _super.apply(this, arguments) || this;
                 _this.prev = null;
                 _this.next = null;
+                _this.toString = function () {
+                    return "VectorKeyframe[" + _this.frameIndex + "](" + _this.x + ", " + _this.y + ")";
+                };
                 return _this;
             }
             VectorKeyframe.prototype.set = function (propertyName, node, copyFrame) {

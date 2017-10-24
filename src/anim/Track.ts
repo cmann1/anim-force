@@ -25,7 +25,7 @@ namespace app.anim
 	{
 		protected type = null;
 
-		protected animation:Animation;
+		public animation:Animation;
 		protected properties:{[id:string]:TrackProperty} = {};
 
 		public bulkKeyframeOperations = true;
@@ -261,6 +261,17 @@ namespace app.anim
 		}
 
 		//
+
+		public copyFrom(track:Track)
+		{
+			this.length = track.length;
+			this.interpolation = track.interpolation;
+
+			for(var propertyName in track.properties)
+			{
+				this.properties[propertyName].copyFrom(track.properties[propertyName]);
+			}
+		}
 
 		public save():any
 		{

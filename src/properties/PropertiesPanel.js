@@ -10,10 +10,17 @@ var app;
                 this.setModel(model);
                 this.$panel = $('#properties-panel');
                 // TODO: Remove
-                this.$panel.find('button.btn-export-as').on('click', function () {
+                this.$panel.find('button.btn-export-as').on('click', function (event) {
                     var out = (new AngelScriptExporter()).exportModel(_this.model);
-                    Utils.copyToClipboard(out);
-                    app.App.notice('Output copied to clipboard', 'blue');
+                    // console.log(out);
+                    if (event.shiftKey) {
+                        Utils.copyToClipboard(out);
+                        app.App.notice('Output copied to clipboard', 'blue');
+                    }
+                    else {
+                        var blob = new Blob([out], { type: 'text/json;charset=utf-8' });
+                        saveAs(blob, _this.model.name + '.cpp');
+                    }
                 });
                 // TODO: Remove
                 this.$panel.find('button.btn-export-spr').on('click', function () {

@@ -161,6 +161,13 @@ var app;
                 }
                 this.updateLayer();
             };
+            Node.prototype.resetToBindPose = function (recurse) {
+                this.model.getBindPose().updateNode(this);
+                this.onPropertyChange('offset');
+                this.onPropertyChange('scaleX');
+                this.onPropertyChange('scaleY');
+                this.onPropertyChange('rotation');
+            };
             Node.prototype.resetOffset = function () {
                 if (this.offsetX != 0 || this.offsetY != 0) {
                     this.offsetX = 0;

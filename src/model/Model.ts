@@ -77,16 +77,13 @@ namespace app.model
 				{
 					child.prepareForDrawing(0, 0, worldScale, 1, 1, 0, this.drawList, viewport);
 
-					if(child.visible)
+					if(i++ == 0)
 					{
-						if(i++ == 0)
-						{
-							this.childrenWorldAABB.from(child.worldAABB);
-						}
-						else
-						{
-							this.childrenWorldAABB.union(child.worldAABB);
-						}
+						this.childrenWorldAABB.from(child.worldAABB);
+					}
+					else
+					{
+						this.childrenWorldAABB.union(child.worldAABB);
 					}
 				}
 
@@ -123,7 +120,7 @@ namespace app.model
 
 			if(Config.drawAABB)
 			{
-				// this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
+				this.childrenWorldAABB.draw(ctx, worldScale, Config.childrenAABB);
 				this.worldAABB.draw(ctx, worldScale, '#0FF');
 			}
 
@@ -132,6 +129,11 @@ namespace app.model
 
 		public hitTest(x:number, y:number, worldScaleFactor:number, result:Interaction):boolean
 		{
+			if(this.selectedNode && this.selectedNode.hitTestControls(x ,y, worldScaleFactor, result))
+			{
+				return true;
+			}
+
 			if(this.hitTestControls(x ,y, worldScaleFactor, result))
 			{
 				return true;
@@ -151,6 +153,11 @@ namespace app.model
 				{
 					return true;
 				}
+			}
+
+			if(this.hitTestControls(x ,y, worldScaleFactor, result))
+			{
+				return true;
 			}
 
 
@@ -405,11 +412,20 @@ namespace app.model
 			return this.nodeMap[id];
 		}
 
-		public addNewAnimation(name:string, select:boolean=false)
+		public addNewAnimation(name:string, select:boolean=false, copyFrom:boolean=false)
 		{
+			if(copyFrom && !this.activeAnimation) copyFrom = false;
+
 			if(name == null || name == 'None')
 			{
-				name = 'Untitled Animation ' + (++this.nextAnimationId);
+				if(copyFrom)
+				{
+					name = this.activeAnimation.name + '_copy';
+				}
+				else
+				{
+					name = 'Untitled Animation ' + (++this.nextAnimationId);
+				}
 			}
 
 			var newName = name;
@@ -421,6 +437,7 @@ namespace app.model
 			}
 
 			var anim = new app.anim.Animation(newName, this);
+			if(copyFrom) anim.copyFrom(this.activeAnimation);
 			this.animations[newName] = anim;
 			this.animationList = null;
 			this.animationChange.dispatch(anim, new Event('newAnimation'));

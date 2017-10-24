@@ -19,10 +19,19 @@ namespace app.properties
 			this.$panel = $('#properties-panel');
 
 			// TODO: Remove
-			this.$panel.find('button.btn-export-as').on('click', () => {
+			this.$panel.find('button.btn-export-as').on('click', (event) => {
 				var out = (new AngelScriptExporter()).exportModel(this.model);
-				Utils.copyToClipboard(out);
-				App.notice('Output copied to clipboard', 'blue');
+				// console.log(out);
+				if(event.shiftKey)
+				{
+					Utils.copyToClipboard(out);
+					App.notice('Output copied to clipboard', 'blue');
+				}
+				else
+				{
+					var blob = new Blob([out], {type: 'text/json;charset=utf-8'});
+					saveAs(blob, this.model.name  + '.cpp');
+				}
 			});
 			// TODO: Remove
 			this.$panel.find('button.btn-export-spr').on('click', () => {

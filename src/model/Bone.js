@@ -66,8 +66,7 @@ var app;
                 for (var _i = 0, _a = this.children; _i < _a.length; _i++) {
                     var child = _a[_i];
                     child.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, worldScale, 1, this.stretchY, this.worldRotation, drawList, viewport);
-                    if (child.visible)
-                        this.childrenWorldAABB.union(child.worldAABB);
+                    this.childrenWorldAABB.union(child.worldAABB);
                 }
                 this.worldAABB.union(this.childrenWorldAABB);
             };
@@ -102,6 +101,10 @@ var app;
                 ctx.restore();
             };
             //
+            Bone.prototype.resetToBindPose = function (recurse) {
+                _super.prototype.resetToBindPose.call(this, recurse);
+                this.onPropertyChange('length');
+            };
             Bone.prototype.resetLength = function () {
                 if (this.model.mode == model.EditMode.EDIT) {
                     if (this.length != 100) {

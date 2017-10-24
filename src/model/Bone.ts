@@ -64,7 +64,6 @@ namespace app.model
 			this.worldEndPointX = this.worldX + endPoint.x;
 			this.worldEndPointY = this.worldY + endPoint.y;
 
-
 			this.stretchHandle.active = this.selected && this.model.mode == EditMode.ANIMATE;
 			this.lengthHandle.active = this.selected && this.model.mode == EditMode.EDIT;
 			this.baseHandle.x = this.boneHandle.x = this.worldX;
@@ -82,9 +81,7 @@ namespace app.model
 			for(var child of this.children)
 			{
 				child.prepareForDrawing(this.worldEndPointX, this.worldEndPointY, worldScale, 1, this.stretchY, this.worldRotation, drawList, viewport);
-
-				if(child.visible)
-					this.childrenWorldAABB.union(child.worldAABB);
+				this.childrenWorldAABB.union(child.worldAABB);
 			}
 
 			this.worldAABB.union(this.childrenWorldAABB);
@@ -131,6 +128,12 @@ namespace app.model
 		}
 
 		//
+
+		public resetToBindPose(recurse:boolean)
+		{
+			super.resetToBindPose(recurse);
+			this.onPropertyChange('length');
+		}
 
 		public resetLength()
 		{

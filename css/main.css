@@ -471,6 +471,8 @@ canvas#timeline {
   #properties-panel .top {
     padding: 10px;
     flex-grow: 1; }
+  #properties-panel button {
+    margin-bottom: 5px; }
 
 #layer-palette {
   position: absolute;

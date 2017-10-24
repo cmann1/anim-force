@@ -421,6 +421,10 @@ var app;
                                 this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
                             }
                         }
+                        else if (keyCode == Key.B && altKey) {
+                            if (selectedNode)
+                                selectedNode.resetToBindPose(shiftKey);
+                        }
                         else if (keyCode == Key.G && altKey) {
                             if (selectedNode)
                                 selectedNode.resetOffset();

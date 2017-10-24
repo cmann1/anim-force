@@ -216,6 +216,15 @@ namespace app.model
 			this.updateLayer();
 		}
 
+		public resetToBindPose(recurse:boolean)
+		{
+			this.model.getBindPose().updateNode(this);
+			this.onPropertyChange('offset');
+			this.onPropertyChange('scaleX');
+			this.onPropertyChange('scaleY');
+			this.onPropertyChange('rotation');
+		}
+
 		public resetOffset()
 		{
 			if(this.offsetX != 0 || this.offsetY != 0)

@@ -18,6 +18,11 @@ namespace app.anim
 				: node[propertyName];
 		}
 
+		public toString = () : string => {
+
+			return `StringKeyframe[${this.frameIndex}]("${this.value}")`;
+		};
+
 		//
 
 		public save():any
