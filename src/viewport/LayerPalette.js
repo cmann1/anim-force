@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport_1) {
-        var LayerPalette = (function () {
+        var LayerPalette = /** @class */ (function () {
             function LayerPalette(viewport) {
                 var _this = this;
                 this.requiresInit = true;
@@ -172,7 +172,7 @@ var app;
             return LayerPalette;
         }());
         viewport_1.LayerPalette = LayerPalette;
-        var LayerItem = (function () {
+        var LayerItem = /** @class */ (function () {
             function LayerItem(layer, isSubLayer) {
                 this.visible = true;
                 this.locked = false;

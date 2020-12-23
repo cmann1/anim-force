@@ -1,6 +1,6 @@
 var math;
 (function (math) {
-    var Rectangle = (function () {
+    var Rectangle = /** @class */ (function () {
         function Rectangle(x, y, width, height) {
             if (x === void 0) { x = 0; }
             if (y === void 0) { y = 0; }

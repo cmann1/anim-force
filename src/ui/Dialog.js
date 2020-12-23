@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var ui;
     (function (ui) {
-        var Dialog = (function () {
+        var Dialog = /** @class */ (function () {
             function Dialog(title, options) {
                 var _this = this;
                 this.title = '';
@@ -179,7 +179,7 @@ var app;
                 get: function () {
                     return this.dlg;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Dialog.prototype.reposition = function () {
@@ -221,9 +221,9 @@ var app;
             Dialog.prototype.getCancelValue = function () {
                 return this.cancelValue;
             };
+            Dialog.nextId = 0;
             return Dialog;
         }());
-        Dialog.nextId = 0;
         ui.Dialog = Dialog;
     })(ui = app.ui || (app.ui = {}));
 })(app || (app = {}));

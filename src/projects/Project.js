@@ -4,7 +4,7 @@ var app;
     (function (projects) {
         var Model = app.model.Model;
         var Node = app.model.Node;
-        var Project = (function () {
+        var Project = /** @class */ (function () {
             function Project(name) {
                 this.isNew = true;
                 this.activeModel = null;

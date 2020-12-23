@@ -4,7 +4,7 @@ var app;
     (function (timeline_1) {
         var EditMode = app.model.EditMode;
         var Key = KeyCodes.Key;
-        var TimelineToolbar = (function () {
+        var TimelineToolbar = /** @class */ (function () {
             function TimelineToolbar(model, timeline, $toolbar) {
                 var _this = this;
                 /*

@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -16,7 +19,7 @@ var app;
         var Sprite = app.model.Sprite;
         var EditMode = app.model.EditMode;
         var Anchor = app.model.Anchor;
-        var Viewport = (function (_super) {
+        var Viewport = /** @class */ (function (_super) {
             __extends(Viewport, _super);
             function Viewport(elementId, model) {
                 var _this = _super.call(this, elementId) || this;
@@ -369,15 +372,19 @@ var app;
                 if (keyCode == Key.Home) {
                     this.reset();
                 }
+                // Zoom in
                 else if (keyCode == Key.Add || keyCode == Key.Equals) {
                     this.zoom(1);
                 }
+                // Zoom out
                 else if (keyCode == Key.Subtract || keyCode == Key.Dash) {
                     this.zoom(-1);
                 }
+                // Toggle draw grid
                 else if (keyCode == Key.G && !altKey) {
                     app.Config.set('drawGrid', !app.Config.drawGrid);
                 }
+                // Toggle AAB draw
                 else if (keyCode == Key.Zero) {
                     app.Config.set('drawAABB', !app.Config.drawAABB);
                 }
@@ -389,6 +396,7 @@ var app;
                                 selectedNode.parent.removeChild(selectedNode);
                             }
                         }
+                        // Duplicate
                         else if (keyCode == Key.D) {
                             var node = this.model.duplicateSelected(!shiftKey);
                             if (node) {
@@ -403,44 +411,53 @@ var app;
                                 this.requiresUpdate = true;
                             }
                         }
+                        // Change layer/sublayer
                         else if (keyCode == Key.PageDown || keyCode == Key.PageUp) {
                             if (selectedNode) {
                                 this.model.increaseSelectedNodeLayer(keyCode == Key.PageDown ? -1 : 1, altKey, shiftKey);
                                 this.showMessage("Layer: " + selectedNode.layer + "." + selectedNode.subLayer);
                             }
                         }
+                        // Change sprite frame
                         else if (keyCode == Key.Numpad8 || keyCode == Key.Numpad2) {
                             if (selectedNode instanceof Sprite) {
                                 selectedNode.setFrame(Math.round(selectedNode.frame) + (keyCode == Key.Numpad8 ? 1 : -1));
                                 this.showMessage('Frame: ' + (Math.round(selectedNode.frame) + 1) + '/' + selectedNode.frameCount);
                             }
                         }
+                        // Change palette
                         else if (keyCode == Key.Numpad4 || keyCode == Key.Numpad6) {
                             if (selectedNode instanceof Sprite) {
                                 selectedNode.setPalette(selectedNode.palette + (keyCode == Key.Numpad6 ? 1 : -1));
                                 this.showMessage('Palette: ' + (selectedNode.palette + 1) + '/' + selectedNode.paletteCount);
                             }
                         }
+                        // Reset to bind pose
                         else if (keyCode == Key.B && altKey) {
                             if (selectedNode)
                                 selectedNode.resetToBindPose(shiftKey);
                         }
+                        // Reset offset
                         else if (keyCode == Key.G && altKey) {
                             if (selectedNode)
                                 selectedNode.resetOffset();
                         }
+                        // Reset scale
                         else if (keyCode == Key.S && altKey) {
                             if (selectedNode)
                                 selectedNode.resetScale();
                         }
+                        // Reset rotation
                         else if (keyCode == Key.R && altKey) {
                             if (selectedNode)
                                 selectedNode.resetRotation();
                         }
+                        // Reset length
                         else if (keyCode == Key.L && altKey) {
                             if (selectedNode)
                                 selectedNode.resetLength();
                         }
+                        // Toggle anchor rotation and scaling
                         else if (keyCode == Key.One || keyCode == Key.Two) {
                             if (selectedNode && selectedNode instanceof Anchor) {
                                 if (keyCode == Key.One)
@@ -449,6 +466,7 @@ var app;
                                     selectedNode.allowScale = !selectedNode.allowScale;
                             }
                         }
+                        // Flip
                         else if (keyCode == Key.Y) {
                             if (selectedNode) {
                                 if (shiftKey)
@@ -457,6 +475,7 @@ var app;
                                     selectedNode.flipX();
                             }
                         }
+                        // TODO: REMOVE
                         else if (keyCode == Key.Enter) {
                             app.main.showSpriteSelector(this.onSpritesSelect);
                         }

@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -12,7 +15,7 @@ var app;
 (function (app) {
     var model;
     (function (model) {
-        var BoxNode = (function (_super) {
+        var BoxNode = /** @class */ (function (_super) {
             __extends(BoxNode, _super);
             function BoxNode(name, allowRotation, allowScale) {
                 if (allowRotation === void 0) { allowRotation = true; }
@@ -167,7 +170,7 @@ var app;
                         this.rotation = 0;
                     }
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(BoxNode.prototype, "allowScale", {
@@ -197,7 +200,7 @@ var app;
                         this.scaleY = 1;
                     }
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             return BoxNode;

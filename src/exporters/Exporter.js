@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var exporters;
     (function (exporters) {
-        var Exporter = (function () {
+        var Exporter = /** @class */ (function () {
             function Exporter() {
             }
             Exporter.prototype.exportModel = function (model) {

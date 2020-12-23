@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -13,7 +16,7 @@ var app;
     var anim;
     (function (anim) {
         var TrackPropertyType = app.anim.TrackPropertyType;
-        var EventTrack = (function (_super) {
+        var EventTrack = /** @class */ (function (_super) {
             __extends(EventTrack, _super);
             function EventTrack(animation, node) {
                 var _this = _super.call(this, 'event', animation, node) || this;

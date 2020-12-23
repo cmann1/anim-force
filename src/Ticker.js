@@ -2,11 +2,11 @@ var app;
 (function (app) {
     var ticker;
     (function (ticker) {
-        var Ticker = (function () {
+        var Ticker = /** @class */ (function () {
             function Ticker(runner, targetFps) {
+                var _this = this;
                 if (runner === void 0) { runner = null; }
                 if (targetFps === void 0) { targetFps = 60; }
-                var _this = this;
                 this.isRunning = false;
                 this.measuredFps = 0;
                 this.frameCount = 0;
@@ -48,7 +48,7 @@ var app;
                         callback = Ticker.EMPTY_RUNNER;
                     this._tickCallback = callback;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Ticker.prototype, "targetFps", {
@@ -63,14 +63,14 @@ var app;
                     this._targetFps = newTargetFps;
                     this.fpsInterval = 1000 / newTargetFps;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Ticker.prototype, "ticking", {
                 get: function () {
                     return this.isRunning;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Ticker.prototype.start = function () {

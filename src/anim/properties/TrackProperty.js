@@ -14,7 +14,7 @@ var app;
             TrackPropertyType[TrackPropertyType["VECTOR"] = 2] = "VECTOR";
             TrackPropertyType[TrackPropertyType["STRING"] = 3] = "STRING";
         })(TrackPropertyType = anim.TrackPropertyType || (anim.TrackPropertyType = {}));
-        var TrackProperty = (function () {
+        var TrackProperty = /** @class */ (function () {
             function TrackProperty(track, propertyName, KeyFrameClass, type) {
                 this.frameIndex = 0;
                 this.frames = null;

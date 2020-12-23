@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var ui;
     (function (ui) {
-        var SpriteSelector = (function () {
+        var SpriteSelector = /** @class */ (function () {
             function SpriteSelector() {
                 var _this = this;
                 this.scrollTop = 0;
@@ -53,12 +53,12 @@ var app;
                 for (var _i = 0, spriteList_1 = spriteList; _i < spriteList_1.length; _i++) {
                     var groupData = spriteList_1[_i];
                     var groupName = groupData['name'];
-                    var spriteList_2 = groupData['sprites'];
+                    var spriteList_3 = groupData['sprites'];
                     var $group = $("<div class=\"sprite-group spr-tooltip\" title=\"" + groupName + "\">\n\t\t\t\t\t\t<img src=\"assets/sprites/" + groupName + "/_group_thumb.png\" alt=\"\">\n\t\t\t\t\t</div>");
                     var $content = this.$content = $('<div class="content collapsed"></div>');
                     var thumbX = 0;
-                    for (var _a = 0, spriteList_3 = spriteList_2; _a < spriteList_3.length; _a++) {
-                        var spriteData = spriteList_3[_a];
+                    for (var _a = 0, spriteList_2 = spriteList_3; _a < spriteList_2.length; _a++) {
+                        var spriteData = spriteList_2[_a];
                         var $thumb = $("<div class=\"thumb-outer spr-tooltip\" title=\"" + spriteData.name + " p[" + spriteData.palettes + "] f[" + spriteData.frames + "]\" data-group=\"" + groupName + "\" data-sprite=\"" + spriteData.name + "\">\n\t\t\t\t\t\t\t<div class=\"thumb\" style=\"background: url('assets/sprites/" + groupName + "/_thumb.png') " + -thumbX + "px 0\"></div>\n\t\t\t\t\t\t</div>");
                         $content.append($thumb);
                         thumbX += 42;

@@ -5,7 +5,7 @@ var app;
         var tree;
         (function (tree_1) {
             var Key = KeyCodes.Key;
-            var TreeNode = (function () {
+            var TreeNode = /** @class */ (function () {
                 function TreeNode(tree, nodeType, node) {
                     var _this = this;
                     this.parent = null;
@@ -103,7 +103,7 @@ var app;
                     set: function (value) {
                         this.$item.toggleClass('highlighted', value);
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 Object.defineProperty(TreeNode.prototype, "selected", {
@@ -113,7 +113,7 @@ var app;
                     set: function (value) {
                         this.$item.toggleClass('selected', value);
                     },
-                    enumerable: true,
+                    enumerable: false,
                     configurable: true
                 });
                 //

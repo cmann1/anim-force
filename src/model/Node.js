@@ -6,7 +6,7 @@ var app;
         var StructureChangeEvent = model_1.events.StructureChangeEvent;
         var PropertyChangeEvent = model_1.events.PropertyChangeEvent;
         var AABB = app.viewport.AABB;
-        var Node = (function () {
+        var Node = /** @class */ (function () {
             ///
             function Node(name) {
                 this.canHaveChildren = false;
@@ -71,7 +71,7 @@ var app;
                         this.setSelected(false);
                     }
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Node.prototype, "name", {
@@ -81,7 +81,7 @@ var app;
                 set: function (value) {
                     this.setName(value);
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Node.prototype, "visible", {
@@ -96,7 +96,7 @@ var app;
                     if (!value && this.selected)
                         this.setSelected(false);
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Node.prototype.setLocked = function (value, recurse) {
@@ -380,10 +380,10 @@ var app;
                     this.model.onStructureChange(type, parent, target, index, other);
                 }
             };
+            Node.nextId = 0;
+            Node.autoId = true;
             return Node;
         }());
-        Node.nextId = 0;
-        Node.autoId = true;
         model_1.Node = Node;
     })(model = app.model || (app.model = {}));
 })(app || (app = {}));

@@ -1,6 +1,6 @@
 var app;
 (function (app) {
-    var Clipboard = (function () {
+    var Clipboard = /** @class */ (function () {
         function Clipboard() {
         }
         Clipboard.getData = function (type) {
@@ -9,9 +9,9 @@ var app;
         Clipboard.setData = function (type, data) {
             Clipboard.data[type] = data;
         };
+        Clipboard.data = {};
         return Clipboard;
     }());
-    Clipboard.data = {};
     app.Clipboard = Clipboard;
 })(app || (app = {}));
 //# sourceMappingURL=Clipboard.js.map

@@ -2,12 +2,12 @@ var app;
 (function (app) {
     var ui;
     (function (ui) {
-        var Splitter = (function () {
+        var Splitter = /** @class */ (function () {
             // private
             function Splitter($first, $second, orientation, defaultPosition, anchor, id) {
+                var _this = this;
                 if (anchor === void 0) { anchor = 0 /* FIRST */; }
                 if (id === void 0) { id = null; }
-                var _this = this;
                 this._barThickness = 6;
                 this.cursor = 'col-resize';
                 this.widthProp = 'width';
@@ -136,7 +136,7 @@ var app;
                     }
                     this.update();
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Splitter.prototype, "barThickness", {
@@ -148,7 +148,7 @@ var app;
                     this.$bar.css(this.widthProp, this._barThickness);
                     this.update();
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             return Splitter;

@@ -2,13 +2,13 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport) {
-        var AABB = (function () {
+        var AABB = /** @class */ (function () {
             function AABB(x1, y1, x2, y2) {
+                var _this = this;
                 if (x1 === void 0) { x1 = 0; }
                 if (y1 === void 0) { y1 = 0; }
                 if (x2 === void 0) { x2 = 0; }
                 if (y2 === void 0) { y2 = 0; }
-                var _this = this;
                 this.toString = function () {
                     return "<" + _this.x1 + ", " + _this.y1 + "> <" + _this.x2 + ", " + _this.y2 + ">";
                 };

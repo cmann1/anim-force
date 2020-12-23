@@ -1,6 +1,6 @@
 var math;
 (function (math) {
-    var Vector = (function () {
+    var Vector = /** @class */ (function () {
         function Vector(x, y) {
             if (x === void 0) { x = 0; }
             if (y === void 0) { y = 0; }

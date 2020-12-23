@@ -49,7 +49,7 @@ var app;
     var Model = app.model.Model;
     var SpriteSelector = app.ui.SpriteSelector;
     var ProjectManager = app.projects.ProjectManager;
-    var App = (function () {
+    var App = /** @class */ (function () {
         function App() {
             var _this = this;
             this.model = new Model(); // A blank model so things work before a project is loaded
@@ -181,7 +181,7 @@ var app;
             get: function () {
                 return this._spriteManager;
             },
-            enumerable: true,
+            enumerable: false,
             configurable: true
         });
         // TODO: remove

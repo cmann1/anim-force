@@ -13,7 +13,7 @@ var app;
             next: null,
         };
         var TrackProperty = app.anim.TrackProperty;
-        var Track = (function () {
+        var Track = /** @class */ (function () {
             function Track(type, animation, node) {
                 this.type = null;
                 this.properties = {};

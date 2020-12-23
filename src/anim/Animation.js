@@ -9,11 +9,11 @@ var app;
         var Event = app.events.Event;
         var EventNode = app.model.EventNode;
         var Anchor = app.model.Anchor;
-        var Animation = (function () {
+        var Animation = /** @class */ (function () {
             function Animation(name, model, readOnly, forceKeyframe) {
+                var _this = this;
                 if (readOnly === void 0) { readOnly = false; }
                 if (forceKeyframe === void 0) { forceKeyframe = true; }
-                var _this = this;
                 this.active = false;
                 this.fps = 30;
                 this.loop = true;

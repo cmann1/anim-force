@@ -13,7 +13,7 @@ var app;
             var Event = app.events.Event;
             var EventNode = app.model.EventNode;
             var Anchor = app.model.Anchor;
-            var TimelineTree = (function () {
+            var TimelineTree = /** @class */ (function () {
                 function TimelineTree(elementId, model) {
                     var _this = this;
                     this.nodeMap = {};
@@ -116,6 +116,7 @@ var app;
                                     parentTree.addChild(targetTree);
                                 }
                             }
+                            // Add a new node
                             else {
                                 var newTree = _this.addTreeNode(TimelineTree.fromNode(_this, target));
                                 if (other) {

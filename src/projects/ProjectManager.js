@@ -19,7 +19,7 @@ var app;
             obj.asLoadData = LoadData_asLoadData;
             return obj;
         }
-        var ProjectManager = (function () {
+        var ProjectManager = /** @class */ (function () {
             function ProjectManager() {
                 var _this = this;
                 this.overwriteProjectId = null;

@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -14,7 +17,7 @@ var app;
     (function (timeline) {
         var tree;
         (function (tree_1) {
-            var ContainerTreeNode = (function (_super) {
+            var ContainerTreeNode = /** @class */ (function (_super) {
                 __extends(ContainerTreeNode, _super);
                 function ContainerTreeNode(tree, nodeType, node, allowFold) {
                     if (allowFold === void 0) { allowFold = true; }

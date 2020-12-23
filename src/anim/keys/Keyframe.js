@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var anim;
     (function (anim) {
-        var Keyframe = (function () {
+        var Keyframe = /** @class */ (function () {
             function Keyframe(frameIndex) {
                 this.prev = null;
                 this.next = null;

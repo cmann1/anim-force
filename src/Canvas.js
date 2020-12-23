@@ -3,7 +3,7 @@ var app;
     /*
      * Wraps thr html canvas, providing commonly used functionality such as mouse and keyboard events
      */
-    var Canvas = (function () {
+    var Canvas = /** @class */ (function () {
         function Canvas(elementId) {
             var _this = this;
             this.mousePrevX = 0;

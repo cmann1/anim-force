@@ -1,7 +1,10 @@
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
         extendStatics(d, b);
         function __() { this.constructor = d; }
@@ -22,7 +25,7 @@ var app;
             EditMode[EditMode["ANIMATE"] = 1] = "ANIMATE";
             EditMode[EditMode["PLAYBACK"] = 2] = "PLAYBACK";
         })(EditMode = model.EditMode || (model.EditMode = {}));
-        var Model = (function (_super) {
+        var Model = /** @class */ (function (_super) {
             __extends(Model, _super);
             function Model() {
                 var _this = _super.call(this, 'Untitled Model') || this;
@@ -299,14 +302,14 @@ var app;
                 get: function () {
                     return true;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Model.prototype, "visible", {
                 get: function () {
                     return true;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             //
@@ -405,7 +408,7 @@ var app;
                         return;
                     this.setMode(value);
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             //

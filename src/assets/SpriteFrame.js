@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var assets;
     (function (assets) {
-        var SpriteFrame = (function () {
+        var SpriteFrame = /** @class */ (function () {
             function SpriteFrame(data) {
                 this.x = data[0];
                 this.y = data[1];

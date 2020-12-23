@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport) {
-        var Interaction = (function () {
+        var Interaction = /** @class */ (function () {
             function Interaction() {
                 this.offset = 0;
                 this.x = 0;

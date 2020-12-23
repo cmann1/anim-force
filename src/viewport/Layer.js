@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport) {
-        var Layer = (function () {
+        var Layer = /** @class */ (function () {
             function Layer(layer, subLayer) {
                 this.visible = true;
                 this.locked = false;

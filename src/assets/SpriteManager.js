@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var assets;
     (function (assets) {
-        var SpriteManager = (function () {
+        var SpriteManager = /** @class */ (function () {
             function SpriteManager(basePath, readyCallback) {
                 var _this = this;
                 this.spriteSets = {};

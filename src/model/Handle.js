@@ -16,7 +16,7 @@ var app;
             HandleType[HandleType["SCALE"] = 2] = "SCALE";
             HandleType[HandleType["ROTATION"] = 3] = "ROTATION";
         })(HandleType = model.HandleType || (model.HandleType = {}));
-        var Handle = (function () {
+        var Handle = /** @class */ (function () {
             function Handle(node, interaction, radius, shape, type, fill, outline) {
                 if (radius === void 0) { radius = app.Config.handleRadius; }
                 if (shape === void 0) { shape = HandleShape.CIRCLE; }

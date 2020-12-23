@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var assets;
     (function (assets) {
-        var SpriteAsset = (function () {
+        var SpriteAsset = /** @class */ (function () {
             function SpriteAsset(spriteSetName, spriteName, path) {
                 var _this = this;
                 this.error = false;
@@ -112,7 +112,7 @@ var app;
                 get: function () {
                     return this._NULL;
                 },
-                enumerable: true,
+                enumerable: false,
                 configurable: true
             });
             return SpriteAsset;

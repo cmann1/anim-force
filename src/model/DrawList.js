@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var model;
     (function (model) {
-        var DrawList = (function () {
+        var DrawList = /** @class */ (function () {
             function DrawList() {
                 this.list = [];
             }

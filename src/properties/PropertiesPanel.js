@@ -4,7 +4,7 @@ var app;
     (function (properties) {
         var AngelScriptExporter = app.exporters.AngelScriptExporter;
         var SpriteGroupExporter = app.exporters.SpriteGroupExporter;
-        var PropertiesPanel = (function () {
+        var PropertiesPanel = /** @class */ (function () {
             function PropertiesPanel(model) {
                 var _this = this;
                 this.setModel(model);

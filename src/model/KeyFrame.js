@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var model;
     (function (model) {
-        var KeyFrame = (function () {
+        var KeyFrame = /** @class */ (function () {
             function KeyFrame() {
             }
             return KeyFrame;

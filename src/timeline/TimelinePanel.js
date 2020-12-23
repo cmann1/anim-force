@@ -4,7 +4,7 @@ var app;
     (function (timeline) {
         var Splitter = app.ui.Splitter;
         var TimelineTree = app.timeline.tree.TimelineTree;
-        var TimelinePanel = (function () {
+        var TimelinePanel = /** @class */ (function () {
             function TimelinePanel(model) {
                 this.model = model;
                 this.$container = $('#timeline-panel');

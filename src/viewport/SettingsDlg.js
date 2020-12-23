@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var viewport;
     (function (viewport_1) {
-        var SettingsDlg = (function () {
+        var SettingsDlg = /** @class */ (function () {
             function SettingsDlg(viewport, $viewportContainer) {
                 var _this = this;
                 this.onDlgOpen = function (event) {

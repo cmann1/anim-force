@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var events;
     (function (events) {
-        var EventDispatcher = (function () {
+        var EventDispatcher = /** @class */ (function () {
             function EventDispatcher() {
                 this._eventHandlers = [];
             }

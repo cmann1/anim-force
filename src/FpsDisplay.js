@@ -3,10 +3,10 @@ var app;
     var Fps;
     (function (Fps) {
         var CSS = "\n#fps-display{\n\tleft: 10px; top: 10px;\n\tpadding: 2px 4px;\n\tposition: absolute;\n\tz-index: 100;\n\n\tbackground-color: #999;\n\tborder-radius: 3px;\n\tcolor: #FFF;\n\tcursor: default;\n\tfont: bold 11px/14px 'Helvetica Neue', Helvetica, Arial, sans-serif;\n\ttext-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);\n\tvertical-align: baseline;\n\twhite-space: nowrap;\n\tuser-select: none;\n}";
-        var Display = (function () {
+        var Display = /** @class */ (function () {
             function Display(fpsCallback) {
-                if (fpsCallback === void 0) { fpsCallback = null; }
                 var _this = this;
+                if (fpsCallback === void 0) { fpsCallback = null; }
                 this.timerId = null;
                 /*
                  * Events

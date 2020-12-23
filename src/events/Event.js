@@ -2,7 +2,7 @@ var app;
 (function (app) {
     var events;
     (function (events) {
-        var Event = (function () {
+        var Event = /** @class */ (function () {
             function Event(type, nativeEvent) {
                 if (nativeEvent === void 0) { nativeEvent = null; }
                 this.type = type;
