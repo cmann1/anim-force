@@ -6,7 +6,7 @@
   - Run the **_extract_sprites_reference.py** PropUtils script.
   - A **reference_sprites* directory and **sprites-reference-data** file should be created.
   - Open **AnimForce/scripts/sprite_sheet_generator.py**
-  - Modify the **HOME = ** line to point to the location of **PropUtils** and then run the script
+  - Modify the **HOME =** line to point to the location of **PropUtils** and then run the script
   - This will create all the required sprite data in **assets/sprites**
  - Start the web server and browse to the AnimForce download location in your browser
 
