@@ -11,14 +11,24 @@
  - Start the web server and browse to the AnimForce download location in your browser
 
 # Usage
-- Keys:
-  - **Shift + N** - New project
-  - **Ctrl + S** - Save
-  - **Ctrl + O** - Project manager
-  - **Right mouse** - Pan
-  - **Scroll** - Zoom
 - Add elements on the bottom left.
 - With a sprite selected press **Enter** to change the sprite.
 - Once the model is created, press the plus button in the bottom right to add one or more animations.
 - Use the timeline and timeline controls to create the animation.
 - Export to Angelscript using the buttons on the right.
+- Keys:
+  - **Shift + N** - New project
+  - **Ctrl + S** - Save
+  - **Ctrl + O** - Project manager
+  - **Right mouse** - Pan
+  - **Scroll/+/-** - Zoom
+  - **Home** - Reset view
+  - **G** - Toggle grid
+  - **Delete** - Delete selected
+  - **D** - Duplicate selected
+  - **[Alt +] PageUp/Down** - Change sublayer/layer
+  - **Numpad 2/8** - Change sprite frame
+  - **Numpad 4/6** - Change sprite palette
+  - **Alt + B** - Reset pose
+  - **Alt + G/S/R/L** - Reset offset/scale/rotation/length
+  - **Y** - Flip sprite
