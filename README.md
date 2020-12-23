@@ -17,7 +17,6 @@
   - **Ctrl + O** - Project manager
   - **Right mouse** - Pan
   - **Scroll** - Zoom
--
 - Add elements on the bottom left.
 - With a sprite selected press **Enter** to change the sprite.
 - Once the model is created, press the plus button in the bottom right to add one or more animations.
